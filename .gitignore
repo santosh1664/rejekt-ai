@@ -1,0 +1,18 @@
+.neon
+.env.local
+node_modules/
+
+# Personal application history and resume-model files (docs/resume-model.md)
+data/imports/
+ml/data/
+ml/out/
+ml/.venv/
+
+# Local runtime files and machine-specific config
+logs/
+*.log
+.claude/
+.DS_Store
+job-discovery-saas
+ml/.llama.cpp/
+ml/.venv/

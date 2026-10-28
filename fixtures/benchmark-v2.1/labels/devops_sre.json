@@ -1,0 +1,482 @@
+{
+  "854": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Cybersecurity Engineer - Security Operations Center (SOC)",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "4365": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Site Reliability Engineer, Observability",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "7235": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Staff Site Reliability Engineer - Kubernetes",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "14385": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Site Reliability Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "24496": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "C",
+    "title": "Research Manager - Security Research/Audits & Compliance",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "25733": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Site Reliability Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "26181": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Software Engineer - DevOps/SRE",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "33265": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Senior Staff Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "37483": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Sr. Site Reliability Engineer I",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "38316": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Order Management & Billing Lead — Cloud Marketplaces & Partnerships",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "45586": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Senior Data Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "52927": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Staff Software Development Engineer (Microservices)",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "54297": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Salary below required minimum"
+    ],
+    "bucket": "H",
+    "title": "Fall 2027 National Security Fellowship, National Security Project",
+    "set": "eligibility"
+  },
+  "55957": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Lead DevOps Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "56507": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Staff+ Software Engineer, Agentic Software Security",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "58862": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "Applied Research Scientist, AI Research",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "61291": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "F",
+    "title": "Software Engineer (LLM Products)",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "490213": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Senior Site Reliability Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "1280235": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "I",
+    "title": "Machine Learning Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1295076": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Staff Cloud Infrastructure Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1295123": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Excluded employment type: CONTRACT"
+    ],
+    "bucket": "H",
+    "title": "Product Security Engineer",
+    "set": "eligibility"
+  },
+  "1299146": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "B",
+    "title": "DevOps Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "1302793": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Golang SRE / Production Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1306589": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Staff Security Engineer, Application Security",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1412787": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Senior Software Engineer - Scalable Machine Learning",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3297303": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Senior Fullstack Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3297772": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Principal E-Commerce Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3300730": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "DevOps / SRE / DevSecOps Engineer (AWS) -  Latin America, Remote",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3300809": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "DevOps / SRE / DevSecOps Engineer (AWS) - Remote, Latin America",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3311468": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Principal Architect,  Infrastructure",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3321651": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Test Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3329702": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Build Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3333058": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Site Reliability Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3348822": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Staff Solutions Architect - Data Infrastructure",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5044685": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Platform Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5150119": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Product Support Engineer - Karachi",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  }
+}

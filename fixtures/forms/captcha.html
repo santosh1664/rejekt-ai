@@ -1,0 +1,9 @@
+<!doctype html>
+<!-- A form with a visible reCAPTCHA checkbox: auto-apply must stop and hand it to the person. -->
+<html><head><meta charset="utf-8"><title>Apply</title></head><body>
+<form method="post" action="/captcha/submit" enctype="multipart/form-data">
+  <label for="e">Email *</label><input id="e" name="email" required>
+  <label for="r">Resume *</label><input id="r" name="resume" type="file" required>
+  <iframe title="reCAPTCHA" src="/recaptcha/api2/anchor?ar=1&k=test&size=normal" width="304" height="78"></iframe>
+  <button type="submit">Submit application</button>
+</form></body></html>

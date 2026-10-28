@@ -1,0 +1,470 @@
+{
+  "4484": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "B",
+    "title": "Staff Data Scientist",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5547": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "I",
+    "title": "Cloud Infrastructure Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "6464": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Sales Engineer, Mid Market - Northeast",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "10382": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "C",
+    "title": "Data Engineer Team Lead",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "25113": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Analyst, Business Insights",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "25202": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "Mid-Market Account Executive",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "29451": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Excluded employment type: CONTRACT"
+    ],
+    "bucket": "H",
+    "title": "Associate Director R&D AI Solutions & Analytics",
+    "set": "eligibility"
+  },
+  "58174": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Customer Technical Account Manager – OTT Cloud Streaming",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "59545": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "C",
+    "title": "Senior Machine Learning Engineer, Fleet Monitoring & Response",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "61916": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Data Analyst",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "62449": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "C",
+    "title": "Data Engineer II (Remote US)",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "64391": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Analista contable - Cabify logistics",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1283724": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Data Analyst, B2B Growth - San Francisco",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1287134": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Analyst",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1289039": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Senior Engineer - Technical Staff",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "1293573": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "Business Development Manager",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1301358": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Founding Data Analyst",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1303509": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Software Test Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1305939": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Analyst, Strategic Finance",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1307225": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Senior Clinical Data Scientist",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1991362": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "E",
+    "title": "Staff Machine Learning Engineer(Platform - Identity)",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "3284950": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Operations Data Analyst",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3286833": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Power BI Analyst",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3290240": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "E",
+    "title": "Director of Marketing Science Analytics & Commercial Intelligence (Customer Engagement Team)",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3301500": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "React Engineer - Remote, Latin America",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3310116": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Sr. Account Executive - SEA",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3313204": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "E",
+    "title": "Staff Data Scientist– Pricing Science",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3348291": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Analyst (Fully Remote)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3872901": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Excluded employment type: CONTRACT"
+    ],
+    "bucket": "H",
+    "title": "Senior Director, Analytics Engineering, Data Analytics & AI",
+    "set": "eligibility"
+  },
+  "5077908": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Data Analyst",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5077972": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "B",
+    "title": "Staff Data Scientist, Watchlist",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5078079": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Actuarial Data Analyst",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "5091390": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Enterprise AI Feature Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "5358325": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Visual Design Lead",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5381852": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "DATA ANALYST I | DIGITAL ACCOUNT ANALYTICS & AI MG",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5401234": {
+    "label": "BAD",
+    "reasons": [
+      "Major required-skill gap",
+      "Role fit: RELATED"
+    ],
+    "bucket": "B",
+    "title": "Senior Data Scientist – Hardware Systems",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  }
+}

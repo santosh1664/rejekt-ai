@@ -1,0 +1,39 @@
+ALEX RIVERA
+Software Engineer
+Dallas, TX | alex.rivera@example.com | (469) 555-0142 | linkedin.com/in/alexrivera | github.com/alexr
+
+PROFESSIONAL SUMMARY
+Software Engineer with 3.5 years of experience building Java and Spring Boot microservices, REST APIs and AI agent workflows for enterprise platforms.
+
+EXPERIENCE
+Software Engineer | Northwind Bank | Remote          Jan 2024 – Present
+• Built agentic AI workflows that orchestrate multi-step business processes, cutting manual steps by 30%.
+• Designed secure REST APIs with JWT auth serving 50K+ daily requests.
+Software Developer — Bluefin Labs, Pune, India
+Jun 2021 - Jul 2023
+• Developed full-stack features with Angular, React and Spring Boot for 500+ internal users.
+• Owned CI/CD pipelines with Docker, Kubernetes and Jenkins, reducing deployment time
+  from 2 days to 6 hours.
+
+EDUCATION
+University of North Texas, Denton, TX
+Master of Science in Computer Science    Aug 2023 – May 2025    GPA: 3.8/4.0
+Vellore Institute of Technology
+B.Tech, Computer Science | 2017 – 2021
+
+PROJECTS
+Interview Coach | Python, LangChain, FastAPI, React
+• RAG pipeline over 2M job listings with real-time voice mock interviews.
+Job Radar - Node.js, PostgreSQL (2025)
+• Scans 20K company career pages for new postings.
+
+TECHNICAL SKILLS
+Languages: Java, Python, TypeScript, SQL
+Frameworks: Spring Boot, React, Angular, FastAPI
+Cloud & DevOps: AWS, Docker, Kubernetes, Jenkins
+
+CERTIFICATIONS
+AWS Certified Developer – Associate - Amazon Web Services, 2024
+
+AWARDS
+• Best Paper, ACM W4A 2024

@@ -1,0 +1,2620 @@
+{
+  "set": "holdout",
+  "generatedAt": "2026-09-29T23:23:23.124Z",
+  "summary": [
+    {
+      "profile": "Entry Software Engineer",
+      "profileId": "entry_swe",
+      "candidatePoolSize": 2000,
+      "totalEligible": 2000,
+      "precisionAt5": 0.6,
+      "precisionAt10": 0.4,
+      "maxPrecisionAt5": 0.8,
+      "maxPrecisionAt10": 0.4,
+      "normalizedPrecisionAt5": 0.75,
+      "normalizedPrecisionAt10": 1,
+      "recallAt10": 1,
+      "ndcgAt5": 0.9813883936133462,
+      "ndcgAt10": 0.9700445659389005,
+      "mrr": 1,
+      "badMatchAt5": 0,
+      "badMatchAt10": 0,
+      "qualitySampleEligibilityExclusionRate": 0.2727272727272727,
+      "hardIneligibleViolations": 0,
+      "hardIneligibleTotal": 0,
+      "candidateRecall": {
+        "relevant": 4,
+        "stillActive": 3
+      },
+      "labeledCoverage": "11/11",
+      "totalRelevant": 4
+    },
+    {
+      "profile": "Mid Software Engineer",
+      "profileId": "mid_swe",
+      "candidatePoolSize": 2000,
+      "totalEligible": 2000,
+      "precisionAt5": 1,
+      "precisionAt10": 0.6666666666666666,
+      "maxPrecisionAt5": 1,
+      "maxPrecisionAt10": 0.6,
+      "normalizedPrecisionAt5": 1,
+      "normalizedPrecisionAt10": 1,
+      "recallAt10": 1,
+      "ndcgAt5": 1,
+      "ndcgAt10": 1,
+      "mrr": 1,
+      "badMatchAt5": 0,
+      "badMatchAt10": 0.2222222222222222,
+      "qualitySampleEligibilityExclusionRate": 0.1111111111111111,
+      "hardIneligibleViolations": 0,
+      "hardIneligibleTotal": 1,
+      "candidateRecall": {
+        "relevant": 6,
+        "stillActive": 3
+      },
+      "labeledCoverage": "9/9",
+      "totalRelevant": 6
+    },
+    {
+      "profile": "Backend Java Engineer",
+      "profileId": "backend_java",
+      "candidatePoolSize": 2000,
+      "totalEligible": 2000,
+      "precisionAt5": 0.2,
+      "precisionAt10": 0.1,
+      "maxPrecisionAt5": 0.2,
+      "maxPrecisionAt10": 0.1,
+      "normalizedPrecisionAt5": 1,
+      "normalizedPrecisionAt10": 1,
+      "recallAt10": 1,
+      "ndcgAt5": 1,
+      "ndcgAt10": 1,
+      "mrr": 1,
+      "badMatchAt5": 0,
+      "badMatchAt10": 0.3,
+      "qualitySampleEligibilityExclusionRate": 0.2,
+      "hardIneligibleViolations": 0,
+      "hardIneligibleTotal": 1,
+      "candidateRecall": {
+        "relevant": 1,
+        "stillActive": 1
+      },
+      "labeledCoverage": "10/10",
+      "totalRelevant": 1
+    },
+    {
+      "profile": "Data Engineer",
+      "profileId": "data_engineer",
+      "candidatePoolSize": 1875,
+      "totalEligible": 1875,
+      "precisionAt5": 0.6,
+      "precisionAt10": 0.3,
+      "maxPrecisionAt5": 0.6,
+      "maxPrecisionAt10": 0.3,
+      "normalizedPrecisionAt5": 1,
+      "normalizedPrecisionAt10": 1,
+      "recallAt10": 1,
+      "ndcgAt5": 1,
+      "ndcgAt10": 0.9898977330110128,
+      "mrr": 1,
+      "badMatchAt5": 0.2,
+      "badMatchAt10": 0.4,
+      "qualitySampleEligibilityExclusionRate": 0.3,
+      "hardIneligibleViolations": 0,
+      "hardIneligibleTotal": 1,
+      "candidateRecall": {
+        "relevant": 3,
+        "stillActive": 2
+      },
+      "labeledCoverage": "10/10",
+      "totalRelevant": 3
+    },
+    {
+      "profile": "Senior Data Engineer",
+      "profileId": "senior_data_engineer",
+      "candidatePoolSize": 1668,
+      "totalEligible": 1668,
+      "precisionAt5": 0.8,
+      "precisionAt10": 0.4444444444444444,
+      "maxPrecisionAt5": 0.8,
+      "maxPrecisionAt10": 0.4,
+      "normalizedPrecisionAt5": 1,
+      "normalizedPrecisionAt10": 1,
+      "recallAt10": 1,
+      "ndcgAt5": 1,
+      "ndcgAt10": 1,
+      "mrr": 1,
+      "badMatchAt5": 0,
+      "badMatchAt10": 0.3333333333333333,
+      "qualitySampleEligibilityExclusionRate": 0.2222222222222222,
+      "hardIneligibleViolations": 0,
+      "hardIneligibleTotal": 1,
+      "candidateRecall": {
+        "relevant": 4,
+        "stillActive": 2
+      },
+      "labeledCoverage": "9/9",
+      "totalRelevant": 4
+    },
+    {
+      "profile": "ML Engineer",
+      "profileId": "ml_engineer",
+      "candidatePoolSize": 1739,
+      "totalEligible": 1739,
+      "precisionAt5": 0.2,
+      "precisionAt10": 0.1111111111111111,
+      "maxPrecisionAt5": 0.2,
+      "maxPrecisionAt10": 0.1,
+      "normalizedPrecisionAt5": 1,
+      "normalizedPrecisionAt10": 1,
+      "recallAt10": 1,
+      "ndcgAt5": 1,
+      "ndcgAt10": 1,
+      "mrr": 1,
+      "badMatchAt5": 0.2,
+      "badMatchAt10": 0.5555555555555556,
+      "qualitySampleEligibilityExclusionRate": 0.2222222222222222,
+      "hardIneligibleViolations": 0,
+      "hardIneligibleTotal": 1,
+      "candidateRecall": {
+        "relevant": 1,
+        "stillActive": 1
+      },
+      "labeledCoverage": "9/9",
+      "totalRelevant": 1
+    },
+    {
+      "profile": "QA Automation Engineer",
+      "profileId": "qa_automation",
+      "candidatePoolSize": 2000,
+      "totalEligible": 2000,
+      "precisionAt5": 0.8,
+      "precisionAt10": 0.4,
+      "maxPrecisionAt5": 0.8,
+      "maxPrecisionAt10": 0.4,
+      "normalizedPrecisionAt5": 1,
+      "normalizedPrecisionAt10": 1,
+      "recallAt10": 1,
+      "ndcgAt5": 1,
+      "ndcgAt10": 1,
+      "mrr": 1,
+      "badMatchAt5": 0,
+      "badMatchAt10": 0.4,
+      "qualitySampleEligibilityExclusionRate": 0.5,
+      "hardIneligibleViolations": 0,
+      "hardIneligibleTotal": 1,
+      "candidateRecall": {
+        "relevant": 4,
+        "stillActive": 1
+      },
+      "labeledCoverage": "10/10",
+      "totalRelevant": 4
+    },
+    {
+      "profile": "DevOps/SRE Engineer",
+      "profileId": "devops_sre",
+      "candidatePoolSize": 1748,
+      "totalEligible": 1748,
+      "precisionAt5": 0.8,
+      "precisionAt10": 0.4,
+      "maxPrecisionAt5": 0.8,
+      "maxPrecisionAt10": 0.4,
+      "normalizedPrecisionAt5": 1,
+      "normalizedPrecisionAt10": 1,
+      "recallAt10": 1,
+      "ndcgAt5": 0.9942646540427001,
+      "ndcgAt10": 0.9947393838291835,
+      "mrr": 1,
+      "badMatchAt5": 0,
+      "badMatchAt10": 0.3,
+      "qualitySampleEligibilityExclusionRate": 0.2,
+      "hardIneligibleViolations": 0,
+      "hardIneligibleTotal": 0,
+      "candidateRecall": {
+        "relevant": 4,
+        "stillActive": 2
+      },
+      "labeledCoverage": "10/10",
+      "totalRelevant": 4
+    },
+    {
+      "profile": "Data Analyst",
+      "profileId": "data_analyst",
+      "candidatePoolSize": 1935,
+      "totalEligible": 1935,
+      "precisionAt5": 0.8,
+      "precisionAt10": 0.4444444444444444,
+      "maxPrecisionAt5": 0.8,
+      "maxPrecisionAt10": 0.4,
+      "normalizedPrecisionAt5": 1,
+      "normalizedPrecisionAt10": 1,
+      "recallAt10": 1,
+      "ndcgAt5": 0.9806148958274842,
+      "ndcgAt10": 0.9806148958274842,
+      "mrr": 1,
+      "badMatchAt5": 0.2,
+      "badMatchAt10": 0.5555555555555556,
+      "qualitySampleEligibilityExclusionRate": 0,
+      "hardIneligibleViolations": 0,
+      "hardIneligibleTotal": 1,
+      "candidateRecall": {
+        "relevant": 4,
+        "stillActive": 2
+      },
+      "labeledCoverage": "9/9",
+      "totalRelevant": 4
+    }
+  ],
+  "jobs": [
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 1,
+      "jobId": "3308854",
+      "title": "Software Engineer – Satellite Modeling and Tasking",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 61,
+      "rawScore": 61,
+      "components": {
+        "role": 50,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 72,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 2,
+      "jobId": "63319",
+      "title": "Software Engineer II",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MODERATE",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 60,
+      "rawScore": 60,
+      "components": {
+        "role": 65,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 50,
+        "location": 40,
+        "freshness": 40,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 3,
+      "jobId": "1285478",
+      "title": "Senior Web Engineer, Perpetuals",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Exact role but severe seniority gap"
+      ],
+      "finalScore": 58,
+      "rawScore": 58,
+      "components": {
+        "role": 35,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 50,
+        "location": 72,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": false
+    },
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 4,
+      "jobId": "3347709",
+      "title": "Senior Software Engineer",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Exact role but severe seniority gap"
+      ],
+      "finalScore": 55,
+      "rawScore": 55,
+      "components": {
+        "role": 65,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 15,
+        "location": 40,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 5,
+      "jobId": "56868",
+      "title": "Software Engineer (C++/Java)",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MODERATE",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 51,
+      "rawScore": 51,
+      "components": {
+        "role": 65,
+        "requiredSkills": 70,
+        "preferredSkills": 0,
+        "experience": 30,
+        "location": 55,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 6,
+      "jobId": "7731",
+      "title": "Staff R&D Software Engineer, Fivetran AI",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Exact role but severe seniority gap"
+      ],
+      "finalScore": 41,
+      "rawScore": 41,
+      "components": {
+        "role": 65,
+        "requiredSkills": 0,
+        "preferredSkills": 0,
+        "experience": 10,
+        "location": 78,
+        "freshness": 80,
+        "salary": 100
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": false
+    },
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 7,
+      "jobId": "65738",
+      "title": "Software Engineer - Machine Learning",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "ML_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: RELATED",
+        "Seniority: MODERATE",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 38,
+      "rawScore": 38,
+      "components": {
+        "role": 50,
+        "requiredSkills": 9,
+        "preferredSkills": 70,
+        "experience": 30,
+        "location": 40,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 8,
+      "jobId": "5331162",
+      "title": "Product Manager - ELD & Fleet Compliance",
+      "roleFamily": "PRODUCT",
+      "canonicalRole": "PRODUCT",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: CROSS_FAMILY",
+        "Seniority: MATCH",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 38,
+      "rawScore": 38,
+      "components": {
+        "role": 25,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 55,
+        "freshness": 90,
+        "salary": 65
+      },
+      "roleMatchType": "DIFFERENT_FAMILY_RELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 9,
+      "jobId": "59075",
+      "title": "Software Engineer - Infrastructure",
+      "roleFamily": "DEVOPS_SRE",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MODERATE",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 31,
+      "rawScore": 31,
+      "components": {
+        "role": 55,
+        "requiredSkills": 25,
+        "preferredSkills": 0,
+        "experience": 30,
+        "location": 72,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "DIFFERENT_FAMILY_RELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 10,
+      "jobId": "56079",
+      "title": "External Contractor - Mentor role for Data Product Manager track",
+      "roleFamily": "PRODUCT",
+      "canonicalRole": "PRODUCT",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: CROSS_FAMILY",
+        "Seniority: MATCH",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 26,
+      "rawScore": 26,
+      "components": {
+        "role": 25,
+        "requiredSkills": 50,
+        "preferredSkills": 70,
+        "experience": 10,
+        "location": 55,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "DIFFERENT_FAMILY_RELATED",
+      "eligible": false
+    },
+    {
+      "profileId": "entry_swe",
+      "profile": "Entry Software Engineer",
+      "rank": 11,
+      "jobId": "26095",
+      "title": "Senior Systems, Integration, and Test Engineer",
+      "roleFamily": "OTHER",
+      "canonicalRole": "QA_ENGINEER",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 18,
+      "rawScore": 18,
+      "components": {
+        "role": 10,
+        "requiredSkills": 100,
+        "preferredSkills": 70,
+        "experience": 30,
+        "location": 72,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "mid_swe",
+      "profile": "Mid Software Engineer",
+      "rank": 1,
+      "jobId": "3347707",
+      "title": "Senior Software Engineer",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 63,
+      "rawScore": 63,
+      "components": {
+        "role": 65,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 65,
+        "location": 72,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "mid_swe",
+      "profile": "Mid Software Engineer",
+      "rank": 2,
+      "jobId": "1278922",
+      "title": "Software Engineer, Core Platform (All Levels)",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 62,
+      "rawScore": 62,
+      "components": {
+        "role": 50,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "mid_swe",
+      "profile": "Mid Software Engineer",
+      "rank": 3,
+      "jobId": "1292366",
+      "title": "Senior Software Engineer, Perception",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MATCH",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 58,
+      "rawScore": 58,
+      "components": {
+        "role": 65,
+        "requiredSkills": 33,
+        "preferredSkills": 70,
+        "experience": 100,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "mid_swe",
+      "profile": "Mid Software Engineer",
+      "rank": 4,
+      "jobId": "3301134",
+      "title": "Full Stack Laravel + React Developer - Remote, Latin America",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "FULL_STACK_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: ADJACENT",
+        "Seniority: MATCH",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 58,
+      "rawScore": 59,
+      "components": {
+        "role": 35,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 95,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "mid_swe",
+      "profile": "Mid Software Engineer",
+      "rank": 5,
+      "jobId": "41167",
+      "title": "Staff Software Engineer - Distributed Data Systems",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MODERATE",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 57,
+      "rawScore": 57,
+      "components": {
+        "role": 50,
+        "requiredSkills": 70,
+        "preferredSkills": 0,
+        "experience": 35,
+        "location": 95,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "mid_swe",
+      "profile": "Mid Software Engineer",
+      "rank": 6,
+      "jobId": "50143",
+      "title": "Software Engineer, Components (Starshield)",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MATCH",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 53,
+      "rawScore": 53,
+      "components": {
+        "role": 50,
+        "requiredSkills": 20,
+        "preferredSkills": 70,
+        "experience": 100,
+        "location": 72,
+        "freshness": 40,
+        "salary": 100
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "mid_swe",
+      "profile": "Mid Software Engineer",
+      "rank": 7,
+      "jobId": "1276841",
+      "title": "Staff Software Engineer, Product",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MODERATE",
+        "Skill overlap: WEAK"
+      ],
+      "finalScore": 45,
+      "rawScore": 45,
+      "components": {
+        "role": 65,
+        "requiredSkills": 0,
+        "preferredSkills": 70,
+        "experience": 35,
+        "location": 40,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "mid_swe",
+      "profile": "Mid Software Engineer",
+      "rank": 8,
+      "jobId": "65645",
+      "title": "Principal Engineer, Duo Agent Platform",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 12,
+      "rawScore": 12,
+      "components": {
+        "role": 10,
+        "requiredSkills": 0,
+        "preferredSkills": 70,
+        "experience": 35,
+        "location": 100,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "mid_swe",
+      "profile": "Mid Software Engineer",
+      "rank": 9,
+      "jobId": "5085646",
+      "title": "ERP Engineer - Business Systems",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 12,
+      "rawScore": 12,
+      "components": {
+        "role": 10,
+        "requiredSkills": 0,
+        "preferredSkills": 70,
+        "experience": 35,
+        "location": 72,
+        "freshness": 80,
+        "salary": 65
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": false
+    },
+    {
+      "profileId": "backend_java",
+      "profile": "Backend Java Engineer",
+      "rank": 1,
+      "jobId": "28638",
+      "title": "Backend Engineer",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "BACKEND_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MATCH",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 58,
+      "rawScore": 58,
+      "components": {
+        "role": 95,
+        "requiredSkills": 13,
+        "preferredSkills": 50,
+        "experience": 100,
+        "location": 55,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "backend_java",
+      "profile": "Backend Java Engineer",
+      "rank": 2,
+      "jobId": "57574",
+      "title": "Applied AI Engineer",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "AI_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: RELATED",
+        "Seniority: MATCH",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 58,
+      "rawScore": 58,
+      "components": {
+        "role": 35,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 62,
+        "location": 55,
+        "freshness": 80,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "backend_java",
+      "profile": "Backend Java Engineer",
+      "rank": 3,
+      "jobId": "38611",
+      "title": "Software Engineer II - MES",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: ADJACENT",
+        "Seniority: MODERATE",
+        "Skill overlap: WEAK"
+      ],
+      "finalScore": 39,
+      "rawScore": 39,
+      "components": {
+        "role": 35,
+        "requiredSkills": 0,
+        "preferredSkills": 50,
+        "experience": 100,
+        "location": 72,
+        "freshness": 80,
+        "salary": 71
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": false
+    },
+    {
+      "profileId": "backend_java",
+      "profile": "Backend Java Engineer",
+      "rank": 4,
+      "jobId": "4847300",
+      "title": "Sr. Product Manager, R&D Enablement",
+      "roleFamily": "PRODUCT",
+      "canonicalRole": "PRODUCT",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: CROSS_FAMILY",
+        "Seniority: MATCH",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 35,
+      "rawScore": 35,
+      "components": {
+        "role": 25,
+        "requiredSkills": 70,
+        "preferredSkills": 50,
+        "experience": 100,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "DIFFERENT_FAMILY_RELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "backend_java",
+      "profile": "Backend Java Engineer",
+      "rank": 5,
+      "jobId": "32597",
+      "title": "Software Engineer - Recent Grad",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: ADJACENT",
+        "Seniority: MODERATE",
+        "Skill overlap: WEAK"
+      ],
+      "finalScore": 34,
+      "rawScore": 34,
+      "components": {
+        "role": 35,
+        "requiredSkills": 0,
+        "preferredSkills": 50,
+        "experience": 100,
+        "location": 40,
+        "freshness": 40,
+        "salary": 100
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "backend_java",
+      "profile": "Backend Java Engineer",
+      "rank": 6,
+      "jobId": "1304579",
+      "title": "Member of Technical Staff - Applied AI Engineer",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "AI_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: RELATED",
+        "Seniority: MATCH",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 34,
+      "rawScore": 34,
+      "components": {
+        "role": 35,
+        "requiredSkills": 20,
+        "preferredSkills": 0,
+        "experience": 65,
+        "location": 72,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "backend_java",
+      "profile": "Backend Java Engineer",
+      "rank": 7,
+      "jobId": "1278663",
+      "title": "Senior Quality Assurance Engineer",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: ADJACENT",
+        "Seniority: MATCH",
+        "Skill overlap: WEAK"
+      ],
+      "finalScore": 29,
+      "rawScore": 29,
+      "components": {
+        "role": 35,
+        "requiredSkills": 0,
+        "preferredSkills": 0,
+        "experience": 82,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "backend_java",
+      "profile": "Backend Java Engineer",
+      "rank": 8,
+      "jobId": "774354",
+      "title": "Head of Global Inventory Control & Strategy",
+      "roleFamily": "OPERATIONS",
+      "canonicalRole": "OPERATIONS",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 21,
+      "rawScore": 21,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 100,
+        "experience": 82,
+        "location": 100,
+        "freshness": 80,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "backend_java",
+      "profile": "Backend Java Engineer",
+      "rank": 9,
+      "jobId": "5226573",
+      "title": "Commercial Counsel, Sales",
+      "roleFamily": "LEGAL",
+      "canonicalRole": "LEGAL",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 17,
+      "rawScore": 17,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 0,
+        "experience": 100,
+        "location": 72,
+        "freshness": 60,
+        "salary": 95
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": false
+    },
+    {
+      "profileId": "backend_java",
+      "profile": "Backend Java Engineer",
+      "rank": 10,
+      "jobId": "1295745",
+      "title": "Staff/Principal, Hardware Engineer",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 16,
+      "rawScore": 16,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 40,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "data_engineer",
+      "profile": "Data Engineer",
+      "rank": 1,
+      "jobId": "5093276",
+      "title": "Lead Data Engineer",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 76,
+      "rawScore": 76,
+      "components": {
+        "role": 95,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 65,
+        "location": 55,
+        "freshness": 80,
+        "salary": 65
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "data_engineer",
+      "profile": "Data Engineer",
+      "rank": 2,
+      "jobId": "3344578",
+      "title": "Data Engineer – AI Value & DX Platform",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 73,
+      "rawScore": 73,
+      "components": {
+        "role": 95,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 40,
+        "freshness": 40,
+        "salary": 65
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "data_engineer",
+      "profile": "Data Engineer",
+      "rank": 3,
+      "jobId": "347767",
+      "title": "Staff Data Engineer",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MODERATE",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 55,
+      "rawScore": 56,
+      "components": {
+        "role": 95,
+        "requiredSkills": 33,
+        "preferredSkills": 70,
+        "experience": 10,
+        "location": 40,
+        "freshness": 40,
+        "salary": 65
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": false
+    },
+    {
+      "profileId": "data_engineer",
+      "profile": "Data Engineer",
+      "rank": 4,
+      "jobId": "1308034",
+      "title": "Recruiter, Technical GTM (Spark) (Contract)",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_SCIENCE",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: RELATED",
+        "Seniority: MATCH",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 54,
+      "rawScore": 54,
+      "components": {
+        "role": 35,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 62,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": false
+    },
+    {
+      "profileId": "data_engineer",
+      "profile": "Data Engineer",
+      "rank": 5,
+      "jobId": "3300626",
+      "title": "Senior Technical Account Manager - SIEM/Security Analytics (US Remote)",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_SCIENCE",
+      "label": "BAD",
+      "labelReasons": [
+        "Major required-skill gap",
+        "Role fit: RELATED"
+      ],
+      "finalScore": 38,
+      "rawScore": 38,
+      "components": {
+        "role": 35,
+        "requiredSkills": 0,
+        "preferredSkills": 70,
+        "experience": 62,
+        "location": 95,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "data_engineer",
+      "profile": "Data Engineer",
+      "rank": 6,
+      "jobId": "46901",
+      "title": "Staff Machine Learning Engineer",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "ML_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: RELATED",
+        "Seniority: MODERATE",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 37,
+      "rawScore": 37,
+      "components": {
+        "role": 32,
+        "requiredSkills": 19,
+        "preferredSkills": 70,
+        "experience": 35,
+        "location": 55,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "RELATED_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "data_engineer",
+      "profile": "Data Engineer",
+      "rank": 7,
+      "jobId": "922132",
+      "title": "Staff Machine Learning Engineer, ML Platform",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "ML_ENGINEER",
+      "label": "BAD",
+      "labelReasons": [
+        "Major required-skill gap",
+        "Role fit: RELATED"
+      ],
+      "finalScore": 29,
+      "rawScore": 29,
+      "components": {
+        "role": 32,
+        "requiredSkills": 0,
+        "preferredSkills": 14,
+        "experience": 25,
+        "location": 40,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "RELATED_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "data_engineer",
+      "profile": "Data Engineer",
+      "rank": 8,
+      "jobId": "1289945",
+      "title": "Senior Network Engineer",
+      "roleFamily": "DEVOPS_SRE",
+      "canonicalRole": "NETWORK_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: CROSS_FAMILY",
+        "Seniority: MATCH",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 27,
+      "rawScore": 27,
+      "components": {
+        "role": 30,
+        "requiredSkills": 25,
+        "preferredSkills": 33,
+        "experience": 35,
+        "location": 72,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "DIFFERENT_FAMILY_RELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "data_engineer",
+      "profile": "Data Engineer",
+      "rank": 9,
+      "jobId": "55261",
+      "title": "AV Engineer - East Coast (NYC)",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 18,
+      "rawScore": 18,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 82,
+        "location": 40,
+        "freshness": 80,
+        "salary": 73
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": false
+    },
+    {
+      "profileId": "data_engineer",
+      "profile": "Data Engineer",
+      "rank": 10,
+      "jobId": "27176",
+      "title": "Enterprise Account Executive",
+      "roleFamily": "SALES",
+      "canonicalRole": "SALES",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 15,
+      "rawScore": 15,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 25,
+        "location": 55,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "senior_data_engineer",
+      "profile": "Senior Data Engineer",
+      "rank": 1,
+      "jobId": "5078554",
+      "title": "Senior Data Engineer II",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 79,
+      "rawScore": 79,
+      "components": {
+        "role": 95,
+        "requiredSkills": 100,
+        "preferredSkills": 0,
+        "experience": 62,
+        "location": 72,
+        "freshness": 80,
+        "salary": 76
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": false
+    },
+    {
+      "profileId": "senior_data_engineer",
+      "profile": "Senior Data Engineer",
+      "rank": 2,
+      "jobId": "1298618",
+      "title": "Data Engineer",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 74,
+      "rawScore": 74,
+      "components": {
+        "role": 95,
+        "requiredSkills": 70,
+        "preferredSkills": 25,
+        "experience": 90,
+        "location": 72,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "senior_data_engineer",
+      "profile": "Senior Data Engineer",
+      "rank": 3,
+      "jobId": "46993",
+      "title": "Data Engineer",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MODERATE",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 64,
+      "rawScore": 64,
+      "components": {
+        "role": 95,
+        "requiredSkills": 20,
+        "preferredSkills": 100,
+        "experience": 80,
+        "location": 55,
+        "freshness": 40,
+        "salary": 63
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": false
+    },
+    {
+      "profileId": "senior_data_engineer",
+      "profile": "Senior Data Engineer",
+      "rank": 4,
+      "jobId": "2753347",
+      "title": "Senior Data Engineer",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MATCH",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 64,
+      "rawScore": 64,
+      "components": {
+        "role": 95,
+        "requiredSkills": 31,
+        "preferredSkills": 67,
+        "experience": 80,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "senior_data_engineer",
+      "profile": "Senior Data Engineer",
+      "rank": 5,
+      "jobId": "23559",
+      "title": "Data Analyst III, Reporting & Analytics",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ANALYST",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: RELATED",
+        "Seniority: MODERATE",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 58,
+      "rawScore": 64,
+      "components": {
+        "role": 32,
+        "requiredSkills": 70,
+        "preferredSkills": 67,
+        "experience": 100,
+        "location": 72,
+        "freshness": 80,
+        "salary": 100
+      },
+      "roleMatchType": "RELATED_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "senior_data_engineer",
+      "profile": "Senior Data Engineer",
+      "rank": 6,
+      "jobId": "1280987",
+      "title": "Staff Software Engineer, Backend - NYC",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "BACKEND_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: CROSS_FAMILY",
+        "Seniority: MATCH",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 34,
+      "rawScore": 34,
+      "components": {
+        "role": 35,
+        "requiredSkills": 17,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 72,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "DIFFERENT_FAMILY_RELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "senior_data_engineer",
+      "profile": "Senior Data Engineer",
+      "rank": 7,
+      "jobId": "36854",
+      "title": "Staff Structures Engineer (Terran-R Vehicle)",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 19,
+      "rawScore": 19,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 100,
+        "location": 72,
+        "freshness": 80,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "senior_data_engineer",
+      "profile": "Senior Data Engineer",
+      "rank": 8,
+      "jobId": "52538",
+      "title": "Sr. Manufacturing Engineer, Tool & Die Machining (Starlink)",
+      "roleFamily": "MECHANICAL_ENGINEERING",
+      "canonicalRole": "MECHANICAL_ENGINEERING",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 18,
+      "rawScore": 18,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 100,
+        "location": 72,
+        "freshness": 40,
+        "salary": 65
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "senior_data_engineer",
+      "profile": "Senior Data Engineer",
+      "rank": 9,
+      "jobId": "5968",
+      "title": "GTM AI Revenue Enablement, Senior Manager",
+      "roleFamily": "SALES",
+      "canonicalRole": "SALES",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 17,
+      "rawScore": 17,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 33,
+        "experience": 100,
+        "location": 95,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "ml_engineer",
+      "profile": "ML Engineer",
+      "rank": 1,
+      "jobId": "59545",
+      "title": "Senior Machine Learning Engineer, Fleet Monitoring & Response",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "ML_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MATCH",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 71,
+      "rawScore": 71,
+      "components": {
+        "role": 95,
+        "requiredSkills": 43,
+        "preferredSkills": 70,
+        "experience": 62,
+        "location": 72,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "ml_engineer",
+      "profile": "ML Engineer",
+      "rank": 2,
+      "jobId": "57248",
+      "title": "Principal Machine Learning Engineer, Foundation Models",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "ML_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Exact role but severe seniority gap"
+      ],
+      "finalScore": 59,
+      "rawScore": 59,
+      "components": {
+        "role": 95,
+        "requiredSkills": 20,
+        "preferredSkills": 67,
+        "experience": 45,
+        "location": 72,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "ml_engineer",
+      "profile": "ML Engineer",
+      "rank": 3,
+      "jobId": "2781052",
+      "title": "Principal Machine Learning Engineer",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "ML_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Exact role but severe seniority gap"
+      ],
+      "finalScore": 55,
+      "rawScore": 72,
+      "components": {
+        "role": 95,
+        "requiredSkills": 67,
+        "preferredSkills": 70,
+        "experience": 15,
+        "location": 72,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "ml_engineer",
+      "profile": "ML Engineer",
+      "rank": 4,
+      "jobId": "5064228",
+      "title": "Engineering Manager, Events Analytics Platform",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_SCIENCE",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: RELATED",
+        "Seniority: MODERATE",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 51,
+      "rawScore": 51,
+      "components": {
+        "role": 35,
+        "requiredSkills": 70,
+        "preferredSkills": 33,
+        "experience": 15,
+        "location": 72,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "ml_engineer",
+      "profile": "ML Engineer",
+      "rank": 5,
+      "jobId": "1284568",
+      "title": "Developer Relations Engineer",
+      "roleFamily": "OTHER",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 17,
+      "rawScore": 17,
+      "components": {
+        "role": 10,
+        "requiredSkills": 100,
+        "preferredSkills": 0,
+        "experience": 62,
+        "location": 55,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "ml_engineer",
+      "profile": "ML Engineer",
+      "rank": 6,
+      "jobId": "3290236",
+      "title": "Sr. Specialty Solutions Engineer - Observability",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 16,
+      "rawScore": 16,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 65,
+        "location": 72,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "ml_engineer",
+      "profile": "ML Engineer",
+      "rank": 7,
+      "jobId": "53301",
+      "title": "Director, Business Development",
+      "roleFamily": "SALES",
+      "canonicalRole": "SALES",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 15,
+      "rawScore": 15,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 15,
+        "location": 55,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": false
+    },
+    {
+      "profileId": "ml_engineer",
+      "profile": "ML Engineer",
+      "rank": 8,
+      "jobId": "1301730",
+      "title": "Senior Staff Hardware Qualification Engineer",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 15,
+      "rawScore": 15,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 10,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": false
+    },
+    {
+      "profileId": "ml_engineer",
+      "profile": "ML Engineer",
+      "rank": 9,
+      "jobId": "6088",
+      "title": "Principal Product Manager (Dataplane)",
+      "roleFamily": "PRODUCT",
+      "canonicalRole": "PRODUCT",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 14,
+      "rawScore": 14,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 0,
+        "experience": 15,
+        "location": 100,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "qa_automation",
+      "profile": "QA Automation Engineer",
+      "rank": 1,
+      "jobId": "456805",
+      "title": "Winter 2027 Test Automation Engineer Co-op",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "QA_AUTOMATION_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 87,
+      "rawScore": 87,
+      "components": {
+        "role": 95,
+        "requiredSkills": 100,
+        "preferredSkills": 100,
+        "experience": 90,
+        "location": 72,
+        "freshness": 40,
+        "salary": 65
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": false
+    },
+    {
+      "profileId": "qa_automation",
+      "profile": "QA Automation Engineer",
+      "rank": 2,
+      "jobId": "30881",
+      "title": "Staff Software Development Engineer in Test (SDET)",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SDET",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: ADJACENT",
+        "Seniority: MODERATE",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 75,
+      "rawScore": 76,
+      "components": {
+        "role": 92,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 25,
+        "location": 72,
+        "freshness": 90,
+        "salary": 100
+      },
+      "roleMatchType": "RELATED_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "qa_automation",
+      "profile": "QA Automation Engineer",
+      "rank": 3,
+      "jobId": "58075",
+      "title": "Lead SDET",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SDET",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: ADJACENT",
+        "Seniority: MATCH",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 71,
+      "rawScore": 71,
+      "components": {
+        "role": 92,
+        "requiredSkills": 70,
+        "preferredSkills": 50,
+        "experience": 25,
+        "location": 72,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "RELATED_CANONICAL",
+      "eligible": false
+    },
+    {
+      "profileId": "qa_automation",
+      "profile": "QA Automation Engineer",
+      "rank": 4,
+      "jobId": "5084408",
+      "title": "Software Test Engineer – Power Platforms",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "QA_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: ADJACENT",
+        "Seniority: MATCH",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 66,
+      "rawScore": 66,
+      "components": {
+        "role": 78,
+        "requiredSkills": 22,
+        "preferredSkills": 70,
+        "experience": 100,
+        "location": 72,
+        "freshness": 80,
+        "salary": 100
+      },
+      "roleMatchType": "RELATED_CANONICAL",
+      "eligible": false
+    },
+    {
+      "profileId": "qa_automation",
+      "profile": "QA Automation Engineer",
+      "rank": 5,
+      "jobId": "1287996",
+      "title": "Robotics Software Test Engineer",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "QA_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: ADJACENT",
+        "Seniority: MATCH",
+        "Skill overlap: WEAK"
+      ],
+      "finalScore": 53,
+      "rawScore": 53,
+      "components": {
+        "role": 78,
+        "requiredSkills": 0,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "RELATED_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "qa_automation",
+      "profile": "QA Automation Engineer",
+      "rank": 6,
+      "jobId": "3291537",
+      "title": "Software Engineer, Games",
+      "roleFamily": "SOFTWARE_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: RELATED",
+        "Seniority: MATCH",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 53,
+      "rawScore": 53,
+      "components": {
+        "role": 35,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 40,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "qa_automation",
+      "profile": "QA Automation Engineer",
+      "rank": 7,
+      "jobId": "338249",
+      "title": "Senior Software Engineer, Backend (Infrastructure)",
+      "roleFamily": "DEVOPS_SRE",
+      "canonicalRole": "BACKEND_ENGINEER",
+      "label": "BAD",
+      "labelReasons": [
+        "Different field, no real required-skill overlap"
+      ],
+      "finalScore": 34,
+      "rawScore": 34,
+      "components": {
+        "role": 55,
+        "requiredSkills": 0,
+        "preferredSkills": 70,
+        "experience": 62,
+        "location": 72,
+        "freshness": 40,
+        "salary": 100
+      },
+      "roleMatchType": "DIFFERENT_FAMILY_RELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "qa_automation",
+      "profile": "QA Automation Engineer",
+      "rank": 8,
+      "jobId": "14579",
+      "title": "Electrical/Wire Harness Design Engineer",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 18,
+      "rawScore": 18,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 78,
+        "freshness": 40,
+        "salary": 81
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": false
+    },
+    {
+      "profileId": "qa_automation",
+      "profile": "QA Automation Engineer",
+      "rank": 9,
+      "jobId": "24927",
+      "title": "Senior Electrical Engineer, PCB Systems",
+      "roleFamily": "ELECTRICAL_ENGINEERING",
+      "canonicalRole": "ELECTRICAL_ENGINEERING",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 16,
+      "rawScore": 16,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 35,
+        "location": 40,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "qa_automation",
+      "profile": "QA Automation Engineer",
+      "rank": 10,
+      "jobId": "1296193",
+      "title": "OTA Validation Engineer",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 16,
+      "rawScore": 16,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 33,
+        "experience": 100,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": false
+    },
+    {
+      "profileId": "devops_sre",
+      "profile": "DevOps/SRE Engineer",
+      "rank": 1,
+      "jobId": "61047",
+      "title": "Senior Software Engineer, Cloud Infrastructure / SRE",
+      "roleFamily": "DEVOPS_SRE",
+      "canonicalRole": "SITE_RELIABILITY_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 74,
+      "rawScore": 74,
+      "components": {
+        "role": 95,
+        "requiredSkills": 70,
+        "preferredSkills": 36,
+        "experience": 82,
+        "location": 72,
+        "freshness": 40,
+        "salary": 100
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "devops_sre",
+      "profile": "DevOps/SRE Engineer",
+      "rank": 2,
+      "jobId": "58398",
+      "title": "Site Reliability Engineer",
+      "roleFamily": "DEVOPS_SRE",
+      "canonicalRole": "SITE_RELIABILITY_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 72,
+      "rawScore": 72,
+      "components": {
+        "role": 95,
+        "requiredSkills": 67,
+        "preferredSkills": 0,
+        "experience": 100,
+        "location": 55,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "devops_sre",
+      "profile": "DevOps/SRE Engineer",
+      "rank": 3,
+      "jobId": "1283666",
+      "title": "Senior Site Reliability Engineer - Managed Kubernetes",
+      "roleFamily": "DEVOPS_SRE",
+      "canonicalRole": "SITE_RELIABILITY_ENGINEER",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 71,
+      "rawScore": 71,
+      "components": {
+        "role": 95,
+        "requiredSkills": 70,
+        "preferredSkills": 40,
+        "experience": 82,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "devops_sre",
+      "profile": "DevOps/SRE Engineer",
+      "rank": 4,
+      "jobId": "6691",
+      "title": "Senior Staff Site Reliability Engineer",
+      "roleFamily": "DEVOPS_SRE",
+      "canonicalRole": "SITE_RELIABILITY_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MATCH",
+        "Skill overlap: WEAK"
+      ],
+      "finalScore": 64,
+      "rawScore": 64,
+      "components": {
+        "role": 95,
+        "requiredSkills": 0,
+        "preferredSkills": 100,
+        "experience": 65,
+        "location": 72,
+        "freshness": 80,
+        "salary": 100
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "devops_sre",
+      "profile": "DevOps/SRE Engineer",
+      "rank": 5,
+      "jobId": "53460",
+      "title": "Sr. Site Reliability Engineer - Top Secret Clearance (Starlink)",
+      "roleFamily": "DEVOPS_SRE",
+      "canonicalRole": "SITE_RELIABILITY_ENGINEER",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MATCH",
+        "Skill overlap: PARTIAL"
+      ],
+      "finalScore": 63,
+      "rawScore": 63,
+      "components": {
+        "role": 95,
+        "requiredSkills": 20,
+        "preferredSkills": 70,
+        "experience": 62,
+        "location": 72,
+        "freshness": 40,
+        "salary": 100
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "devops_sre",
+      "profile": "DevOps/SRE Engineer",
+      "rank": 6,
+      "jobId": "22631",
+      "title": "Staff Design Release Engineer, Human-Machine Interface & User Experience",
+      "roleFamily": "DEVOPS_SRE",
+      "canonicalRole": "RELEASE_ENGINEER",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: RELATED",
+        "Seniority: MATCH",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 58,
+      "rawScore": 58,
+      "components": {
+        "role": 35,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 45,
+        "location": 72,
+        "freshness": 60,
+        "salary": 100
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "devops_sre",
+      "profile": "DevOps/SRE Engineer",
+      "rank": 7,
+      "jobId": "3293551",
+      "title": "Director of Security Operations (Remote US)",
+      "roleFamily": "DEVOPS_SRE",
+      "canonicalRole": "DEVOPS_SRE",
+      "label": "BORDERLINE",
+      "labelReasons": [
+        "Role fit: RELATED",
+        "Seniority: MODERATE",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 50,
+      "rawScore": 50,
+      "components": {
+        "role": 35,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 40,
+        "location": 55,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "devops_sre",
+      "profile": "DevOps/SRE Engineer",
+      "rank": 8,
+      "jobId": "2868608",
+      "title": "Vehicle Inspector",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 17,
+      "rawScore": 17,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 72,
+        "freshness": 60,
+        "salary": 15
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": false
+    },
+    {
+      "profileId": "devops_sre",
+      "profile": "DevOps/SRE Engineer",
+      "rank": 9,
+      "jobId": "50522",
+      "title": "Senior Software Engineer, Manufacturing Test",
+      "roleFamily": "INDUSTRIAL_ENGINEERING",
+      "canonicalRole": "SOFTWARE_ENGINEER",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 16,
+      "rawScore": 16,
+      "components": {
+        "role": 10,
+        "requiredSkills": 50,
+        "preferredSkills": 70,
+        "experience": 45,
+        "location": 72,
+        "freshness": 80,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "devops_sre",
+      "profile": "DevOps/SRE Engineer",
+      "rank": 10,
+      "jobId": "1294250",
+      "title": "Software Integration Engineer, Self-Driving",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 11,
+      "rawScore": 11,
+      "components": {
+        "role": 10,
+        "requiredSkills": 0,
+        "preferredSkills": 33,
+        "experience": 100,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": false
+    },
+    {
+      "profileId": "data_analyst",
+      "profile": "Data Analyst",
+      "rank": 1,
+      "jobId": "61916",
+      "title": "Data Analyst",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ANALYST",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 83,
+      "rawScore": 83,
+      "components": {
+        "role": 95,
+        "requiredSkills": 100,
+        "preferredSkills": 50,
+        "experience": 100,
+        "location": 72,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "data_analyst",
+      "profile": "Data Analyst",
+      "rank": 2,
+      "jobId": "49401",
+      "title": "Senior Data Analyst - Marketplace",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ANALYST",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MODERATE",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 80,
+      "rawScore": 80,
+      "components": {
+        "role": 95,
+        "requiredSkills": 100,
+        "preferredSkills": 70,
+        "experience": 45,
+        "location": 78,
+        "freshness": 40,
+        "salary": 65
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "data_analyst",
+      "profile": "Data Analyst",
+      "rank": 3,
+      "jobId": "1300133",
+      "title": "Product Data Analyst",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ANALYST",
+      "label": "EXCELLENT",
+      "labelReasons": [
+        "Exact target role",
+        "Seniority matches",
+        "Strong required-skill fit"
+      ],
+      "finalScore": 78,
+      "rawScore": 78,
+      "components": {
+        "role": 95,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 72,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "data_analyst",
+      "profile": "Data Analyst",
+      "rank": 4,
+      "jobId": "3285592",
+      "title": "Sr Data Analyst",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_ANALYST",
+      "label": "GOOD",
+      "labelReasons": [
+        "Role fit: EXACT",
+        "Seniority: MODERATE",
+        "Skill overlap: STRONG"
+      ],
+      "finalScore": 66,
+      "rawScore": 66,
+      "components": {
+        "role": 95,
+        "requiredSkills": 50,
+        "preferredSkills": 70,
+        "experience": 40,
+        "location": 72,
+        "freshness": 20,
+        "salary": 100
+      },
+      "roleMatchType": "EXACT_CANONICAL",
+      "eligible": true
+    },
+    {
+      "profileId": "data_analyst",
+      "profile": "Data Analyst",
+      "rank": 5,
+      "jobId": "5078455",
+      "title": "Vice President, Analytics (Retail Media)",
+      "roleFamily": "DATA_SCIENCE",
+      "canonicalRole": "DATA_SCIENCE",
+      "label": "BAD",
+      "labelReasons": [
+        "Severe seniority mismatch",
+        "Role fit: RELATED"
+      ],
+      "finalScore": 33,
+      "rawScore": 33,
+      "components": {
+        "role": 35,
+        "requiredSkills": 0,
+        "preferredSkills": 70,
+        "experience": 10,
+        "location": 72,
+        "freshness": 80,
+        "salary": 65
+      },
+      "roleMatchType": "SAME_FAMILY_GENERIC",
+      "eligible": true
+    },
+    {
+      "profileId": "data_analyst",
+      "profile": "Data Analyst",
+      "rank": 6,
+      "jobId": "16353",
+      "title": "Senior Account Executive, Air Majors",
+      "roleFamily": "SALES",
+      "canonicalRole": "SALES",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 17,
+      "rawScore": 17,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 45,
+        "location": 72,
+        "freshness": 40,
+        "salary": 100
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "data_analyst",
+      "profile": "Data Analyst",
+      "rank": 7,
+      "jobId": "3314371",
+      "title": "Marketing Operations Specialist (Remote)",
+      "roleFamily": "MARKETING",
+      "canonicalRole": "MARKETING",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 17,
+      "rawScore": 17,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 95,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "data_analyst",
+      "profile": "Data Analyst",
+      "rank": 8,
+      "jobId": "3346081",
+      "title": "Account Executive",
+      "roleFamily": "SALES",
+      "canonicalRole": "SALES",
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 17,
+      "rawScore": 17,
+      "components": {
+        "role": 10,
+        "requiredSkills": 70,
+        "preferredSkills": 70,
+        "experience": 90,
+        "location": 72,
+        "freshness": 20,
+        "salary": 65
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    },
+    {
+      "profileId": "data_analyst",
+      "profile": "Data Analyst",
+      "rank": 9,
+      "jobId": "1292695",
+      "title": "Bilingual Forward Deployed Engineer (English/Spanish)",
+      "roleFamily": "OTHER",
+      "canonicalRole": null,
+      "label": "BAD",
+      "labelReasons": [
+        "Wrong profession / unrelated role family"
+      ],
+      "finalScore": 10,
+      "rawScore": 10,
+      "components": {
+        "role": 10,
+        "requiredSkills": 13,
+        "preferredSkills": 0,
+        "experience": 82,
+        "location": 40,
+        "freshness": 60,
+        "salary": 65
+      },
+      "roleMatchType": "UNRELATED",
+      "eligible": true
+    }
+  ]
+}

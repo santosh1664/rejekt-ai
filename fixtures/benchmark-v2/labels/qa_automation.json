@@ -1,0 +1,408 @@
+{
+  "10131": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Senior Solutions Architect - Consumer Product Goods",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "14579": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Electrical/Wire Harness Design Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "19327": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "B",
+    "title": "Senior Software Engineer - Enterprise Systems",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "23865": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Sr. Engineering Manager, SDET",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG"
+  },
+  "24927": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Senior Electrical Engineer, PCB Systems",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "27176": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "Enterprise Account Executive",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "30183": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "D",
+    "title": "Senior Software Engineer, Site Reliability",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "30881": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Staff Software Development Engineer in Test (SDET)",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG"
+  },
+  "30968": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "C",
+    "title": "Validation Engineer, Electro-Optical devices",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "41022": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Staff Software Engineer - Access Management",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG"
+  },
+  "43728": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Software Test Engineer, ADAS",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "46131": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Quality Specialist, EW",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "58075": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Lead SDET",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "61547": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Quality Manager",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG"
+  },
+  "62479": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MODERATE",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "F",
+    "title": "Staff Data Analyst (Remote US)",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "64315": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Salary below required minimum"
+    ],
+    "bucket": "H",
+    "title": "Software Engineer II with Accounting Experience"
+  },
+  "65009": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "E",
+    "title": "Staff CIAM Software Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "328889": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "People Analytics PL (DATA SCIENTIST)",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "338249": {
+    "label": "BAD",
+    "reasons": [
+      "Different field, no real required-skill overlap"
+    ],
+    "bucket": "D",
+    "title": "Senior Software Engineer, Backend (Infrastructure)",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "456805": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Winter 2027 Test Automation Engineer Co-op",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "1286988": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Senior Dev Ops Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "1287996": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Robotics Software Test Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "1289356": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "SDET -  Senior Software Developer Engineer in Test (SDET)",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "1292012": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Staff Backend Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG"
+  },
+  "1296193": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "C",
+    "title": "OTA Validation Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "1297895": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Software Engineer, Test (SDET)",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "1302691": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Excluded employment type: CONTRACT"
+    ],
+    "bucket": "H",
+    "title": "Frontend Engineer, Platform"
+  },
+  "3291537": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Software Engineer, Games",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "3335214": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Chief Space Systems Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "3348769": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Senior Test Automation Engineer IV",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "5057803": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "C",
+    "title": "Hardware Test Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "5084408": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Software Test Engineer – Power Platforms",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "5087742": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "SAP Software Test Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "5380270": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "C",
+    "title": "Electrical Test Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  }
+}

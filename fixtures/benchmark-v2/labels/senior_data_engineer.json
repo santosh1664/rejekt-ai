@@ -1,0 +1,384 @@
+{
+  "1006": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "SDE IV - Data Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "2667": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "IT Controls Data Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "5627": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Engineer – Hardware & Supply Chain",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "5968": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "GTM AI Revenue Enablement, Senior Manager",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "7457": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Manager, Mid-Market Sales",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "7581": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "16275": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Salary below required minimum"
+    ],
+    "bucket": "H",
+    "title": "Senior Manager, People Operations (Payroll, Benefits & Analytics)"
+  },
+  "23559": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Data Analyst III, Reporting & Analytics",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG"
+  },
+  "26639": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Staff Site Reliability Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "31080": {
+    "label": "BAD",
+    "reasons": [
+      "Major required-skill gap",
+      "Role fit: RELATED"
+    ],
+    "bucket": "C",
+    "title": "Machine Learning Engineer, LLM Post-Training",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "36854": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Staff Structures Engineer (Terran-R Vehicle)",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "46930": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Senior Calibration Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "46964": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Senior Cloud Deployment Engineer, Space",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "46993": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Data Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "49839": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Senior Propulsion Engineer, Air Vehicles (Air Breathing Engine Integration)",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "50899": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "E",
+    "title": "People Data Analyst",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "52538": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Sr. Manufacturing Engineer, Tool & Die Machining (Starlink)",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "59254": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "C",
+    "title": "2027 Summer Intern, PhD, Safety Research, Human Behavior Analytics",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "WEAK"
+  },
+  "59739": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "64625": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Staff Product Manager, Visibility",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "65138": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Excluded employment type: INTERNSHIP"
+    ],
+    "bucket": "H",
+    "title": "PeopleX Insights & Analytics Intern (Summer 2027)"
+  },
+  "1278256": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Engineer, Graph Analytics",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "1280987": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "D",
+    "title": "Staff Software Engineer, Backend - NYC",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "1291516": {
+    "label": "BAD",
+    "reasons": [
+      "Different field, no real required-skill overlap"
+    ],
+    "bucket": "F",
+    "title": "Senior Manager, Major Deployments - Site Security",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "1294182": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "1298618": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Data Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "1300084": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "I",
+    "title": "Full Stack Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "2753347": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "3302047": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Exact role but severe seniority gap"
+    ],
+    "bucket": "E",
+    "title": "Product QA & Data Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "5063576": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "B",
+    "title": "Marketing Data Scientist",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG"
+  },
+  "5078554": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Data Engineer II",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "5083649": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "B",
+    "title": "Staff Data Scientist",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  }
+}

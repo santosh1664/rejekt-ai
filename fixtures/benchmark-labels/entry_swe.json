@@ -1,0 +1,18 @@
+{
+  "_comment": "Entry Software Engineer (0.5 YOE, BACHELORS). Labeled from title/company/seniority_level/min_exp_years/education_level alone, independent of any computed match score. Sample is skewed toward senior aerospace/defense roles (Shield AI et al.), which this corpus has a lot of — that skew is itself an honest finding, not a labeling artifact.",
+  "5064452": "BORDERLINE",
+  "3344063": "BAD",
+  "3344544": "BAD",
+  "3344729": "BAD",
+  "3345173": "BORDERLINE",
+  "1304623": "BAD",
+  "1412811": "GOOD",
+  "3288082": "BORDERLINE",
+  "1305881": "BAD",
+  "1297001": "BAD",
+  "14211": "GOOD",
+  "1296631": "BAD",
+  "3288008": "GOOD",
+  "1303069": "BAD",
+  "29344": "BAD"
+}

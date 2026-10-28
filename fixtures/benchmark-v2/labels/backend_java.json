@@ -1,0 +1,417 @@
+{
+  "2599": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MODERATE",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "E",
+    "title": "Application Software Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "3022": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MODERATE",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "I",
+    "title": "Software Engineer II - Full Stack (Remote Eligible)",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "3546": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Senior Backend Engineer, Safety",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "7079": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "B",
+    "title": "Senior Distributed Systems Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "9476": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Backend Software Engineer - Infrastructure",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "14844": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "Senior Supply Chain Manager - Hardware",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "28638": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Backend Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "29949": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "C",
+    "title": "Senior Software Engineer - Machine Learning Platform",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "32597": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MODERATE",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "E",
+    "title": "Software Engineer - Recent Grad",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "WEAK"
+  },
+  "38611": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MODERATE",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "E",
+    "title": "Software Engineer II - MES",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "WEAK"
+  },
+  "46734": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Sales Application Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "WEAK"
+  },
+  "56473": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Staff Backend Engineer - Streaming",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "57574": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Applied AI Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "61221": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "VIRTUAL CONSTRUCTION FIELD ENGINEER",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "392587": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "F",
+    "title": "Sr. Marketing Strategy and Analytics Manager",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "523986": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Quality Inspector II",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG"
+  },
+  "774354": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Head of Global Inventory Control & Strategy",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG"
+  },
+  "1276551": {
+    "label": "BAD",
+    "reasons": [
+      "Different field, no real required-skill overlap"
+    ],
+    "bucket": "D",
+    "title": "Forward Deployed Data Scientist - Oil & Gas, Houston",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "1277324": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "I",
+    "title": "Sr. Principal Analyst, Product Analytics",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG"
+  },
+  "1278663": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "B",
+    "title": "Senior Quality Assurance Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "1278949": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Backend Engineer, Agents",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "1284949": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Backend Software Engineer (YC experience)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "1290374": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Excluded employment type: CONTRACT"
+    ],
+    "bucket": "H",
+    "title": "Hardware Test Automation Engineer"
+  },
+  "1292020": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Backend Engineer, AI Team",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "1292781": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Sr. Software Engineer, Backend",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK"
+  },
+  "1295745": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Staff/Principal, Hardware Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG"
+  },
+  "1300875": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Backend Engineer (Infra)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "1303847": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Senior Backend Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "1304579": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "C",
+    "title": "Member of Technical Staff - Applied AI Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL"
+  },
+  "3315178": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Salary below required minimum"
+    ],
+    "bucket": "H",
+    "title": "Senior Software Engineer"
+  },
+  "4847300": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Sr. Product Manager, R&D Enablement",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  },
+  "5050362": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: ADJACENT"
+    ],
+    "bucket": "B",
+    "title": "Engine Programmer Intern",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG"
+  },
+  "5077707": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Binance Accelerator Program - Backend Engineer (Web3)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG"
+  },
+  "5226573": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Commercial Counsel, Sales",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG"
+  }
+}

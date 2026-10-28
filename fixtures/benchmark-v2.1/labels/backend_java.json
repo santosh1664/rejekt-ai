@@ -1,0 +1,481 @@
+{
+  "857": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Member of Technical Staff - Product (Backend)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "9154": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "B",
+    "title": "Senior Software Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "24034": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Back End Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "31153": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Software Engineer, New Grad",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "44875": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Senior Backend Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "46011": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Senior/Staff Forward Deployed Engineer - Data as a Service",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "48214": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Senior DevOps Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "49504": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "B",
+    "title": "Senior Staff Software Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "50216": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Software Engineer - Backend Platform",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "52330": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "Lead Product Marketing Manager - Novus",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "53154": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Senior Backend Engineer - Client integrations (New York)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "56014": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Senior Backend Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "56078": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Senior Embedded Linux Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "57570": {
+    "label": "BAD",
+    "reasons": [
+      "Major required-skill gap",
+      "Role fit: RELATED"
+    ],
+    "bucket": "I",
+    "title": "Senior Software Engineer, Frontend",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "58000": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Design Engineer (Combustion Devices)",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "60653": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Backend Software Engineer - Evergreen Posting",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "63531": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "B",
+    "title": "Staff Software Engineer - Adaptive Telemetry, Databases | USA | Remote",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "64131": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Expert Backend Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "1276327": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Sr. Full Stack Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1277118": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "D",
+    "title": "Senior/Staff DevOps Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "1279020": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Backend Software Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1283534": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Senior Software Engineer - Managed Kubernetes",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1288418": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MODERATE",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "E",
+    "title": "Full-Stack Engineer, Wallets",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "1293241": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Excluded employment type: CONTRACT"
+    ],
+    "bucket": "H",
+    "title": "Senior Software Engineer - NatSec",
+    "set": "eligibility"
+  },
+  "1294803": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Senior Backend Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "1295561": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Backend Engineer (New Grad to Staff Level)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1304224": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "ML Systems & Performance Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "1306405": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "D",
+    "title": "Member of Technical Staff, LLM Infrastructure",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "3291643": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Senior Software Engineer, Embedded Software",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3317244": {
+    "label": "BAD",
+    "reasons": [
+      "Major required-skill gap",
+      "Role fit: RELATED"
+    ],
+    "bucket": "E",
+    "title": "Frontend Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "3317262": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Partnerships Manager - CFO Solutions",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5068537": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Salary below required minimum"
+    ],
+    "bucket": "H",
+    "title": "Quality Assurance Engineer",
+    "set": "eligibility"
+  },
+  "5083290": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "I",
+    "title": "Product Manager, Campaign Pages",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5083993": {
+    "label": "BAD",
+    "reasons": [
+      "Major required-skill gap",
+      "Role fit: RELATED"
+    ],
+    "bucket": "C",
+    "title": "[Job - 31876] QA Automation Tester (Hybrid)",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "5188513": {
+    "label": "BAD",
+    "reasons": [
+      "Different field, no real required-skill overlap"
+    ],
+    "bucket": "F",
+    "title": "Technical Product Manager III",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "5333456": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Applied AI Engineer, DNB",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  }
+}

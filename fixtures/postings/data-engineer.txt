@@ -1,0 +1,13 @@
+Data Engineer
+
+We're hiring a Data Engineer to build our event and batch data platform.
+
+Requirements:
+- 3+ years building data pipelines in Python and SQL
+- Experience with Kafka and event-driven systems
+- AWS (S3, ECS) and Docker
+- Databricks or Spark
+
+Nice to have:
+- Terraform, Airflow
+- Experience with DynamoDB or PostgreSQL

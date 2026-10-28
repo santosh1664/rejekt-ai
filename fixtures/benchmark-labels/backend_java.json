@@ -1,0 +1,18 @@
+{
+  "_comment": "Backend Java Engineer (6 YOE, BACHELORS). This sample surfaced a real, pre-existing data-quality issue: several hardware/mechanical/systems-engineering titles (stress analysis, FPGA, HIL validation, optics, material planning) are tagged role_family=SOFTWARE_ENGINEERING upstream — labeled BAD for genuine domain mismatch, not a scoring artifact. Worth flagging as a role_family classification gap outside this phase's scope.",
+  "21726": "BAD",
+  "6332": "GOOD",
+  "3348507": "BAD",
+  "11019": "BAD",
+  "49332": "BAD",
+  "5169858": "BAD",
+  "3301981": "BORDERLINE",
+  "1516": "BAD",
+  "3305249": "BAD",
+  "3304604": "BAD",
+  "5069926": "GOOD",
+  "8826": "BAD",
+  "5083729": "BAD",
+  "3311871": "BAD",
+  "1295429": "BAD"
+}

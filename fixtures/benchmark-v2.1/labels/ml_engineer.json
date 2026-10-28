@@ -1,0 +1,473 @@
+{
+  "1117": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Staff Data Scientist, Ads",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "4484": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Staff Data Scientist",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "6006": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Sr. Data Engineer - FP&A",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "7286": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Staff Product Manager - dbt v2",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "10062": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Staff Machine Learning Engineer, Voice AI",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "11294": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "Procurement, Growth & Strategic Relationships Lead",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "32361": {
+    "label": "BAD",
+    "reasons": [
+      "Different field, no real required-skill overlap"
+    ],
+    "bucket": "D",
+    "title": "Senior Machine Learning Scientist",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "32728": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Staff Embedded ML Engineer, Edge AI",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "51909": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "B",
+    "title": "Senior Data Scientist, Consumer Apps",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "53227": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Salary below required minimum"
+    ],
+    "bucket": "H",
+    "title": "Business Intelligence Engineer",
+    "set": "eligibility"
+  },
+  "54348": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Senior Campaign Lead, Democracy",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "59741": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Senior Data Science Manager, Driving Quality",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "60218": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Staff Product Data Scientist, Experimentation",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "62237": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Staff Data Scientist, Machine Learning in Epidemiology and Patient Data Products",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1279577": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Machine Learning Engineer - LLMs",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1280134": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Machine Learning Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1281460": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Senior Solutions Engineer / IT",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "1285962": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Machine Learning Engineer, Ads - Quora (Remote)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1287232": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Senior / Staff Data Scientist, Trust & Safety",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1289966": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Staff Machine Learning Engineer, AI",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1291392": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Senior Product Marketing Manager",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1295032": {
+    "label": "BAD",
+    "reasons": [
+      "Different field, no real required-skill overlap"
+    ],
+    "bucket": "D",
+    "title": "Staff Software Engineer, Observability",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "1298870": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Tier 2 Support Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1301024": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "B",
+    "title": "Lead Data Scientist",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "1301287": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Staff Product Manager, SaaS platform",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1304743": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Member of Technical Staff Engineer, Full-Stack (Staff)",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1307127": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "GTM Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "1412787": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Software Engineer - Scalable Machine Learning",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "2176908": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Exact role but severe seniority gap"
+    ],
+    "bucket": "A",
+    "title": "Principal Software Engineer, Machine Learning",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "3293478": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Excluded employment type: CONTRACT"
+    ],
+    "bucket": "H",
+    "title": "Director, Analytics",
+    "set": "eligibility"
+  },
+  "3297243": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Research Engineer - NLP",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3301843": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Data Center Operation Tech",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3328931": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "NLP/Linguistics Software Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3331168": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "ML Engineer, Foundation Models",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "4927996": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "C",
+    "title": "Director, Analytics Systems",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "5369187": {
+    "label": "BAD",
+    "reasons": [
+      "Different field, no real required-skill overlap"
+    ],
+    "bucket": "F",
+    "title": "Manager, Production Site Reliability Engineering",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  }
+}

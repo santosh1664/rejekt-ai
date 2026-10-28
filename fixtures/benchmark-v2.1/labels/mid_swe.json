@@ -1,0 +1,478 @@
+{
+  "1432": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Software Engineer, ML Infrastructure",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3905": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Software Engineer, Privacy Engineering",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "6423": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Salary below required minimum"
+    ],
+    "bucket": "H",
+    "title": "Associate Software Engineer",
+    "set": "eligibility"
+  },
+  "9921": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Software Engineer, Codex Enterprise",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "14307": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Forward Deployed Software Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "37548": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Excluded employment type: INTERNSHIP"
+    ],
+    "bucket": "H",
+    "title": "Sr. Software Engineer, VR Internal Tools",
+    "set": "eligibility"
+  },
+  "53414": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Exact role but severe seniority gap"
+    ],
+    "bucket": "E",
+    "title": "Principal Software Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "56459": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Senior Software Engineer, Front End (Customer Experience)",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "57489": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Staff Software Engineer-Android",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "61951": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "Electrical Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "62289": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Senior Software Engineer (Python)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "1281813": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Lead Applied AI Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1282590": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "I",
+    "title": "Forward Deployed AI Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1284658": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Staff Software Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1285509": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Deployment and Test Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "1286191": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Data Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1286504": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Backend Engineer, AI",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1286919": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Lead Recruiter",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1291191": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "Applied AI Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1293099": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "E",
+    "title": "Staff+ Software Engineer, AI",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1293287": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Staff Software Engineer - Full Stack [NYC or SF]",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1293584": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "D",
+    "title": "Network Engineer",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "1294745": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "AI & ML Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1295440": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Research Scientist, All-Optical Investigation of Rodent Cognition",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1298432": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "Head of Demand Generation",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1304179": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Senior/Staff Frontend Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1304844": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Software Engineer - ML Infrastructure",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1306128": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Forward Deployed Software Engineer (Los Angeles)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "2925761": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "D",
+    "title": "Senior Software Engineer -  Account Infrastructure",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "3298466": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Software Developer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3302313": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Senior Software Engineer, Test",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3346548": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Cybersecurity Engineer Lead",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "5077867": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Software Engineer (Dashboard) - New York",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5079898": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Senior Account Manager, SaaS",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5084805": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Forward Deployed Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5410315": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: RELATED",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "C",
+    "title": "AI Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  }
+}

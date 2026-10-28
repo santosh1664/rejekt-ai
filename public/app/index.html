@@ -1,0 +1,2123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rejekt.ai</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M8 22h16M8 16h10M8 10h13' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Schibsted+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+<style>
+/* ═══ Tokens ════════════════════════════════════════════════════════════════
+   Rejekt.ai identity: white page, black actions, pale status tints
+   (green = good / sent, amber = waiting, red = gap, soft blue = new / info). */
+:root {
+  --paper: #FFFFFF; --surface: #FFFFFF; --surface-2: #F6F6F5; --ink: #111111; --ink-2: #3B3B3B; --muted: #6A6A6A;
+  --line: #DEDEDC; --line-2: #EBEBE9;
+  --cobalt: #111111; --cobalt-ink: #FFFFFF; --cobalt-soft: #F0F0EE;
+  --signal: #F5CE78; --signal-soft: #FFFAEB; --signal-ink: #92650A;
+  --ok: #2A8057; --ok-soft: #F2FAF5; --warn: #92650A; --warn-soft: #FFFAEB; --bad: #B84A3E; --bad-soft: #FFF5F3;
+  --info: #3D5FCB; --info-soft: #F4F8FF;
+  --ok-bd: #DCF1E5; --warn-bd: #F7EBC4; --bad-bd: #FBDCD7; --info-bd: #DCE7FB;
+  --ok-mid: #8FD3AF; --warn-mid: #F5CE78; --bad-mid: #F0A59B; --info-mid: #B3CBF5;
+  --meter-off: #E8E8E6;
+  --r-lg: 18px; --r-md: 12px; --r-sm: 8px;
+  --display: 'Schibsted Grotesk', system-ui, sans-serif;
+  --head: 'Big Shoulders Display', 'Schibsted Grotesk', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --text: 'Schibsted Grotesk', system-ui, -apple-system, sans-serif;
+  --rail: 232px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E0E0E; --surface: #161616; --surface-2: #1E1E1E; --ink: #F2F2F2; --ink-2: #CFCFCF; --muted: #9A9A9A;
+    --line: #2C2C2C; --line-2: #232323; --cobalt: #F2F2F2; --cobalt-ink: #111111; --cobalt-soft: #262626;
+    --signal: #E9C46A; --signal-soft: #2E2812; --signal-ink: #F3D98A;
+    --ok: #6FD3A0; --ok-soft: #14261D; --warn: #E9C46A; --warn-soft: #2E2812; --bad: #F2948A; --bad-soft: #2E1A17;
+    --info: #9DB6F5; --info-soft: #172036;
+    --ok-bd: #24523C; --warn-bd: #55481E; --bad-bd: #5A2E29; --info-bd: #2B3C66;
+    --ok-mid: #3F8F69; --warn-mid: #B8963E; --bad-mid: #B5675E; --info-mid: #5A78C8; --meter-off: #2C2C2C;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E0E0E; --surface: #161616; --surface-2: #1E1E1E; --ink: #F2F2F2; --ink-2: #CFCFCF; --muted: #9A9A9A;
+  --line: #2C2C2C; --line-2: #232323; --cobalt: #F2F2F2; --cobalt-ink: #111111; --cobalt-soft: #262626;
+  --signal: #E9C46A; --signal-soft: #2E2812; --signal-ink: #F3D98A;
+  --ok: #6FD3A0; --ok-soft: #14261D; --warn: #E9C46A; --warn-soft: #2E2812; --bad: #F2948A; --bad-soft: #2E1A17;
+  --info: #9DB6F5; --info-soft: #172036;
+  --ok-bd: #24523C; --warn-bd: #55481E; --bad-bd: #5A2E29; --info-bd: #2B3C66;
+  --ok-mid: #3F8F69; --warn-mid: #B8963E; --bad-mid: #B5675E; --info-mid: #5A78C8; --meter-off: #2C2C2C;
+}
+
+/* ═══ Base ══════════════════════════════════════════════════════════════════ */
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: var(--text); font-size: 15px; line-height: 1.5; background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--cobalt); }
+:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; border-radius: 6px; }
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+h1, h2, h3 { font-family: var(--display); letter-spacing: -0.015em; margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ═══ Shell: left rail + main ═══════════════════════════════════════════════ */
+.app { display: grid; grid-template-columns: var(--rail) 1fr; min-height: 100vh; }
+.rail { position: sticky; top: 0; height: 100vh; padding: 22px 16px; display: flex; flex-direction: column; gap: 6px; border-right: 1px solid var(--line); background: var(--surface); }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); padding: 4px 8px 18px; }
+.brand svg { width: 30px; height: 30px; flex: none; }
+.brand span { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+.nav a { display: flex; align-items: center; gap: 11px; padding: 9px 10px; border-radius: var(--r-md); text-decoration: none; color: var(--ink-2); font-weight: 500; }
+.nav a svg { width: 18px; height: 18px; flex: none; opacity: .8; }
+.nav a:hover { background: var(--surface-2); }
+.nav a[aria-current="page"] { background: var(--cobalt-soft); color: var(--cobalt); }
+.nav a .count { margin-left: auto; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rail-foot { margin-top: auto; display: grid; gap: 10px; }
+.rail-card { border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px; font-size: 13px; }
+.rail-card b { display: block; font-size: 13px; }
+.bar { height: 6px; border-radius: 6px; background: var(--line-2); overflow: hidden; margin-top: 8px; }
+.bar > i { display: block; height: 100%; background: var(--cobalt); border-radius: 6px; }
+.theme-btn { display: flex; align-items: center; gap: 10px; border: 0; background: none; color: var(--muted); padding: 8px 10px; border-radius: var(--r-md); font-size: 13px; }
+.theme-btn:hover { background: var(--surface-2); color: var(--ink); }
+main { min-width: 0; padding: 28px 32px 60px; }
+.page-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.page-head h1 { font-size: 30px; font-weight: 700; line-height: 1.1; }
+.page-head p { margin: 6px 0 0; color: var(--ink-2); }
+.page-head .spacer { flex: 1; }
+
+/* ═══ Controls ══════════════════════════════════════════════════════════════ */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 8px 14px; font-weight: 600; font-size: 14px; text-decoration: none; white-space: nowrap; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--cobalt); border-color: var(--cobalt); color: var(--cobalt-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.quiet { border-color: transparent; background: none; color: var(--ink-2); }
+.btn.quiet:hover { background: var(--surface-2); }
+.btn.danger { color: var(--bad); }
+.btn.sm { padding: 5px 10px; font-size: 13px; border-radius: 8px; }
+.btn:disabled { opacity: .5; cursor: default; }
+.icon-btn { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); }
+.icon-btn:hover { color: var(--ink); border-color: var(--muted); }
+.icon-btn:disabled { opacity: .4; }
+.icon-btn svg { width: 16px; height: 16px; }
+input:not([type]), input[type=text], input[type=url], input[type=email], input[type=tel], input[type=number], input[type=search], input[type=date], select, textarea {
+  width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 11px; font-size: 14px; outline: 0; }
+input:focus, select:focus, textarea:focus { border-color: var(--cobalt); box-shadow: 0 0 0 3px var(--cobalt-soft); }
+textarea { resize: vertical; line-height: 1.5; }
+label.field { display: grid; gap: 5px; font-size: 13px; color: var(--ink-2); font-weight: 500; align-content: start; }
+label.field small { color: var(--muted); font-weight: 400; }
+.check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+.check input { width: 16px; height: 16px; accent-color: var(--cobalt); }
+.tag { display: inline-flex; align-items: center; gap: 5px; border-radius: 6px; padding: 2px 8px; font-size: 12.5px; font-weight: 500; background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line-2); }
+.tag.hit { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.tag.miss { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.tag.signal { background: var(--signal-soft); color: var(--signal-ink); border-color: transparent; }
+.tag.cobalt { background: var(--cobalt-soft); color: var(--cobalt); border-color: transparent; }
+.notice { border-radius: var(--r-md); padding: 12px 14px; font-size: 14px; margin: 12px 0; }
+.notice.warn { background: var(--warn-soft); color: var(--warn); }
+.notice.bad { background: var(--bad-soft); color: var(--bad); }
+.notice.info { background: var(--cobalt-soft); color: var(--cobalt); }
+.empty { text-align: center; padding: 48px 20px; color: var(--muted); }
+.empty h3 { color: var(--ink); font-size: 19px; margin-bottom: 6px; }
+.skeleton { background: linear-gradient(90deg, var(--line-2), var(--line), var(--line-2)); background-size: 200% 100%; animation: sh 1.3s infinite; border-radius: var(--r-md); }
+@keyframes sh { to { background-position: -200% 0; } }
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 11px 16px; border-radius: 12px; font-size: 14px; z-index: 90; max-width: calc(100vw - 32px); box-shadow: 0 10px 30px -10px rgba(16,26,51,.5); }
+
+/* ═══ Signal meter: the one bold element ═════════════════════════════════════ */
+.score { display: grid; justify-items: start; gap: 5px; min-width: 64px; }
+.score b { font-family: var(--display); font-weight: 800; font-size: 30px; line-height: .9; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.score b small { font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: 0; margin-left: 1px; }
+.meter { display: grid; grid-template-columns: repeat(10, 4px); gap: 2px; height: 12px; align-items: end; }
+.meter i { display: block; width: 4px; height: calc(var(--n) * 1.2px + 1px); border-radius: 1.5px; background: var(--meter-off); }
+.score.tier-strong .meter i.on { background: var(--signal); }
+.score.tier-good .meter i.on { background: var(--cobalt); }
+.score.tier-weak .meter i.on { background: var(--muted); }
+.score.big b { font-size: 54px; }
+.score.big .meter { grid-template-columns: repeat(10, 7px); gap: 3px; height: 22px; }
+.score.big .meter i { width: 7px; height: calc(var(--n) * 2px + 2px); }
+
+/* ═══ Search + filters ══════════════════════════════════════════════════════ */
+.searchbar { display: flex; gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 6px; }
+.searchbar:focus-within { border-color: var(--cobalt); box-shadow: 0 0 0 3px var(--cobalt-soft); }
+.searchbar select { width: auto; border: 0; background: var(--surface-2); font-size: 13px; padding: 8px 10px; box-shadow: none !important; }
+.searchbar input { border: 0; box-shadow: none !important; font-size: 15.5px; padding: 8px 6px; }
+.recent { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; font-size: 13px; }
+.recent:empty { display: none; }
+.chip-r { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); overflow: hidden; }
+.chip-r button { border: 0; background: none; padding: 4px 10px; font-size: 13px; color: var(--ink-2); }
+.chip-r button:hover { background: var(--surface-2); color: var(--ink); }
+.chip-r button[data-rm] { padding: 4px 8px 4px 2px; color: var(--muted); }
+.exclude-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; padding: 0 4px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.exclude-row input { border: 0; border-bottom: 1px dashed var(--line); border-radius: 0; background: none; padding: 5px 2px; font-size: 13.5px; box-shadow: none !important; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; align-items: center; }
+.pill { position: relative; }
+.pill > button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: 13px; color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
+.pill > button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px; min-width: 240px; max-height: 340px; overflow-y: auto; box-shadow: 0 18px 40px -16px rgba(16,26,51,.35); }
+.menu .opt { display: flex; gap: 9px; align-items: center; padding: 7px 8px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+.menu .opt:hover { background: var(--surface-2); }
+.menu .opt input { accent-color: var(--cobalt); }
+.menu .foot { display: flex; justify-content: space-between; border-top: 1px solid var(--line-2); margin-top: 6px; padding-top: 8px; }
+.menu p { font-size: 12.5px; color: var(--muted); margin: 6px 8px; }
+.search-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.addlink { display: flex; gap: 8px; align-items: center; margin-top: 14px; padding: 8px 10px 8px 14px; border: 1px dashed var(--line); border-radius: var(--r-md); background: var(--surface-2); font-size: 13.5px; color: var(--ink-2); }
+.addlink label { white-space: nowrap; }
+.addlink input { flex: 1; }
+
+/* ═══ Job rows (list) ═══════════════════════════════════════════════════════ */
+.list { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+.row { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 16px; align-items: start; padding: 16px 18px; border-top: 1px solid var(--line-2); cursor: pointer; position: relative; }
+.row:first-child { border-top: 0; }
+.row:hover { background: var(--surface-2); }
+.row[aria-selected="true"] { background: var(--cobalt-soft); }
+.row[aria-selected="true"]::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--cobalt); }
+.row h3 { font-size: 17.5px; font-weight: 600; line-height: 1.25; }
+.row .sub { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 4px; font-size: 13.5px; color: var(--ink-2); }
+.row .sub .co { font-weight: 600; color: var(--ink); }
+.row .fit { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; align-items: center; font-size: 12.5px; color: var(--muted); }
+.row .acts { display: flex; gap: 6px; align-items: center; }
+.row.compact { grid-template-columns: 64px minmax(0, 1fr) auto; padding: 12px 16px; }
+.row.compact h3 { font-size: 16px; }
+.row.leaving { opacity: 0; transform: translateX(12px); transition: opacity .18s, transform .18s; }
+.more { display: flex; justify-content: center; padding: 16px; border-top: 1px solid var(--line-2); }
+
+/* ═══ Jobs: two-pane ════════════════════════════════════════════════════════ */
+.jobs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(380px, 460px); gap: 22px; align-items: start; }
+.detail { position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.detail .empty { padding: 80px 28px; }
+.jd-head { padding: 22px 22px 16px; border-bottom: 1px solid var(--line-2); }
+.jd-head h2 { font-size: 23px; line-height: 1.2; }
+.jd-head .sub { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; color: var(--ink-2); font-size: 14px; }
+.jd-head .sub b { color: var(--ink); }
+.jd-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.jd-body { padding: 18px 22px 26px; }
+.jd-sec { margin-top: 24px; }
+.jd-sec:first-child { margin-top: 0; }
+.jd-sec h4 { font-family: var(--display); font-size: 15.5px; margin: 0 0 9px; font-weight: 600; }
+.why { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; padding: 16px; border-radius: var(--r-md); background: var(--surface-2); }
+.parts { display: grid; gap: 6px; }
+.part { display: grid; grid-template-columns: 112px 1fr 26px; gap: 10px; align-items: center; font-size: 12.5px; color: var(--ink-2); }
+.part .track { height: 5px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.part .track i { display: block; height: 100%; background: var(--cobalt); border-radius: 5px; }
+.part span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; font-size: 14px; margin: 0; }
+.facts dt { color: var(--muted); font-size: 12.5px; }
+.facts dd { margin: 1px 0 0; color: var(--ink); }
+.reasons { margin: 12px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 14px; }
+.reasons li { margin: 3px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.desc { white-space: pre-wrap; font-size: 14.5px; line-height: 1.65; color: var(--ink-2); max-width: 68ch; }
+.openings { border: 1px solid var(--line); border-radius: var(--r-md); }
+.openings > div { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 9px 12px; border-top: 1px solid var(--line-2); font-size: 14px; }
+.openings > div:first-child { border-top: 0; }
+
+/* Drawer for narrow screens */
+.scrim { position: fixed; inset: 0; background: rgba(13,19,36,.45); z-index: 60; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.scrim.open { opacity: 1; pointer-events: auto; }
+.drawer { position: fixed; inset: 0 0 0 auto; width: min(560px, 100vw); background: var(--surface); z-index: 70; transform: translateX(100%); transition: transform .2s ease; overflow: auto; }
+.drawer.open { transform: none; }
+
+/* ═══ Dashboard ═════════════════════════════════════════════════════════════ */
+.dash { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 22px; align-items: start; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.panel-head { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--line-2); }
+.panel-head h2 { font-size: 17px; font-weight: 600; }
+.panel-head .spacer { flex: 1; }
+.panel-body { padding: 16px 18px; }
+.panel .list { border: 0; border-radius: 0 0 var(--r-lg) var(--r-lg); }
+.pipeline { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--line-2); margin: 4px 0 14px; gap: 2px; }
+.pipeline i { display: block; height: 100%; }
+.legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; font-size: 13.5px; }
+.legend div { display: flex; align-items: center; gap: 8px; }
+.legend b { margin-left: auto; font-variant-numeric: tabular-nums; }
+.dot { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+.st-SAVED { --c: #8A93AB; } .st-APPLIED { --c: var(--cobalt); } .st-GHOSTED { --c: #B4BBCC; } .st-INTERVIEWING { --c: var(--signal); }
+.st-OFFER { --c: var(--ok); } .st-REJECTED { --c: var(--bad); } .st-ARCHIVED { --c: var(--muted); }
+.dot, .pipeline i { background: var(--c); }
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
+.status::before { content: ''; width: 8px; height: 8px; border-radius: 3px; background: var(--c); }
+.app-row { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line-2); font-size: 14px; cursor: pointer; }
+.app-row:first-child { border-top: 0; }
+.app-row .t { flex: 1; min-width: 0; }
+.app-row .t b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-row .t span { color: var(--muted); font-size: 13px; }
+.checklist { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.checklist li { display: flex; gap: 8px; align-items: center; color: var(--ink-2); }
+.checklist li::before { content: ''; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--line); flex: none; }
+
+/* ═══ Tracker ═══════════════════════════════════════════════════════════════ */
+.board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 10px; }
+.col { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: var(--r-md); padding: 12px; min-height: 420px; }
+.col.drop { background: var(--cobalt-soft); }
+.col h3 { font-size: 15px; display: flex; justify-content: space-between; margin: 0 2px 12px; }
+.col h3 span { color: var(--muted); font-family: var(--text); font-weight: 500; }
+.tcard { border: 1px solid var(--line); border-radius: 10px; padding: 11px; margin-bottom: 8px; background: var(--surface); cursor: grab; }
+.tcard:hover { border-color: var(--muted); }
+.tcard b { display: block; font-size: 14px; line-height: 1.3; }
+.tcard .c { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.tcard .d { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.tcard select { width: auto; padding: 3px 6px; font-size: 12px; border-radius: 7px; }
+
+/* ═══ Profile ═══════════════════════════════════════════════════════════════ */
+.switcher { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.switcher select { width: auto; min-width: 200px; font-weight: 600; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin: 0 0 22px; overflow-x: auto; }
+.tabs button { border: 0; background: none; padding: 10px 14px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--cobalt); }
+.profile { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; align-items: start; }
+.toc { position: sticky; top: 20px; display: grid; gap: 2px; font-size: 14px; }
+.toc a { display: flex; justify-content: space-between; gap: 8px; text-decoration: none; color: var(--ink-2); padding: 6px 10px; border-radius: 8px; }
+.toc a:hover { background: var(--surface); }
+.toc a span { color: var(--muted); font-size: 12.5px; }
+.sec { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px 22px; margin-bottom: 16px; scroll-margin-top: 20px; }
+.sec-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+.sec-head h2 { font-size: 19px; font-weight: 600; }
+.sec-head p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.sec-head .spacer { flex: 1; }
+.hero-card { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; }
+.initials { width: 64px; height: 64px; border-radius: 18px; background: var(--cobalt); color: var(--cobalt-ink); display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 24px; }
+.hero-card h1 { font-size: 26px; }
+.hero-card .contact { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; color: var(--ink-2); margin-top: 6px; }
+.pct { text-align: right; }
+.pct b { font-family: var(--display); font-size: 30px; font-weight: 800; letter-spacing: -0.03em; }
+.pct span { display: block; font-size: 12.5px; color: var(--muted); }
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before { content: ''; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 2px; background: var(--line); }
+.entry { position: relative; padding: 2px 0 18px; }
+.entry:last-child { padding-bottom: 2px; }
+.timeline .entry::before { content: ''; position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 2px solid var(--cobalt); }
+.timeline .entry.now::before { background: var(--cobalt); }
+.entry-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.entry-head h3 { font-size: 16.5px; font-weight: 600; }
+.entry-head .when { margin-left: auto; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.entry .org { color: var(--ink-2); font-size: 14px; margin-top: 1px; }
+.entry ul { margin: 8px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 14px; max-width: 76ch; }
+.entry ul li { margin: 3px 0; }
+.tools { display: inline-flex; gap: 4px; opacity: 0; transition: opacity .12s; }
+.entry:hover .tools, .entry:focus-within .tools { opacity: 1; }
+.tools .icon-btn { width: 28px; height: 28px; }
+.tools .icon-btn svg { width: 14px; height: 14px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px 14px; align-items: end; }
+.form-grid .wide { grid-column: 1 / -1; }
+.editor { border: 1px solid var(--cobalt); border-radius: var(--r-md); padding: 16px; margin: 4px 0 16px; background: var(--surface-2); }
+.editor .acts { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+.ad-group + .ad-group { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line-2); }
+.ad-group h3 { font-size: 15.5px; margin-bottom: 4px; }
+.ad-group .hint { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.dropzone { display: grid; place-items: center; gap: 6px; text-align: center; border: 2px dashed var(--line); border-radius: var(--r-lg); padding: 36px 20px; color: var(--ink-2); cursor: pointer; }
+.dropzone.over { border-color: var(--cobalt); background: var(--cobalt-soft); }
+.dropzone b { font-family: var(--display); font-size: 18px; color: var(--ink); }
+.resume-text { white-space: pre-wrap; font-size: 13px; line-height: 1.55; max-height: 420px; overflow: auto; background: var(--surface-2); border-radius: var(--r-md); padding: 14px; color: var(--ink-2); }
+
+
+/* ═══ Resume tab: page preview + layout tools (like Tsenta's) ══════════════ */
+.rz-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.rz-top .spacer { flex: 1; }
+.rz-note { margin: 0; font-size: 13px; color: var(--muted); }
+.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); }
+.seg button { border: 0; background: none; padding: 5px 11px; border-radius: 7px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(16,26,51,.12); }
+.rz-tools { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); }
+.rz-tools .grp { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); }
+.rz-tools select { width: 9.5em; padding: 6px 26px 6px 9px; font-size: 13px; }
+.rz-size { display: inline-flex; align-items: center; gap: 4px; }
+.rz-size .icon-btn { width: 28px; height: 28px; }
+.rz-size output { min-width: 48px; text-align: center; font-size: 13px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.rz-tools .switch { font-size: 13px; color: var(--ink-2); }
+.rz-tools .switch .track { width: 36px; height: 21px; }
+.rz-tools .switch .track::after { width: 15px; height: 15px; }
+.rz-tools .switch input:checked + .track::after { transform: translateX(15px); }
+.rz-tools .spacer { flex: 1; }
+.rz-pop { position: relative; }
+.rz-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; width: 290px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: 0 12px 32px rgba(16,26,51,.16); padding: 10px; }
+.rz-menu.right { left: auto; right: 0; }
+.rz-menu h4 { margin: 4px 6px 8px; font: 600 12px/1.4 var(--text); color: var(--muted); }
+.rz-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.rz-list li { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); font-size: 13.5px; }
+.rz-list li.off span.name { color: var(--muted); text-decoration: line-through; }
+.rz-list li.drag-over { border-color: var(--cobalt); }
+.rz-list .handle { cursor: grab; color: var(--muted); font-size: 11px; letter-spacing: -2px; user-select: none; }
+.rz-list .num { width: 16px; color: var(--muted); font-size: 12px; text-align: right; }
+.rz-list .name { flex: 1; }
+.eye { border: 0; background: none; padding: 2px; color: var(--ink-2); display: inline-grid; place-items: center; border-radius: 6px; }
+.eye svg { width: 17px; height: 17px; }
+.eye[aria-pressed="false"] { color: var(--muted); }
+.rz-menu .row-btn { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; padding: 8px 6px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: var(--cobalt); text-align: left; }
+.rz-menu .row-btn:hover { background: var(--surface-2); }
+.rz-menu hr { border: 0; border-top: 1px solid var(--line-2); margin: 8px 0; }
+.rz-canvas { margin-top: 14px; padding: 24px 12px 36px; border-radius: var(--r-lg); background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+.rz-paper { margin: 0 auto; width: 816px; transform-origin: top left; }
+.rz-paper iframe { display: block; width: 816px; border: 0; background: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(16,26,51,.12), 0 10px 30px rgba(16,26,51,.10); }
+.rz-pages { text-align: center; font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+.rz-pages.over { color: var(--warn); font-weight: 600; }
+.rz-editbar { flex-basis: 100%; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border-radius: var(--r-md); background: var(--cobalt-soft); color: var(--cobalt); font-size: 13.5px; }
+.rz-editbar .spacer { flex: 1; }
+.rz-original { width: 816px; min-height: 1056px; margin: 0 auto; padding: 48px 58px; background: #fff; color: #111; font: 12.5px/1.55 Arial, sans-serif; white-space: pre-wrap; border-radius: 4px; box-shadow: 0 1px 3px rgba(16,26,51,.12); }
+.rz-examples > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+.rz-examples > summary::-webkit-details-marker { display: none; }
+.rz-examples > summary h2 { font-size: 17px; font-weight: 600; }
+.rz-examples > summary::after { content: '▾'; margin-left: auto; color: var(--muted); }
+.rz-examples[open] > summary::after { content: '▴'; }
+.rz-examples[open] > summary { margin-bottom: 14px; }
+@media (max-width: 860px) {
+  .rz-tools { position: static; }
+  .rz-menu { width: min(290px, calc(100vw - 48px)); }
+}
+
+/* ═══ Auto-apply + application detail ══════════════════════════════════════ */
+.aa { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr); gap: 22px; align-items: start; }
+.switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch .track { width: 44px; height: 26px; border-radius: 13px; background: var(--line); position: relative; transition: background .15s; flex: none; }
+.switch .track::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s; }
+.switch input:checked + .track { background: var(--cobalt); }
+.switch input:checked + .track::after { transform: translateX(18px); }
+.switch input:focus-visible + .track { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 22px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 14px; }
+.stat b { display: block; font-family: var(--display); font-size: 26px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 13px; color: var(--muted); }
+.stat.attn b { color: var(--bad); }
+.qitem { padding: 14px 18px; border-top: 1px solid var(--line-2); }
+.qitem:first-child { border-top: 0; }
+.qitem .top { display: flex; gap: 12px; align-items: flex-start; }
+.qitem .top .t { flex: 1; min-width: 0; }
+.qitem h3 { font-size: 16px; font-weight: 600; line-height: 1.3; }
+.qitem .meta { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+.qitem .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+.qitem .why-stop { font-size: 14px; color: var(--ink-2); margin: 8px 0 0; }
+.qform { display: grid; gap: 12px; margin-top: 12px; padding: 14px; border-radius: var(--r-md); background: var(--surface-2); }
+.filled { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
+.filled td { padding: 6px 8px; border-top: 1px solid var(--line-2); vertical-align: top; }
+.filled td:first-child { color: var(--muted); width: 48%; }
+.filled tr.src-saved td:last-child::after { content: ' · your saved answer'; color: var(--muted); font-size: 12px; }
+.badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 2px 9px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.badge.you { background: var(--bad-soft); color: var(--bad); }
+.badge.review { background: var(--signal-soft); color: var(--signal-ink); }
+.badge.sent { background: var(--ok-soft); color: var(--ok); }
+.badge.wait { background: var(--cobalt-soft); color: var(--cobalt); }
+.badge.off { background: var(--surface-2); color: var(--muted); }
+.lane { border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px; margin-top: 12px; background: var(--surface); }
+.lane[data-off="true"] { opacity: .7; }
+.lane .lane-head { display: flex; gap: 10px; align-items: center; }
+.lane .lane-head input[name=name] { font-weight: 600; font-size: 15px; }
+.lane .opts { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 10px; }
+.plan-lane + .plan-lane { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-2); }
+.plan-lane ul { margin: 6px 0 0; padding-left: 18px; font-size: 14px; }
+.plan-lane .skips { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.events { list-style: none; margin: 0; padding: 0 0 0 20px; position: relative; font-size: 14px; }
+.events::before { content: ''; position: absolute; left: 4px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
+.events li { position: relative; padding: 0 0 12px; }
+.events li::before { content: ''; position: absolute; left: -20px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--cobalt); }
+.events li:last-child::before { background: var(--cobalt); }
+.events small { display: block; color: var(--muted); font-size: 12.5px; }
+.letter { white-space: pre-wrap; font-size: 14px; line-height: 1.6; background: var(--surface-2); border-radius: var(--r-md); padding: 14px; color: var(--ink-2); }
+.tailor-box { border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px; background: var(--surface-2); }
+.tailor-box .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
+.tailor-box .row2 > .btn { grid-column: 1 / -1; justify-self: start; }
+.added-list { margin: 8px 0 0; padding-left: 18px; font-size: 14px; display: grid; gap: 6px; }
+.added-list small { display: block; color: var(--muted); font-size: 12px; }
+/* Applied */
+.import-box { display: flex; gap: 16px; align-items: center; background: var(--signal-soft); color: var(--signal-ink); border-radius: var(--r-lg); padding: 16px 18px; margin-bottom: 18px; }
+.import-box b { font-size: 15px; } .import-box p { margin: 4px 0 0; font-size: 14px; } .import-box > div { flex: 1; }
+.ap-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 6px; }
+.ap-controls .spacer { flex: 1; }
+.ap-controls select { width: auto; font-size: 13.5px; padding: 7px 10px; }
+.ap-fields { display: flex; flex-wrap: wrap; gap: 6px; }
+.fchip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: 13px; color: var(--ink-2); }
+.fchip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.fchip .n { font-weight: 700; font-variant-numeric: tabular-nums; }
+.seg { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; }
+.seg button { border: 0; background: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.seg button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(16, 26, 51, .12); }
+.ap-line { margin: 6px 0 12px; font-size: 14px; color: var(--ink-2); min-height: 1.4em; }
+.ap-list { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+.ap-list:empty { display: none; }
+.ap-row, .ap-co { display: flex; gap: 14px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line-2); padding: 14px 18px; align-items: flex-start; cursor: pointer; color: inherit; }
+.ap-row:first-child, .ap-co:first-child { border-top: 0; }
+.ap-row:hover, .ap-co:hover { background: var(--surface-2); }
+.ap-date { width: 64px; flex: none; font-size: 13px; color: var(--muted); padding-top: 2px; font-variant-numeric: tabular-nums; }
+.ap-main, .co-main { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.ap-main h3, .co-main h3 { font-family: var(--display); font-size: 16px; font-weight: 600; margin: 0; }
+.ap-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13.5px; color: var(--muted); }
+.ap-meta b { color: var(--ink-2); font-weight: 600; }
+.ap-hits { display: flex; gap: 5px; flex-wrap: wrap; }
+.snip { margin: 2px 0 0; font-size: 13.5px; color: var(--ink-2); line-height: 1.5; }
+.snip mark { background: var(--signal-soft); color: var(--signal-ink); border-radius: 3px; padding: 0 2px; }
+.ap-side { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; align-items: center; max-width: 230px; }
+.have { font-size: 12px; color: var(--muted); border: 1px dashed var(--line); border-radius: 6px; padding: 1px 7px; }
+.have.yes { color: var(--ok); background: var(--ok-soft); border: 1px solid transparent; }
+.co-n { width: 64px; flex: none; display: grid; font-size: 12px; color: var(--muted); }
+.co-n b { font-family: var(--display); font-size: 22px; color: var(--ink); line-height: 1.1; }
+.co-when { display: grid; justify-items: end; gap: 6px; font-size: 13px; }
+#apMore { margin: 14px 0 0; }
+.model-panel { margin-top: 22px; }
+.jd-actions .move { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); margin-left: auto; }
+.jd-actions .move select { width: auto; padding: 6px 8px; font-size: 13px; }
+.cov { display: flex; align-items: baseline; gap: 8px; margin: 12px 0 6px; }
+.cov b { font-family: var(--display); font-size: 26px; font-weight: 700; }
+.tcard .aa-badge { margin-top: 8px; }
+
+/* ═══ Responsive ════════════════════════════════════════════════════════════ */
+@media (max-width: 1180px) {
+  .aa { grid-template-columns: 1fr; }
+  .jobs { grid-template-columns: 1fr; }
+  .jobs .detail { display: none; }
+  .dash { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .rail { position: fixed; inset: auto 0 0 0; height: auto; flex-direction: row; padding: 6px 10px; z-index: 50; border-right: 0; border-top: 1px solid var(--line); }
+  .rail .brand, .rail-foot { display: none; }
+  .ap-row { flex-wrap: wrap; gap: 6px 12px; padding: 12px 14px; }
+  .ap-date { width: 100%; order: -1; padding: 0; }
+  .ap-side { max-width: none; width: 100%; justify-content: flex-start; }
+  .ap-co { flex-wrap: wrap; } .co-when { justify-items: start; }
+  .import-box { flex-direction: column; align-items: flex-start; }
+  .ap-controls .spacer { display: none; }
+  .jd-actions .move { margin-left: 0; }
+  .nav { display: flex; width: 100%; justify-content: space-around; }
+  .nav a { flex-direction: column; gap: 2px; font-size: 10.5px; padding: 6px 2px; flex: 1 1 0; min-width: 0; white-space: nowrap; letter-spacing: -0.01em; }
+  .nav a .count { display: none; }
+  main { padding: 20px 16px 96px; }
+  .page-head h1 { font-size: 25px; }
+  .row, .row.compact { grid-template-columns: 58px minmax(0, 1fr); gap: 12px; padding: 14px; }
+  .row .acts { grid-column: 2; }
+  .score b { font-size: 25px; }
+  .profile { grid-template-columns: 1fr; }
+  .toc { display: none; }
+  .hero-card { grid-template-columns: auto 1fr; }
+  .pct { grid-column: 1 / -1; text-align: left; }
+  .facts { grid-template-columns: 1fr; }
+  .why { grid-template-columns: 1fr; }
+  .searchbar { flex-wrap: wrap; }
+  .searchbar input { flex-basis: 100%; order: 3; }
+  .searchbar .btn { margin-left: auto; }
+  #apSearch { flex-wrap: nowrap; } #apSearch input { flex-basis: auto; order: 0; }
+  .legend { grid-template-columns: 1fr; }
+  .switcher select { min-width: 0; flex: 1; }
+  .addlink { flex-wrap: wrap; }
+  .addlink input { flex-basis: 100%; }
+  .tools { opacity: 1; }
+  .aa { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .tailor-box .row2 { grid-template-columns: 1fr; }
+}
+
+/* ═══ Design v2: white, black actions, pale status tints ═══════════════════════ */
+.brand svg { color: var(--ink); }
+.brand span { font-family: var(--head); text-transform: uppercase; font-weight: 800; font-size: 24px; letter-spacing: .04em; }
+.page-head h1 { font-family: var(--head); font-weight: 900; font-size: 54px; line-height: .92; letter-spacing: 0; text-transform: uppercase; }
+.panel-head h2, .sec-head h2, .rz-examples > summary h2 { font-family: var(--head); text-transform: uppercase; font-weight: 800; font-size: 26px; letter-spacing: .01em; }
+.hero-card h1 { font-family: var(--head); font-weight: 900; font-size: 40px; text-transform: uppercase; line-height: 1; }
+.btn, .btn.sm { border-radius: 999px; }
+.btn.primary { box-shadow: none; }
+.nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+.nav a { font-weight: 500; }
+.bar > i, .part .track i { background: var(--ok-mid); }
+.score b { font-family: var(--head); font-weight: 800; font-size: 42px; letter-spacing: 0; line-height: .9; }
+.score b small { font-size: 18px; }
+.score.big b { font-size: 76px; }
+.score.tier-strong b { color: var(--ok); } .score.tier-good b { color: var(--warn); } .score.tier-weak b { color: var(--muted); }
+.score.tier-strong .meter i.on { background: var(--ok-mid); }
+.score.tier-good .meter i.on { background: var(--warn-mid); }
+.score.tier-weak .meter i.on { background: var(--meter-off); filter: brightness(.9); }
+.stat b, .cov b { font-family: var(--head); font-weight: 800; font-size: 38px; letter-spacing: 0; }
+.pct b { font-family: var(--head); font-weight: 900; font-size: 42px; letter-spacing: 0; }
+.row .fit, .ap-meta, .search-meta, .rz-pages, .events small { font-family: var(--mono); font-size: 12.5px; }
+.tag { font-family: var(--mono); font-size: 12px; border-radius: 999px; padding: 3px 10px; }
+.tag.hit { background: var(--ok-soft); color: var(--ok); border-color: var(--ok-bd); }
+.tag.miss { background: var(--bad-soft); color: var(--bad); border: 1px dashed var(--bad-mid); }
+.tag.signal { background: var(--warn-soft); color: var(--warn); border-color: var(--warn-bd); }
+.tag.cobalt { background: var(--info-soft); color: var(--info); border-color: var(--info-bd); }
+.notice { border: 1px solid transparent; }
+.notice.warn { border-color: var(--warn-bd); }
+.notice.bad { border-color: var(--bad-bd); }
+.notice.info { background: var(--info-soft); color: var(--info); border-color: var(--info-bd); }
+.notice.ok { background: var(--ok-soft); color: var(--ok); border-color: var(--ok-bd); }
+.badge { font-family: var(--mono); font-size: 12px; border: 1px solid transparent; }
+.badge.you { border-color: var(--bad-bd); }
+.badge.review { background: var(--warn-soft); color: var(--warn); border-color: var(--warn-bd); }
+.badge.sent { border-color: var(--ok-bd); }
+.badge.wait { background: var(--info-soft); color: var(--info); border-color: var(--info-bd); }
+.import-box { background: var(--info-soft); color: var(--info); border: 1px solid var(--info-bd); }
+.snip mark { background: var(--warn-soft); color: var(--warn); }
+.have.yes { border-color: var(--ok-bd); }
+.have[data-dl] { cursor: pointer; }
+.have[data-dl]:hover { background: var(--ok-bd); }
+.st-SAVED { --c: #C9C9C6; } .st-APPLIED { --c: var(--info-mid); } .st-GHOSTED { --c: #DEDEDC; } .st-INTERVIEWING { --c: var(--warn-mid); }
+.st-OFFER { --c: var(--ok-mid); } .st-REJECTED { --c: var(--bad-mid); } .st-ARCHIVED { --c: #C9C9C6; }
+.toast { box-shadow: 0 10px 30px -10px rgba(17,17,17,.4); }
+.menu { box-shadow: 0 18px 40px -16px rgba(17,17,17,.25); }
+.scrim { background: rgba(17,17,17,.4); }
+/* a long job title must not widen a column */
+.dash > *, .aa > *, .jobs > * { min-width: 0; }
+.dash > div, .aa > div { grid-template-columns: minmax(0, 1fr); }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Main navigation">
+    <a class="brand" href="#/dashboard" aria-label="Rejekt.ai home">
+      <svg viewBox="0 0 30 30" fill="none" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="6" stroke="currentColor" stroke-width="2"/><path d="M7 21h16M7 15h10M7 9h13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <span>Rejekt.ai</span>
+    </a>
+    <nav class="nav" id="nav">
+      <a href="#/dashboard" data-route="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Dashboard</a>
+      <a href="#/jobs" data-route="jobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Jobs</a>
+      <a href="#/tracker" data-route="tracker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/></svg>Tracker<span class="count" id="appliedCount"></span></a>
+      <a href="#/applied" data-route="applied"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/><path d="M15 3v3M9 3v3"/></svg>Applied</a>
+      <a href="#/auto-apply" data-route="auto-apply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Auto-apply<span class="count" id="needsCount"></span></a>
+      <a href="#/profile" data-route="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profile</a>
+    </nav>
+    <div class="rail-foot">
+      <a class="rail-card" id="railProfile" href="#/profile" style="text-decoration:none;color:inherit;display:none"></a>
+      <button class="theme-btn" id="themeBtn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg><span>Switch theme</span></button>
+    </div>
+  </aside>
+  <main id="view" tabindex="-1"></main>
+</div>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Job details" aria-hidden="true"></aside>
+
+<script>
+// ═══ State + helpers ════════════════════════════════════════════════════════
+const API = '/v1';
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('jd.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('jd.' + k, JSON.stringify(v)); } catch {} },
+};
+let USER = store.get('userId', null);
+if (!USER) { USER = crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ Math.random() * 16 >> c / 4).toString(16)); store.set('userId', USER); }
+
+const state = {
+  profile: null, profileSkills: null, apps: { counts: {}, applications: [] },
+  search: store.get('search', { include: '', exclude: '', scope: 'title' }), saved: null, posted: store.get('posted', 30),
+  feed: null, cursor: null, selected: null,
+  resumeProfiles: [], rp: null, fields: null, profileTab: 'details',
+};
+
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+async function api(method, path, body) {
+  const res = await fetch(API + path, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+  let data = null; try { data = await res.json(); } catch {}
+  if (!res.ok && res.status !== 422) throw Object.assign(new Error(data?.error || data?.errors?.join(', ') || `Request failed (${res.status})`), { status: res.status, data });
+  return { status: res.status, data };
+}
+function toast(msg) { $$('.toast').forEach(t => t.remove()); const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3200); }
+function ago(d) {
+  if (!d) return ''; const s = (Date.now() - new Date(d)) / 1000;
+  if (s < 3600) return `${Math.max(1, Math.round(s / 60))} min ago`; if (s < 86400) return `${Math.round(s / 3600)} h ago`;
+  const days = Math.round(s / 86400); return days === 1 ? 'yesterday' : days < 60 ? `${days} days ago` : `${Math.round(days / 30)} months ago`;
+}
+function money(sal) {
+  if (!sal || (sal.minAnnual == null && sal.maxAnnual == null)) return null;
+  const k = v => (v == null ? null : `$${Math.round(v / 1000)}k`);
+  return [k(sal.minAnnual), k(sal.maxAnnual)].filter(Boolean).join('–') + ' a year';
+}
+const ACRONYMS = { Ai: 'AI', Ml: 'ML', Qa: 'QA', Sre: 'SRE', Sdet: 'SDET', Ui: 'UI', Mlops: 'MLOps', Etl: 'ETL', Devops: 'DevOps', It: 'IT', Us: 'US' };
+const pretty = s => (String(s) === 'ONSITE' ? 'On-site' : String(s || '').replace(/_/g, ' ').toLowerCase().replace(/\b\w+/g, w => ACRONYMS[w[0].toUpperCase() + w.slice(1)] || w[0].toUpperCase() + w.slice(1)));
+const humanize = s => String(s || '').replace(/\b[A-Z]+(?:_[A-Z]+)+\b/g, m => pretty(m));
+const jobSkills = j => [...(j.skills?.required || []), ...(j.skills?.preferred || []), ...(j.skills?.mentioned || [])];
+const tier = s => (s >= 80 ? 'strong' : s >= 65 ? 'good' : 'weak');
+function score(n, { big = false } = {}) {
+  const v = Math.max(0, Math.min(100, Math.round(n || 0))); const on = Math.round(v / 10);
+  return `<div class="score tier-${tier(v)}${big ? ' big' : ''}" role="img" aria-label="${v}% match"><b>${v}<small>%</small></b><span class="meter" aria-hidden="true">${Array.from({ length: 10 }, (_, i) => `<i class="${i < on ? 'on' : ''}" style="--n:${i + 1}"></i>`).join('')}</span></div>`;
+}
+function whereText(j) {
+  return j.locationText || [j.locations?.[0]?.city, j.locations?.[0]?.stateCode].filter(Boolean).join(', ') || (j.workplace === 'REMOTE' ? 'Remote' : '');
+}
+const svg = (inner, size = 16, w = 2) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" aria-hidden="true">${inner}</svg>`;
+const I = {
+  x: s => svg('<path d="M6 6l12 12M18 6L6 18"/>', s, 2.2),
+  save: s => svg('<path d="M6 3h12v18l-6-4-6 4z"/>', s),
+  ext: s => svg('<path d="M14 4h6v6M20 4l-9 9M19 14v6H4V5h6"/>', s),
+  edit: s => svg('<path d="M4 20h4L19 9l-4-4L4 16z"/>', s),
+  up: s => svg('<path d="M6 15l6-6 6 6"/>', s),
+  trash: s => svg('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>', s),
+  chev: s => svg('<path d="M6 9l6 6 6-6"/>', s, 2.5),
+};
+
+// ═══ Data ═══════════════════════════════════════════════════════════════════
+async function loadProfile() {
+  const [{ data: profile }, { data: saved }] = await Promise.all([api('GET', `/users/${USER}/profile`), api('GET', `/users/${USER}/search`)]);
+  state.profile = profile; state.saved = saved?.active ? saved : null;
+  if (state.saved && !state.search.include && !state.search.exclude) state.search = { include: saved.include.join(' | '), exclude: saved.exclude.join(' | '), scope: saved.scope };
+}
+async function ensureSkills() {
+  if (state.profileSkills) return;
+  const { data } = await api('GET', `/users/${USER}/skills`);
+  state.profileSkills = (data || []).map(s => s.canonical_name.toLowerCase());
+}
+async function loadApps() {
+  const { data } = await api('GET', `/users/${USER}/applications`);
+  state.apps = data;
+  const c = data.counts; const active = (c.APPLIED || 0) + (c.INTERVIEWING || 0) + (c.OFFER || 0);
+  $('#appliedCount').textContent = active ? String(active) : '';
+  const needs = data.applications.filter(a => a.applyState === 'NEEDS_YOU' || a.applyState === 'NEEDS_REVIEW').length;
+  $('#needsCount').textContent = needs ? String(needs) : '';
+}
+async function loadRailProfile() {
+  try {
+    const { data } = await api('GET', `/users/${USER}/resume-profiles`);
+    state.resumeProfiles = data;
+    const d = data.find(p => p.isDefault); const el = $('#railProfile');
+    if (!d) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    el.innerHTML = `<b>${esc(d.name)} profile</b><span class="muted">${d.completeness.percent}% complete</span><div class="bar"><i style="width:${d.completeness.percent}%"></i></div>`;
+  } catch {}
+}
+function feedQuery(extra = {}) {
+  const p = new URLSearchParams();
+  const split = s => s.split('|').map(x => x.trim()).filter(Boolean).join('|');
+  const inc = split(state.search.include), exc = split(state.search.exclude);
+  if (inc || exc) { p.set('search', inc); p.set('exclude_search', exc); p.set('search_scope', state.search.scope); }
+  else p.set('use_saved_search', 'false');
+  if (state.posted) p.set('posted_within_days', state.posted);
+  for (const [k, v] of Object.entries(extra)) if (v != null) p.set(k, v);
+  return p.toString();
+}
+async function loadFeed({ append = false, limit = 25 } = {}) {
+  const { data } = await api('GET', `/users/${USER}/recommendations?${feedQuery({ limit, cursor: append ? state.cursor : null })}`);
+  state.cursor = data.nextCursor;
+  if (append && state.feed) { state.feed.jobs.push(...data.jobs); state.feed.nextCursor = data.nextCursor; } else state.feed = data;
+  return state.feed;
+}
+
+// ═══ Router ═════════════════════════════════════════════════════════════════
+const ROUTES = { dashboard: renderDashboard, jobs: renderJobs, browse: renderJobs, tracker: renderTracker, applied: renderApplied, 'auto-apply': renderAutoApply, profile: renderProfile };
+async function route() {
+  const name = location.hash.replace(/^#\/?/, '').split(/[/?]/)[0] || 'dashboard';
+  const view = ROUTES[name] ? name : 'dashboard';
+  const navKey = view === 'browse' ? 'jobs' : view;
+  $$('#nav a').forEach(a => { if (a.dataset.route === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  closeDrawer(true);
+  state.selected = null;
+  try {
+    if (!state.profile && view !== 'profile') await loadProfile();
+    if (!state.profile && view !== 'profile') { location.hash = '#/profile'; return; }
+    await ROUTES[view]();
+  } catch (e) {
+    $('#view').innerHTML = `<div class="notice bad">This page couldn't load: ${esc(e.message)}. Check that the server is running and the database is migrated (npm run migrate).</div>`;
+  }
+  loadRailProfile(); loadApps().catch(() => {});
+  const jm = location.hash.match(/job=(\d+)/); if (jm) openJob(jm[1]);
+}
+window.addEventListener('hashchange', route);
+
+// ═══ Search + filters ═══════════════════════════════════════════════════════
+const DATE_OPTS = [[1, 'Past 24 hours'], [3, 'Past 3 days'], [7, 'Past week'], [14, 'Past 2 weeks'], [30, 'Past month'], [0, 'Any time']];
+const WORKPLACES = [['REMOTE', 'Remote'], ['HYBRID', 'Hybrid'], ['ONSITE', 'On-site']];
+const COUNTRIES = [['US', 'United States'], ['CA', 'Canada'], ['GB', 'United Kingdom'], ['IE', 'Ireland'], ['DE', 'Germany'], ['FR', 'France'], ['NL', 'Netherlands'], ['ES', 'Spain'], ['IT', 'Italy'], ['PT', 'Portugal'], ['SE', 'Sweden'], ['PL', 'Poland'], ['CH', 'Switzerland'], ['AU', 'Australia'], ['IN', 'India'], ['SG', 'Singapore'], ['JP', 'Japan'], ['IL', 'Israel'], ['BR', 'Brazil'], ['MX', 'Mexico']];
+const EMPLOYMENT = [['FULL_TIME', 'Full time'], ['CONTRACT', 'Contract'], ['PART_TIME', 'Part time'], ['INTERNSHIP', 'Internship']];
+
+function searchHTML() {
+  const p = state.profile || {};
+  const wp = p.remote_only ? ['REMOTE'] : (p.preferred_workplace_types || []); const emp = p.preferred_employment_types || [];
+  const pill = (key, label, on) => `<div class="pill"><button type="button" data-pill="${key}" aria-pressed="${!!on}" aria-haspopup="true">${esc(label)}${I.chev(12)}</button></div>`;
+  return `
+  <form class="searchbar" id="searchForm" role="search">
+    <select id="scope" aria-label="Search in"><option value="title">Titles</option><option value="title_description">Titles and descriptions</option><option value="description">Descriptions</option></select>
+    <input id="q" type="search" placeholder="Search roles or skills, or paste a job link" autocomplete="off" value="${esc(state.search.include)}" aria-label="Search" />
+    <button class="btn primary" type="submit">Search</button>
+  </form>
+  <div class="recent" id="recent" aria-label="Recent searches"></div>
+  <div class="exclude-row"><label for="ex">Hide jobs mentioning</label><input id="ex" type="text" placeholder="senior | staff" value="${esc(state.search.exclude)}" /></div>
+  <div class="filters">
+    ${pill('date', DATE_OPTS.find(d => d[0] === Number(state.posted))?.[1] || 'Date posted', Number(state.posted) !== 30)}
+    ${pill('workplace', wp.length ? wp.map(w => pretty(w)).join(', ') : 'Workplace', wp.length)}
+    ${pill('employment', emp.length ? emp.map(e => pretty(e)).join(', ') : 'Job type', emp.length)}
+    ${pill('country', (p.allowed_countries || []).length ? p.allowed_countries.join(', ') : 'Country', (p.allowed_countries || []).length)}
+    ${pill('experience', p.max_experience_required != null ? `Up to ${p.max_experience_required} yrs required` : 'Experience required', p.max_experience_required != null)}
+    ${pill('salary', p.salary_is_hard_constraint && p.min_salary ? `$${Math.round(p.min_salary / 1000)}k or more` : 'Salary', p.salary_is_hard_constraint && p.min_salary)}
+    ${pill('visa', p.needs_sponsorship ? 'Sponsors visas' : 'Visa', p.needs_sponsorship)}
+    ${pill('clearance', p.exclude_clearance_jobs ? 'No clearance' : 'Clearance', p.exclude_clearance_jobs)}
+    <span style="flex:1"></span>
+    <button class="btn sm quiet" id="saveSearch" type="button">${state.saved ? 'Saved search on' : 'Save this search'}</button>
+  </div>
+  <div id="searchMeta"></div>`;
+}
+// The titles and roles you search for are kept, with the filters you had on, so one click brings both back.
+const FILTER_KEYS = ['remote_only', 'preferred_workplace_types', 'preferred_employment_types', 'allowed_countries', 'max_experience_required', 'min_salary', 'salary_is_hard_constraint', 'exclude_clearance_jobs'];
+const snapFilters = () => ({ posted: state.posted, visa: !!state.profile?.needs_sponsorship, prefs: Object.fromEntries(FILTER_KEYS.map(k => [k, state.profile?.[k] ?? null])) });
+const recentOf = () => store.get('recent', []).map(r => (typeof r === 'string' ? { q: r } : r));
+const filterSummary = f => !f ? '' : [Number(f.posted) !== 30 && DATE_OPTS.find(d => d[0] === Number(f.posted))?.[1], (f.prefs.allowed_countries || []).length && (f.prefs.allowed_countries || []).join(', '),
+  (f.prefs.preferred_workplace_types || []).length && f.prefs.preferred_workplace_types.map(pretty).join('/'), f.visa && 'visa', f.prefs.max_experience_required != null && `≤${f.prefs.max_experience_required} yrs`].filter(Boolean).join(' · ');
+function rememberSearch() {
+  store.set('search', state.search);
+  const q = state.search.include.trim();
+  if (!q || /^https?:\/\//i.test(q)) return;
+  const entry = { q, ex: state.search.exclude, scope: state.search.scope, f: snapFilters() };
+  store.set('recent', [entry, ...recentOf().filter(r => r.q.toLowerCase() !== q.toLowerCase())].slice(0, 8));
+  renderRecent();
+}
+async function applyRecent(r) {
+  state.search = { include: r.q, exclude: r.ex || '', scope: r.scope || 'title' }; store.set('search', state.search);
+  if (r.f) {
+    state.posted = r.f.posted; store.set('posted', state.posted);
+    await savePrefs(r.f.prefs); await saveProfileField({ needs_sponsorship: r.f.visa });
+  }
+  route();
+}
+function renderRecent() {
+  const host = $('#recent'); if (!host) return;
+  const list = recentOf();
+  host.innerHTML = list.length ? `<span class="muted">Recent</span>${list.map((r, i) => `<span class="chip-r"><button type="button" data-i="${i}" title="${esc(filterSummary(r.f) || 'No filters')}">${esc(r.q)}</button><button type="button" data-rm="${i}" aria-label="Remove ${esc(r.q)}">×</button></span>`).join('')}<button type="button" class="btn sm quiet" data-clear-recent>Clear</button>` : '';
+}
+function bindSearch(onChange) {
+  $('#scope').value = state.search.scope;
+  $('#searchForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const q = $('#q').value.trim();
+    if (/^https?:\/\//i.test(q)) return importLink(q, e.submitter);
+    state.search = { include: $('#q').value, exclude: $('#ex').value, scope: $('#scope').value }; rememberSearch(); onChange();
+  });
+  renderRecent();
+  $('#recent').addEventListener('click', e => {
+    const x = e.target.closest('[data-rm]'); const go = e.target.closest('[data-i]');
+    if (x) { store.set('recent', recentOf().filter((_, i) => i !== Number(x.dataset.rm))); return renderRecent(); }
+    if (e.target.closest('[data-clear-recent]')) { store.set('recent', []); return renderRecent(); }
+    if (go) applyRecent(recentOf()[Number(go.dataset.i)]);
+  });
+  $('#ex').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#searchForm').requestSubmit(); } });
+  $('#scope').addEventListener('change', () => { if ($('#q').value || $('#ex').value) $('#searchForm').requestSubmit(); });
+  $('#saveSearch').addEventListener('click', async () => {
+    state.search = { include: $('#q').value, exclude: $('#ex').value, scope: $('#scope').value }; rememberSearch();
+    const split = s => s.split('|').map(x => x.trim()).filter(Boolean);
+    const { status, data } = await api('PUT', `/users/${USER}/search`, { include: split(state.search.include), exclude: split(state.search.exclude), scope: state.search.scope });
+    if (status === 422) return toast(data.message || 'That search returns no jobs, so it wasn\'t saved.');
+    state.saved = data.saved ? data.keywordSearch : null;
+    toast(data.cleared ? 'Saved search turned off.' : `Search saved. ${data.preview.total} jobs match it.`);
+    $('#saveSearch').textContent = state.saved ? 'Saved search on' : 'Save this search';
+  });
+  $$('[data-pill]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openFilterMenu(b.dataset.pill, b.parentElement, onChange); }));
+}
+function closeMenus() { $$('.pill .menu').forEach(m => m.remove()); }
+document.addEventListener('click', e => { if (!e.target.closest('.menu')) closeMenus(); });
+async function savePrefs(patch) { await api('PUT', `/users/${USER}/profile/preferences`, patch); Object.assign(state.profile, patch); }
+async function saveProfileField(patch) { const p = { ...state.profile, ...patch }; await api('PUT', `/users/${USER}/profile`, profileBody(p)); Object.assign(state.profile, patch); }
+function profileBody(p) {
+  const keys = ['current_title', 'total_experience_years', 'highest_education_level', 'current_city', 'current_state', 'current_country', 'work_authorization', 'needs_sponsorship', 'full_name', 'email', 'phone', 'summary', 'open_to_work',
+    'preferred_workplace_types', 'preferred_employment_types', 'preferred_states', 'preferred_cities', 'remote_only', 'min_salary', 'salary_is_hard_constraint', 'max_experience_required', 'exclude_clearance_jobs', 'excluded_companies', 'excluded_role_families', 'allowed_countries'];
+  return Object.fromEntries(keys.map(k => [k, p?.[k] ?? (/preferred_|excluded_|allowed_/.test(k) ? [] : null)]));
+}
+function openFilterMenu(key, host, onChange) {
+  closeMenus();
+  const p = state.profile; const m = document.createElement('div'); m.className = 'menu'; m.setAttribute('role', 'dialog');
+  const opts = (list, sel, type = 'checkbox') => list.map(([v, l]) => `<label class="opt"><input type="${type}" name="o" value="${v}" ${sel.includes(v) ? 'checked' : ''}/> ${l}</label>`).join('');
+  const foot = `<div class="foot"><button class="btn sm quiet" data-act="clear" type="button">Clear</button><button class="btn sm primary" data-act="apply" type="button">Apply</button></div>`;
+  if (key === 'date') m.innerHTML = opts(DATE_OPTS.map(([v, l]) => [String(v), l]), [String(state.posted)], 'radio') + foot;
+  if (key === 'workplace') m.innerHTML = opts(WORKPLACES, p.remote_only ? ['REMOTE'] : (p.preferred_workplace_types || [])) + `<p>Remote on its own hides everything else. Picking several ranks them instead.</p>` + foot;
+  if (key === 'employment') m.innerHTML = opts(EMPLOYMENT, p.preferred_employment_types || []) + foot;
+  if (key === 'country') m.innerHTML = opts(COUNTRIES, p.allowed_countries || []) + `<p>Only jobs in these countries show. Remote jobs with no country restriction still do.</p>` + foot;
+  if (key === 'experience') m.innerHTML = `<label class="field" style="padding:6px">Hide jobs that require more than this many years<input type="number" min="0" max="30" value="${p.max_experience_required ?? ''}"/></label>` + foot;
+  if (key === 'salary') m.innerHTML = `<label class="field" style="padding:6px">Minimum salary per year (USD)<input type="number" min="0" step="5000" value="${p.salary_is_hard_constraint ? (p.min_salary ?? '') : ''}"/></label><p>Jobs that don't post a salary still show.</p>` + foot;
+  if (key === 'visa') m.innerHTML = `<label class="opt"><input type="checkbox" ${p.needs_sponsorship ? 'checked' : ''}/> I need visa sponsorship</label><p>Hides jobs that say they don't sponsor.</p>` + foot;
+  if (key === 'clearance') m.innerHTML = `<label class="opt"><input type="checkbox" ${p.exclude_clearance_jobs ? 'checked' : ''}/> Hide jobs that require a security clearance</label>` + foot;
+  host.appendChild(m);
+  m.querySelector('input')?.focus();
+  m.addEventListener('click', async e => {
+    const act = e.target.closest('[data-act]')?.dataset.act; if (!act) return;
+    const clear = act === 'clear'; const vals = $$('input[type=checkbox]:checked', m).map(i => i.value);
+    try {
+      if (key === 'date') { state.posted = clear ? 30 : Number(m.querySelector('input:checked')?.value ?? 30); store.set('posted', state.posted); }
+      if (key === 'workplace') { const v = clear ? [] : vals; await savePrefs({ remote_only: v.length === 1 && v[0] === 'REMOTE', preferred_workplace_types: v }); }
+      if (key === 'employment') await savePrefs({ preferred_employment_types: clear ? [] : vals });
+      if (key === 'country') await savePrefs({ allowed_countries: clear ? [] : vals });
+      if (key === 'experience') { const n = m.querySelector('input').value; await savePrefs({ max_experience_required: clear || n === '' ? null : Number(n) }); }
+      if (key === 'salary') { const n = m.querySelector('input').value; await savePrefs({ min_salary: clear || n === '' ? null : Number(n), salary_is_hard_constraint: !clear && n !== '' }); }
+      if (key === 'visa') await saveProfileField({ needs_sponsorship: !clear && m.querySelector('input').checked });
+      if (key === 'clearance') await savePrefs({ exclude_clearance_jobs: !clear && m.querySelector('input').checked });
+      closeMenus(); onChange();
+    } catch (err) { toast(err.message); }
+  });
+}
+function searchMetaHTML(feed) {
+  const warn = (feed?.searchWarnings || []).map(w => `<div class="notice warn">${esc(w)}</div>`).join('');
+  if (!feed?.keywordSearch) return warn;
+  const ks = feed.keywordSearch;
+  return `<div class="search-meta">${ks.include.map(t => `<span class="tag cobalt">${esc(t)}</span>`).join('')}${ks.exclude.map(t => `<span class="tag miss">without ${esc(t)}</span>`).join('')}
+    <span>${feed.total} result${feed.total === 1 ? '' : 's'}. Search matches rank higher, so their scores run above an unsearched list.</span>
+    <button class="btn sm quiet" id="clearSearch" type="button">Clear search</button></div>` + warn;
+}
+function zeroHTML(feed) {
+  const r = feed.zeroResultReason;
+  if (r === 'NO_PROFILE') return `<div class="empty"><h3>Set up your profile first</h3>Jobs are matched against your experience and skills. <a href="#/profile">Go to your profile</a></div>`;
+  if (r === 'NO_MATCHING_JOBS' && feed.keywordSearch) return `<div class="empty"><h3>Nothing matches "${esc(feed.keywordSearch.include.join(' | '))}"</h3>Try a broader term, or search titles and descriptions to catch tools that rarely appear in titles.</div>`;
+  if (r === 'FILTERS_NARROW') return `<div class="empty"><h3>Your filters hide every match</h3>Loosen one of these: ${(feed.appliedFilters || []).map(esc).join('; ')}</div>`;
+  if (r === 'NOT_ELIGIBLE') return `<div class="empty"><h3>No eligible jobs right now</h3>Every match failed a sponsorship, citizenship or clearance rule.</div>`;
+  return `<div class="empty"><h3>No jobs in this window</h3>Widen the date range to see older postings.</div>`;
+}
+
+// ═══ Job rows ═══════════════════════════════════════════════════════════════
+function rowHTML(j, { compact = false } = {}) {
+  const have = new Set(state.profileSkills || []);
+  const skills = jobSkills(j); const hits = skills.filter(s => have.has(s.toLowerCase()));
+  const fit = skills.length ? `<span>${hits.length} of ${skills.length} skills match</span>${hits.slice(0, 4).map(s => `<span class="tag hit">${esc(s)}</span>`).join('')}` : '';
+  const extras = [
+    j.scoreRebased ? `<span class="tag cobalt">${j.keywordMatch?.type === 'SEMANTIC_TITLE' ? 'Related to your search' : 'Matches your search'}</span>` : '',
+    j.siblings?.length ? `<span class="tag">${j.siblings.length + 1} openings</span>` : '',
+  ].join('');
+  const wp = j.workplace && !['UNKNOWN', 'ONSITE'].includes(j.workplace) ? pretty(j.workplace) : '';
+  return `<article class="row${compact ? ' compact' : ''}" data-job="${j.jobId}" tabindex="0" aria-selected="${state.selected === j.jobId}">
+    ${score(j.matchScore)}
+    <div><h3>${esc(j.title)}</h3>
+      <div class="sub"><span class="co">${esc(j.company)}</span>${whereText(j) ? `<span>${esc(whereText(j))}</span>` : ''}${wp ? `<span>${wp}</span>` : ''}<span class="muted">${ago(j.postedAt || j.discovered)}</span></div>
+      ${compact ? '' : `<div class="fit">${extras}${fit}</div>`}</div>
+    <div class="acts">
+      <button class="icon-btn" data-pass="${j.jobId}" title="Not for me" aria-label="Pass on ${esc(j.title)}">${I.x(16)}</button>
+      ${compact ? '' : `<button class="icon-btn" data-save="${j.jobId}" title="Save to tracker" aria-label="Save ${esc(j.title)}">${I.save(16)}</button>`}
+      <button class="btn sm primary" data-apply="${j.jobId}">Apply</button>
+    </div>
+  </article>`;
+}
+function bindRows(root) {
+  const find = id => state.feed?.jobs.find(j => j.jobId === id) || { jobId: id };
+  root.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-pass],[data-apply],[data-save]');
+    if (btn) {
+      e.stopPropagation();
+      const id = btn.dataset.pass || btn.dataset.apply || btn.dataset.save;
+      try {
+        if (btn.dataset.pass) { await api('POST', `/users/${USER}/jobs/${id}/interactions`, { interaction_type: 'SKIP' }); removeRow(id); toast('Passed. This job won\'t come back.'); }
+        if (btn.dataset.save) { await api('POST', `/users/${USER}/applications`, { jobId: id, status: 'SAVED' }); toast('Saved to your tracker.'); loadApps(); }
+        if (btn.dataset.apply) applyTo(find(id));
+      } catch (err) { toast(err.message); }
+      return;
+    }
+    const row = e.target.closest('[data-job]'); if (row) openJob(row.dataset.job);
+  });
+  root.addEventListener('keydown', e => {
+    const row = e.target.closest?.('[data-job]'); if (!row || e.target !== row) return;
+    if (e.key === 'Enter') openJob(row.dataset.job);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); (e.key === 'ArrowDown' ? row.nextElementSibling : row.previousElementSibling)?.focus(); }
+  });
+}
+function removeRow(id) {
+  $$(`[data-job="${id}"]`).forEach(el => { el.classList.add('leaving'); setTimeout(() => el.remove(), 180); });
+  if (state.feed) state.feed.jobs = state.feed.jobs.filter(j => j.jobId !== id);
+  if (state.selected === id) { state.selected = null; const d = $('#detail'); if (d) d.innerHTML = detailEmpty(); }
+}
+async function applyTo(job) {
+  if (job.url) window.open(job.url, '_blank', 'noopener');
+  await api('POST', `/users/${USER}/applications`, { jobId: job.jobId, status: 'APPLIED' });
+  removeRow(job.jobId);
+  toast('Posting opened and marked as applied.');
+  loadApps();
+}
+async function importLink(url, button) {
+  const label = button?.textContent; if (button) { button.disabled = true; button.textContent = 'Checking link…'; }
+  try {
+    const res = await fetch(`${API}/jobs/import`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+    const data = await res.json();
+    if (data.jobId) {
+      toast(data.company?.added ? `Job added. ${data.company.name} will now be scanned automatically.` : 'Job added.');
+      if ($('#q')?.value.trim() === url) $('#q').value = '';
+      if ($('#addLinkInput')?.value.trim() === url) $('#addLinkInput').value = '';
+      openJob(data.jobId);
+    } else toast(data.message || 'That link couldn\'t be added.');
+  } catch (err) { toast(err.message); }
+  finally { if (button) { button.disabled = false; button.textContent = label; } }
+}
+
+// ═══ Job detail (pane on wide screens, drawer otherwise) ═════════════════════
+const detailEmpty = () => `<div class="empty"><h3>Pick a job</h3>See why it matches you, what's missing, and the full description.</div>`;
+async function openJob(jobId) {
+  jobId = String(jobId);
+  state.selected = jobId;
+  $$('.row').forEach(r => r.setAttribute('aria-selected', String(r.dataset.job === jobId)));
+  const paneEl = $('#detail');
+  const pane = paneEl && getComputedStyle(paneEl).display !== 'none' ? paneEl : null;
+  const host = pane || $('#drawer');
+  if (!pane) { $('#drawer').classList.add('open'); $('#scrim').classList.add('open'); $('#drawer').setAttribute('aria-hidden', 'false'); }
+  host.innerHTML = `<div class="jd-head"><div class="skeleton" style="height:28px;width:70%"></div><div class="skeleton" style="height:16px;width:40%;margin-top:10px"></div></div><div class="jd-body"><div class="skeleton" style="height:240px"></div></div>`;
+  let data;
+  try { ({ data } = await api('GET', `/users/${USER}/jobs/${jobId}/match`)); }
+  catch (e) { host.innerHTML = `<div class="jd-body"><div class="notice bad">${esc(e.message)}</div></div>`; return; }
+  if (state.selected !== jobId) return;
+  host.innerHTML = jobDetailHTML(data, jobId, !pane);
+  host.scrollTop = 0;
+  bindDetail(host, data, jobId);
+  if (!pane) host.querySelector('[data-close]')?.focus();
+}
+function jobDetailHTML(data, jobId, inDrawer) {
+  const j = data.job, m = data.match;
+  const fromFeed = state.feed?.jobs.find(x => x.jobId === jobId);
+  const s = fromFeed?.matchScore ?? m?.matchScore;
+  const have = new Set(state.profileSkills || []);
+  const req = j.skills.required || [], other = [...(j.skills.preferred || []), ...(j.skills.mentioned || [])];
+  const chip = x => `<span class="tag ${have.has(x.toLowerCase()) ? 'hit' : ''}">${esc(x)}</span>`;
+  const c = m?.components || {};
+  const parts = [['Role fit', c.role], ['Required skills', c.requiredSkills], ['Preferred skills', c.preferredSkills], ['Experience', c.experience], ['Location', c.location], ['Recency', c.freshness], ['Salary', c.salary]]
+    .filter(([, v]) => v != null).map(([l, v]) => `<div class="part"><span>${l}</span><span class="track"><i style="width:${Math.round(v)}%"></i></span><span>${Math.round(v)}</span></div>`).join('');
+  const visa = { AVAILABLE: ['hit', 'Sponsors visas'], SPONSORS: ['hit', 'Sponsors visas'], MAY_SPONSOR: ['signal', 'May sponsor'], NOT_AVAILABLE: ['miss', 'Doesn\'t sponsor'], NO_SPONSORSHIP: ['miss', 'Doesn\'t sponsor'], RESTRICTED: ['miss', 'US citizens only'] }[j.sponsorship] || ['', 'Not mentioned'];
+  const status = data.application?.status;
+  const fact = (k, v) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`;
+  const openings = fromFeed?.siblings?.length ? [{ jobId, url: j.url, locationText: whereText(j), current: true }, ...fromFeed.siblings] : null;
+  return `
+    <div class="jd-head">
+      <div style="display:flex;gap:12px;align-items:flex-start"><h2 style="flex:1">${esc(j.title)}</h2>${inDrawer ? `<button class="icon-btn" data-close aria-label="Close">${I.x(16)}</button>` : ''}</div>
+      <div class="sub"><b>${esc(j.company)}</b><span>${esc(whereText(j) || 'Location not stated')}</span><span class="muted">${ago(j.postedAt || j.discovered)}</span>${status ? `<span class="status st-${status}">${esc(STATUS_LABEL[status] || pretty(status))}</span>` : ''}</div>
+      <div class="jd-actions">
+        <button class="btn primary" data-dapply>Apply</button>
+        <button class="btn" data-dsave>${I.save(15)} ${status ? 'In your tracker' : 'Save'}</button>
+        <button class="btn" data-tailor aria-expanded="false">Tailor resume</button>
+        <a class="btn quiet" href="${esc(j.url)}" target="_blank" rel="noopener">${I.ext(15)} View posting</a>
+        <button class="btn quiet" data-hide>Not interested</button>
+      </div>
+    </div>
+    <div class="jd-body">
+      <section class="jd-sec hidden" id="tailorSec"></section>
+      ${m ? `<section class="jd-sec"><h4>Why it matches</h4>
+        <div class="why">${score(s, { big: true })}<div class="parts">${parts}</div></div>
+        <ul class="reasons">${(fromFeed?.whyMatched || m.whyMatched).map(r => `<li>${esc(humanize(r))}</li>`).join('')}</ul>
+        ${m.missingRequiredSkills?.length ? `<p style="font-size:14px;margin:10px 0 0">Missing required skills: ${m.missingRequiredSkills.map(x => `<span class="tag miss">${esc(x)}</span>`).join(' ')}</p>` : ''}
+        ${!m.eligible ? `<div class="notice bad">${m.blockers.map(esc).join('<br>')}</div>` : ''}
+        ${m.warnings?.length ? `<div class="notice warn">${[...new Set(m.warnings)].map(esc).join('<br>')}</div>` : ''}</section>`
+      : `<div class="notice info">Add your experience and skills in your profile to see how this job matches you.</div>`}
+      <section class="jd-sec"><h4>The role</h4><dl class="facts">
+        ${fact('Pay', money(j.salary) || 'Not posted')}${fact('Workplace', j.workplace && j.workplace !== 'UNKNOWN' ? pretty(j.workplace) : 'Not stated')}
+        ${fact('Level', j.seniority && j.seniority !== 'UNKNOWN' ? pretty(j.seniority) : (j.experience?.min != null ? `${j.experience.min}+ years` : 'Not stated'))}${fact('Job type', j.employmentType && j.employmentType !== 'UNKNOWN' ? pretty(j.employmentType) : 'Not stated')}
+        ${fact('Field', pretty(j.roleFamily) || 'Not classified')}<div><dt>Visa sponsorship</dt><dd><span class="tag ${visa[0]}">${visa[1]}</span></dd></div></dl></section>
+      ${openings ? `<section class="jd-sec"><h4>${openings.length} openings for this role</h4><div class="openings">${openings.map(o => `<div><span>${esc(o.locationText || 'Location not stated')}${o.current ? ' <span class="tag cobalt">Viewing</span>' : ''}</span>${o.current ? '' : `<button class="btn sm quiet" data-sib="${o.jobId}">Open</button>`}</div>`).join('')}</div></section>` : ''}
+      ${req.length ? `<section class="jd-sec"><h4>Required skills</h4><div class="chips">${req.map(chip).join('')}</div></section>` : ''}
+      ${other.length ? `<section class="jd-sec"><h4>${req.length ? 'Also mentioned' : 'Skills mentioned'}</h4><div class="chips">${other.map(chip).join('')}</div></section>` : ''}
+      <section class="jd-sec"><h4>Description</h4><div class="desc">${esc(j.description || 'No description was captured for this posting.')}</div></section>
+    </div>`;
+}
+function bindDetail(host, data, jobId) {
+  host.querySelector('[data-close]')?.addEventListener('click', () => closeDrawer());
+  host.querySelectorAll('[data-sib]').forEach(b => b.addEventListener('click', () => openJob(b.dataset.sib)));
+  host.querySelector('[data-hide]').addEventListener('click', async () => { await api('POST', `/users/${USER}/jobs/${jobId}/interactions`, { interaction_type: 'HIDE' }); removeRow(jobId); closeDrawer(); toast('Hidden. You won\'t see this job again.'); });
+  host.querySelector('[data-dsave]').addEventListener('click', async () => { await api('POST', `/users/${USER}/applications`, { jobId, status: data.application?.status || 'SAVED' }); toast('Saved to your tracker.'); loadApps(); });
+  host.querySelector('[data-dapply]').addEventListener('click', () => { applyTo({ jobId, url: data.job.url }); closeDrawer(); });
+  host.querySelector('[data-tailor]').addEventListener('click', e => openTailor(host, data, jobId, e.currentTarget));
+}
+function closeDrawer(silent) {
+  $('#drawer').classList.remove('open'); $('#scrim').classList.remove('open'); $('#drawer').setAttribute('aria-hidden', 'true');
+  if (!silent && /job=/.test(location.hash)) history.replaceState(null, '', location.hash.replace(/[?&]job=\d+/, ''));
+}
+$('#scrim').addEventListener('click', () => closeDrawer());
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeMenus(); } });
+
+// ═══ Dashboard ══════════════════════════════════════════════════════════════
+const STATUSES = [['SAVED', 'Saved'], ['APPLIED', 'Applied'], ['GHOSTED', 'No reply'], ['INTERVIEWING', 'Interviewing'], ['OFFER', 'Offer'], ['REJECTED', 'Rejected']];
+const STATUS_LABEL = Object.fromEntries(STATUSES);
+async function renderDashboard() {
+  const first = (state.profile?.full_name || '').split(' ')[0];
+  const hour = new Date().getHours();
+  $('#view').innerHTML = `
+    <div class="page-head"><div><h1>${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'}${first ? `, ${esc(first)}` : ''}</h1><p id="dashLine">Finding your best matches…</p></div></div>
+    <form class="searchbar" id="dashSearch" role="search" style="margin-bottom:22px"><input id="dq" type="search" placeholder="Search roles or skills, or paste a job link" aria-label="Search jobs"/><button class="btn primary" type="submit">Search</button></form>
+    <div class="dash">
+      <section class="panel"><div class="panel-head"><h2>Best matches right now</h2><span class="spacer"></span><a class="btn sm quiet" href="#/jobs">See all jobs</a></div>
+        <div class="list" id="top">${'<div style="padding:16px 18px"><div class="skeleton" style="height:52px"></div></div>'.repeat(4)}</div></section>
+      <div style="display:grid;gap:22px">
+        <section class="panel"><div class="panel-head"><h2>Applications</h2><span class="spacer"></span><a class="btn sm quiet" href="#/tracker">Open tracker</a></div><div class="panel-body" id="pipe"></div></section>
+        <section class="panel" id="profilePanel"></section>
+      </div>
+    </div>`;
+  $('#dashSearch').addEventListener('submit', e => {
+    e.preventDefault(); const q = $('#dq').value.trim(); if (!q) { location.hash = '#/jobs'; return; }
+    if (/^https?:\/\//i.test(q)) return importLink(q, e.submitter);
+    state.search = { include: q, exclude: '', scope: 'title' }; location.hash = '#/jobs';
+  });
+  bindRows($('#top'));
+  await Promise.all([ensureSkills(), loadApps(), loadRailProfile()]);
+  renderPipeline(); renderProfilePanel();
+  const feed = await loadFeed({ limit: 6 });
+  const strong = feed.jobs.filter(j => j.matchScore >= 80).length;
+  $('#dashLine').textContent = feed.total ? `${feed.total} jobs fit your profile${strong ? `, and ${strong} of the top ${feed.jobs.length} are strong matches` : ''}.` : 'No matching jobs yet. Widen your filters or add more skills.';
+  $('#top').innerHTML = feed.jobs.length ? feed.jobs.map(j => rowHTML(j, { compact: true })).join('') : zeroHTML(feed);
+}
+function renderPipeline() {
+  const host = $('#pipe'); if (!host) return;
+  const { counts, applications } = state.apps;
+  const total = STATUSES.reduce((n, [k]) => n + (counts[k] || 0), 0);
+  if (!total) { host.innerHTML = `<p class="muted" style="margin:0">Nothing tracked yet. Apply to or save a job and it shows up here.</p>`; return; }
+  host.innerHTML = `<div class="pipeline" role="img" aria-label="Applications by stage">${STATUSES.filter(([k]) => counts[k]).map(([k]) => `<i class="st-${k}" style="width:${(counts[k] / total) * 100}%"></i>`).join('')}</div>
+    <div class="legend">${STATUSES.map(([k, l]) => `<div class="st-${k}"><span class="dot"></span>${l}<b>${counts[k] || 0}</b></div>`).join('')}</div>
+    <div style="margin-top:14px">${applications.slice(0, 4).map(a => `<div class="app-row" data-open="${a.id}"><div class="t"><b>${esc(a.job?.title || 'Removed job')}</b><span>${esc(a.job?.company || '')}</span></div><span class="status st-${a.status}">${esc(STATUS_LABEL[a.status] || pretty(a.status))}</span></div>`).join('')}</div>`;
+  $$('.app-row[data-open]', host).forEach(r => r.addEventListener('click', () => openApplication(r.dataset.open)));
+}
+function renderProfilePanel() {
+  const host = $('#profilePanel'); if (!host) return;
+  const d = state.resumeProfiles.find(p => p.isDefault);
+  if (!d) { host.innerHTML = `<div class="panel-body"><h2 style="font-size:17px">Your profile</h2><p class="muted">Upload a resume to fill in your profile.</p><a class="btn primary" href="#/profile">Set up profile</a></div>`; return; }
+  const todo = d.completeness.items.filter(i => !i.done);
+  host.innerHTML = `<div class="panel-head"><h2>${esc(d.name)} profile</h2><span class="spacer"></span><a class="btn sm quiet" href="#/profile">Edit</a></div>
+    <div class="panel-body"><div style="display:flex;align-items:baseline;gap:8px"><b style="font-family:var(--display);font-size:28px">${d.completeness.percent}%</b><span class="muted">complete</span></div><div class="bar"><i style="width:${d.completeness.percent}%"></i></div>
+    ${todo.length ? `<p style="margin:12px 0 0;font-size:14px">Still to add:</p><ul class="checklist">${todo.slice(0, 4).map(i => `<li>${esc(i.label)}</li>`).join('')}</ul>` : '<p class="muted" style="margin:10px 0 0">Everything recruiters ask for is filled in.</p>'}</div>`;
+}
+
+// ═══ Jobs (two-pane) ════════════════════════════════════════════════════════
+async function renderJobs() {
+  $('#view').innerHTML = `
+    <div class="page-head"><div><h1>Jobs</h1><p id="jobsLine">Ranked by how well they fit your profile.</p></div></div>
+    <div class="jobs">
+      <div>
+        ${searchHTML()}
+        <form class="addlink" id="addLinkForm"><label for="addLinkInput">Found a job elsewhere?</label><input id="addLinkInput" type="url" placeholder="Paste its link to add it" required/><button class="btn sm" type="submit">Add job</button></form>
+        <div class="list" id="list" style="margin-top:14px">${'<div style="padding:18px"><div class="skeleton" style="height:60px"></div></div>'.repeat(6)}</div>
+      </div>
+      <aside class="detail" id="detail" aria-label="Job details">${detailEmpty()}</aside>
+    </div>`;
+  bindSearch(() => renderJobs());
+  $('#addLinkForm').addEventListener('submit', e => { e.preventDefault(); importLink($('#addLinkInput').value.trim(), e.submitter); });
+  bindRows($('#list'));
+  await ensureSkills();
+  const draw = feed => {
+    $('#searchMeta').innerHTML = searchMetaHTML(feed);
+    $('#clearSearch')?.addEventListener('click', () => { state.search = { include: '', exclude: '', scope: state.search.scope }; renderJobs(); });
+    $('#jobsLine').textContent = feed.total ? `${feed.total} jobs, best fit first.` : 'Ranked by how well they fit your profile.';
+    $('#list').innerHTML = feed.jobs.length ? feed.jobs.map(j => rowHTML(j)).join('') + (feed.nextCursor ? `<div class="more"><button class="btn" id="loadMore" type="button">Show more jobs</button></div>` : '') : zeroHTML(feed);
+    $('#loadMore')?.addEventListener('click', async e => { e.target.disabled = true; draw(await loadFeed({ append: true })); });
+  };
+  draw(await loadFeed());
+  const pane = $('#detail');
+  if (state.feed.jobs[0] && pane && getComputedStyle(pane).display !== 'none' && !/job=/.test(location.hash)) openJob(state.feed.jobs[0].jobId);
+}
+
+// ═══ Tracker ════════════════════════════════════════════════════════════════
+async function renderTracker() {
+  await loadApps();
+  const q = (store.get('trackerQ', '') || '').toLowerCase();
+  const apps = state.apps.applications.filter(a => !q || `${a.job?.company} ${a.job?.title}`.toLowerCase().includes(q));
+  $('#view').innerHTML = `
+    <div class="page-head"><div><h1>Tracker</h1><p>Drag a card to move it, or use the menu on each card.</p></div><span class="spacer"></span>
+      <input id="tq" type="search" placeholder="Search companies or roles" value="${esc(q)}" style="width:240px" aria-label="Search tracker"/><button class="btn" id="exportCsv" type="button">Export CSV</button></div>
+    <div class="board">${STATUSES.map(([k, l]) => {
+      const items = apps.filter(a => a.status === k);
+      return `<section class="col st-${k}" data-col="${k}" aria-label="${l}"><h3>${l}<span>${items.length}</span></h3>
+        ${items.map(a => `<div class="tcard" draggable="true" data-app="${a.id}"><b>${esc(a.job?.title || 'Removed job')}</b><div class="c">${esc(a.job?.company || '')}</div>${a.applyState ? `<div class="aa-badge">${applyBadge(a.applyState)}</div>` : ''}
+          <div class="d"><span>${ago(a.updatedAt)}</span><select data-move="${a.id}" aria-label="Move to">${STATUSES.map(([v, lab]) => `<option value="${v}" ${v === k ? 'selected' : ''}>${lab}</option>`).join('')}<option value="ARCHIVED">Archive</option></select></div></div>`).join('') || '<p class="muted" style="font-size:13px;margin:4px 2px">Nothing here yet.</p>'}
+      </section>`;
+    }).join('')}</div>`;
+  $('#tq').addEventListener('input', e => { store.set('trackerQ', e.target.value); clearTimeout(renderTracker.t); renderTracker.t = setTimeout(() => renderTracker().then(() => { const i = $('#tq'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }), 250); });
+  const move = async (id, status) => { await api('PATCH', `/users/${USER}/applications/${id}`, { status }); renderTracker(); };
+  $$('[data-move]').forEach(s => s.addEventListener('change', () => move(s.dataset.move, s.value)));
+  $$('.tcard').forEach(c => {
+    c.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', c.dataset.app));
+    c.addEventListener('click', e => { if (e.target.closest('select')) return; openApplication(c.dataset.app); });
+  });
+  $$('.col').forEach(col => {
+    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drop'); });
+    col.addEventListener('dragleave', () => col.classList.remove('drop'));
+    col.addEventListener('drop', e => { e.preventDefault(); col.classList.remove('drop'); move(e.dataTransfer.getData('text/plain'), col.dataset.col); });
+  });
+  $('#exportCsv').addEventListener('click', () => {
+    const rows = [['Company', 'Role', 'Status', 'Applied', 'Updated', 'Link'], ...state.apps.applications.map(a => [a.job?.company, a.job?.title, a.status, a.appliedAt || '', a.updatedAt, a.job?.url])];
+    const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = 'applications.csv'; link.click();
+  });
+}
+
+// ═══ Resume tailoring (job detail) ══════════════════════════════════════════
+async function ensureResumeProfiles() {
+  if (!state.resumeProfiles?.length) { try { state.resumeProfiles = (await api('GET', `/users/${USER}/resume-profiles`)).data; } catch {} }
+  return state.resumeProfiles || [];
+}
+const resumeUrl = (appId, pdf = true, download = false) => `${API}/users/${USER}/applications/${appId}/resume${pdf ? `?format=pdf${download ? '&download=1' : ''}` : ''}`;
+const changesUrl = appId => `${API}/users/${USER}/applications/${appId}/resume?changes=1`;
+function tailorReportHTML(rep, appId) {
+  if (!rep) return '';
+  if (rep.mode === 'match') return matchReportHTML(rep, appId);
+  const chips = (list, cls) => list.map(x => `<span class="tag ${cls}">${esc(x)}</span>`).join(' ');
+  return `${rep.coverage != null ? `<div class="cov"><b>${rep.coverage}%</b><span class="muted">of the skills this job names are on your resume</span></div>` : ''}
+    ${rep.matched?.length ? `<p style="margin:6px 0;font-size:14px">On your resume: ${chips(rep.matched, 'hit')}</p>` : ''}
+    ${rep.addedToSkills?.length ? `<p style="margin:6px 0;font-size:14px">Added to your skills list because your experience shows them: ${chips(rep.addedToSkills, 'cobalt')}</p>` : ''}
+    ${rep.missingRequired?.length ? `<p style="margin:6px 0;font-size:14px">Required but not on your resume (not added): ${chips(rep.missingRequired, 'miss')}</p>` : ''}
+    <p class="muted" style="font-size:13px;margin:8px 0 0">${rep.mode === 'off' ? 'Your resume is used as written.' : `${rep.bulletsMoved ? `${rep.bulletsMoved} bullet${rep.bulletsMoved === 1 ? '' : 's'} moved up` : 'Your bullets already lead with what this job asks for'}${rep.mode === 'ai' ? `, ${rep.rewrittenBullets} reworded${rep.revertedBullets?.length ? `, ${rep.revertedBullets.length} rewording${rep.revertedBullets.length === 1 ? '' : 's'} rejected for adding things your resume doesn't show` : ''}` : ''}. Every role, title and bullet is kept.`}${rep.model ? ` Rewritten by ${esc(rep.model.replace(/^ollama:/, ''))}.` : ''}${rep.aiSkipped ? ` ${esc(rep.aiSkipped)}.` : ''}</p>
+    ${appId ? `<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><a class="btn sm primary" href="${resumeUrl(appId, true, true)}" download>Download PDF</a><a class="btn sm" href="${resumeUrl(appId)}" target="_blank" rel="noopener">Open PDF</a><a class="btn sm" href="${changesUrl(appId)}" target="_blank" rel="noopener">See what changed</a></div>` : ''}`;
+}
+async function openTailor(host, data, jobId, btn) {
+  const sec = host.querySelector('#tailorSec');
+  sec.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true');
+  const profiles = await ensureResumeProfiles();
+  if (!profiles.length) { sec.innerHTML = `<div class="notice info">Set up a resume profile first. <a href="#/profile">Go to Profile</a></div>`; return; }
+  // One click tailors with your default resume profile: nothing to pick first.
+  const profile = profiles.find(p => p.isDefault) || profiles[0];
+  btn.disabled = true; btn.textContent = 'Tailoring…';
+  sec.innerHTML = `<div class="tailor-box"><h4 style="margin:0 0 6px">Resume for this job</h4>
+    <p class="muted" style="font-size:13px;margin:0">Tailoring your ${esc(profile.name)} resume to this posting. This can take a minute.</p>
+    <div class="skeleton" style="height:44px;margin-top:12px"></div></div>`;
+  try {
+    const { data: app } = await api('POST', `/users/${USER}/applications`, { jobId, status: data.application?.status || 'SAVED', resumeProfileId: profile.id });
+    const { data: r } = await api('POST', `/users/${USER}/applications/${app.id}/tailor`, { mode: 'match', resumeProfileId: profile.id });
+    sec.innerHTML = `<div class="tailor-box"><h4 style="margin:0 0 10px">Resume for this job</h4>${tailorReportHTML(r.report, app.id)}
+      <p class="muted" style="font-size:13px;margin:12px 0 0">Saved with this job. Once you've applied, it's kept under Applied.</p></div>`;
+    data.application = { status: app.status }; loadApps();
+  } catch (err) { sec.innerHTML = `<div class="tailor-box"><div class="notice bad" style="margin:0">${esc(err.message)}</div></div>`; }
+  finally { btn.disabled = false; btn.textContent = 'Tailor again'; }
+}
+
+// ═══ Application detail (tracker cards) ═════════════════════════════════════
+const APPLY_STATE = {
+  QUEUED: ['wait', 'Queued'], PREPARED: ['wait', 'Ready to send'], SUBMITTING: ['wait', 'Sending'], NEEDS_REVIEW: ['review', 'Waiting for your OK'],
+  NEEDS_YOU: ['you', 'Needs you'], SUBMITTED: ['sent', 'Sent'], FAILED: ['you', "Couldn't send"], SKIPPED: ['off', 'Skipped'],
+};
+const applyBadge = st => { const [c, l] = APPLY_STATE[st] || ['off', pretty(st)]; return `<span class="badge ${c}">${esc(l)}</span>`; };
+function eventText(e) {
+  if (e.kind === 'note') return 'Notes edited';
+  if (e.kind === 'resume') return `Resume tailored${e.detail?.profile ? ` from "${e.detail.profile}"` : ''}`;
+  if (e.kind === 'auto_apply') {
+    const l = { QUEUED: 'Picked by auto-apply', PREPARED: e.detail?.approved ? 'Approved, sending on the next run' : 'Resume tailored, ready to send', SUBMITTING: 'Filling the form',
+      NEEDS_REVIEW: 'Form filled, waiting for your OK', NEEDS_YOU: 'Stopped: needs you', SUBMITTED: 'Sent', FAILED: "Couldn't send", SKIPPED: 'Skipped' }[e.to] || pretty(e.to);
+    return `${l}${e.detail?.reason && ['NEEDS_YOU', 'NEEDS_REVIEW', 'FAILED'].includes(e.to) ? ` — ${e.detail.reason}` : ''}`;
+  }
+  if (!e.from && e.detail?.source === 'tsenta') return 'Applied through Tsenta';
+  if (!e.from) return `Added as ${STATUS_LABEL[e.to] || pretty(e.to)}${e.detail?.source === 'auto' ? ' by auto-apply' : ''}`;
+  return `Moved to ${STATUS_LABEL[e.to] || pretty(e.to)}`;
+}
+async function openApplication(appId) {
+  const host = $('#drawer');
+  host.classList.add('open'); $('#scrim').classList.add('open'); host.setAttribute('aria-hidden', 'false');
+  host.innerHTML = `<div class="jd-head"><div class="skeleton" style="height:28px;width:70%"></div></div><div class="jd-body"><div class="skeleton" style="height:200px"></div></div>`;
+  let a;
+  try { ({ data: a } = await api('GET', `/users/${USER}/applications/${appId}`)); }
+  catch (e) { host.innerHTML = `<div class="jd-body"><div class="notice bad">${esc(e.message)}</div></div>`; return; }
+  const j = a.job || {}; const snap = a.snapshot || {};
+  const rep = a.tailoredResume?.report;
+  host.innerHTML = `
+    <div class="jd-head">
+      <div style="display:flex;gap:12px;align-items:flex-start"><h2 style="flex:1">${esc(j.title || 'Removed job')}</h2><button class="icon-btn" data-close aria-label="Close">${I.x(16)}</button></div>
+      <div class="sub"><b>${esc(j.company || '')}</b><span>${esc(j.locationText || '')}</span><span class="status st-${a.status}">${esc(STATUS_LABEL[a.status] || pretty(a.status))}</span>${a.applyState ? applyBadge(a.applyState) : ''}</div>
+      <div class="jd-actions">
+        ${j.jobId && !j.removed ? `<button class="btn" data-job="${j.jobId}">Job details and match</button>` : ''}
+        ${j.url ? `<a class="btn quiet" href="${esc(j.url)}" target="_blank" rel="noopener">${I.ext(15)} View posting</a>` : ''}
+        ${a.hasTailoredResume ? `<a class="btn quiet" href="${resumeUrl(a.id, true, true)}" download>Download resume</a>` : `<button class="btn quiet" data-tailor-app>Tailor resume</button>`}
+        ${a.applyState === 'NEEDS_YOU' || a.applyState === 'NEEDS_REVIEW' ? `<a class="btn primary" href="#/auto-apply">Answer in Auto-apply</a>` : ''}
+        <label class="move">Status <select id="appStatus">${STATUSES.map(([v, l]) => `<option value="${v}" ${v === a.status ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      </div>
+      ${j.removed && a.source !== 'tsenta' ? `<div class="notice warn" style="margin-bottom:0">The posting has been taken down. What you applied to is kept below.</div>` : ''}
+    </div>
+    <div class="jd-body">
+      <section class="jd-sec"><h4>History</h4><ul class="events">${a.events.map(e => `<li>${esc(eventText(e))}<small>${new Date(e.at).toLocaleString()}</small></li>`).join('') || '<li>Tracked</li>'}</ul></section>
+      ${rep ? `<section class="jd-sec"><h4>Resume ${a.applyState === 'SUBMITTED' || a.status === 'APPLIED' ? 'sent' : 'for this job'}${a.resumeProfileName ? ` · ${esc(a.resumeProfileName)} profile` : ''}</h4>${tailorReportHTML(rep, a.id)}</section>` : ''}
+      ${!rep && a.tailoredResume?.sections ? `<section class="jd-sec"><h4>Resume sent${a.source === 'tsenta' ? ', written by Tsenta' : ''}</h4>
+        ${a.claimsCheck?.unsupported?.length ? `<p style="font-size:14px;margin:0 0 10px">Added for this job, beyond your ${esc(a.claimsCheck.profileName)} profile: ${a.claimsCheck.unsupported.slice(0, 24).map(x => `<span class="tag cobalt">${esc(x)}</span>`).join(' ')}${a.claimsCheck.unsupported.length > 24 ? ' …' : ''}</p>` : ''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn sm primary" href="${resumeUrl(a.id, true, true)}" download>Download PDF</a><a class="btn sm" href="${resumeUrl(a.id)}" target="_blank" rel="noopener">Open PDF</a><a class="btn sm" href="${changesUrl(a.id)}" target="_blank" rel="noopener">See what changed</a></div></section>` : ''}
+      ${a.applyDetail?.filled?.length ? `<section class="jd-sec"><h4>Answers on the form</h4><table class="filled">${a.applyDetail.filled.map(f => `<tr class="src-${esc(f.source || '')}"><td>${esc(f.label)}</td><td>${esc(f.value)}</td></tr>`).join('')}</table></section>` : ''}
+      ${a.coverLetter ? `<section class="jd-sec"><h4>Cover letter</h4><div class="letter">${esc(a.coverLetter)}</div></section>` : ''}
+      <section class="jd-sec"><h4>Notes</h4><textarea id="appNotes" rows="3" placeholder="Recruiter name, interview dates, anything to remember">${esc(a.notes || '')}</textarea>
+        <div style="margin-top:8px"><button class="btn sm" id="saveNotes" type="button">Save notes</button></div></section>
+      <section class="jd-sec"><h4>The posting${snap.importedFrom === 'tsenta' ? ' <span class="muted" style="font-weight:400;font-size:13px">from your Tsenta history</span>' : snap.capturedAt ? ` <span class="muted" style="font-weight:400;font-size:13px">as saved ${ago(snap.capturedAt)}</span>` : ''}</h4><div class="desc">${esc(snap.description || 'No description was saved for this job.')}</div></section>
+    </div>`;
+  host.scrollTop = 0;
+  host.querySelector('[data-close]').addEventListener('click', () => closeDrawer());
+  host.querySelector('[data-close]').focus();
+  host.querySelector('[data-job]')?.addEventListener('click', () => openJob(j.jobId));
+  host.querySelector('#appStatus').addEventListener('change', async e => {
+    try { await api('PATCH', `/users/${USER}/applications/${a.id}`, { status: e.target.value }); toast(`Moved to ${STATUS_LABEL[e.target.value]}.`); loadApps(); if (location.hash === '#/applied') loadApplied(); }
+    catch (err) { toast(err.message); }
+  });
+  host.querySelector('#saveNotes').addEventListener('click', async () => { await api('PATCH', `/users/${USER}/applications/${a.id}`, { notes: $('#appNotes').value }); toast('Notes saved.'); });
+  host.querySelector('[data-tailor-app]')?.addEventListener('click', async e => {
+    e.target.disabled = true; e.target.textContent = 'Tailoring…';
+    try { await api('POST', `/users/${USER}/applications/${a.id}/tailor`, { mode: 'match' }); openApplication(a.id); } catch (err) { toast(err.message); e.target.disabled = false; }
+  });
+}
+
+function atsScanHTML(a) {
+  if (!a) return '';
+  const chips = (list, cls) => list.map(x => `<span class="tag ${cls}">${esc(x)}</span>`).join(' ');
+  const good = a.score >= 8.5;
+  const P = [['coverage', 'Skills the job names', 3], ['evidence', 'Shown in your bullets', 1.5], ['placement', 'Placement', 1.5], ['integrity', 'Nothing invented', 3], ['writing', 'Writing', 1]];
+  return `<div class="notice ${good ? 'ok' : 'warn'}" style="margin:8px 0"><b>ATS scan: ${a.score}/10</b> <span class="muted">(untailored resume: ${a.before}/10)</span> · ${good ? 'Optimized for this role.' : 'Below the 8.5 mark: the gaps below are what your resume doesn\'t show.'}
+    <div class="muted" style="font-size:13px;margin-top:4px">${P.map(([k, l, max]) => `${l} ${a.parts?.[k] ?? '–'}/${max}`).join(' · ')}</div>
+    ${a.gaps?.length ? `<p style="margin:6px 0;font-size:14px">Asked for but not on your resume, so not added: ${chips(a.gaps, 'miss')}</p>` : ''}
+    ${a.missing?.length ? `<p style="margin:6px 0;font-size:14px">On your resume but not yet prominent: ${chips(a.missing, 'miss')}</p>` : ''}
+    ${a.issues?.length ? `<ul style="margin:6px 0 0;padding-left:18px;font-size:13px">${a.issues.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''}</div>`;
+}
+function matchReportHTML(rep, appId) {
+  const chips = (list, cls) => list.map(x => `<span class="tag ${cls}">${esc(x)}</span>`).join(' ');
+  const n = (k, w) => `${k} ${w}${k === 1 ? '' : 's'}`;
+  return `${atsScanHTML(rep.ats)}${rep.coverage != null ? `<div class="cov"><b>${rep.coverage}%</b><span class="muted">of the skills this job names are on this resume${rep.coverageBefore != null && rep.coverageBefore !== rep.coverage ? ` (was ${rep.coverageBefore}%)` : ''}</span></div>` : ''}
+    ${rep.addedSkills?.length ? `<p style="margin:6px 0;font-size:14px">Skills added for this job: ${chips(rep.addedSkills, 'cobalt')}</p>` : ''}
+    <p style="margin:6px 0;font-size:14px">${rep.model ? `${n(rep.editedBullets || 0, 'bullet')} reworded toward the posting, ${n(rep.addedBullets?.length || 0, 'bullet')} swapped in for weaker ones${rep.addedBullets?.some(b => b.from === 'bank') ? ` (${rep.addedBullets.filter(b => b.from === 'bank').length} from bullets you wrote before)` : ''}${rep.summaryRewritten ? ', summary rewritten' : ''}. Employers, titles and dates are unchanged.` : `${esc(rep.aiSkipped || 'The rewriting model was not used.')}.`}</p>
+    ${rep.addedBullets?.length ? `<details style="margin-top:6px"><summary style="cursor:pointer;font-size:14px">Swapped-in bullets (${rep.addedBullets.length})</summary><ul class="added-list">${rep.addedBullets.map(b => `<li>${esc(b.text)}<small>${esc(b.where)}${b.from === 'bank' ? ', one you wrote before' : ''}</small></li>`).join('')}</ul></details>` : ''}
+    ${rep.model ? `<p class="muted" style="font-size:13px;margin:8px 0 0">Written by ${esc(rep.model.replace(/^ollama:/, ''))}.</p>` : ''}
+    ${appId ? `<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><a class="btn sm primary" href="${resumeUrl(appId, true, true)}" download>Download PDF</a><a class="btn sm" href="${resumeUrl(appId)}" target="_blank" rel="noopener">Open PDF</a><a class="btn sm" href="${changesUrl(appId)}" target="_blank" rel="noopener">See what changed</a></div>` : ''}`;
+}
+
+// ═══ Applied: everything you've sent, searchable ════════════════════════════
+const AP_FIELDS = [['company', 'Company'], ['title', 'Job title'], ['link', 'Link'], ['posting', 'Posting text']];
+const apState = { q: '', fields: [], source: 'all', view: 'list', page: 1 };
+const fmtDay = d => (d ? new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: new Date(d).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' }) : '');
+const nfmt = n => Number(n || 0).toLocaleString();
+async function renderApplied() {
+  let imp = null; let model = null;
+  try { [{ data: imp }, { data: model }] = await Promise.all([api('GET', `/users/${USER}/imports/tsenta`), api('GET', `/users/${USER}/resume-model`)]); } catch {}
+  const canImport = imp?.available && imp.imported < imp.available.applications;
+  $('#view').innerHTML = `
+    <div class="page-head"><div><h1>Applied</h1><p>Every application you've sent, with the posting and the resume that went out.</p></div></div>
+    ${canImport ? `<div class="import-box"><div><b>Your Tsenta history is ready to import</b><p>${nfmt(imp.available.applications)} applications. For the most recent ${imp.available.details}, the posting is included, and for some the resume Tsenta sent.${imp.imported ? ` ${nfmt(imp.imported)} are already here.` : ''}</p></div><button class="btn primary" id="apImport" type="button">Import</button></div>` : ''}
+    <form class="searchbar" id="apSearch" role="search"><input id="apQ" type="search" placeholder="Search a company, job title, link or words in the posting" value="${esc(apState.q)}" aria-label="Search applications"><button class="btn primary" type="submit">Search</button></form>
+    <div class="ap-controls">
+      <div class="ap-fields" role="group" aria-label="Search in">${AP_FIELDS.map(([k, l]) => `<button type="button" class="fchip" data-f="${k}" aria-pressed="${apState.fields.includes(k)}">${l}<span class="n" data-n="${k}"></span></button>`).join('')}</div>
+      <span class="spacer"></span>
+      <select id="apSource" aria-label="Source"><option value="all">All applications</option><option value="app">Sent from here</option><option value="tsenta">From Tsenta</option></select>
+      <div class="seg" role="tablist" aria-label="View"><button role="tab" data-v="list" aria-selected="${apState.view === 'list'}">Applications</button><button role="tab" data-v="company" aria-selected="${apState.view === 'company'}">By company</button></div>
+    </div>
+    <p class="ap-line" id="apLine" aria-live="polite"></p>
+    <div id="apList" class="ap-list"></div>
+    <div id="apMore"></div>
+    ${model ? `<section class="panel model-panel"><div class="panel-head"><h2>Resume model</h2><span class="spacer"></span><span class="badge ${model.ok ? 'sent' : 'off'}">${model.ok ? 'Running' : 'Not running'}</span></div>
+      <div class="panel-body"><p style="margin:0 0 8px">${model.ok ? `Rewrites use <b>${esc(model.model)}</b> on this computer.` : esc(model.reason || 'The local model is not reachable.')}</p>
+      <p class="muted" style="margin:0;font-size:14px">${model.trainingData ? `Training data so far: ${nfmt(model.trainingData.total)} resumes with their postings (${nfmt(model.trainingData.model_rewrites)} rewritten here, ${nfmt(model.trainingData.from_tsenta)} from Tsenta), ${nfmt(model.trainingData.sent)} sent, ${nfmt(model.trainingData.led_to_interview)} led to an interview. ` : ''}Export it and fine-tune your own model with the steps in docs/resume-model.md.</p></div></section>` : ''}`;
+  $('#apSource').value = apState.source;
+  $('#apSearch').addEventListener('submit', e => { e.preventDefault(); apState.q = $('#apQ').value.trim(); apState.page = 1; loadApplied(); });
+  $$('.fchip').forEach(b => b.addEventListener('click', () => {
+    const f = b.dataset.f; apState.fields = apState.fields.includes(f) ? apState.fields.filter(x => x !== f) : [...apState.fields, f];
+    b.setAttribute('aria-pressed', String(apState.fields.includes(f))); apState.page = 1; loadApplied();
+  }));
+  $('#apSource').addEventListener('change', e => { apState.source = e.target.value; apState.page = 1; loadApplied(); });
+  $$('.seg [data-v]').forEach(b => b.addEventListener('click', () => { apState.view = b.dataset.v; $$('.seg [data-v]').forEach(x => x.setAttribute('aria-selected', String(x === b))); apState.page = 1; loadApplied(); }));
+  $('#apImport')?.addEventListener('click', async e => {
+    e.target.disabled = true; e.target.textContent = 'Importing…';
+    try { const { data: r } = await api('POST', `/users/${USER}/imports/tsenta`); toast(`Imported ${nfmt(r.applications)} applications from Tsenta.`); renderApplied(); }
+    catch (err) { toast(err.message); e.target.disabled = false; e.target.textContent = 'Import'; }
+  });
+  loadApplied();
+}
+function markSnippet(s) { return s ? `<p class="snip">${esc(s.before)}<mark>${esc(s.match)}</mark>${esc(s.after)}</p>` : ''; }
+async function loadApplied(append = false) {
+  const p = new URLSearchParams({ page: apState.page, limit: 50 });
+  if (apState.q) p.set('q', apState.q);
+  if (apState.fields.length) p.set('fields', apState.fields.join(','));
+  if (apState.source !== 'all') p.set('source', apState.source);
+  if (apState.view === 'company') p.set('groupBy', 'company');
+  const list = $('#apList'); if (!list) return;
+  if (!append) list.innerHTML = `<div class="skeleton" style="height:64px;margin-bottom:8px"></div>`.repeat(4);
+  let d; try { ({ data: d } = await api('GET', `/users/${USER}/applied?${p}`)); } catch (err) { list.innerHTML = `<div class="notice bad">${esc(err.message)}</div>`; return; }
+  const c = d.counts || {};
+  $$('[data-n]').forEach(n => { n.textContent = apState.q ? ` ${nfmt(c[n.dataset.n])}` : ''; });
+  const total = c.total || 0;
+  $('#apLine').textContent = !total ? '' : apState.q
+    ? `${nfmt(total)} application${total === 1 ? '' : 's'} at ${nfmt(c.companies)} compan${c.companies === 1 ? 'y' : 'ies'} match “${apState.q}”: ${AP_FIELDS.filter(([k]) => c[k]).map(([k, l]) => `${l.toLowerCase()} ${nfmt(c[k])}`).join(', ')}.`
+    : `${nfmt(total)} application${total === 1 ? '' : 's'} at ${nfmt(c.companies)} compan${c.companies === 1 ? 'y' : 'ies'}${c.from_tsenta ? `, ${nfmt(c.from_tsenta)} of them through Tsenta` : ''}.`;
+  let html = '';
+  if (apState.view === 'company') {
+    html = d.companies.map(g => `<button class="ap-co" type="button" data-co="${esc(g.company)}">
+        <span class="co-n"><b>${g.roleCount}</b>${g.roleCount === 1 ? 'role' : 'roles'}</span>
+        <span class="co-main"><h3>${esc(g.company)}</h3><span class="muted">${g.titles.filter(Boolean).slice(0, 3).map(esc).join('; ')}${g.roleCount > 3 ? '; …' : ''}</span></span>
+        <span class="co-when">${g.interviews ? `<span class="badge sent">${g.interviews} interview${g.interviews === 1 ? '' : 's'}</span>` : ''}<span class="muted">Last ${fmtDay(g.lastAppliedAt)}</span></span></button>`).join('');
+  } else {
+    html = d.applications.map(a => `<button class="ap-row" type="button" data-app="${a.id}">
+        <span class="ap-date">${fmtDay(a.appliedAt)}</span>
+        <span class="ap-main"><h3>${esc(a.title || 'Untitled role')}</h3>
+          <span class="ap-meta"><b>${esc(a.company || '')}</b>${a.location ? `<span>${esc(a.location)}</span>` : ''}${a.ats ? `<span>${esc(pretty(a.ats))}</span>` : ''}</span>
+          ${a.matchedOn.length ? `<span class="ap-hits">${a.matchedOn.map(m => `<span class="tag cobalt">${esc((AP_FIELDS.find(f => f[0] === m) || [m, m])[1])}</span>`).join(' ')}</span>` : ''}
+          ${markSnippet(a.postingSnippet)}</span>
+        <span class="ap-side">${a.status !== 'APPLIED' ? `<span class="status st-${a.status}">${esc(STATUS_LABEL[a.status] || pretty(a.status))}</span>` : ''}${a.source === 'tsenta' ? '<span class="tag">Tsenta</span>' : ''}
+          <span class="have ${a.hasDescription ? 'yes' : ''}" title="${a.hasDescription ? 'Posting saved' : 'No posting saved'}">Posting</span>${a.hasResume ? `<span class="have yes" role="link" tabindex="0" data-dl="${a.id}" title="Download the resume you sent">Resume ↓</span>` : `<span class="have" title="No resume saved">Resume</span>`}</span></button>`).join('');
+  }
+  if (!append) list.innerHTML = html || `<div class="empty"><b>${apState.q ? 'Nothing matches that search.' : 'Nothing sent yet.'}</b><p class="muted">${apState.q ? 'Try fewer words, or search all fields.' : 'Applications you send from Jobs or Auto-apply show up here with the posting and resume.'}</p></div>`;
+  else list.insertAdjacentHTML('beforeend', html);
+  const shown = $$('.ap-row, .ap-co', list).length; const max = apState.view === 'company' ? d.totalGroups : total;
+  $('#apMore').innerHTML = shown < max ? `<button class="btn" id="apMoreBtn" type="button">Show more (${nfmt(max - shown)} left)</button>` : '';
+  $('#apMoreBtn')?.addEventListener('click', () => { apState.page++; loadApplied(true); });
+  // The saved resume downloads straight from the row, without opening the application.
+  $$('[data-dl]:not([data-b])', list).forEach(c => { c.dataset.b = 1;
+    const go = e => { e.stopPropagation(); e.preventDefault(); window.location.href = resumeUrl(c.dataset.dl, true, true); };
+    c.addEventListener('click', go); c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') go(e); }); });
+  $$('.ap-row:not([data-b])', list).forEach(r => { r.dataset.b = 1; r.addEventListener('click', () => openApplication(r.dataset.app)); });
+  $$('.ap-co:not([data-b])', list).forEach(r => { r.dataset.b = 1; r.addEventListener('click', () => {
+    apState.q = r.dataset.co; apState.fields = ['company']; apState.view = 'list'; apState.page = 1; renderApplied();
+  }); });
+}
+
+// ═══ Auto-apply ═════════════════════════════════════════════════════════════
+const POSTED_OPTS = [[3, 'Past 3 days'], [7, 'Past week'], [14, 'Past 2 weeks'], [30, 'Past month']];
+async function renderAutoApply() {
+  const [{ data: aa }, { data: list }] = await Promise.all([api('GET', `/users/${USER}/auto-apply`), api('GET', `/users/${USER}/applications?source=auto`)]);
+  const profiles = await ensureResumeProfiles();
+  const apps = list.applications;
+  const by = st => apps.filter(a => a.applyState === st);
+  const needs = [...by('NEEDS_YOU'), ...by('FAILED')]; const review = by('NEEDS_REVIEW');
+  const waiting = apps.filter(a => ['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState));
+  const sent = by('SUBMITTED');
+  const sentToday = sent.filter(a => a.submittedAt && new Date(a.submittedAt).toDateString() === new Date().toDateString()).length;
+  const lastRun = aa.runs?.find(r => !r.dryRun);
+  $('#view').innerHTML = `
+    <div class="page-head"><div><h1>Auto-apply</h1><p>Finds jobs for each lane, tailors your resume, fills the form, and sends it or waits for your OK.</p></div><span class="spacer"></span>
+      <label class="switch"><input type="checkbox" id="aaOn" ${aa.enabled ? 'checked' : ''}><span class="track"></span><span id="aaOnLabel">${aa.enabled ? 'On' : 'Off'}</span></label></div>
+    ${!profiles.length ? `<div class="notice info">Set up a resume profile first: auto-apply sends it. <a href="#/profile">Go to Profile</a></div>` : ''}
+    <div class="stats">
+      <div class="stat ${needs.length ? 'attn' : ''}"><b>${needs.length}</b><span>need you</span></div>
+      <div class="stat"><b>${review.length}</b><span>waiting for your OK</span></div>
+      <div class="stat"><b>${waiting.length}</b><span>queued to send</span></div>
+      <div class="stat"><b>${sentToday}</b><span>sent today of ${aa.dailyCap}</span></div>
+    </div>
+    <div class="aa">
+      <div style="display:grid;gap:22px">
+        ${needs.length ? `<section class="panel"><div class="panel-head"><h2>Needs you</h2></div><div id="qNeeds">${needs.map(queueItemHTML).join('')}</div></section>` : ''}
+        ${review.length ? `<section class="panel"><div class="panel-head"><h2>Waiting for your OK</h2><span class="spacer"></span><button class="btn sm" id="approveAll" type="button">Approve all ${review.length}</button></div><div id="qReview">${review.map(queueItemHTML).join('')}</div></section>` : ''}
+        <section class="panel"><div class="panel-head"><h2>Next run</h2><span class="spacer"></span><button class="btn sm" id="aaPreview" type="button">Preview</button><button class="btn sm primary" id="aaRun" type="button" ${aa.running ? 'disabled' : ''}>${aa.running ? 'Running…' : 'Run now'}</button></div>
+          <div class="panel-body" id="aaPlan"><p class="muted" style="margin:0">${lastRun ? `Last run ${ago(lastRun.startedAt)}: ${runLine(lastRun.summary)}.` : 'Not run yet.'} Preview shows which jobs the next run would pick, without sending anything.</p>
+          ${waiting.length ? `<p style="margin:10px 0 0;font-size:14px">${waiting.length} application${waiting.length === 1 ? ' is' : 's are'} queued and will be filled on the next run.</p>` : ''}</div></section>
+        <section class="panel"><div class="panel-head"><h2>Sent</h2><span class="spacer"></span><a class="btn sm quiet" href="#/tracker">Open tracker</a></div>
+          <div class="panel-body">${sent.length ? sent.slice(0, 12).map(a => `<div class="app-row" data-open="${a.id}"><div class="t"><b>${esc(a.job?.title || 'Removed job')}</b><span>${esc(a.job?.company || '')}</span></div><span class="muted" style="font-size:13px">${ago(a.submittedAt || a.updatedAt)}</span></div>`).join('') : '<p class="muted" style="margin:0">Nothing sent yet.</p>'}</div></section>
+      </div>
+      <div style="display:grid;gap:22px">
+        <section class="panel"><div class="panel-head"><h2>Limits</h2></div><form class="panel-body" id="aaLimits" style="display:grid;gap:12px">
+          <div class="form-grid"><label class="field">Applications per day<input type="number" name="dailyCap" min="1" max="100" value="${aa.dailyCap}"></label>
+            <label class="field">Per company in 30 days<input type="number" name="perCompanyCap30d" min="1" max="20" value="${aa.perCompanyCap30d}"></label></div>
+          <label class="check"><input type="checkbox" name="acceptConsent" ${aa.acceptConsent ? 'checked' : ''}> Tick required "I agree" boxes, such as privacy notices</label>
+          <p class="muted" style="margin:0;font-size:13px">Forms that show a CAPTCHA, or ask something your profile doesn't answer, are never guessed. They come back to you under "Needs you". It fills ${aa.fillableAts.map(pretty).join(', ')} forms; other jobs are skipped.</p>
+          <div><button class="btn sm" type="submit">Save limits</button></div></form></section>
+        <section class="panel"><div class="panel-head"><h2>Lanes</h2><span class="spacer"></span><button class="btn sm" id="addLane" type="button" ${aa.lanes.length >= 5 ? 'disabled' : ''}>Add lane</button></div>
+          <div class="panel-body" style="padding-top:4px"><p class="muted" style="margin:10px 0 0;font-size:13px">A lane is one kind of role sent with one resume profile.</p>
+          <div id="lanes">${aa.lanes.map(l => laneHTML(l, profiles)).join('') || '<p style="margin:12px 0 0">No lanes yet. Add one to start.</p>'}</div></div></section>
+      </div>
+    </div>`;
+
+  $('#aaOn').addEventListener('change', async e => {
+    if (e.target.checked && !aa.lanes.length) { e.target.checked = false; toast('Add a lane first.'); return; }
+    await api('PUT', `/users/${USER}/auto-apply`, { enabled: e.target.checked });
+    $('#aaOnLabel').textContent = e.target.checked ? 'On' : 'Off';
+    toast(e.target.checked ? 'Auto-apply is on. It runs whenever the worker runs.' : 'Auto-apply is off.');
+  });
+  $('#aaLimits').addEventListener('submit', async e => {
+    e.preventDefault(); const f = e.target;
+    await api('PUT', `/users/${USER}/auto-apply`, { dailyCap: f.dailyCap.value, perCompanyCap30d: f.perCompanyCap30d.value, acceptConsent: f.acceptConsent.checked });
+    toast('Limits saved.');
+  });
+  $('#addLane').addEventListener('click', async () => {
+    const d = profiles.find(p => p.isDefault);
+    await api('POST', `/users/${USER}/auto-apply/lanes`, { name: d ? `${d.name} roles` : 'New lane', resumeProfileId: d?.id || null });
+    renderAutoApply();
+  });
+  $$('.lane').forEach(bindLane);
+  $('#aaPreview').addEventListener('click', async e => {
+    e.target.disabled = true; e.target.textContent = 'Checking…';
+    try { const { data } = await api('POST', `/users/${USER}/auto-apply/preview`); $('#aaPlan').innerHTML = planHTML(data); }
+    catch (err) { toast(err.message); } finally { e.target.disabled = false; e.target.textContent = 'Preview'; }
+  });
+  $('#aaRun').addEventListener('click', async e => {
+    try { await api('POST', `/users/${USER}/auto-apply/run`); } catch (err) { toast(err.message); return; }
+    e.target.disabled = true; e.target.textContent = 'Running…';
+    toast('Running. This page updates when it finishes.');
+    pollRun();
+  });
+  if (aa.running) pollRun();
+  $('#approveAll')?.addEventListener('click', async e => {
+    e.target.disabled = true;
+    for (const a of review) await api('POST', `/users/${USER}/applications/${a.id}/approve`, {});
+    toast(`${review.length} approved. They're sent on the next run.`); renderAutoApply();
+  });
+  $$('.qitem').forEach(bindQueueItem);
+  $$('.app-row[data-open]').forEach(r => r.addEventListener('click', () => openApplication(r.dataset.open)));
+}
+async function pollRun() {
+  for (let i = 0; i < 90; i++) {
+    await new Promise(r => setTimeout(r, 3000));
+    if (location.hash !== '#/auto-apply') return;
+    const { data } = await api('GET', `/users/${USER}/auto-apply`);
+    if (!data.running) { const r = data.runs?.find(x => !x.dryRun); toast(r ? `Run finished: ${runLine(r.summary)}` : 'Run finished.'); renderAutoApply(); loadApps(); return; }
+  }
+}
+function runLine(summary) {
+  if (!summary) return 'no details';
+  if (summary.skipped) return summary.skipped;
+  const o = summary.outcomes || {};
+  const parts = [`${summary.plan?.queued ?? 0} picked`, o.SUBMITTED && `${o.SUBMITTED} sent`, o.FILLED && `${o.FILLED} waiting for your OK`, o.NEEDS_YOU && `${o.NEEDS_YOU} need you`, o.FAILED && `${o.FAILED} failed`].filter(Boolean);
+  return parts.join(', ');
+}
+function planHTML(plan) {
+  if (!plan.lanes.length) return `<p style="margin:0">No lanes are on. Add or turn on a lane.</p>`;
+  return `<p style="margin:0 0 12px;font-size:14px">${plan.capLeft} of ${plan.dailyCap} applications left today.</p>` + plan.lanes.map(l => `
+    <div class="plan-lane"><b>${esc(l.name)}</b> <span class="muted" style="font-size:13px">${esc(l.resumeProfile || 'no profile')} · ${l.considered} jobs checked, ${l.aboveThreshold} above the minimum</span>
+      ${l.error ? `<div class="notice warn">${esc(l.error)}</div>` : ''}
+      ${l.picked.length ? `<ul>${l.picked.map(p => `<li><b>${p.matchScore}</b> · ${esc(p.title)} — ${esc(p.company)}</li>`).join('')}</ul>` : '<p style="margin:6px 0 0;font-size:14px">Nothing to send right now.</p>'}
+      ${Object.keys(l.skipped).length ? `<div class="skips">Skipped: ${Object.entries(l.skipped).map(([r, n]) => `${n} ${esc(r)}`).join(' · ')}</div>` : ''}
+    </div>`).join('');
+}
+function laneHTML(l, profiles) {
+  const opt = (v, cur, label) => `<option value="${v}" ${String(v) === String(cur) ? 'selected' : ''}>${esc(label)}</option>`;
+  return `<form class="lane" data-lane="${l.id}" data-off="${!l.enabled}">
+    <div class="lane-head"><input name="name" value="${esc(l.name)}" aria-label="Lane name"><label class="switch" title="Lane on or off"><input type="checkbox" name="enabled" ${l.enabled ? 'checked' : ''}><span class="track"></span></label></div>
+    <div class="form-grid" style="margin-top:12px">
+      <label class="field">Resume profile<select name="resumeProfileId">${opt('', l.resumeProfileId || '', 'Default profile')}${profiles.map(p => opt(p.id, l.resumeProfileId || '', p.name)).join('')}</select></label>
+      <label class="field">Minimum match<input type="number" name="minScore" min="40" max="95" value="${l.minScore}"></label>
+      <label class="field wide">Titles to look for <small>separate with |</small><input name="search" value="${esc(l.search)}" placeholder="data engineer | backend engineer"></label>
+      <div class="recent wide" data-recent-titles aria-label="Recent titles"></div>
+      <label class="field wide">Leave out jobs mentioning <small>separate with |</small><input name="excludeSearch" value="${esc(l.excludeSearch)}" placeholder="clearance | citizenship"></label>
+      <label class="field wide">Skip titles with<input name="excludeTitle" value="${esc(l.excludeTitle)}"></label>
+      <label class="field">Posted<select name="postedWithinDays">${POSTED_OPTS.map(([v, lab]) => opt(v, l.postedWithinDays, lab)).join('')}</select></label>
+    </div>
+    <div class="opts">${WORKPLACES.map(([v, lab]) => `<label class="check"><input type="checkbox" name="wp" value="${v}" ${l.workplaceTypes.includes(v) ? 'checked' : ''}> ${lab}</label>`).join('')}
+      <label class="check"><input type="checkbox" name="reviewBeforeSubmit" ${l.reviewBeforeSubmit ? 'checked' : ''}> Let me review before sending</label></div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm primary" type="submit">Save lane</button><button class="btn sm quiet danger" type="button" data-del>Delete</button></div>
+  </form>`;
+}
+// Titles you have looked for are kept with the lane settings you used, and fill the form again in one click (then Save lane).
+const recentTitles = () => store.get('recentTitles', []);
+function renderTitleChips(form) {
+  const host = form.querySelector('[data-recent-titles]'); if (!host) return;
+  const list = recentTitles();
+  host.innerHTML = list.length ? `<span class="muted">Recent</span>${list.map((r, i) => `<span class="chip-r"><button type="button" data-i="${i}" title="${esc([r.ex && `leave out ${r.ex}`, `min match ${r.min}`, (r.wp || []).map(pretty).join('/')].filter(Boolean).join(' · '))}">${esc(r.q)}</button><button type="button" data-rm="${i}" aria-label="Remove ${esc(r.q)}">×</button></span>`).join('')}<button type="button" class="btn sm quiet" data-clear-recent>Clear</button>` : '';
+}
+function rememberTitles(f) {
+  const q = f.search.value.trim(); if (!q) return;
+  const entry = { q, ex: f.excludeSearch.value, skip: f.excludeTitle.value, min: f.minScore.value, posted: f.postedWithinDays.value, wp: $$('[name=wp]:checked', f).map(x => x.value), review: f.reviewBeforeSubmit.checked };
+  store.set('recentTitles', [entry, ...recentTitles().filter(r => r.q.toLowerCase() !== q.toLowerCase())].slice(0, 8));
+  $$('.lane').forEach(renderTitleChips);
+}
+function bindLane(form) {
+  const id = form.dataset.lane;
+  renderTitleChips(form);
+  form.querySelector('[data-recent-titles]')?.addEventListener('click', e => {
+    const x = e.target.closest('[data-rm]'); const go = e.target.closest('[data-i]');
+    if (x) { store.set('recentTitles', recentTitles().filter((_, i) => i !== Number(x.dataset.rm))); return $$('.lane').forEach(renderTitleChips); }
+    if (e.target.closest('[data-clear-recent]')) { store.set('recentTitles', []); return $$('.lane').forEach(renderTitleChips); }
+    if (!go) return;
+    const r = recentTitles()[Number(go.dataset.i)]; if (!r) return;
+    form.search.value = r.q; form.excludeSearch.value = r.ex || ''; form.excludeTitle.value = r.skip || '';
+    if (r.min) form.minScore.value = r.min; if (r.posted) form.postedWithinDays.value = r.posted;
+    $$('[name=wp]', form).forEach(c => { c.checked = (r.wp || []).includes(c.value); }); form.reviewBeforeSubmit.checked = !!r.review;
+    toast('Filled in. Press Save lane to keep it.');
+  });
+  form.addEventListener('submit', async e => {
+    e.preventDefault(); const f = form;
+    const body = { name: f.name.value, enabled: f.enabled.checked, resumeProfileId: f.resumeProfileId.value || null, minScore: f.minScore.value,
+      search: f.search.value, excludeSearch: f.excludeSearch.value, excludeTitle: f.excludeTitle.value, postedWithinDays: f.postedWithinDays.value,
+      tailorMode: 'match', reviewBeforeSubmit: f.reviewBeforeSubmit.checked, workplaceTypes: $$('[name=wp]:checked', f).map(x => x.value) };
+    try { await api('PATCH', `/users/${USER}/auto-apply/lanes/${id}`, body); form.dataset.off = String(!body.enabled); rememberTitles(f); toast('Lane saved.'); } catch (err) { toast(err.message); }
+  });
+  form.querySelector('[data-del]').addEventListener('click', async () => {
+    if (!confirm('Delete this lane? Applications it already made stay in your tracker.')) return;
+    await api('DELETE', `/users/${USER}/auto-apply/lanes/${id}`); renderAutoApply();
+  });
+}
+function queueItemHTML(a) {
+  const d = a.applyDetail || {};
+  const missing = d.missing || [];
+  const field = (m, i) => {
+    const name = `q${i}`;
+    if (m.options?.length) return `<label class="field">${esc(m.label)}<select name="${name}" data-q="${esc(m.label)}"><option value="">Choose…</option>${m.options.map(o => `<option>${esc(o)}</option>`).join('')}</select></label>`;
+    if (m.type === 'textarea') return `<label class="field">${esc(m.label)}<textarea name="${name}" rows="3" data-q="${esc(m.label)}"></textarea></label>`;
+    if (m.type === 'file') return `<p class="muted" style="margin:0;font-size:13px">"${esc(m.label)}" asks for a file. Apply on the company's site for this one.</p>`;
+    return `<label class="field">${esc(m.label)}<input name="${name}" data-q="${esc(m.label)}"></label>`;
+  };
+  const askable = missing.filter(m => m.type !== 'file');
+  return `<div class="qitem" data-app="${a.id}" data-state="${a.applyState}">
+    <div class="top"><div class="t"><h3>${esc(a.job?.title || 'Removed job')}</h3><div class="meta"><b>${esc(a.job?.company || '')}</b>${d.matchScore != null ? `<span>${d.matchScore}% match</span>` : ''}<span>${ago(a.updatedAt)}</span></div></div>${applyBadge(a.applyState)}</div>
+    ${d.reason ? `<p class="why-stop">${esc(d.reason)}</p>` : ''}
+    ${a.applyState === 'NEEDS_YOU' && missing.length ? `<form class="qform">${missing.map(field).join('')}
+      ${askable.length ? `<label class="check"><input type="checkbox" name="remember" checked> Save these answers to my profile for next time</label>` : ''}</form>` : ''}
+    ${a.applyState === 'NEEDS_REVIEW' && d.filled?.length ? `<details style="margin-top:10px"><summary style="cursor:pointer;font-size:14px">What it filled in (${d.filled.length})</summary><table class="filled">${d.filled.map(f => `<tr class="src-${esc(f.source || '')}"><td>${esc(f.label)}</td><td>${esc(f.value)}</td></tr>`).join('')}</table></details>` : ''}
+    <div class="acts">
+      ${a.applyState === 'NEEDS_REVIEW' ? `<button class="btn sm primary" data-approve type="button">Approve and send</button>` : ''}
+      ${a.applyState === 'NEEDS_YOU' && askable.length ? `<button class="btn sm primary" data-answer type="button">Save answers and send</button>` : ''}
+      ${a.applyState === 'FAILED' ? `<button class="btn sm primary" data-approve type="button">Try again</button>` : ''}
+      ${a.hasTailoredResume ? `<a class="btn sm" href="${resumeUrl(a.id)}" target="_blank" rel="noopener">Resume</a>` : ''}
+      ${d.formUrl || a.job?.url ? `<a class="btn sm quiet" href="${esc(d.formUrl || a.job.url)}" target="_blank" rel="noopener">${I.ext(14)} Apply on site</a>` : ''}
+      <button class="btn sm quiet" data-details type="button">Details</button>
+      <button class="btn sm quiet" data-skip type="button">Skip</button>
+    </div></div>`;
+}
+function bindQueueItem(el) {
+  const id = el.dataset.app;
+  el.querySelector('[data-skip]').addEventListener('click', async () => { await api('POST', `/users/${USER}/applications/${id}/skip`); toast('Skipped.'); renderAutoApply(); loadApps(); });
+  el.querySelector('[data-details]').addEventListener('click', () => openApplication(id));
+  el.querySelector('[data-approve]')?.addEventListener('click', async () => { await api('POST', `/users/${USER}/applications/${id}/approve`, {}); toast('Approved. It\'s sent on the next run.'); renderAutoApply(); loadApps(); });
+  el.querySelector('[data-answer]')?.addEventListener('click', async () => {
+    const answers = {}; let blank = 0;
+    $$('[data-q]', el).forEach(f => { if (f.value.trim()) answers[f.dataset.q] = f.value.trim(); else blank++; });
+    if (blank) { toast(`Answer all ${blank + Object.keys(answers).length} questions first.`); return; }
+    await api('POST', `/users/${USER}/applications/${id}/answers`, { answers, remember: !!el.querySelector('[name=remember]')?.checked, approve: true });
+    toast('Saved. It\'s sent on the next run.'); renderAutoApply(); loadApps();
+  });
+}
+
+// ═══ Profile ════════════════════════════════════════════════════════════════
+const LIST_SECTIONS = {
+  experience: { title: 'Experience', blurb: 'Most recent first. Bullet points are what recruiters read.', item: 'role', fields: [
+    ['title', 'Job title'], ['company', 'Company'], ['location', 'Location'], ['startDate', 'Start', 'month'], ['endDate', 'End', 'month'], ['current', 'I work here now', 'bool'], ['bullets', 'What you did, one point per line', 'lines'] ] },
+  education: { title: 'Education', blurb: 'Degrees and schools.', item: 'school', fields: [
+    ['school', 'School'], ['degree', 'Degree'], ['field', 'Field of study'], ['startDate', 'Start', 'month'], ['endDate', 'End', 'month'], ['gpa', 'GPA'], ['description', 'Notes', 'textarea'] ] },
+  projects: { title: 'Projects', blurb: 'Side projects, research and open source.', item: 'project', fields: [
+    ['name', 'Project name'], ['role', 'Your role'], ['url', 'Link'], ['startDate', 'Start', 'month'], ['endDate', 'End', 'month'], ['technologies', 'Technologies, comma separated', 'csv'], ['bullets', 'What it does, one point per line', 'lines'] ] },
+  certifications: { title: 'Certifications', blurb: 'Licenses and certificates.', item: 'certification', fields: [
+    ['name', 'Certification'], ['issuer', 'Issued by'], ['date', 'Date', 'month'], ['url', 'Credential link'] ] },
+  custom: { title: 'Other sections', blurb: 'Awards, publications, volunteering or anything else.', item: 'section', fields: [
+    ['title', 'Section title'], ['body', 'Content', 'textarea'] ] },
+};
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const fmtMonth = v => { const m = String(v || '').match(/^(\d{4})(?:-(\d{2}))?$/); return m ? (m[2] ? `${MONTHS[+m[2] - 1]} ${m[1]}` : m[1]) : (v || ''); };
+const span = e => { const a = fmtMonth(e.startDate), b = e.current ? 'Present' : fmtMonth(e.endDate); return a && b ? `${a} – ${b}` : (a || b); };
+const linkHref = u => (/^https?:/i.test(u) ? u : 'https://' + u);
+
+async function loadResumeProfiles() {
+  let { data } = await api('GET', `/users/${USER}/resume-profiles`);
+  if (!data.length) { await api('POST', `/users/${USER}/resume-profiles`, { name: 'Default' }); ({ data } = await api('GET', `/users/${USER}/resume-profiles`)); }
+  state.resumeProfiles = data;
+  const wanted = store.get('rpId', null);
+  const pick = data.find(p => p.id === wanted) || data.find(p => p.isDefault) || data[0];
+  const { data: full } = await api('GET', `/users/${USER}/resume-profiles/${pick.id}`);
+  state.rp = full;
+  if (!state.fields) state.fields = (await api('GET', '/profile/fields')).data;
+}
+async function patchRP(patch, msg = 'Saved.') {
+  const { data } = await api('PATCH', `/users/${USER}/resume-profiles/${state.rp.id}`, patch);
+  state.rp = data; state.profile = null; state.profileSkills = null; state.feed = null;
+  toast(state.rp.isDefault ? `${msg} Your job matches now use this.` : msg);
+  loadRailProfile();
+  return data;
+}
+
+async function renderProfile() {
+  await loadResumeProfiles();
+  const rp = state.rp, s = rp.sections, p = s.personal;
+  const initials = (p.fullName || rp.name).split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  const counts = { experience: s.experience.length, education: s.education.length, projects: s.projects.length, skills: s.skills.reduce((n, g) => n + g.items.length, 0), certifications: s.certifications.length };
+  $('#view').innerHTML = `
+    <div class="page-head"><div><h1>Profile</h1><p>What recruiters and job forms see. Your default profile drives your job matches.</p></div><span class="spacer"></span>
+      <div class="switcher">
+        <select id="rpSelect" aria-label="Choose a profile">${state.resumeProfiles.map(x => `<option value="${x.id}" ${x.id === rp.id ? 'selected' : ''}>${esc(x.name)}${x.isDefault ? ' (default)' : ''}</option>`).join('')}</select>
+        <button class="btn" id="rpNew" type="button">New profile</button>
+        ${rp.isDefault ? '' : '<button class="btn" id="rpDefault" type="button">Make default</button>'}
+        <button class="btn quiet" id="rpRename" type="button">Rename</button>
+        ${state.resumeProfiles.length > 1 ? '<button class="btn quiet danger" id="rpDelete" type="button">Delete</button>' : ''}
+      </div></div>
+    <div class="tabs" role="tablist">${[['details', 'Profile details'], ['resume', 'Resume'], ['letter', 'Cover letter']].map(([k, l]) => `<button role="tab" type="button" data-tab="${k}" aria-selected="${state.profileTab === k}">${l}</button>`).join('')}</div>
+    <div id="tabBody"></div>`;
+
+  $('#rpSelect').addEventListener('change', e => { store.set('rpId', e.target.value); renderProfile(); });
+  $('#rpNew').addEventListener('click', async () => {
+    const name = prompt('Name the new profile, for example "Java Full Stack". It starts as a copy of this one.');
+    if (!name) return;
+    const { data } = await api('POST', `/users/${USER}/resume-profiles`, { name, copyFrom: rp.id });
+    store.set('rpId', data.id); toast(`Created "${data.name}".`); renderProfile();
+  });
+  $('#rpDefault')?.addEventListener('click', async () => { await api('POST', `/users/${USER}/resume-profiles/${rp.id}/set-default`); state.profile = null; state.profileSkills = null; state.feed = null; toast(`"${rp.name}" is now your default. Job matches use it.`); renderProfile(); });
+  $('#rpRename').addEventListener('click', async () => { const name = prompt('Rename this profile', rp.name); if (name && name !== rp.name) { await patchRP({ name }, 'Renamed.'); renderProfile(); } });
+  $('#rpDelete')?.addEventListener('click', async () => {
+    if (!confirm(`Delete the "${rp.name}" profile? This can't be undone.`)) return;
+    const { data } = await api('DELETE', `/users/${USER}/resume-profiles/${rp.id}`);
+    if (data.deleted) { store.set('rpId', null); toast('Profile deleted.'); renderProfile(); } else toast(data.error);
+  });
+  $$('[data-tab]').forEach(b => b.addEventListener('click', () => { state.profileTab = b.dataset.tab; renderProfile(); }));
+
+  if (state.profileTab === 'resume') return renderResumeTab();
+  if (state.profileTab === 'letter') return renderLetterTab();
+
+  const todo = rp.completeness.items.filter(i => !i.done);
+  const contact = [p.city && [p.city, p.state].filter(Boolean).join(', '), p.email, p.phone].filter(Boolean);
+  const links = [p.linkedin && ['LinkedIn', p.linkedin], p.github && ['GitHub', p.github], p.portfolio && ['Website', p.portfolio]].filter(Boolean);
+  $('#tabBody').innerHTML = `<div class="profile">
+    <nav class="toc" aria-label="Profile sections">
+      ${[['about', 'About you'], ['looking', 'What you want'], ['summary', 'Summary'], ['experience', 'Experience', counts.experience], ['education', 'Education', counts.education], ['projects', 'Projects', counts.projects], ['skills', 'Skills', counts.skills], ['certifications', 'Certifications', counts.certifications], ['custom', 'Other sections'], ['defaults', 'Application answers']]
+        .map(([id, l, n]) => `<a href="#/profile" data-jump="${id}">${l}${n != null ? `<span>${n}</span>` : ''}</a>`).join('')}
+    </nav>
+    <div>
+      ${!rp.hasResume && !s.experience.length ? `<div class="notice info" style="margin-top:0">Fastest start: <a href="#/profile" id="goResume">upload your resume</a> and every section below fills in for you to review.</div>` : ''}
+      <section class="sec" id="sec-about">
+        <div class="hero-card"><div class="initials" aria-hidden="true">${esc(initials)}</div>
+          <div><h1>${esc(p.fullName || 'Add your name')}</h1>${p.headline ? `<div style="color:var(--ink-2);margin-top:2px">${esc(p.headline)}</div>` : ''}
+            <div class="contact">${contact.map(x => `<span>${esc(x)}</span>`).join('') || '<span class="muted">Add your contact details</span>'}${links.map(([l, u]) => `<a href="${esc(linkHref(u))}" target="_blank" rel="noopener">${l}</a>`).join('')}</div>
+            <div style="margin-top:10px"><span class="tag ${p.openToWork ? 'hit' : ''}">${p.openToWork ? 'Open to work' : 'Not looking right now'}</span></div></div>
+          <div class="pct"><b>${rp.completeness.percent}%</b><span>complete</span></div></div>
+        ${todo.length ? `<p style="margin:16px 0 0;font-size:14px;color:var(--ink-2)">Still to add:</p><ul class="checklist">${todo.map(i => `<li>${esc(i.label)}</li>`).join('')}</ul>` : ''}
+        <div style="margin-top:14px"><button class="btn sm" type="button" data-edit-personal>${I.edit(14)} Edit details</button></div>
+        <div id="personalEditor"></div>
+      </section>
+      <section class="sec" id="sec-looking"><div class="sec-head"><div><h2>What you want</h2><p>The roles you're aiming for. They count for about a third of every match score.</p></div></div><div id="rolesBox"><div class="skeleton" style="height:40px"></div></div></section>
+      <section class="sec" id="sec-summary"><div class="sec-head"><div><h2>Summary</h2><p>Two to four sentences about what you do best.</p></div><span class="spacer"></span><button class="btn sm" type="button" data-edit-summary>Edit</button></div>
+        <div id="summaryBody">${s.summary ? `<p style="margin:0;max-width:72ch;color:var(--ink-2)">${esc(s.summary)}</p>` : '<p class="muted" style="margin:0">No summary yet.</p>'}</div></section>
+      ${['experience', 'education', 'projects'].map(listSectionHTML).join('')}
+      <section class="sec" id="sec-skills"><div class="sec-head"><div><h2>Skills</h2><p>Grouped the way you'd list them on a resume. Every job's requirements are checked against these.</p></div><span class="spacer"></span><button class="btn sm" type="button" data-edit-skills>Edit</button></div>
+        <div id="skillsBody">${s.skills.length ? s.skills.map(g => `<div style="margin-bottom:12px"><div style="font-weight:600;font-size:14px;margin-bottom:6px">${esc(g.group)}</div><div class="chips">${g.items.map(x => `<span class="tag">${esc(x)}</span>`).join('')}</div></div>`).join('') : '<p class="muted" style="margin:0">No skills yet. Upload a resume or add them by hand.</p>'}</div></section>
+      ${['certifications', 'custom'].map(listSectionHTML).join('')}
+      <section class="sec" id="sec-defaults"><div class="sec-head"><div><h2>Application answers</h2><p>The questions job forms ask every time, answered once.</p></div></div><div id="defaultsBody"></div></section>
+    </div></div>`;
+
+  $('#goResume')?.addEventListener('click', e => { e.preventDefault(); state.profileTab = 'resume'; renderProfile(); });
+  $$('[data-jump]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); $(`#sec-${a.dataset.jump}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+  $('[data-edit-personal]').addEventListener('click', () => openPersonalEditor());
+  $('[data-edit-summary]').addEventListener('click', () => {
+    $('#summaryBody').innerHTML = `<div class="editor"><label class="field">Summary<textarea id="sumText" rows="5" maxlength="4000">${esc(s.summary)}</textarea></label><div class="acts"><button class="btn quiet" type="button" data-cancel>Cancel</button><button class="btn primary" type="button" data-save>Save summary</button></div></div>`;
+    $('#sumText').focus();
+    $('#summaryBody [data-cancel]').addEventListener('click', () => renderProfile());
+    $('#summaryBody [data-save]').addEventListener('click', async () => { await patchRP({ sections: { summary: $('#sumText').value } }, 'Summary saved.'); renderProfile(); });
+  });
+  $('[data-edit-skills]').addEventListener('click', openSkillsEditor);
+  for (const key of Object.keys(LIST_SECTIONS)) bindListSection(key);
+  renderDefaults();
+  renderRoles();
+}
+
+function listSectionHTML(key) {
+  const def = LIST_SECTIONS[key]; const items = state.rp.sections[key];
+  const isTimeline = key === 'experience' || key === 'education';
+  return `<section class="sec" id="sec-${key}"><div class="sec-head"><div><h2>${def.title}</h2><p>${def.blurb}</p></div><span class="spacer"></span><button class="btn sm" type="button" data-add="${key}">Add ${def.item}</button></div>
+    <div id="editor-${key}"></div>
+    ${items.length ? `<div class="${isTimeline ? 'timeline' : ''}">${items.map((e, i) => entryHTML(key, e, i)).join('')}</div>` : `<p class="muted" style="margin:0">Nothing here yet.</p>`}</section>`;
+}
+function entryHTML(key, e, i) {
+  const tools = `<span class="tools"><button class="icon-btn" type="button" data-up="${key}:${i}" aria-label="Move up" ${i === 0 ? 'disabled' : ''}>${I.up()}</button><button class="icon-btn" type="button" data-edit="${key}:${i}" aria-label="Edit">${I.edit()}</button><button class="icon-btn" type="button" data-del="${key}:${i}" aria-label="Delete">${I.trash()}</button></span>`;
+  if (key === 'experience') return `<div class="entry${e.current ? ' now' : ''}"><div class="entry-head"><h3>${esc(e.title || 'Untitled role')}</h3>${tools}<span class="when">${esc(span(e))}</span></div><div class="org">${esc([e.company, e.location].filter(Boolean).join(', '))}</div>${e.bullets.length ? `<ul>${e.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}</div>`;
+  if (key === 'education') return `<div class="entry"><div class="entry-head"><h3>${esc(e.school || e.degree)}</h3>${tools}<span class="when">${esc(span(e))}</span></div><div class="org">${esc([e.degree, e.field].filter(Boolean).join(', '))}${e.gpa ? `, GPA ${esc(e.gpa)}` : ''}</div>${e.description ? `<p style="margin:6px 0 0;color:var(--ink-2);font-size:14px">${esc(e.description)}</p>` : ''}</div>`;
+  if (key === 'projects') return `<div class="entry" style="${i ? 'border-top:1px solid var(--line-2);padding-top:14px' : ''}"><div class="entry-head"><h3>${e.url ? `<a href="${esc(linkHref(e.url))}" target="_blank" rel="noopener">${esc(e.name)}</a>` : esc(e.name)}</h3>${tools}<span class="when">${esc(span(e))}</span></div>${e.role ? `<div class="org">${esc(e.role)}</div>` : ''}${e.technologies.length ? `<div class="chips" style="margin-top:6px">${e.technologies.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}${e.bullets.length ? `<ul>${e.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}</div>`;
+  if (key === 'certifications') return `<div class="entry" style="padding-bottom:10px"><div class="entry-head"><h3 style="font-size:15.5px">${esc(e.name)}</h3>${tools}<span class="when">${esc(fmtMonth(e.date))}</span></div>${e.issuer ? `<div class="org">${esc(e.issuer)}</div>` : ''}</div>`;
+  return `<div class="entry"><div class="entry-head"><h3 style="font-size:15.5px">${esc(e.title)}</h3>${tools}</div><p style="white-space:pre-wrap;margin:6px 0 0;color:var(--ink-2);font-size:14px">${esc(e.body)}</p></div>`;
+}
+function bindListSection(key) {
+  const sec = $(`#sec-${key}`); if (!sec) return;
+  sec.querySelector('[data-add]').addEventListener('click', () => openEntryEditor(key, -1));
+  sec.addEventListener('click', async e => {
+    const b = e.target.closest('[data-edit],[data-del],[data-up]'); if (!b) return;
+    const i = Number((b.dataset.edit || b.dataset.del || b.dataset.up).split(':')[1]);
+    const list = [...state.rp.sections[key]];
+    if (b.dataset.edit) return openEntryEditor(key, i);
+    if (b.dataset.del) { if (!confirm('Delete this entry?')) return; list.splice(i, 1); await patchRP({ sections: { [key]: list } }, 'Deleted.'); return renderProfile(); }
+    if (b.dataset.up && i > 0) { [list[i - 1], list[i]] = [list[i], list[i - 1]]; await patchRP({ sections: { [key]: list } }, 'Moved.'); return renderProfile(); }
+  });
+}
+function fieldInput(name, label, type, value) {
+  if (type === 'bool') return `<label class="check" style="align-self:center"><input type="checkbox" name="${name}" ${value ? 'checked' : ''}/> ${label}</label>`;
+  if (type === 'lines') return `<label class="field wide">${label}<textarea name="${name}" rows="5">${esc((value || []).join('\n'))}</textarea></label>`;
+  if (type === 'textarea') return `<label class="field wide">${label}<textarea name="${name}" rows="4">${esc(value || '')}</textarea></label>`;
+  if (type === 'csv') return `<label class="field wide">${label}<input type="text" name="${name}" value="${esc((value || []).join(', '))}"/></label>`;
+  if (type === 'month') return `<label class="field">${label}<input type="text" name="${name}" placeholder="Aug 2023" value="${esc(fmtMonth(value))}"/></label>`;
+  return `<label class="field">${label}<input type="text" name="${name}" value="${esc(value ?? '')}"/></label>`;
+}
+function readFields(form, fields) {
+  const out = {};
+  for (const [name, , type] of fields) {
+    const el = form.querySelector(`[name="${name}"]`); if (!el) continue;
+    if (type === 'bool') out[name] = el.checked;
+    else if (type === 'lines') out[name] = el.value.split('\n').map(x => x.replace(/^\s*[•\-*]\s*/, '').trim()).filter(Boolean);
+    else if (type === 'csv') out[name] = el.value.split(',').map(x => x.trim()).filter(Boolean);
+    else out[name] = el.value.trim();
+  }
+  return out;
+}
+function openEntryEditor(key, index) {
+  const def = LIST_SECTIONS[key]; const list = [...state.rp.sections[key]]; const cur = index >= 0 ? list[index] : {};
+  const host = $(`#editor-${key}`);
+  host.innerHTML = `<form class="editor"><div class="form-grid">${def.fields.map(([n, l, t]) => fieldInput(n, l, t, cur[n])).join('')}</div>
+    <div class="acts"><button class="btn quiet" type="button" data-cancel>Cancel</button><button class="btn primary" type="submit">${index >= 0 ? 'Save changes' : `Add ${def.item}`}</button></div></form>`;
+  const form = host.querySelector('form');
+  form.querySelector('input,textarea')?.focus();
+  host.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const cb = form.querySelector('[name=current]'); const end = form.querySelector('[name=endDate]');
+  if (cb && end) { const sync = () => { end.disabled = cb.checked; if (cb.checked) end.value = ''; }; cb.addEventListener('change', sync); sync(); }
+  form.querySelector('[data-cancel]').addEventListener('click', () => { host.innerHTML = ''; });
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const entry = readFields(form, def.fields);
+    if (index >= 0) list[index] = entry; else list.unshift(entry);
+    const saved = await patchRP({ sections: { [key]: list } }, index >= 0 ? 'Changes saved.' : 'Added.');
+    if (saved.sections[key].length < list.length) toast('That entry needs a name or title, so it wasn\'t saved.');
+    renderProfile();
+  });
+}
+function openPersonalEditor() {
+  const p = state.rp.sections.personal;
+  const fields = [['fullName', 'Full name'], ['headline', 'Headline, for example Software Engineer'], ['email', 'Email'], ['phone', 'Phone'], ['city', 'City'], ['state', 'State'], ['country', 'Country'], ['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['portfolio', 'Website or portfolio'], ['openToWork', 'Open to work', 'bool']];
+  const host = $('#personalEditor');
+  host.innerHTML = `<form class="editor" style="margin-top:14px"><div class="form-grid">${fields.map(([n, l, t]) => fieldInput(n, l, t, p[n])).join('')}</div><div class="acts"><button class="btn quiet" type="button" data-cancel>Cancel</button><button class="btn primary" type="submit">Save details</button></div></form>`;
+  const form = host.querySelector('form'); form.querySelector('input').focus();
+  form.querySelector('[data-cancel]').addEventListener('click', () => { host.innerHTML = ''; });
+  form.addEventListener('submit', async e => { e.preventDefault(); await patchRP({ sections: { personal: readFields(form, fields) } }, 'Details saved.'); renderProfile(); });
+}
+function openSkillsEditor() {
+  const groups = state.rp.sections.skills.length ? state.rp.sections.skills : [{ group: 'Skills', items: [] }];
+  const row = (g = { group: '', items: [] }) => `<div class="form-grid skill-row" style="grid-template-columns:minmax(120px,200px) 1fr auto;margin-bottom:10px"><label class="field">Group<input type="text" name="group" value="${esc(g.group)}" placeholder="Languages"/></label><label class="field">Skills, comma separated<input type="text" name="items" value="${esc(g.items.join(', '))}"/></label><button class="icon-btn" type="button" data-rmrow aria-label="Remove group">${I.trash()}</button></div>`;
+  $('#skillsBody').innerHTML = `<form class="editor"><div id="skillRows">${groups.map(row).join('')}</div><button class="btn sm" type="button" id="addGroup">Add group</button>
+    <div class="acts"><button class="btn quiet" type="button" data-cancel>Cancel</button><button class="btn primary" type="submit">Save skills</button></div></form>`;
+  const form = $('#skillsBody form');
+  $('#addGroup').addEventListener('click', () => $('#skillRows').insertAdjacentHTML('beforeend', row()));
+  form.addEventListener('click', e => { if (e.target.closest('[data-rmrow]')) e.target.closest('.skill-row').remove(); });
+  form.querySelector('[data-cancel]').addEventListener('click', () => renderProfile());
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const skills = $$('.skill-row', form).map(r => ({ group: r.querySelector('[name=group]').value.trim() || 'Skills', items: r.querySelector('[name=items]').value.split(',').map(x => x.trim()).filter(Boolean) })).filter(g => g.items.length);
+    await patchRP({ sections: { skills } }, 'Skills saved.'); renderProfile();
+  });
+}
+function renderDefaults() {
+  const fields = state.fields || {}; const ad = state.rp.sections.applicationDefaults || {};
+  const GROUPS = [['authorization', 'Work authorization', 'Used to filter out jobs that won\'t sponsor you, and for every "are you authorized to work" question.'], ['logistics', 'Availability', ''], ['background', 'Background questions', ''], ['eeo', 'Voluntary self-identification', 'Optional. Employers use these only for equal-opportunity reporting, and "Prefer not to say" is always fine.']];
+  const input = (key, f) => {
+    const v = ad[key];
+    if (f.type === 'bool') return `<label class="field">${f.label}<select name="${key}"><option value="">Not answered</option><option value="true" ${v === true ? 'selected' : ''}>Yes</option><option value="false" ${v === false ? 'selected' : ''}>No</option></select></label>`;
+    if (f.type === 'select') return `<label class="field">${f.label}<select name="${key}"><option value="">Not answered</option>${f.options.map(o => `<option ${v === o ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></label>`;
+    if (f.type === 'date') return `<label class="field">${f.label}<input type="date" name="${key}" value="${esc(v || '')}"/></label>`;
+    return `<label class="field">${f.label}${f.hint ? ` <small>${esc(f.hint)}</small>` : ''}<input type="text" name="${key}" value="${esc(v || '')}"/></label>`;
+  };
+  $('#defaultsBody').innerHTML = `<form id="adForm">${GROUPS.map(([g, title, hint]) => `<div class="ad-group"><h3>${title}</h3>${hint ? `<p class="hint">${hint}</p>` : ''}<div class="form-grid" style="margin-top:${hint ? 0 : 10}px">${Object.entries(fields).filter(([, f]) => f.group === g).map(([k, f]) => input(k, f)).join('')}</div></div>`).join('')}
+    <div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="btn primary" type="submit">Save answers</button></div></form>`;
+  $('#adForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const out = {};
+    for (const [k, f] of Object.entries(fields)) {
+      const el = e.target.querySelector(`[name="${k}"]`); if (!el || el.value === '') continue;
+      out[k] = f.type === 'bool' ? el.value === 'true' : el.value;
+    }
+    await patchRP({ sections: { applicationDefaults: out } }, 'Answers saved.'); renderProfile();
+  });
+}
+async function renderRoles() {
+  const { data: roles } = await api('GET', `/users/${USER}/target-roles`);
+  const names = roles.map(r => pretty(r.canonical_role || r.role_family));
+  if (!$('#rolesBox')) return;
+  $('#rolesBox').innerHTML = `<form id="rolesForm" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <div class="chips" id="roleChips">${names.map(n => `<span class="tag cobalt" data-role="${esc(n)}">${esc(n)}<button type="button" class="btn sm quiet" style="padding:0 2px;color:inherit" aria-label="Remove ${esc(n)}">${I.x(12)}</button></span>`).join('') || '<span class="muted">No target roles yet.</span>'}</div>
+    <input id="roleInput" type="text" placeholder="Add a role, for example Backend Engineer" style="max-width:320px"/><button class="btn sm" type="submit">Add role</button></form>`;
+  const save = async list => {
+    await api('PUT', `/users/${USER}/target-roles`, { roles: list.map(t => { const key = t.toUpperCase().replace(/[^A-Z0-9]+/g, '_'); const r = roles.find(x => x.canonical_role === key || x.role_family === key); return r ? { canonicalRole: r.canonical_role, roleFamily: r.role_family } : { title: t }; }) });
+    state.feed = null; toast('Target roles saved. Your matches are updated.'); renderRoles();
+  };
+  $('#roleChips').addEventListener('click', e => { const chip = e.target.closest('[data-role]'); if (chip && e.target.closest('button')) save(names.filter(n => n !== chip.dataset.role)); });
+  $('#rolesForm').addEventListener('submit', e => { e.preventDefault(); const v = $('#roleInput').value.trim(); if (v) save([...names, v]); });
+}
+// ─── Resume tab: page preview, layout tools and inline editing (like Tsenta's) ─
+const RZ_FONTS = ['Arial', 'Calibri', 'Helvetica', 'Garamond', 'Georgia', 'Times New Roman'];
+const RZ_SECTIONS = { summary: 'Summary', experience: 'Work experience', projects: 'Projects', education: 'Education', skills: 'Skills', certifications: 'Certifications' };
+const RZ_LINKS = [['city', 'City'], ['state', 'State'], ['country', 'Country'], ['email', 'Email'], ['phone', 'Phone'], ['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['website', 'Website']];
+const EYE = on => on
+  ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>'
+  : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a17.7 17.7 0 0 1-3.2 4.2M6.6 6.6A17.4 17.4 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+const rzMonth = t => {
+  const s = String(t || '').trim(); if (!s || /^(present|current|now)$/i.test(s)) return '';
+  let m = s.match(/^(\d{4})-(\d{1,2})/); if (m) return `${m[1]}-${m[2].padStart(2, '0')}`;
+  m = s.match(/^([A-Za-z]{3,9})\.?\s+(\d{4})$/);
+  if (m) { const i = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'].indexOf(m[1].slice(0, 3).toLowerCase()); if (i >= 0) return `${m[2]}-${String(i + 1).padStart(2, '0')}`; }
+  m = s.match(/^(\d{1,2})\/(\d{4})$/); if (m) return `${m[2]}-${m[1].padStart(2, '0')}`;
+  return s;
+};
+function rzSet(obj, path, value) {
+  const k = path.split('.'); let o = obj;
+  for (let i = 0; i < k.length - 1; i++) { const key = /^\d+$/.test(k[i]) ? +k[i] : k[i]; o[key] ??= /^\d+$/.test(k[i + 1]) ? [] : {}; o = o[key]; }
+  o[/^\d+$/.test(k.at(-1)) ? +k.at(-1) : k.at(-1)] = value;
+}
+function rzGet(obj, path) { return path.split('.').reduce((o, k) => (o == null ? o : o[/^\d+$/.test(k) ? +k : k]), obj); }
+
+function renderResumeTab() {
+  const rp = state.rp;
+  const z = state.rz && state.rz.id === rp.id ? state.rz : (state.rz = { id: rp.id, view: 'resume', mode: 'view', layout: structuredClone(rp.layout || {}), draft: null, menu: null, focus: null });
+  const L = z.layout;
+  const keysOf = sec => [...Object.keys(RZ_SECTIONS), ...(sec.custom || []).map((_, i) => `custom:${i}`)];
+  const sectionsNow = () => (z.mode === 'edit' ? z.draft : rp.sections);
+  const orderNow = () => { const keys = keysOf(sectionsNow()); return [...(L.order || []), ...keys].filter((k, i, a) => keys.includes(k) && a.indexOf(k) === i); };
+  const labelOf = k => (k.startsWith('custom:') ? (sectionsNow().custom?.[+k.slice(7)]?.title || 'Custom section') : RZ_SECTIONS[k]);
+  const pdfUrl = `${API}/users/${USER}/resume-profiles/${rp.id}/resume?format=pdf`;
+  const origUrl = `${API}/users/${USER}/resume-profiles/${rp.id}/original`;
+  const fileKind = f => ({ 'application/pdf': 'original PDF', 'text/plain': 'original text file' }[f.contentType] || 'original Word file');
+  const fmtBytes = n => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+  const editing = z.mode === 'edit';
+
+  $('#tabBody').innerHTML = `
+    <div class="rz-top">
+      <div class="seg" role="group" aria-label="Which version to show">
+        <button type="button" data-view="resume" aria-pressed="${z.view === 'resume'}">Your resume</button>
+        <button type="button" data-view="original" aria-pressed="${z.view === 'original'}" ${rp.resumeText || rp.originalFile ? '' : 'disabled title="No resume uploaded yet"'}>Original upload</button>
+      </div>
+      <p class="rz-note">Each application gets a copy tailored to the job, in this layout.</p>
+      <span class="spacer"></span>
+      <div class="rz-pop">
+        <button class="btn" type="button" data-menu="replace" aria-expanded="${z.menu === 'replace'}">Replace</button>
+        ${z.menu === 'replace' ? `<div class="rz-menu right" role="dialog" aria-label="Replace your resume">
+          <h4>Upload a new resume</h4>
+          <label class="dropzone" id="drop" style="padding:22px 12px"><input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.txt" hidden/><b style="font-size:15px">Choose a file</b><span style="font-size:12.5px">PDF, Word or plain text, or drop it here</span></label>
+          <fieldset style="border:0;padding:0;margin:10px 4px 0;display:grid;gap:6px;font-size:13px"><legend class="muted" style="font-size:12px;margin-bottom:4px">When it has something a section already has:</legend>
+            <label class="check"><input type="radio" name="mode" value="fill" checked/> Keep what I've written</label>
+            <label class="check"><input type="radio" name="mode" value="replace"/> Replace it with the upload</label></fieldset>
+          <div id="importResult"></div>
+        </div>` : ''}
+      </div>
+      ${z.view === 'original'
+        ? (rp.originalFile ? `<a class="btn primary" href="${origUrl}" download="${esc(rp.originalFile.name)}">Download ${esc(fileKind(rp.originalFile))}</a>` : '')
+        : `<a class="btn primary" href="${pdfUrl}" download>Download PDF</a>`}
+    </div>
+    ${z.view === 'original' ? `${rp.originalFile
+        ? `<p class="rz-pages" style="text-align:left;margin:0 0 10px">Your upload: <b>${esc(rp.originalFile.name)}</b> · ${fmtBytes(rp.originalFile.bytes)} · ${ago(rp.originalFile.uploadedAt)}</p>`
+        : `<div class="notice info" style="margin:0 0 10px">Only the text read from ${esc(rp.resumeFilename || 'your resume')} was kept, not the file itself. Upload it again with <b>Replace</b> (choose "Keep what I've written") to keep a copy you can download.</div>`}
+      ${rp.originalFile?.contentType === 'application/pdf'
+        ? `<div class="rz-canvas"><iframe src="${origUrl}?inline=1#toolbar=1&view=FitH" title="Your uploaded resume" style="display:block;width:100%;max-width:900px;height:min(1150px,85vh);margin:0 auto;border:0;border-radius:4px;background:#fff"></iframe></div>`
+        : `<div class="rz-canvas"><div class="rz-original">${esc(rp.resumeText || '')}</div></div>
+      <p class="rz-pages">${rp.resumeFilename ? `Text read from ${esc(rp.resumeFilename)}. ` : ''}Anything missing here couldn't be read from the file.</p>`}` : `
+    <div class="rz-tools" role="toolbar" aria-label="Resume layout">
+      <span class="grp">Template <span class="seg">${[['classic', 'Classic'], ['compact', 'Compact']].map(([k, l]) => `<button type="button" data-set="template" data-val="${k}" aria-pressed="${(L.template || 'classic') === k}">${l}</button>`).join('')}</span></span>
+      <label class="grp">Font <select id="rzFont">${RZ_FONTS.map(f => `<option ${(L.font || 'Arial') === f ? 'selected' : ''}>${f}</option>`).join('')}</select></label>
+      <span class="grp">Size <span class="rz-size"><button class="icon-btn" type="button" data-size="-0.5" aria-label="Smaller text">−</button><output aria-live="polite">${(L.size || 10.5).toFixed(1)}pt</output><button class="icon-btn" type="button" data-size="0.5" aria-label="Larger text">+</button></span></span>
+      <span class="grp">Align <span class="seg">${[['left', 'Left'], ['justify', 'Justified']].map(([k, l]) => `<button type="button" data-set="align" data-val="${k}" aria-pressed="${(L.align || 'left') === k}">${l}</button>`).join('')}</span></span>
+      <label class="switch"><input type="checkbox" id="rzFit" ${L.onePage ? 'checked' : ''}/><span class="track"></span>Fit to one page</label>
+      <div class="rz-pop">
+        <button class="btn sm" type="button" data-menu="sections" aria-expanded="${z.menu === 'sections'}">Sections ▾</button>
+        ${z.menu === 'sections' ? `<div class="rz-menu" role="dialog" aria-label="Sections">
+          <h4>Drag to reorder · click the eye to hide</h4>
+          <ol class="rz-list" id="rzSecList">${orderNow().map((k, i) => { const on = !(L.hidden || []).includes(k); return `<li draggable="true" data-key="${esc(k)}" class="${on ? '' : 'off'}"><span class="num">${i + 1}</span><span class="handle" aria-hidden="true">⋮⋮</span><span class="name">${esc(labelOf(k))}</span><button type="button" class="eye" data-hide="${esc(k)}" aria-pressed="${on}" aria-label="${on ? 'Hide' : 'Show'} ${esc(labelOf(k))}">${EYE(on)}</button></li>`; }).join('')}</ol>
+          <hr/><button type="button" class="row-btn" id="rzAddCustom">+ Add custom section</button>
+        </div>` : ''}
+      </div>
+      <div class="rz-pop">
+        <button class="btn sm" type="button" data-menu="more" aria-expanded="${z.menu === 'more'}">More ▾</button>
+        ${z.menu === 'more' ? `<div class="rz-menu right" role="dialog" aria-label="More options">
+          <label class="switch" style="padding:4px 6px 8px;font-size:13px"><input type="checkbox" id="rzCenter" ${L.header !== 'left' ? 'checked' : ''}/><span class="track"></span>Center name and contact</label>
+          <label class="switch" style="padding:4px 6px 8px;font-size:13px"><input type="checkbox" id="rzLabels" ${L.linksAsLabels ? 'checked' : ''}/><span class="track"></span>Show links as labels</label>
+          <h4>Contact details in the header</h4>
+          <ul class="rz-list">${RZ_LINKS.map(([k, l]) => { const on = !(L.hiddenLinks || ['country']).includes(k); return `<li class="${on ? '' : 'off'}"><span class="name">${l}</span><button type="button" class="eye" data-link="${k}" aria-pressed="${on}" aria-label="${on ? 'Hide' : 'Show'} ${l}">${EYE(on)}</button></li>`; }).join('')}</ul>
+          <hr/><button type="button" class="row-btn" id="rzEditFromMenu">✎ Edit resume text directly</button>
+        </div>` : ''}
+      </div>
+      <span class="spacer"></span>
+      ${editing ? '<button class="btn sm" type="button" id="rzCancel">Cancel</button><button class="btn sm primary" type="button" id="rzSave">Save changes</button>'
+        : '<button class="btn sm" type="button" id="rzEdit">✎ Edit text</button>'}
+      ${editing ? '<div class="rz-editbar" role="status"><span>Click any text on the page to change it. Enter adds a bullet, ⋮⋮ drags it, × deletes it.</span><span class="spacer"></span><b>Not saved yet</b></div>' : ''}
+    </div>
+
+    <div class="rz-canvas" id="rzCanvas"><div class="rz-paper" id="rzPaper"><iframe id="rzFrame" title="${editing ? 'Resume editor' : 'Resume preview'}"></iframe></div><p class="rz-pages" id="rzPages"></p></div>`}
+    <details class="sec rz-examples" style="margin-top:18px" ${state.rzExamplesOpen ? 'open' : ''} id="examplesSec">
+      <summary><h2>Teach "Match the job" how you tailor</h2><span class="muted" style="font-size:13px">Optional</span></summary>
+      <p class="muted" style="margin:0 0 12px;font-size:13px">Add a resume and the version you tailored for one job. "Match the job" learns your style from these and reuses bullets you wrote.</p>
+      <form id="exampleForm" class="example-form" style="display:grid;gap:10px;max-width:640px">
+        <label>Original resume <input type="file" name="original" accept=".pdf,.doc,.docx,.txt" required/></label>
+        <label>Tailored resume <input type="file" name="tailored" accept=".pdf,.doc,.docx,.txt" required/></label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap"><label style="flex:1">Job title <input name="jobTitle" maxlength="200"/></label><label style="flex:1">Company <input name="company" maxlength="200"/></label></div>
+        <label>Job posting <span class="muted">(optional, needed for training)</span><textarea name="jobDescription" rows="5"></textarea></label>
+        <div><button class="btn primary" type="submit">Save example</button></div>
+      </form>
+      <div id="exampleResult"></div>
+      <ul id="exampleList" class="example-list" style="list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px"></ul>
+    </details>`;
+
+  // ── Wiring ──
+  const rerender = () => renderResumeTab();
+  let saveTimer = null;
+  const setLayout = patch => {
+    Object.assign(L, patch);
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async () => {
+      try { const { data } = await api('PATCH', `/users/${USER}/resume-profiles/${rp.id}`, { layout: L }); state.rp.layout = data.layout; } catch (err) { toast(err.message); }
+    }, 350);
+    rerender();
+  };
+  $$('[data-view]').forEach(b => b.addEventListener('click', () => { z.view = b.dataset.view; z.menu = null; rerender(); }));
+  $$('[data-menu]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); z.menu = z.menu === b.dataset.menu ? null : b.dataset.menu; rerender(); }));
+  $$('.rz-menu').forEach(m => m.addEventListener('click', e => e.stopPropagation()));
+  // Keep an open menu on screen: open it leftward when it would run off the right edge.
+  $$('.rz-menu').forEach(m => { if (m.getBoundingClientRect().right > window.innerWidth - 8) m.classList.add('right'); });
+  if (z.menu) setTimeout(() => document.addEventListener('click', function close() { document.removeEventListener('click', close); if (state.rz === z && z.menu) { z.menu = null; rerender(); } }), 0);
+  $$('[data-set]').forEach(b => b.addEventListener('click', () => setLayout({ [b.dataset.set]: b.dataset.val })));
+  $('#rzFont')?.addEventListener('change', e => setLayout({ font: e.target.value }));
+  $$('[data-size]').forEach(b => b.addEventListener('click', () => setLayout({ size: Math.min(12, Math.max(8.5, (L.size || 10.5) + Number(b.dataset.size))) })));
+  $('#rzFit')?.addEventListener('change', e => setLayout({ onePage: e.target.checked }));
+  $('#rzLabels')?.addEventListener('change', e => setLayout({ linksAsLabels: e.target.checked }));
+  $('#rzCenter')?.addEventListener('change', e => setLayout({ header: e.target.checked ? 'center' : 'left' }));
+  $$('[data-link]').forEach(b => b.addEventListener('click', () => {
+    const hidden = new Set(L.hiddenLinks || ['country']); hidden.has(b.dataset.link) ? hidden.delete(b.dataset.link) : hidden.add(b.dataset.link);
+    setLayout({ hiddenLinks: [...hidden] });
+  }));
+  $$('[data-hide]').forEach(b => b.addEventListener('click', () => {
+    const hidden = new Set(L.hidden || []); hidden.has(b.dataset.hide) ? hidden.delete(b.dataset.hide) : hidden.add(b.dataset.hide);
+    setLayout({ hidden: [...hidden] });
+  }));
+  // Drag to reorder sections.
+  const list = $('#rzSecList');
+  if (list) {
+    let from = null;
+    $$('li', list).forEach(li => {
+      li.addEventListener('dragstart', e => { from = li.dataset.key; e.dataTransfer.effectAllowed = 'move'; });
+      li.addEventListener('dragover', e => { e.preventDefault(); $$('li', list).forEach(x => x.classList.toggle('drag-over', x === li)); });
+      li.addEventListener('drop', e => {
+        e.preventDefault(); const to = li.dataset.key; if (!from || from === to) return;
+        const order = orderNow().filter(k => k !== from); order.splice(order.indexOf(to), 0, from); setLayout({ order });
+      });
+    });
+    list.addEventListener('dragend', () => $$('li', list).forEach(x => x.classList.remove('drag-over')));
+  }
+  const startEdit = () => { z.mode = 'edit'; z.draft = structuredClone(rp.sections); z.menu = null; rerender(); };
+  $('#rzEdit')?.addEventListener('click', startEdit);
+  $('#rzEditFromMenu')?.addEventListener('click', startEdit);
+  $('#rzAddCustom')?.addEventListener('click', () => {
+    if (z.mode !== 'edit') { z.mode = 'edit'; z.draft = structuredClone(rp.sections); }
+    (z.draft.custom ||= []).push({ title: 'New section', body: '' });
+    const key = `custom:${z.draft.custom.length - 1}`;
+    if (L.order) L.order = [...L.order, key];
+    z.focus = `custom.${z.draft.custom.length - 1}.body`; z.menu = null; rerender();
+  });
+  $('#rzCancel')?.addEventListener('click', () => { z.mode = 'view'; z.draft = null; rerender(); });
+  $('#rzSave')?.addEventListener('click', async e => {
+    const frame = $('#rzFrame'); collect(frame.contentDocument);
+    e.target.disabled = true;
+    try {
+      const { data } = await api('PATCH', `/users/${USER}/resume-profiles/${rp.id}`, { sections: z.draft, layout: L });
+      state.rp = data; state.profile = null; state.feed = null; z.mode = 'view'; z.draft = null;
+      toast('Resume saved'); loadRailProfile(); renderResumeTab();
+    } catch (err) { toast(err.message); e.target.disabled = false; }
+  });
+  $('#examplesSec')?.addEventListener('toggle', e => { state.rzExamplesOpen = e.target.open; });
+
+  // Replace (upload) — same import as before.
+  const drop = $('#drop');
+  if (drop) {
+    const handle = async file => {
+      $('#importResult').innerHTML = `<div class="notice info">Reading ${esc(file.name)}…</div>`;
+      try {
+        const text = await parseResumeFile(file);
+        const mode = $('input[name=mode]:checked').value;
+        const { data } = await api('POST', `/users/${USER}/resume-profiles/${rp.id}/import-resume`, { text, filename: file.name, mode });
+        // Keep the file itself too, so it can be downloaded later.
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        const type = file.type || { pdf: 'application/pdf', doc: 'application/msword', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', txt: 'text/plain' }[ext] || 'application/octet-stream';
+        const up = await fetch(`${API}/users/${USER}/resume-profiles/${rp.id}/original`, { method: 'PUT', headers: { 'Content-Type': type, 'X-Filename': encodeURIComponent(file.name) }, body: file });
+        if (!up.ok) toast((await up.json().catch(() => ({}))).error || 'The file itself couldn\'t be kept, but its text was read');
+        state.rp = (await api('GET', `/users/${USER}/resume-profiles/${rp.id}`)).data;
+        state.profile = null; state.profileSkills = null; state.feed = null; z.menu = null;
+        const x = data.extracted;
+        toast(`Read ${x.experience} roles, ${x.projects} projects and ${x.skills} skills from ${file.name}`);
+        loadRailProfile(); renderResumeTab();
+      } catch (err) { $('#importResult').innerHTML = `<div class="notice bad">${esc(err.message)}</div>`; }
+    };
+    $('#resumeFile').addEventListener('change', e => e.target.files[0] && handle(e.target.files[0]));
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); e.dataTransfer.files[0] && handle(e.dataTransfer.files[0]); });
+  }
+  setupTailoringExamples();
+  if (z.view === 'original') return;
+
+  // ── The page itself ──
+  function collect(doc) {
+    if (!doc || z.mode !== 'edit') return;
+    $$('[data-path]', doc).forEach(el => {
+      const path = el.dataset.path; const text = (el.classList.contains('multiline') ? el.innerText : el.textContent).replace(/ /g, ' ').trim();
+      if (/\.(items|technologies)$/.test(path)) return rzSet(z.draft, path, text.split(/\s*,\s*/).filter(Boolean));
+      if (/^experience\.\d+\.endDate$/.test(path)) {
+        const cur = !text || /^(present|current|now)$/i.test(text);
+        rzSet(z.draft, path.replace(/endDate$/, 'current'), cur); return rzSet(z.draft, path, cur ? '' : rzMonth(text));
+      }
+      if (/(Date|\.date)$/.test(path)) return rzSet(z.draft, path, rzMonth(text));
+      rzSet(z.draft, path, text);
+    });
+  }
+  const blank = { experience: { company: '', title: '', location: '', startDate: '', endDate: '', current: false, bullets: [''] },
+    projects: { name: '', url: '', technologies: [], bullets: [''] }, education: { school: '', degree: '', field: '', startDate: '', endDate: '', gpa: '' },
+    skills: { group: 'Skills', items: [] }, certifications: { name: '', issuer: '', date: '' } };
+  const firstField = { experience: 'title', projects: 'name', education: 'degree', skills: 'group', certifications: 'name' };
+  const act = (doc, a, key) => {
+    collect(doc);
+    if (a === 'add-bullet') { const b = (rzGet(z.draft, key).bullets ||= []); b.push(''); z.focus = `${key}.bullets.${b.length - 1}`; }
+    if (a === 'del-bullet' || a === 'del-entry') { const parts = key.split('.'); const i = +parts.pop(); rzGet(z.draft, parts.join('.')).splice(i, 1); }
+    if (a === 'add-entry') { (z.draft[key] ||= []).push(structuredClone(blank[key])); z.focus = `${key}.${z.draft[key].length - 1}.${firstField[key]}`; }
+    paint();
+  };
+  async function paint() {
+    const frame = $('#rzFrame'); if (!frame) return;
+    let html;
+    try {
+      const res = await fetch(`${API}/users/${USER}/resume-profiles/${rp.id}/render`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(z.mode === 'edit' ? { sections: z.draft, layout: L, edit: true } : { layout: L }) });
+      html = await res.text();
+    } catch { html = '<p style="font:14px system-ui;padding:24px">The preview couldn\'t load. Is the app server running?</p>'; }
+    frame.onload = () => {
+      const doc = frame.contentDocument; if (!doc) return;
+      const fit = () => {
+        const paper = $('#rzPaper'); const canvas = $('#rzCanvas'); if (!paper || !canvas) return;
+        const h = Math.max(doc.documentElement.scrollHeight, 1056);
+        frame.style.height = `${h}px`;
+        const scale = Math.min(1, (canvas.clientWidth - 24) / 816);
+        paper.style.transform = `scale(${scale})`; paper.style.height = `${h * scale}px`; paper.style.width = `${816}px`;
+        paper.style.marginLeft = `${Math.max(0, (canvas.clientWidth - 24 - 816 * scale) / 2)}px`;
+        const content = doc.getElementById('content'); const pages = $('#rzPages');
+        if (content && pages) {
+          const over = content.scrollHeight > 960 + 2;
+          pages.className = `rz-pages${over && z.mode !== 'edit' ? ' over' : ''}`;
+          pages.textContent = z.mode === 'edit' ? '' : over ? `Runs past one page (about ${Math.ceil(content.scrollHeight / 960)} pages). Turn on "Fit to one page", hide a section, or make the text smaller.`
+            : L.onePage && doc.documentElement.dataset.fitSize ? `Fits on one page (text at ${doc.documentElement.dataset.fitSize}pt).` : 'One page.';
+        }
+      };
+      fit(); new ResizeObserver(fit).observe($('#rzCanvas'));
+      if (z.mode !== 'edit') return;
+      doc.addEventListener('input', fit);
+      doc.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b) { e.preventDefault(); act(doc, b.dataset.act, b.dataset.key); } });
+      doc.addEventListener('keydown', e => {
+        const el = e.target.closest?.('[data-path]'); if (!el) return;
+        const m = el.dataset.path.match(/^(.*)\.bullets\.(\d+)$/);
+        if (e.key === 'Enter' && !el.classList.contains('multiline')) {
+          e.preventDefault();
+          if (m) { collect(doc); rzGet(z.draft, m[1]).bullets.splice(+m[2] + 1, 0, ''); z.focus = `${m[1]}.bullets.${+m[2] + 1}`; paint(); }
+          else el.blur();
+        }
+        if (e.key === 'Backspace' && m && !el.textContent.trim()) { e.preventDefault(); collect(doc); rzGet(z.draft, m[1]).bullets.splice(+m[2], 1); z.focus = +m[2] > 0 ? `${m[1]}.bullets.${+m[2] - 1}` : null; paint(); }
+      });
+      // Drag bullets within a role or project.
+      let drag = null;
+      doc.addEventListener('dragstart', e => { const li = e.target.closest?.('li[data-index]'); if (!li) return; drag = { list: li.parentElement.dataset.list, from: +li.dataset.index }; li.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', ''); });
+      doc.addEventListener('dragover', e => { const li = e.target.closest?.('li[data-index]'); if (!drag || !li || li.parentElement.dataset.list !== drag.list) return; e.preventDefault(); $$('li.drag-over', doc).forEach(x => x.classList.remove('drag-over')); li.classList.add('drag-over'); });
+      doc.addEventListener('drop', e => {
+        const li = e.target.closest?.('li[data-index]'); if (!drag || !li || li.parentElement.dataset.list !== drag.list) return;
+        e.preventDefault(); collect(doc);
+        const arr = rzGet(z.draft, drag.list); const [moved] = arr.splice(drag.from, 1); arr.splice(+li.dataset.index, 0, moved); drag = null; paint();
+      });
+      doc.addEventListener('dragend', () => { drag = null; $$('.dragging, .drag-over', doc).forEach(x => x.classList.remove('dragging', 'drag-over')); });
+      if (z.focus) { const el = doc.querySelector(`[data-path="${z.focus}"]`); z.focus = null; if (el) { el.focus(); const r = doc.createRange(); r.selectNodeContents(el); r.collapse(false); const s = doc.getSelection(); s.removeAllRanges(); s.addRange(r); el.scrollIntoView({ block: 'center' }); } }
+    };
+    frame.srcdoc = html;
+  }
+  paint();
+}
+async function parseResumeFile(file) {
+  const fd = new FormData(); fd.append('resume', file);
+  const r = await fetch('/api/parse-resume', { method: 'POST', body: fd }); const parsed = await r.json();
+  if (!r.ok) throw new Error(parsed.error || `${file.name} couldn't be read`);
+  return parsed.text;
+}
+function setupTailoringExamples() {
+  const list = async () => {
+    const { data } = await api('GET', `/users/${USER}/resume-examples`);
+    const ex = data?.examples || [];
+    $('#exampleList').innerHTML = ex.length ? ex.map(x => `<li style="display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 12px">
+        <span><b>${esc(x.jobTitle || 'Untitled role')}</b>${x.company ? ` at ${esc(x.company)}` : ''}<br><span class="muted">${x.bullets.original} bullets became ${x.bullets.tailored}${x.hasPosting ? '' : '. No posting, so it isn\'t used for training'}</span></span>
+        <button class="btn" type="button" data-del="${x.id}">Remove</button></li>`).join('') : '<li class="muted">No examples yet.</li>';
+  };
+  $('#exampleList').addEventListener('click', async e => {
+    const id = e.target.closest('[data-del]')?.dataset.del; if (!id) return;
+    await api('DELETE', `/users/${USER}/resume-examples/${id}`); toast('Example removed'); list();
+  });
+  $('#exampleForm').addEventListener('submit', async e => {
+    e.preventDefault(); const f = e.target; const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
+    $('#exampleResult').innerHTML = '<div class="notice info">Reading both resumes…</div>';
+    try {
+      const [original, tailored] = await Promise.all([parseResumeFile(f.original.files[0]), parseResumeFile(f.tailored.files[0])]);
+      const { data, error } = await api('POST', `/users/${USER}/resume-examples`, { original, tailored, jobTitle: f.jobTitle.value, company: f.company.value, jobDescription: f.jobDescription.value });
+      if (error || !data?.id) throw new Error(error || data?.error || 'The example couldn\'t be saved');
+      $('#exampleResult').innerHTML = `<div class="notice info">Saved. ${data.bullets.original} bullets in the original, ${data.bullets.tailored} in the tailored version.</div>`;
+      f.reset(); list();
+    } catch (err) { $('#exampleResult').innerHTML = `<div class="notice bad">${esc(err.message)}</div>`; }
+    finally { btn.disabled = false; }
+  });
+  list();
+}
+function renderLetterTab() {
+  const rp = state.rp;
+  $('#tabBody').innerHTML = `<section class="sec"><div class="sec-head"><div><h2>Cover letter template</h2><p>Write {company} and {title} where the job's details should go. Each profile keeps its own template.</p></div></div>
+    <textarea id="letter" rows="16" style="max-width:76ch" aria-label="Cover letter template">${esc(rp.coverLetter || '')}</textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn primary" id="saveLetter" type="button">Save template</button><button class="btn quiet" id="starter" type="button">Start from a draft</button></div></section>`;
+  $('#saveLetter').addEventListener('click', async () => { await patchRP({ coverLetter: $('#letter').value }, 'Template saved.'); });
+  $('#starter').addEventListener('click', () => {
+    const s = rp.sections; const latest = s.experience[0];
+    if ($('#letter').value.trim() && !confirm('Replace the current text with a draft?')) return;
+    const did = latest ? (latest.bullets[0] || 'shipped production software end to end').replace(/^[A-Z](?![A-Z])/, c => c.toLowerCase()).replace(/\.$/, '') : '';
+    $('#letter').value = [`Dear {company} hiring team,`, `I'm applying for the {title} role. ${s.summary || ''}`.trim(),
+      latest ? `Most recently, as ${latest.title} at ${latest.company}, I ${did}.` : '',
+      `I'd welcome the chance to talk about how I can help {company}.`, `Best regards,\n${s.personal.fullName || ''}`].filter(Boolean).join('\n\n');
+  });
+}
+
+// ═══ Theme + boot ═══════════════════════════════════════════════════════════
+const savedTheme = store.get('theme', null); if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+$('#themeBtn').addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark'; store.set('theme', document.documentElement.dataset.theme);
+});
+route();
+</script>
+</body>
+</html>

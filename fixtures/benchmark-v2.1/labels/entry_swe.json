@@ -1,0 +1,458 @@
+{
+  "581": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: WEAK"
+    ],
+    "bucket": "A",
+    "title": "Software Engineer, Developer Productivity",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "2261": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "C",
+    "title": "Principal AI Engineer, AI Agent Development",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "7516": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "B",
+    "title": "Full Stack Software Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "8993": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Exact role but severe seniority gap"
+    ],
+    "bucket": "E",
+    "title": "Staff Software Engineer, Compute Platform (Routing)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "13442": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "I",
+    "title": "Software Engineer, New Grad",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "20369": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Quality Assurance Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "21480": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Senior/Staff Controls Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "31002": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Exact role but severe seniority gap"
+    ],
+    "bucket": "A",
+    "title": "Developer Marketing Manager",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "33326": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Exact role but severe seniority gap"
+    ],
+    "bucket": "A",
+    "title": "Staff Software Engineer, Issuing",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "37118": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "D",
+    "title": "People Research Data Scientist, AI Fairness & Bias",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "52319": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Exact role but severe seniority gap"
+    ],
+    "bucket": "A",
+    "title": "Senior Software Engineer, Creator Core Systems",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "53217": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: ADJACENT"
+    ],
+    "bucket": "E",
+    "title": "Staff Backend Engineer - Submission Processing",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "56337": {
+    "label": "BAD",
+    "reasons": [
+      "Different field, no real required-skill overlap"
+    ],
+    "bucket": "F",
+    "title": "Lead Risk Analytics Data Scientist",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "56795": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Role fit: CROSS_FAMILY",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "D",
+    "title": "Specialist, DevSecOps",
+    "roleFitTier": "CROSS_FAMILY",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "60210": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "C",
+    "title": "Staff ML Engineer, Foundation Models",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "60515": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Exact role but severe seniority gap"
+    ],
+    "bucket": "A",
+    "title": "Senior Software Engineer, CAD Interoperability",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "60649": {
+    "label": "EXCELLENT",
+    "reasons": [
+      "Exact target role",
+      "Seniority matches",
+      "Strong required-skill fit"
+    ],
+    "bucket": "A",
+    "title": "Associate Software Engineer (UI)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "62466": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Salary below required minimum"
+    ],
+    "bucket": "H",
+    "title": "1146 - Fullstack Engineer",
+    "set": "eligibility"
+  },
+  "65643": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Software Engineer - AI Platforms",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "1281399": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: RELATED"
+    ],
+    "bucket": "C",
+    "title": "Senior Machine Learning Scientist, Imaging",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "1284473": {
+    "label": "HARD_INELIGIBLE",
+    "reasons": [
+      "Excluded employment type: CONTRACT"
+    ],
+    "bucket": "H",
+    "title": "Senior Software Engineer, Payments",
+    "set": "eligibility"
+  },
+  "1290327": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MODERATE",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "A",
+    "title": "Software Engineer, AI Product + Agents",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MODERATE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1294402": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Exact role but severe seniority gap"
+    ],
+    "bucket": "A",
+    "title": "Principal Software Engineer",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1297381": {
+    "label": "BAD",
+    "reasons": [
+      "Severe seniority mismatch",
+      "Role fit: ADJACENT"
+    ],
+    "bucket": "B",
+    "title": "Staff Front End Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "1305088": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Forward Deployed Engineer",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "2312520": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "F",
+    "title": "Senior Director Finance, GTM",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3284689": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Backend Engineer",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3301618": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Embedded Systems Engineer, Robotics Hardware",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  },
+  "3306069": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: ADJACENT",
+      "Seniority: MATCH",
+      "Skill overlap: STRONG"
+    ],
+    "bucket": "B",
+    "title": "Software Engineer (Backend)",
+    "roleFitTier": "ADJACENT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3325206": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Automation & Performance Engineer | 12 weeks+ (575)",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "3344287": {
+    "label": "BORDERLINE",
+    "reasons": [
+      "Exact role but severe seniority gap"
+    ],
+    "bucket": "E",
+    "title": "Senior Staff Software Engineer, Autonomous Pilot Integration – Expeditionary (R5193)",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5040692": {
+    "label": "GOOD",
+    "reasons": [
+      "Role fit: EXACT",
+      "Seniority: MATCH",
+      "Skill overlap: PARTIAL"
+    ],
+    "bucket": "A",
+    "title": "Software Engineer – ML Infrastructure",
+    "roleFitTier": "EXACT",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "PARTIAL",
+    "set": "quality"
+  },
+  "5059643": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "G",
+    "title": "Senior Staff Engineer, Environmental Control Systems (RX) (R5905)",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5061713": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "I",
+    "title": "Business Development Representative (SaaS & Cybersecurity) - Central or Northeast",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5086326": {
+    "label": "BAD",
+    "reasons": [
+      "Wrong profession / unrelated role family"
+    ],
+    "bucket": "D",
+    "title": "Commercial Finance and Operations Manager",
+    "roleFitTier": "UNRELATED",
+    "seniorityGapTier": "SEVERE",
+    "skillOverlapTier": "STRONG",
+    "set": "quality"
+  },
+  "5090146": {
+    "label": "BAD",
+    "reasons": [
+      "Major required-skill gap",
+      "Role fit: RELATED"
+    ],
+    "bucket": "C",
+    "title": "Artificial Intelligence Engineer",
+    "roleFitTier": "RELATED",
+    "seniorityGapTier": "MATCH",
+    "skillOverlapTier": "WEAK",
+    "set": "quality"
+  }
+}

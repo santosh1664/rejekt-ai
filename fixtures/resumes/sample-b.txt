@@ -1,0 +1,22 @@
+Jordan Lee
+jordan.lee@example.org · +1 512 555 0199 · Austin, TX · https://jordanlee.dev
+
+Summary
+Backend engineer focused on payments and data platforms.
+
+Work Experience
+Northwind Payments
+Senior Backend Engineer, Austin, TX
+03/2022 - Present
+- Led migration of settlement service to Go, improving throughput 4x
+- Mentored 3 engineers
+Acme Corp
+Backend Engineer
+2019 - 2022
+- Built Kafka-based event pipelines
+
+Education
+B.S. Computer Science, University of Texas at Austin, 2019
+
+Skills
+Go, Python, PostgreSQL, Kafka, AWS, Terraform

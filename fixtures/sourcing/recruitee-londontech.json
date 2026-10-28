@@ -1,0 +1,48 @@
+{
+  "offers": [
+    {
+      "id": 2795924,
+      "slug": "backend-engineer",
+      "title": "Backend Engineer",
+      "company_name": "London Tech",
+      "careers_url": "https://londontech.recruitee.com/o/backend-engineer",
+      "careers_apply_url": "https://londontech.recruitee.com/o/backend-engineer/c/new",
+      "location": "London, United Kingdom",
+      "city": "London",
+      "state_code": null,
+      "state_name": "England",
+      "country": "United Kingdom",
+      "country_code": "GB",
+      "remote": true,
+      "hybrid": false,
+      "on_site": false,
+      "employment_type_code": "contract",
+      "experience_code": "experienced",
+      "education_code": "bachelor_degree",
+      "min_hours": 40,
+      "published_at": "2026-10-23 13:27:46 UTC",
+      "created_at": "2026-10-23 13:05:02 UTC",
+      "updated_at": "2026-10-23 13:27:46 UTC",
+      "close_at": null,
+      "status": "published",
+      "department": null,
+      "salary": {
+        "max": null,
+        "min": null,
+        "period": null,
+        "currency": null
+      },
+      "description": "<p class=\"Paragraph SCXW210525911 BCX8\"><strong>About 8 West Consulting</strong></p><p class=\"Paragraph SCXW210525911 BCX8\">8 West Consulting provides consultancy services and leading-edge software solutions to a diverse portfolio of US, EU and UK-based clients. We work across a range of sectors including <strong>insurance, healthcare and retail </strong>market, delivering innovative technology so",
+      "requirements": "<p class=\"MsoNormal\"><strong>Key Responsibilities</strong></p><p class=\"MsoNormal\">·&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Design, develop, test and maintain robust, scalable Python applications and services</p><p class=\"MsoNormal\">·&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Contribu",
+      "locations": [
+        {
+          "name": "Cork, T12 AY18",
+          "city": "Cork",
+          "state": "Munster",
+          "country": "Ireland",
+          "country_code": "IE"
+        }
+      ]
+    }
+  ]
+}

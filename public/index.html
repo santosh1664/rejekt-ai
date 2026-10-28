@@ -1,0 +1,1797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rejekt.ai</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #000000;
+    --line: rgba(0,0,0,0.14); --line-soft: rgba(0,0,0,0.05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #000000; --fg: #ffffff;
+    --line: rgba(255,255,255,0.16); --line-soft: rgba(255,255,255,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #000000; --fg: #ffffff;
+      --line: rgba(255,255,255,0.16); --line-soft: rgba(255,255,255,0.06);
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  a { text-decoration: none; color: inherit; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 40px; border-bottom: 1px solid var(--line); flex-wrap: wrap; gap: 12px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand-mark { width: 18px; height: 18px; }
+  .brand-name { font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+  .brand-sub { font-size: 12.5px; opacity: 0.55; }
+  .stats { display: flex; gap: 22px; flex-wrap: wrap; }
+  .stat { text-align: right; }
+  .stat-num { font-size: 13px; font-weight: 600; letter-spacing: -0.01em; }
+  .stat-label { font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+  main { max-width: 960px; margin: 0 auto; padding: 36px 40px 80px; }
+
+  .intro { margin-bottom: 28px; }
+  .intro h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .intro p { font-size: 14px; opacity: 0.6; margin: 0; max-width: 560px; line-height: 1.5; }
+
+  /* ── Search row ─────────────────────────────── */
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; align-items: flex-start; }
+
+  .search-wrap { flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--line); height: 40px; padding: 0 12px;
+  }
+  .search-box svg { flex-shrink: 0; opacity: 0.5; }
+  .search-box input[type="text"] {
+    flex: 1; min-width: 0; border: none; background: transparent;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--fg); outline: none;
+  }
+  .search-box input::placeholder { color: var(--fg); opacity: 0.35; }
+
+  .search-mode { display: flex; gap: 0; border: 1px solid var(--line); width: fit-content; }
+  .search-mode label {
+    display: flex; align-items: center; padding: 5px 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.55;
+    cursor: pointer; white-space: nowrap; border-right: 1px solid var(--line); user-select: none;
+  }
+  .search-mode label:last-child { border-right: none; }
+  .search-mode input[type="radio"] { display: none; }
+  .search-mode label:has(input:checked) { background: var(--fg); color: var(--bg); opacity: 1; }
+
+  select#ats {
+    height: 40px; padding: 0 12px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--fg);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  }
+  label.checkbox {
+    display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px;
+    border: 1px solid var(--line); font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; letter-spacing: 0.02em; text-transform: uppercase;
+    white-space: nowrap; cursor: pointer; user-select: none;
+  }
+  label.checkbox input { display: none; }
+  label.checkbox:has(input:checked) { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+  /* ── Generic dropdown filter button ─────────── */
+  .filter-wrap { position: relative; }
+  .filter-btn {
+    display: flex; align-items: center; gap: 7px; height: 36px; padding: 0 12px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase;
+    cursor: pointer; white-space: nowrap;
+  }
+  .filter-btn.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .filter-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    border: 1px solid currentColor; font-size: 10px; font-weight: 600;
+  }
+  .filter-chevron { font-size: 10px; opacity: 0.7; }
+
+  .filter-dropdown {
+    position: absolute; top: calc(100% + 6px); left: 0; z-index: 200;
+    background: var(--bg); border: 1px solid var(--fg);
+    min-width: 220px; max-height: 360px;
+    display: flex; flex-direction: column;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+  }
+  .filter-dropdown.right { left: auto; right: 0; }
+  .filter-search { padding: 10px 10px 6px; border-bottom: 1px solid var(--line); }
+  .filter-search input {
+    width: 100%; padding: 6px 10px; border: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    color: var(--fg); background: var(--bg); outline: none;
+  }
+  .filter-search input:focus { border-color: var(--fg); }
+  .filter-options { overflow-y: auto; flex: 1; padding: 6px 0; }
+  .filter-option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 14px; font-size: 13px; cursor: pointer;
+  }
+  .filter-option:hover { background: var(--line-soft); }
+  .filter-option input[type="checkbox"] { display: none; }
+  .box { width: 14px; height: 14px; flex-shrink: 0; border: 1.5px solid var(--fg); }
+  .filter-option input:checked ~ .box,
+  .box.checked { background: var(--fg); }
+  .filter-option.hidden { display: none; }
+  .filter-actions {
+    border-top: 1px solid var(--line); padding: 8px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7;
+  }
+  .filter-actions button {
+    background: none; border: none; color: inherit; font: inherit;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 2px; padding: 0;
+  }
+
+  /* ── Salary range dropdown ───────────────────── */
+  .salary-dropdown {
+    position: absolute; top: calc(100% + 6px); left: 0; z-index: 200;
+    background: var(--bg); border: 1px solid var(--fg);
+    min-width: 280px; padding: 16px 16px 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+  }
+  .salary-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .salary-row input[type="number"] {
+    flex: 1; height: 34px; padding: 0 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none;
+  }
+  .salary-row input:focus { border-color: var(--fg); }
+  .salary-sep { font-size: 12px; opacity: 0.5; }
+  .salary-apply {
+    height: 34px; padding: 0 16px; border: 1px solid var(--fg);
+    background: var(--fg); color: var(--bg); font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+    width: 100%;
+  }
+  .salary-clear {
+    display: block; text-align: center; margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; opacity: 0.6;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+  }
+
+  /* ── Date dropdown ───────────────────────────── */
+  .date-option {
+    padding: 9px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    cursor: pointer; border-bottom: 1px solid var(--line-soft);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .date-option:last-child { border-bottom: none; }
+  .date-option:hover { background: var(--line-soft); }
+  .date-option.selected { font-weight: 600; }
+  .date-check { opacity: 0; font-size: 12px; }
+  .date-option.selected .date-check { opacity: 1; }
+
+  /* ── Active chips ────────────────────────────── */
+  .active-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px;
+    border: 1px solid var(--fg);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .chip-x { cursor: pointer; opacity: 0.6; font-size: 13px; line-height: 1; }
+  .chip-x:hover { opacity: 1; }
+
+  .result-count {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.5;
+    margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line);
+  }
+
+  /* ── Job list ────────────────────────────────── */
+  .job-card {
+    display: block; padding: 18px 4px; border-bottom: 1px solid var(--line);
+    transition: opacity 0.12s;
+  }
+  .job-card:hover { opacity: 0.6; }
+  .job-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+  .job-title { font-weight: 600; font-size: 15.5px; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .job-company { font-size: 13px; opacity: 0.55; margin-bottom: 10px; }
+  .job-date { font-family: 'JetBrains Mono', monospace; font-size: 11px; opacity: 0.4; white-space: nowrap; padding-top: 2px; }
+  .job-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 3px 7px; border: 1px solid var(--line);
+  }
+  .tag.remote   { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .tag.hybrid   { border-color: var(--fg); }
+  .tag.salary   { opacity: 0.75; }
+  .tag.level    { opacity: 0.8; }
+  .tag.sponsor  { background: rgba(0,200,100,0.12); border-color: rgba(0,200,100,0.5); }
+  .tag.emp-type { opacity: 0.8; }
+  .match-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 3px 8px; margin-left: auto;
+    border: 1px solid rgba(100,200,100,0.6);
+    background: rgba(0,200,100,0.1); color: rgb(0,150,75);
+  }
+  /* Profile-fit badge — how well a job matches the candidate's saved profile.
+     Kept monochrome (unlike .match-badge's green) so it reads as part of the
+     site's own black/white system rather than a third accent color; tier is
+     conveyed by weight/fill instead of hue. */
+  .profile-match {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 3px 8px; border: 1px solid var(--fg);
+  }
+  .profile-match.strong { background: var(--fg); color: var(--bg); }
+  .profile-match.good   { background: transparent; color: var(--fg); }
+  .profile-match.fair   { border-color: var(--line); opacity: 0.6; }
+
+  .empty, .loading {
+    text-align: center; padding: 70px 20px; opacity: 0.4;
+    font-size: 13px; font-family: 'JetBrains Mono', monospace;
+  }
+
+  .pagination {
+    display: flex; justify-content: center; align-items: center;
+    gap: 18px; margin-top: 28px;
+  }
+  .pagination button {
+    height: 36px; padding: 0 18px; border: 1px solid var(--fg);
+    background: var(--bg); color: var(--fg);
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+  }
+  .pagination button:disabled { opacity: 0.25; cursor: default; }
+  .pagination span { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; opacity: 0.5; }
+
+  @media (max-width: 600px) {
+    header { padding: 16px 20px; }
+    main { padding: 24px 20px 60px; }
+  }
+
+  /* ── Profile button ──────────────────────────────── */
+  .profile-btn {
+    display: flex; align-items: center; gap: 7px;
+    height: 36px; padding: 0 14px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  }
+  .profile-btn.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+  /* ── Profile drawer ──────────────────────────────── */
+  .profile-drawer {
+    position: fixed; top: 0; right: 0; width: 460px; height: 100vh;
+    background: var(--bg); border-left: 1px solid var(--line);
+    z-index: 500; display: flex; flex-direction: column;
+    transform: translateX(100%); transition: transform 0.22s ease;
+    box-shadow: -12px 0 40px rgba(0,0,0,0.18);
+  }
+  .profile-drawer.open { transform: translateX(0); }
+  .profile-overlay {
+    display: none; position: fixed; inset: 0; z-index: 499;
+    background: rgba(0,0,0,0.4);
+  }
+  .profile-overlay.open { display: block; }
+
+  .drawer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px; border-bottom: 1px solid var(--line); flex-shrink: 0;
+  }
+  .drawer-title { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+  .drawer-close {
+    background: none; border: none; color: var(--fg); font-size: 20px;
+    cursor: pointer; opacity: 0.5; line-height: 1; padding: 2px 6px;
+  }
+  .drawer-close:hover { opacity: 1; }
+
+  .drawer-body { overflow-y: auto; padding: 20px 24px; flex: 1; }
+
+  .profile-section { margin-bottom: 24px; }
+  .profile-section-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45;
+    margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+  }
+  .profile-field { margin-bottom: 14px; }
+  .profile-label {
+    display: block; font-size: 12px; font-weight: 500; opacity: 0.65;
+    margin-bottom: 5px; letter-spacing: 0.01em;
+  }
+  .profile-input {
+    width: 100%; padding: 8px 12px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+    font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; outline: none;
+    box-sizing: border-box;
+  }
+  .profile-input:focus { border-color: var(--fg); }
+  .profile-select {
+    width: 100%; padding: 8px 12px; appearance: none;
+    border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+    font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; outline: none;
+    cursor: pointer; box-sizing: border-box;
+  }
+  .profile-select:focus { border-color: var(--fg); }
+
+  .profile-chips-wrap { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .profile-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer;
+    user-select: none;
+  }
+  .profile-chip.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+  .profile-hint {
+    font-size: 11.5px; opacity: 0.45; margin-top: 3px; line-height: 1.4;
+  }
+
+  .drawer-footer {
+    padding: 16px 24px; border-top: 1px solid var(--line); flex-shrink: 0;
+  }
+  .save-profile-btn {
+    width: 100%; height: 40px;
+    background: var(--fg); color: var(--bg); border: none;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600;
+    cursor: pointer;
+  }
+  .save-profile-btn:hover { opacity: 0.85; }
+  .profile-saved-msg {
+    text-align: center; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; opacity: 0.55; margin-top: 8px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+
+  /* ── Resume drop zone ────────────────────── */
+  .resume-drop-zone {
+    border: 2px dashed var(--line); padding: 18px 16px; text-align: center;
+    cursor: pointer; margin-bottom: 20px; position: relative;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .resume-drop-zone:hover, .resume-drop-zone.drag-over {
+    border-color: var(--fg); background: rgba(128,128,128,0.05);
+  }
+  .resume-drop-icon { font-size: 24px; margin-bottom: 6px; opacity: 0.6; }
+  .resume-drop-label { font-size: 12px; opacity: 0.7; line-height: 1.4; }
+  .resume-drop-label strong { opacity: 1; }
+  .resume-drop-input { display: none; }
+  .resume-parse-btn {
+    width: 100%; height: 36px; background: none;
+    border: 1px solid var(--fg); color: var(--fg);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+    cursor: pointer; margin-top: 8px; display: none;
+  }
+  .resume-parse-btn:hover { background: var(--fg); color: var(--bg); }
+  .resume-parse-btn.visible { display: block; }
+  .resume-parse-status {
+    font-size: 11px; text-align: center; margin-top: 6px; min-height: 16px;
+    font-family: 'JetBrains Mono', monospace; letter-spacing: 0.03em;
+    opacity: 0.6;
+  }
+
+  /* ── Profile: avatar & header card ─── */
+  .pf-identity {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 0 20px; margin-bottom: 4px;
+  }
+  .pf-avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--fg); color: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 19px; flex-shrink: 0; letter-spacing: -0.02em;
+  }
+  .pf-avatar-meta { min-width: 0; flex: 1; }
+  .pf-avatar-name { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pf-avatar-email { font-size: 11.5px; opacity: 0.5; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pf-avatar-status { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: #22c55e; font-weight: 600; margin-top: 4px; letter-spacing: 0.03em; }
+  .pf-avatar-status::before { content:''; width:6px; height:6px; border-radius:50%; background:#22c55e; flex-shrink:0; }
+
+  /* ── Profile: skills tag input ─────── */
+  .pf-skills-cat-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; opacity: 0.45; margin: 10px 0 4px;
+  }
+  .pf-tag-wrap {
+    border: 1px solid var(--line); background: var(--bg);
+    padding: 5px 8px; display: flex; flex-wrap: wrap; gap: 5px;
+    min-height: 36px; cursor: text; box-sizing: border-box;
+  }
+  .pf-tag-wrap:focus-within { border-color: var(--fg); }
+  .pf-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--surface); border: 1px solid var(--line);
+    padding: 2px 7px; font-size: 11.5px; white-space: nowrap;
+  }
+  .pf-tag-x {
+    cursor: pointer; opacity: 0.45; font-size: 14px; line-height: 1;
+    padding: 0 1px;
+  }
+  .pf-tag-x:hover { opacity: 1; }
+  .pf-tag-input {
+    border: none; outline: none; background: transparent;
+    font-family: 'Space Grotesk', sans-serif; font-size: 13px;
+    color: var(--fg); min-width: 60px; flex: 1; padding: 2px 0;
+  }
+
+  /* ── Profile: certifications ────────── */
+  .pf-cert-row {
+    display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px;
+    align-items: start; margin-bottom: 8px;
+  }
+  .pf-cert-del {
+    background: none; border: none; color: var(--fg); opacity: 0.35;
+    font-size: 18px; line-height: 1; cursor: pointer; padding: 8px 4px 0;
+  }
+  .pf-cert-del:hover { opacity: 1; }
+  .pf-add-btn {
+    background: none; border: 1px dashed var(--line); color: var(--fg);
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 6px 12px; cursor: pointer; opacity: 0.55; margin-top: 4px;
+  }
+  .pf-add-btn:hover { opacity: 1; border-color: var(--fg); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 24 24" fill="none"><path d="M12 2L23 21H1L12 2Z" fill="currentColor"/></svg>
+    <span class="brand-name">Rejekt.ai</span>
+    <span class="brand-sub mono">/ live openings</span>
+  </div>
+  <div class="stats" id="stats">Loading&hellip;</div>
+  <button class="profile-btn" id="profileToggle" title="My Profile">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+    </svg>
+    <span id="profileBtnLabel">My Profile</span>
+  </button>
+</header>
+
+<main>
+  <div class="intro">
+    <h1>Find your next role.</h1>
+    <p>Search live engineering, data and go-to-market openings pulled directly from company career pages.</p>
+  </div>
+
+  <!-- Row 1: Search + role + ATS + remote -->
+  <div class="controls">
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+        </svg>
+        <input type="text" id="q" placeholder="Search title or company&hellip;" autocomplete="off" />
+      </div>
+      <div class="search-mode">
+        <label><input type="radio" name="searchField" value="both" checked /><span>Title &amp; Company</span></label>
+        <label><input type="radio" name="searchField" value="title" /><span>Title only</span></label>
+        <label><input type="radio" name="searchField" value="desc" /><span>Title + Description</span></label>
+      </div>
+    </div>
+
+    <!-- Role multi-select -->
+    <div class="filter-wrap" id="roleWrap">
+      <button class="filter-btn" id="roleBtn" type="button">
+        Role <span class="filter-badge" id="roleBadge" hidden></span>
+        <span class="filter-chevron" id="roleChevron">&#9660;</span>
+      </button>
+      <div class="filter-dropdown" id="roleDropdown" hidden>
+        <div class="filter-search"><input type="text" id="roleSearch" placeholder="Filter roles&hellip;" autocomplete="off" /></div>
+        <div class="filter-options" id="roleOptions"></div>
+        <div class="filter-actions">
+          <span id="roleSelCount">0 selected</span>
+          <button type="button" onclick="clearFilter('categories')">Clear all</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date posted -->
+    <div class="filter-wrap" id="dateWrap">
+      <button class="filter-btn" id="dateBtn" type="button">
+        Date <span class="filter-badge" id="dateBadge" hidden>1</span>
+        <span class="filter-chevron" id="dateChevron">&#9660;</span>
+      </button>
+      <div class="filter-dropdown" id="dateDropdown" style="min-width:180px" hidden>
+        <div class="date-option" data-days="1">Last 24 hours <span class="date-check">&#10003;</span></div>
+        <div class="date-option" data-days="3">Last 3 days <span class="date-check">&#10003;</span></div>
+        <div class="date-option" data-days="7">Last 7 days <span class="date-check">&#10003;</span></div>
+        <div class="date-option" data-days="14">Last 2 weeks <span class="date-check">&#10003;</span></div>
+        <div class="date-option" data-days="30">Last 30 days <span class="date-check">&#10003;</span></div>
+      </div>
+    </div>
+
+    <!-- Workplace -->
+    <div class="filter-wrap" id="workplaceWrap">
+      <button class="filter-btn" id="workplaceBtn" type="button">
+        Workplace <span class="filter-badge" id="workplaceBadge" hidden></span>
+        <span class="filter-chevron" id="workplaceChevron">&#9660;</span>
+      </button>
+      <div class="filter-dropdown" id="workplaceDropdown" hidden>
+        <div class="filter-options" id="workplaceOptions">
+          <div class="filter-option" data-value="REMOTE"><input type="checkbox"/><span class="box"></span>Remote</div>
+          <div class="filter-option" data-value="HYBRID"><input type="checkbox"/><span class="box"></span>Hybrid</div>
+          <div class="filter-option" data-value="ONSITE"><input type="checkbox"/><span class="box"></span>On-site</div>
+          <div class="filter-option" data-value="FLEXIBLE"><input type="checkbox"/><span class="box"></span>Flexible</div>
+        </div>
+        <div class="filter-actions">
+          <span id="workplaceSelCount">0 selected</span>
+          <button type="button" onclick="clearFilter('workplaceTypes')">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Career level -->
+    <div class="filter-wrap" id="levelWrap">
+      <button class="filter-btn" id="levelBtn" type="button">
+        Experience <span class="filter-badge" id="levelBadge" hidden></span>
+        <span class="filter-chevron" id="levelChevron">&#9660;</span>
+      </button>
+      <div class="filter-dropdown" id="levelDropdown" hidden>
+        <div class="filter-options" id="levelOptions">
+          <div class="filter-option" data-value="INTERN"><input type="checkbox"/><span class="box"></span>Intern</div>
+          <div class="filter-option" data-value="ENTRY"><input type="checkbox"/><span class="box"></span>Entry-level</div>
+          <div class="filter-option" data-value="MID"><input type="checkbox"/><span class="box"></span>Mid-level</div>
+          <div class="filter-option" data-value="SENIOR"><input type="checkbox"/><span class="box"></span>Senior</div>
+          <div class="filter-option" data-value="LEAD"><input type="checkbox"/><span class="box"></span>Lead / Principal</div>
+          <div class="filter-option" data-value="MANAGER"><input type="checkbox"/><span class="box"></span>Manager / Director</div>
+          <div class="filter-option" data-value="EXECUTIVE"><input type="checkbox"/><span class="box"></span>Executive (VP+)</div>
+        </div>
+        <div class="filter-actions">
+          <span id="levelSelCount">0 selected</span>
+          <button type="button" onclick="clearFilter('careerLevels')">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employment type -->
+    <div class="filter-wrap" id="empWrap">
+      <button class="filter-btn" id="empBtn" type="button">
+        Job type <span class="filter-badge" id="empBadge" hidden></span>
+        <span class="filter-chevron" id="empChevron">&#9660;</span>
+      </button>
+      <div class="filter-dropdown" id="empDropdown" hidden>
+        <div class="filter-options" id="empOptions">
+          <div class="filter-option" data-value="FULL_TIME"><input type="checkbox"/><span class="box"></span>Full-time</div>
+          <div class="filter-option" data-value="PART_TIME"><input type="checkbox"/><span class="box"></span>Part-time</div>
+          <div class="filter-option" data-value="CONTRACT"><input type="checkbox"/><span class="box"></span>Contract</div>
+          <div class="filter-option" data-value="TEMPORARY"><input type="checkbox"/><span class="box"></span>Temporary</div>
+          <div class="filter-option" data-value="INTERNSHIP"><input type="checkbox"/><span class="box"></span>Internship</div>
+        </div>
+        <div class="filter-actions">
+          <span id="empSelCount">0 selected</span>
+          <button type="button" onclick="clearFilter('employmentTypes')">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Degree -->
+    <div class="filter-wrap" id="degreeWrap">
+      <button class="filter-btn" id="degreeBtn" type="button">
+        Degree <span class="filter-badge" id="degreeBadge" hidden></span>
+        <span class="filter-chevron" id="degreeChevron">&#9660;</span>
+      </button>
+      <div class="filter-dropdown" id="degreeDropdown" style="min-width:190px" hidden>
+        <div class="filter-options" id="degreeOptions">
+          <div class="filter-option" data-value="ASSOCIATE"><input type="checkbox"/><span class="box"></span>Associate's</div>
+          <div class="filter-option" data-value="BACHELOR"><input type="checkbox"/><span class="box"></span>Bachelor's</div>
+          <div class="filter-option" data-value="MASTER"><input type="checkbox"/><span class="box"></span>Master's</div>
+          <div class="filter-option" data-value="PHD"><input type="checkbox"/><span class="box"></span>PhD / Doctorate</div>
+        </div>
+        <div class="filter-actions">
+          <span id="degreeSelCount">0 selected</span>
+          <button type="button" onclick="clearFilter('degreeLevels')">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visa sponsorship -->
+    <div class="filter-wrap" id="visaWrap">
+      <button class="filter-btn" id="visaBtn" type="button">
+        Visa <span class="filter-badge" id="visaBadge" hidden></span>
+        <span class="filter-chevron" id="visaChevron">&#9660;</span>
+      </button>
+      <div class="filter-dropdown right" id="visaDropdown" style="min-width:210px" hidden>
+        <div class="filter-options" id="visaOptions">
+          <div class="filter-option" data-value="AVAILABLE"><input type="checkbox"/><span class="box"></span>Sponsors visa</div>
+          <div class="filter-option" data-value="NOT_AVAILABLE"><input type="checkbox"/><span class="box"></span>Does not sponsor</div>
+          <div class="filter-option" data-value="RESTRICTED"><input type="checkbox"/><span class="box"></span>US citizens only</div>
+          <div class="filter-option" data-value="NOT_MENTIONED"><input type="checkbox"/><span class="box"></span>Not mentioned</div>
+        </div>
+        <div class="filter-actions">
+          <span id="visaSelCount">0 selected</span>
+          <button type="button" onclick="clearFilter('sponsorshipTypes')">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Salary -->
+    <div class="filter-wrap" id="salaryWrap">
+      <button class="filter-btn" id="salaryBtn" type="button">
+        Salary <span class="filter-badge" id="salaryBadge" hidden>1</span>
+        <span class="filter-chevron" id="salaryChevron">&#9660;</span>
+      </button>
+      <div class="salary-dropdown" id="salaryDropdown" hidden>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;opacity:0.6;margin-bottom:10px;">Annual salary (USD)</div>
+        <div class="salary-row">
+          <input type="number" id="salaryMin" placeholder="Min" min="0" step="10000" />
+          <span class="salary-sep">&mdash;</span>
+          <input type="number" id="salaryMax" placeholder="Max" min="0" step="10000" />
+        </div>
+        <button class="salary-apply" type="button" onclick="applySalary()">Apply</button>
+        <span class="salary-clear" onclick="clearFilter('salary')">Clear salary filter</span>
+      </div>
+    </div>
+
+    <select id="ats"><option value="">All platforms</option></select>
+    <label class="checkbox"><input type="checkbox" id="remote" /> Remote only</label>
+  </div>
+
+  <!-- Active filter chips -->
+  <div class="active-chips" id="chips"></div>
+
+  <div class="result-count mono" id="resultCount"></div>
+  <div id="results"><div class="loading">Loading jobs&hellip;</div></div>
+
+  <div class="pagination" id="pagination" hidden>
+    <button id="prev">&larr; Prev</button>
+    <span id="pageLabel"></span>
+    <button id="next">Next &rarr;</button>
+  </div>
+</main>
+
+<!-- Profile overlay -->
+<div class="profile-overlay" id="profileOverlay"></div>
+
+<!-- Profile drawer -->
+<div class="profile-drawer" id="profileDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">My Profile</div>
+    <button class="drawer-close" id="drawerClose" title="Close">&times;</button>
+  </div>
+  <div class="drawer-body">
+
+
+    <!-- Resume Upload & Auto-fill -->
+    <div class="profile-section">
+      <div class="profile-section-title">Import from Résumé</div>
+      <div class="resume-drop-zone" id="resumeDropZone">
+        <input class="resume-drop-input" id="resumeFileInput" type="file" accept=".pdf,.doc,.docx,.txt" />
+        <div class="resume-drop-icon">📄</div>
+        <div class="resume-drop-label"><strong>Drop your résumé here</strong><br><span style="text-decoration:underline;cursor:pointer;">Click to browse</span> — PDF, DOCX, TXT</div>
+      </div>
+      <div id="resumeFileName" class="resume-drop-label" style="text-align:center;margin-top:-12px;margin-bottom:8px;min-height:16px;"></div>
+      <button class="resume-parse-btn" id="resumeParseBtn" type="button">⚡ Extract &amp; Fill Profile</button>
+      <div class="resume-parse-status" id="resumeParseStatus"></div>
+    </div>
+
+    <!-- Identity card -->
+    <div class="pf-identity">
+      <div class="pf-avatar" id="pf_avatar">?</div>
+      <div class="pf-avatar-meta">
+        <div class="pf-avatar-name" id="pf_avatar_name">Add your name</div>
+        <div class="pf-avatar-email" id="pf_avatar_email">—</div>
+        <div class="pf-avatar-status">Open to work</div>
+      </div>
+    </div>
+
+    <!-- Basic Info -->
+    <div class="profile-section">
+      <div class="profile-section-title">Basic Info</div>
+      <div class="profile-field">
+        <label class="profile-label" for="pf_name">Full name</label>
+        <input class="profile-input" id="pf_name" type="text" placeholder="Your name" autocomplete="name" />
+      </div>
+      <div class="profile-field">
+        <label class="profile-label" for="pf_email">Email</label>
+        <input class="profile-input" id="pf_email" type="email" placeholder="you@email.com" autocomplete="email" />
+      </div>
+      <div class="profile-field">
+        <label class="profile-label" for="pf_phone">Phone</label>
+        <input class="profile-input" id="pf_phone" type="tel" placeholder="+1 (555) 123-4567" autocomplete="tel" />
+      </div>
+      <div class="profile-field">
+        <label class="profile-label" for="pf_linkedin">LinkedIn</label>
+        <input class="profile-input" id="pf_linkedin" type="url" placeholder="linkedin.com/in/yourname" />
+      </div>
+      <div class="profile-field">
+        <label class="profile-label" for="pf_github">GitHub / Portfolio</label>
+        <input class="profile-input" id="pf_github" type="url" placeholder="github.com/username" />
+      </div>
+    </div>
+
+    <!-- Professional Summary -->
+    <div class="profile-section">
+      <div class="profile-section-title">Professional Summary</div>
+      <div class="profile-field">
+        <textarea class="profile-input" id="pf_summary" rows="4" placeholder="e.g. AI/ML-focused engineer with 3+ years building agentic systems…" style="resize:vertical;min-height:80px;font-family:'Space Grotesk',sans-serif;line-height:1.5;"></textarea>
+      </div>
+    </div>
+
+    <!-- Job Preferences -->
+    <div class="profile-section">
+      <div class="profile-section-title">Job Preferences</div>
+      <div class="profile-field">
+        <label class="profile-label" for="pf_title">Target job title</label>
+        <input class="profile-input" id="pf_title" type="text" placeholder="e.g. Software Engineer, ML Engineer" />
+        <div class="profile-hint">Used to personalise match scores</div>
+      </div>
+      <div class="profile-field">
+        <label class="profile-label" for="pf_location">Preferred location</label>
+        <input class="profile-input" id="pf_location" type="text" placeholder="e.g. Dallas, TX · Remote" />
+      </div>
+      <div class="profile-field">
+        <label class="profile-label">Workplace preference</label>
+        <div class="profile-chips-wrap" id="pf_workplace">
+          <span class="profile-chip" data-val="REMOTE">Remote</span>
+          <span class="profile-chip" data-val="HYBRID">Hybrid</span>
+          <span class="profile-chip" data-val="ONSITE">On-site</span>
+        </div>
+      </div>
+      <div class="profile-field">
+        <label class="profile-label">Experience level</label>
+        <div class="profile-chips-wrap" id="pf_level">
+          <span class="profile-chip" data-val="ENTRY">Entry</span>
+          <span class="profile-chip" data-val="MID">Mid</span>
+          <span class="profile-chip" data-val="SENIOR">Senior</span>
+          <span class="profile-chip" data-val="LEAD">Lead</span>
+          <span class="profile-chip" data-val="MANAGER">Manager</span>
+        </div>
+      </div>
+      <div class="profile-field">
+        <label class="profile-label">Job type</label>
+        <div class="profile-chips-wrap" id="pf_jobtype">
+          <span class="profile-chip" data-val="FULL_TIME">Full-time</span>
+          <span class="profile-chip" data-val="CONTRACT">Contract</span>
+          <span class="profile-chip" data-val="PART_TIME">Part-time</span>
+          <span class="profile-chip" data-val="INTERNSHIP">Internship</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Salary & Availability -->
+    <div class="profile-section">
+      <div class="profile-section-title">Salary &amp; Availability</div>
+      <div class="profile-field">
+        <label class="profile-label">Expected annual salary (USD)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="profile-input" id="pf_salary_min" type="number" placeholder="Min" step="10000" style="flex:1" />
+          <span style="opacity:0.4;font-size:12px">—</span>
+          <input class="profile-input" id="pf_salary_max" type="number" placeholder="Max" step="10000" style="flex:1" />
+        </div>
+      </div>
+      <div class="profile-field">
+        <label class="profile-label" for="pf_hourly">Hourly rate (USD)</label>
+        <input class="profile-input" id="pf_hourly" type="number" placeholder="e.g. 75" style="width:120px" />
+      </div>
+      <div class="profile-field">
+        <label class="profile-label">Availability preferences</label>
+        <div class="profile-chips-wrap" id="pf_avail">
+          <span class="profile-chip" data-val="relocate">Can relocate</span>
+          <span class="profile-chip" data-val="start_now">Start immediately</span>
+          <span class="profile-chip" data-val="inperson">In-person OK</span>
+          <span class="profile-chip" data-val="transport">Has transport</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Work Authorization -->
+    <div class="profile-section">
+      <div class="profile-section-title">Work Authorization</div>
+      <div class="profile-field">
+        <label class="profile-label" for="pf_work_auth">Visa / permit type</label>
+        <select class="profile-select" id="pf_work_auth">
+          <option value="">Select&hellip;</option>
+          <option value="us_citizen">US Citizen</option>
+          <option value="green_card">Green Card / LPR</option>
+          <option value="h1b">H-1B</option>
+          <option value="opt">OPT / CPT</option>
+          <option value="ead">EAD</option>
+          <option value="tn">TN Visa</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="profile-field">
+        <label class="profile-label">Sponsorship &amp; background</label>
+        <div class="profile-chips-wrap" id="pf_visa">
+          <span class="profile-chip" data-val="authorized">Authorized to work</span>
+          <span class="profile-chip" data-val="needs_sponsor">Needs sponsorship</span>
+          <span class="profile-chip" data-val="gov_clearance">Gov clearance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills by category -->
+    <div class="profile-section">
+      <div class="profile-section-title">Skills <span style="font-weight:400;opacity:0.5;font-size:9px">— Enter or comma to add</span></div>
+
+      <div class="pf-skills-cat-label">Programming Languages</div>
+      <div class="pf-tag-wrap" id="pf_sk_lang" data-skillkey="languages"></div>
+
+      <div class="pf-skills-cat-label">Frameworks &amp; Libraries</div>
+      <div class="pf-tag-wrap" id="pf_sk_fw" data-skillkey="frameworks"></div>
+
+      <div class="pf-skills-cat-label">Databases</div>
+      <div class="pf-tag-wrap" id="pf_sk_db" data-skillkey="databases"></div>
+
+      <div class="pf-skills-cat-label">Tools &amp; Software</div>
+      <div class="pf-tag-wrap" id="pf_sk_tools" data-skillkey="tools"></div>
+
+      <div class="pf-skills-cat-label">Cloud Platforms</div>
+      <div class="pf-tag-wrap" id="pf_sk_cloud" data-skillkey="cloud"></div>
+
+      <div class="pf-skills-cat-label">Soft Skills</div>
+      <div class="pf-tag-wrap" id="pf_sk_soft" data-skillkey="soft"></div>
+    </div>
+
+    <!-- Experience -->
+    <div class="profile-section">
+      <div class="profile-section-title">Experience</div>
+      <div class="profile-field">
+        <label class="profile-label" for="pf_exp_years">Years of total experience</label>
+        <select class="profile-select" id="pf_exp_years">
+          <option value="">Select&hellip;</option>
+          <option value="0">0–1 years</option>
+          <option value="2">2–3 years</option>
+          <option value="4">4–6 years</option>
+          <option value="7">7–10 years</option>
+          <option value="11">10+ years</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Certifications -->
+    <div class="profile-section">
+      <div class="profile-section-title">Certifications</div>
+      <div id="pf_certs_list"></div>
+      <button class="pf-add-btn" id="pf_add_cert" type="button">+ Add certification</button>
+    </div>
+
+  </div>
+  <div class="drawer-footer">
+
+    <button class="save-profile-btn" id="saveProfile">Save Profile</button>
+    <div class="profile-saved-msg" id="profileSavedMsg" hidden>✓ Saved</div>
+  </div>
+</div>
+
+<script>
+const ROLE_FAMILIES = [
+  { value: 'software_engineering',   label: 'Software Engineering' },
+  { value: 'data_science',           label: 'Data Science' },
+  { value: 'product_management',     label: 'Product Management' },
+  { value: 'design',                 label: 'Design' },
+  { value: 'it_operations',          label: 'IT Operations' },
+  { value: 'finance',                label: 'Finance' },
+  { value: 'consulting',             label: 'Consulting' },
+  { value: 'marketing',              label: 'Marketing' },
+  { value: 'sales',                  label: 'Sales' },
+  { value: 'operations',             label: 'Operations' },
+  { value: 'human_resources',        label: 'Human Resources' },
+  { value: 'mechanical_engineering', label: 'Mechanical Engineering' },
+  { value: 'electrical_engineering', label: 'Electrical Engineering' },
+  { value: 'civil_engineering',      label: 'Civil Engineering' },
+  { value: 'chemical_engineering',   label: 'Chemical Engineering' },
+  { value: 'industrial_engineering', label: 'Industrial Engineering' },
+  { value: 'research',               label: 'Research' },
+  { value: 'healthcare',             label: 'Healthcare' },
+  { value: 'legal',                  label: 'Legal' },
+  { value: 'education',              label: 'Education' },
+  { value: 'other',                  label: 'Other' },
+];
+
+const state = {
+  q: '', searchField: 'both',
+  categories:       new Set(),
+  ats: '',
+  remote:           false,
+  careerLevels:     new Set(),
+  employmentTypes:  new Set(),
+  workplaceTypes:   new Set(),
+  sponsorshipTypes: new Set(),
+  degreeLevels:     new Set(),
+  salaryMin:        null,
+  salaryMax:        null,
+  postedWithin:     null,
+  page: 1,
+};
+
+const el = (id) => document.getElementById(id);
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+
+function fmtDate(d) {
+  if (!d) return '';
+  const days = Math.floor((Date.now() - new Date(d)) / 86400000);
+  if (days <= 0) return 'today';
+  if (days === 1) return '1d ago';
+  if (days < 30) return days + 'd ago';
+  return new Date(d).toLocaleDateString();
+}
+function fmtSalary(n) {
+  if (!n) return '';
+  if (n >= 1000) return '$' + Math.round(n / 1000) + 'k';
+  return '$' + n;
+}
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+// ── Dropdown helpers ──────────────────────────────────────────────────────────
+let openDropdown = null;
+
+function closeAllDropdowns() {
+  document.querySelectorAll('.filter-dropdown, .salary-dropdown').forEach(function(d) { d.hidden = true; });
+  document.querySelectorAll('.filter-chevron').forEach(function(c) { c.innerHTML = '&#9660;'; });
+  openDropdown = null;
+}
+
+function toggleDropdownById(dropdownId, chevronId) {
+  var dropdown = el(dropdownId);
+  var isOpen   = !dropdown.hidden;
+  closeAllDropdowns();
+  if (!isOpen) {
+    dropdown.hidden = false;
+    if (chevronId) el(chevronId).innerHTML = '&#9650;';
+    openDropdown = dropdownId;
+  }
+}
+
+document.addEventListener('click', function(e) {
+  if (!openDropdown) return;
+  var dd   = el(openDropdown);
+  var wrap = dd && dd.closest('.filter-wrap');
+  if (wrap && !wrap.contains(e.target)) closeAllDropdowns();
+  else if (!wrap) closeAllDropdowns();
+});
+
+function setupCheckboxDropdown(opts) {
+  var btnId = opts.btnId, dropdownId = opts.dropdownId, chevronId = opts.chevronId,
+      optionsId = opts.optionsId, badgeId = opts.badgeId, countId = opts.countId, stateKey = opts.stateKey;
+
+  el(btnId).addEventListener('click', function(e) { e.stopPropagation(); toggleDropdownById(dropdownId, chevronId); });
+  el(optionsId).querySelectorAll('.filter-option').forEach(function(opt) {
+    opt.addEventListener('click', function() {
+      var val = opt.dataset.value;
+      if (state[stateKey].has(val)) state[stateKey].delete(val);
+      else state[stateKey].add(val);
+      syncCheckboxOptions(optionsId, state[stateKey]);
+      updateBadge(badgeId, btnId, state[stateKey].size);
+      if (countId) el(countId).textContent = state[stateKey].size + ' selected';
+      state.page = 1; loadJobs(); renderChips();
+    });
+  });
+}
+
+function syncCheckboxOptions(optionsId, valueSet) {
+  el(optionsId).querySelectorAll('.filter-option').forEach(function(opt) {
+    var checked = valueSet.has(opt.dataset.value);
+    opt.querySelector('input[type=checkbox]').checked = checked;
+    opt.querySelector('.box').classList.toggle('checked', checked);
+  });
+}
+
+function updateBadge(badgeId, btnId, count) {
+  var badge = el(badgeId);
+  badge.hidden = count === 0;
+  badge.textContent = count;
+  el(btnId).classList.toggle('active', count > 0);
+}
+
+// ── Role dropdown ─────────────────────────────────────────────────────────────
+function buildRoleOptions() {
+  var container = el('roleOptions');
+  container.innerHTML = '';
+  ROLE_FAMILIES.forEach(function(rf) {
+    var div = document.createElement('div');
+    div.className = 'filter-option';
+    div.dataset.value = rf.value;
+    div.dataset.label = rf.label.toLowerCase();
+    div.innerHTML = '<input type="checkbox" value="' + rf.value + '"/><span class="box"></span><span style="flex:1">' + rf.label + '</span>';
+    div.addEventListener('click', function() {
+      if (state.categories.has(rf.value)) state.categories.delete(rf.value);
+      else state.categories.add(rf.value);
+      syncCheckboxOptions('roleOptions', state.categories);
+      updateBadge('roleBadge', 'roleBtn', state.categories.size);
+      el('roleSelCount').textContent = state.categories.size + ' selected';
+      state.page = 1; loadJobs(); renderChips();
+    });
+    container.appendChild(div);
+  });
+}
+
+el('roleBtn').addEventListener('click', function(e) { e.stopPropagation(); toggleDropdownById('roleDropdown', 'roleChevron'); });
+el('roleSearch').addEventListener('input', function(e) {
+  var q = e.target.value.toLowerCase();
+  el('roleOptions').querySelectorAll('.filter-option').forEach(function(opt) {
+    opt.classList.toggle('hidden', q && !opt.dataset.label.includes(q));
+  });
+});
+
+// ── Date dropdown ─────────────────────────────────────────────────────────────
+el('dateBtn').addEventListener('click', function(e) { e.stopPropagation(); toggleDropdownById('dateDropdown', 'dateChevron'); });
+el('dateDropdown').querySelectorAll('.date-option').forEach(function(opt) {
+  opt.addEventListener('click', function() {
+    var days = parseInt(opt.dataset.days);
+    state.postedWithin = (state.postedWithin === days) ? null : days;
+    el('dateDropdown').querySelectorAll('.date-option').forEach(function(o) {
+      o.classList.toggle('selected', parseInt(o.dataset.days) === state.postedWithin);
+    });
+    el('dateBadge').hidden = !state.postedWithin;
+    el('dateBtn').classList.toggle('active', !!state.postedWithin);
+    closeAllDropdowns();
+    state.page = 1; loadJobs(); renderChips();
+  });
+});
+
+// ── Salary ────────────────────────────────────────────────────────────────────
+el('salaryBtn').addEventListener('click', function(e) { e.stopPropagation(); toggleDropdownById('salaryDropdown', 'salaryChevron'); });
+function applySalary() {
+  state.salaryMin = parseInt(el('salaryMin').value) || null;
+  state.salaryMax = parseInt(el('salaryMax').value) || null;
+  var active = state.salaryMin || state.salaryMax;
+  el('salaryBadge').hidden = !active;
+  el('salaryBtn').classList.toggle('active', !!active);
+  closeAllDropdowns();
+  state.page = 1; loadJobs(); renderChips();
+}
+el('salaryMin').addEventListener('keydown', function(e) { if (e.key === 'Enter') applySalary(); });
+el('salaryMax').addEventListener('keydown', function(e) { if (e.key === 'Enter') applySalary(); });
+
+// ── Setup multi-checkbox dropdowns ────────────────────────────────────────────
+setupCheckboxDropdown({ btnId:'workplaceBtn', dropdownId:'workplaceDropdown', chevronId:'workplaceChevron', optionsId:'workplaceOptions', badgeId:'workplaceBadge', countId:'workplaceSelCount', stateKey:'workplaceTypes' });
+setupCheckboxDropdown({ btnId:'levelBtn',     dropdownId:'levelDropdown',     chevronId:'levelChevron',     optionsId:'levelOptions',     badgeId:'levelBadge',     countId:'levelSelCount',     stateKey:'careerLevels' });
+setupCheckboxDropdown({ btnId:'empBtn',       dropdownId:'empDropdown',       chevronId:'empChevron',       optionsId:'empOptions',       badgeId:'empBadge',       countId:'empSelCount',       stateKey:'employmentTypes' });
+setupCheckboxDropdown({ btnId:'degreeBtn',    dropdownId:'degreeDropdown',    chevronId:'degreeChevron',    optionsId:'degreeOptions',    badgeId:'degreeBadge',    countId:'degreeSelCount',    stateKey:'degreeLevels' });
+setupCheckboxDropdown({ btnId:'visaBtn',      dropdownId:'visaDropdown',      chevronId:'visaChevron',      optionsId:'visaOptions',      badgeId:'visaBadge',      countId:'visaSelCount',      stateKey:'sponsorshipTypes' });
+
+// ── Clear filter ──────────────────────────────────────────────────────────────
+function clearFilter(key) {
+  if (key === 'categories')       { state.categories.clear();       syncCheckboxOptions('roleOptions',      state.categories);       updateBadge('roleBadge',      'roleBtn',      0); el('roleSelCount').textContent = '0 selected'; }
+  if (key === 'workplaceTypes')   { state.workplaceTypes.clear();   syncCheckboxOptions('workplaceOptions', state.workplaceTypes);   updateBadge('workplaceBadge', 'workplaceBtn', 0); el('workplaceSelCount').textContent = '0 selected'; }
+  if (key === 'careerLevels')     { state.careerLevels.clear();     syncCheckboxOptions('levelOptions',     state.careerLevels);     updateBadge('levelBadge',     'levelBtn',     0); el('levelSelCount').textContent = '0 selected'; }
+  if (key === 'employmentTypes')  { state.employmentTypes.clear();  syncCheckboxOptions('empOptions',       state.employmentTypes);  updateBadge('empBadge',       'empBtn',       0); el('empSelCount').textContent = '0 selected'; }
+  if (key === 'degreeLevels')     { state.degreeLevels.clear();     syncCheckboxOptions('degreeOptions',    state.degreeLevels);     updateBadge('degreeBadge',    'degreeBtn',    0); el('degreeSelCount').textContent = '0 selected'; }
+  if (key === 'sponsorshipTypes') { state.sponsorshipTypes.clear(); syncCheckboxOptions('visaOptions',      state.sponsorshipTypes); updateBadge('visaBadge',      'visaBtn',      0); el('visaSelCount').textContent = '0 selected'; }
+  if (key === 'salary') {
+    state.salaryMin = state.salaryMax = null;
+    el('salaryMin').value = ''; el('salaryMax').value = '';
+    el('salaryBadge').hidden = true; el('salaryBtn').classList.remove('active');
+  }
+  if (key === 'date') {
+    state.postedWithin = null;
+    el('dateDropdown').querySelectorAll('.date-option').forEach(function(o) { o.classList.remove('selected'); });
+    el('dateBadge').hidden = true; el('dateBtn').classList.remove('active');
+  }
+  state.page = 1; loadJobs(); renderChips();
+}
+
+// ── Active chips renderer ─────────────────────────────────────────────────────
+var LEVEL_LABELS    = { INTERN:'Intern', ENTRY:'Entry', MID:'Mid', SENIOR:'Senior', LEAD:'Lead/Principal', MANAGER:'Manager', EXECUTIVE:'Executive' };
+var WORKPLACE_LABELS= { REMOTE:'Remote', HYBRID:'Hybrid', ONSITE:'On-site', FLEXIBLE:'Flexible' };
+var EMP_LABELS      = { FULL_TIME:'Full-time', PART_TIME:'Part-time', CONTRACT:'Contract', TEMPORARY:'Temporary', INTERNSHIP:'Internship' };
+var DEGREE_LABELS   = { ASSOCIATE:"Associate's", BACHELOR:"Bachelor's", MASTER:"Master's", PHD:'PhD' };
+var VISA_LABELS     = { AVAILABLE:'Sponsors Visa', NOT_AVAILABLE:'No Sponsorship', RESTRICTED:'US Citizens', NOT_MENTIONED:'Not Mentioned', UNCLEAR:'Unclear' };
+var DATE_LABELS     = { 1:'Last 24h', 3:'Last 3 days', 7:'Last 7 days', 14:'Last 2 weeks', 30:'Last 30 days' };
+
+function renderChips() {
+  var chipsEl = el('chips');
+  chipsEl.innerHTML = '';
+  function addChip(label, onClear) {
+    var chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = escapeHtml(label) + ' <span class="chip-x">&#215;</span>';
+    chip.querySelector('.chip-x').addEventListener('click', onClear);
+    chipsEl.appendChild(chip);
+  }
+
+  state.categories.forEach(function(val) {
+    var rf = ROLE_FAMILIES.find(function(r) { return r.value === val; });
+    if (rf) addChip(rf.label, function() {
+      state.categories.delete(val);
+      syncCheckboxOptions('roleOptions', state.categories);
+      updateBadge('roleBadge','roleBtn',state.categories.size);
+      el('roleSelCount').textContent = state.categories.size + ' selected';
+      state.page=1; loadJobs(); renderChips();
+    });
+  });
+  state.careerLevels.forEach(function(val) {
+    addChip(LEVEL_LABELS[val] || val, function() {
+      state.careerLevels.delete(val);
+      syncCheckboxOptions('levelOptions', state.careerLevels);
+      updateBadge('levelBadge','levelBtn',state.careerLevels.size);
+      state.page=1; loadJobs(); renderChips();
+    });
+  });
+  state.workplaceTypes.forEach(function(val) {
+    addChip(WORKPLACE_LABELS[val] || val, function() {
+      state.workplaceTypes.delete(val);
+      syncCheckboxOptions('workplaceOptions', state.workplaceTypes);
+      updateBadge('workplaceBadge','workplaceBtn',state.workplaceTypes.size);
+      state.page=1; loadJobs(); renderChips();
+    });
+  });
+  state.employmentTypes.forEach(function(val) {
+    addChip(EMP_LABELS[val] || val, function() {
+      state.employmentTypes.delete(val);
+      syncCheckboxOptions('empOptions', state.employmentTypes);
+      updateBadge('empBadge','empBtn',state.employmentTypes.size);
+      state.page=1; loadJobs(); renderChips();
+    });
+  });
+  state.degreeLevels.forEach(function(val) {
+    addChip(DEGREE_LABELS[val] || val, function() {
+      state.degreeLevels.delete(val);
+      syncCheckboxOptions('degreeOptions', state.degreeLevels);
+      updateBadge('degreeBadge','degreeBtn',state.degreeLevels.size);
+      state.page=1; loadJobs(); renderChips();
+    });
+  });
+  state.sponsorshipTypes.forEach(function(val) {
+    addChip(VISA_LABELS[val] || val, function() {
+      state.sponsorshipTypes.delete(val);
+      syncCheckboxOptions('visaOptions', state.sponsorshipTypes);
+      updateBadge('visaBadge','visaBtn',state.sponsorshipTypes.size);
+      state.page=1; loadJobs(); renderChips();
+    });
+  });
+  if (state.salaryMin || state.salaryMax) {
+    var parts = [];
+    if (state.salaryMin) parts.push(fmtSalary(state.salaryMin));
+    if (state.salaryMax) parts.push(fmtSalary(state.salaryMax));
+    addChip('Salary: ' + parts.join(' - '), function() { clearFilter('salary'); });
+  }
+  if (state.postedWithin) {
+    addChip(DATE_LABELS[state.postedWithin] || 'Last ' + state.postedWithin + 'd', function() { clearFilter('date'); });
+  }
+  if (state.ats) addChip('ATS: ' + state.ats, function() { state.ats = ''; el('ats').value = ''; state.page=1; loadJobs(); renderChips(); });
+  if (state.remote) addChip('Remote only', function() { state.remote = false; el('remote').checked = false; state.page=1; loadJobs(); renderChips(); });
+}
+
+// ── Load meta ─────────────────────────────────────────────────────────────────
+async function loadMeta() {
+  try {
+    var res  = await fetch('/api/meta');
+    var data = await res.json();
+    var t    = data.totals;
+    el('stats').innerHTML =
+      '<div class="stat"><div class="stat-num mono">' + Number(t.total).toLocaleString() + '</div><div class="stat-label">Open jobs</div></div>' +
+      '<div class="stat"><div class="stat-num mono">' + Number(t.companies).toLocaleString() + '</div><div class="stat-label">Companies</div></div>' +
+      '<div class="stat"><div class="stat-num mono">' + Number(t.remote).toLocaleString() + '</div><div class="stat-label">Remote</div></div>';
+    var atsSel = el('ats');
+    data.ats.forEach(function(row) {
+      var opt = document.createElement('option');
+      opt.value = row.ats;
+      opt.textContent = row.ats + ' (' + Number(row.n).toLocaleString() + ')';
+      atsSel.appendChild(opt);
+    });
+  } catch(e) { el('stats').textContent = 'Stats unavailable'; }
+}
+
+// ── Profile-based job match scoring ─────────────────────────────────────────
+// Client-side only — profile lives in localStorage, jobs are already fetched
+// with normalized skills (job.skills.{required,preferred,mentioned}) and
+// job.seniority_level, so no backend round-trip is needed per job.
+var LEVEL_ORDER = { INTERN:0, ENTRY:1, MID:2, SENIOR:3, LEAD:4, MANAGER:5, EXECUTIVE:6 };
+var EXP_YEARS_MAP = { '0':0, '2':2, '4':4, '7':7, '11':11 };
+
+// Mirrors server.mjs's CAREER_LEVEL_TO_SENIORITY (inverted) — collapses the
+// finer-grained seniority_level values the classifier produces back down
+// to the 7 buckets the filter UI and LEVEL_ORDER above already speak.
+var SENIORITY_TO_BUCKET = {
+  INTERN: 'INTERN',
+  ENTRY: 'ENTRY', JUNIOR: 'ENTRY',
+  MID: 'MID',
+  SENIOR: 'SENIOR', STAFF: 'SENIOR',
+  LEAD: 'LEAD', PRINCIPAL: 'LEAD',
+  MANAGER: 'MANAGER', DIRECTOR: 'MANAGER',
+  EXECUTIVE: 'EXECUTIVE',
+};
+
+// Generated from data/skills-taxonomy.json's alias lists (every alias whose
+// lowercase form differs from its skill's normalizedName) — kept in sync
+// manually since this is a plain static HTML page with no shared build
+// step. Regenerate by mapping over the taxonomy's skills[].aliases if the
+// taxonomy changes; see lib/skills.mjs for the source-of-truth version this
+// mirrors.
+var SKILL_ALIASES = {"py":"python","js":"javascript","ts":"typescript","cpp":"c++","csharp":"c#","c sharp":"c#","golang":"go","ruby on rails":"ruby","shell scripting":"bash","react.js":"react","reactjs":"react","angularjs":"angular","vue.js":"vue","vuejs":"vue","nextjs":"next.js","html5":"html","css3":"css","tailwindcss":"tailwind css","tailwind":"tailwind css","nodejs":"node.js","node js":"node.js","springboot":"spring boot","express.js":"express","expressjs":"express","dotnet":".net","dot net":".net","aspnet":"asp.net","rest api":"rest","restful":"rest","rest apis":"rest","postgres":"postgresql","pgsql":"postgresql","mssql":"sql server","ms sql":"sql server","oracle db":"oracle","oracle database":"oracle","mongo":"mongodb","elastic search":"elasticsearch","big query":"bigquery","pyspark":"apache spark","kafka":"apache kafka","apache airflow":"airflow","apache hive":"hive","apache flink":"flink","google cloud dataflow":"dataflow","glue":"aws glue","amazon athena":"athena","amazon emr":"emr","aws emr":"emr","adf":"azure data factory","synapse":"azure synapse","iceberg table":"apache iceberg","amazon web services":"aws","microsoft azure":"azure","google cloud":"gcp","google cloud platform":"gcp","amazon s3":"s3","amazon ecs":"ecs","amazon eks":"eks","amazon rds":"rds","aws rds":"rds","cdk":"aws cdk","azure kubernetes service":"aks","azure blob storage":"blob storage","pubsub":"pub/sub","google pub/sub":"pub/sub","google cloud run":"cloud run","google kubernetes engine":"gke","k8s":"kubernetes","gitlab ci/cd":"gitlab ci","argo cd":"argocd","continuous integration":"ci/cd","continuous delivery":"ci/cd","continuous deployment":"ci/cd","sklearn":"scikit-learn","scikit learn":"scikit-learn","llama index":"llamaindex","huggingface":"hugging face","natural language processing":"nlp","llms":"llm","large language model":"llm","retrieval augmented generation":"rag","retrieval-augmented generation":"rag","vector db":"vector database","ml":"machine learning","py.test":"pytest","restassured":"rest assured","cucumber.js":"cucumber","oauth2":"oauth","oauth 2.0":"oauth","openid connect":"oidc","soc2":"soc 2","pci-dss":"pci dss","sentry.io":"sentry","elk":"elk stack","powerbi":"power bi","microsoft excel":"excel","ab testing":"a/b testing","statistical analysis":"statistics","amazon sqs":"sqs","amazon sns":"sns","tcp ip":"tcp/ip","https":"http","load balancer":"load balancing","ms office":"microsoft office","erp system":"erp","erp systems":"erp","spark":"apache spark","lambda":"aws lambda"};
+function normalizeSkillName(value) {
+  var normalized = String(value || '').toLowerCase().replace(/[^a-z0-9+#./\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+  return SKILL_ALIASES[normalized] || normalized;
+}
+
+// Weighted skill-overlap score in [0,1]: required skills matter most,
+// preferred moderately, mentioned minimally — per spec Step 6.
+function skillsMatchScore(job, normalizedProfileSkills) {
+  var jobSkills = job.skills || { required: [], preferred: [], mentioned: [] };
+  var WEIGHT = { required: 1.0, preferred: 0.6, mentioned: 0.2 };
+  var earned = 0, possible = 0;
+  ['required', 'preferred', 'mentioned'].forEach(function(tier) {
+    (jobSkills[tier] || []).forEach(function(skill) {
+      possible += WEIGHT[tier];
+      if (normalizedProfileSkills.indexOf(normalizeSkillName(skill)) !== -1) earned += WEIGHT[tier];
+    });
+  });
+  return possible > 0 ? earned / possible : 0;
+}
+
+function computeProfileMatch(job, profile) {
+  if (!profile) return null;
+  var allSkills = []
+    .concat((profile.skills2 && profile.skills2.languages)  || [])
+    .concat((profile.skills2 && profile.skills2.frameworks) || [])
+    .concat((profile.skills2 && profile.skills2.databases)  || [])
+    .concat((profile.skills2 && profile.skills2.tools)      || [])
+    .concat((profile.skills2 && profile.skills2.cloud)      || [])
+    .concat((profile.skills2 && profile.skills2.soft)       || [])
+    .concat(profile.skills || [])
+    .map(function(s) { return normalizeSkillName(s); });
+  var hasTitle = !!(profile.title && profile.title.trim());
+  if (!hasTitle && !allSkills.length) return null; // not enough profile data to score
+
+  var score = 0;
+
+  // 1) Title + skills overlap — 40 pts (dominant signal, like career-ops's "Match con CV")
+  var titleLower = (job.title || '').toLowerCase();
+  var titleWords = (profile.title || '').toLowerCase().split(/[^a-z0-9+#.]+/).filter(function(w) { return w.length > 2; });
+  var titleHit = titleWords.length > 0 && titleWords.some(function(w) { return titleLower.indexOf(w) !== -1; });
+  var skillOverlap = allSkills.length ? skillsMatchScore(job, allSkills) : 0;
+  score += (titleHit ? 20 : 0) + Math.min(20, Math.round(skillOverlap * 20));
+
+  // 2) Seniority fit — 20 pts
+  var jobBucket = job.seniority_level ? SENIORITY_TO_BUCKET[job.seniority_level] : null;
+  if (profile.level && profile.level.length && jobBucket) {
+    var jobLvl = LEVEL_ORDER[jobBucket];
+    var profLvls = profile.level.map(function(l) { return LEVEL_ORDER[l]; }).filter(function(n) { return n !== undefined; });
+    if (profLvls.length && jobLvl !== undefined) {
+      var minDist = Math.min.apply(null, profLvls.map(function(pl) { return Math.abs(pl - jobLvl); }));
+      score += minDist === 0 ? 20 : minDist === 1 ? 10 : 0;
+    }
+  } else {
+    score += 10; // neutral credit when either side is unspecified
+  }
+
+  // 3) Experience years fit — 15 pts
+  var profExp = EXP_YEARS_MAP[profile.expYears];
+  if (profExp !== undefined && (job.min_exp_years != null || job.max_exp_years != null)) {
+    var lo = job.min_exp_years != null ? job.min_exp_years : 0;
+    var hi = job.max_exp_years != null ? job.max_exp_years : 99;
+    if (profExp >= lo && profExp <= hi) score += 15;
+    else if (profExp < lo) score += Math.max(0, 15 - (lo - profExp) * 4);
+    else score += Math.max(0, 15 - (profExp - hi) * 3);
+  } else {
+    score += 8;
+  }
+
+  // 4) Workplace fit — 10 pts
+  if (profile.workplace && profile.workplace.length && job.workplace_type && job.workplace_type !== 'UNKNOWN') {
+    score += profile.workplace.indexOf(job.workplace_type) !== -1 ? 10 : 0;
+  } else {
+    score += 5;
+  }
+
+  // 5) Job type fit — 5 pts
+  if (profile.jobtype && profile.jobtype.length && job.employment_type && job.employment_type !== 'UNKNOWN') {
+    score += profile.jobtype.indexOf(job.employment_type) !== -1 ? 5 : 0;
+  } else {
+    score += 3;
+  }
+
+  // 6) Comp fit — 10 pts (neutral when the job has no posted salary, which is most of them)
+  if (profile.salaryMin && (job.salary_min_annual || job.salary_max_annual)) {
+    var jobHi = job.salary_max_annual || job.salary_min_annual;
+    if (jobHi >= profile.salaryMin) score += 10;
+    else score += Math.max(0, 10 - Math.round((profile.salaryMin - jobHi) / 10000));
+  } else {
+    score += 5;
+  }
+
+  // Red flag: needs sponsorship but the job explicitly offers none — like
+  // career-ops's red-flags dimension, a hard blocker rather than a soft deduction.
+  if (profile.visa && profile.visa.indexOf('needs_sponsor') !== -1 && job.sponsorship_status === 'NOT_AVAILABLE') {
+    score -= 25;
+  }
+
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function profileMatchTier(score) {
+  if (score >= 80) return 'strong';
+  if (score >= 60) return 'good';
+  if (score >= 40) return 'fair';
+  return null; // too low to be a useful signal — omit the badge entirely
+}
+
+// ── Load jobs ─────────────────────────────────────────────────────────────────
+async function loadJobs() {
+  el('results').innerHTML = '<div class="loading">Loading jobs&hellip;</div>';
+  el('resultCount').textContent = '';
+
+  var p = new URLSearchParams({ page: state.page, pageSize: 20 });
+  if (state.q)                     { p.set('q', state.q); p.set('searchField', state.searchField); }
+  if (state.categories.size)       p.set('categories',     Array.from(state.categories).join(','));
+  if (state.ats)                   p.set('ats',             state.ats);
+  if (state.remote)                p.set('remote',          'true');
+  if (state.careerLevels.size)     p.set('careerLevels',    Array.from(state.careerLevels).join(','));
+  if (state.employmentTypes.size)  p.set('employmentTypes', Array.from(state.employmentTypes).join(','));
+  if (state.workplaceTypes.size)   p.set('workplaceTypes',  Array.from(state.workplaceTypes).join(','));
+  if (state.sponsorshipTypes.size) p.set('sponsorship',     Array.from(state.sponsorshipTypes).join(','));
+  if (state.degreeLevels.size)     p.set('degreeLevel',     Array.from(state.degreeLevels)[0]); // primary
+  if (state.salaryMin)             p.set('salaryMin',       state.salaryMin);
+  if (state.salaryMax)             p.set('salaryMax',       state.salaryMax);
+  if (state.postedWithin)          p.set('postedWithin',    state.postedWithin);
+
+  try {
+    var res  = await fetch('/api/jobs?' + p.toString());
+    var data = await res.json();
+
+    if (!data.jobs || data.jobs.length === 0) {
+      el('results').innerHTML = '<div class="empty">No jobs match your filters.</div>';
+      el('pagination').hidden = true;
+      el('resultCount').textContent = '0 results';
+      return;
+    }
+
+    el('resultCount').textContent = Number(data.total).toLocaleString() + ' result' + (data.total === 1 ? '' : 's');
+
+    var currentProfile = loadProfile();
+    el('results').innerHTML = data.jobs.map(function(j) {
+      var salaryTag = (j.salary_min_annual || j.salary_max_annual)
+        ? '<span class="tag salary">' + fmtSalary(j.salary_min_annual) + (j.salary_max_annual && j.salary_max_annual !== j.salary_min_annual ? '&ndash;' + fmtSalary(j.salary_max_annual) : '') + '</span>'
+        : '';
+      var levelLabel = { INTERN:'Intern', ENTRY:'Entry', MID:'Mid', SENIOR:'Senior', LEAD:'Lead', MANAGER:'Manager', EXECUTIVE:'Exec' };
+      var levelBucket = j.seniority_level ? SENIORITY_TO_BUCKET[j.seniority_level] : null;
+      var levelTag = levelBucket
+        ? '<span class="tag level">' + escapeHtml(levelLabel[levelBucket] || levelBucket) + '</span>' : '';
+      var wpClass = j.workplace_type === 'REMOTE' ? 'remote' : j.workplace_type === 'HYBRID' ? 'hybrid' : '';
+      var wpLabel = { REMOTE:'Remote', HYBRID:'Hybrid', ONSITE:'On-site', FLEXIBLE:'Flexible' };
+      var workplaceTag = (j.workplace_type && j.workplace_type !== 'UNKNOWN')
+        ? '<span class="tag ' + wpClass + '">' + (wpLabel[j.workplace_type] || j.workplace_type) + '</span>' : '';
+      var empLabel = { FULL_TIME:'Full-time', PART_TIME:'Part-time', CONTRACT:'Contract', TEMPORARY:'Temp', INTERNSHIP:'Internship' };
+      var empTag = (j.employment_type && j.employment_type !== 'UNKNOWN' && j.employment_type !== 'FULL_TIME')
+        ? '<span class="tag emp-type">' + escapeHtml(empLabel[j.employment_type] || j.employment_type) + '</span>' : '';
+      var sponsorTag = j.sponsorship_status === 'AVAILABLE'
+        ? '<span class="tag sponsor">Visa &#10003;</span>' : '';
+      var matchBadge = (j.match_score != null && state.q)
+        ? '<span class="match-badge">&#9632; ' + j.match_score.toFixed(1) + '% match</span>' : '';
+      var profileScore = computeProfileMatch(j, currentProfile);
+      var profileTier  = profileScore != null ? profileMatchTier(profileScore) : null;
+      var profileMatchBadge = profileTier
+        ? '<span class="profile-match ' + profileTier + '" title="How well this job fits your saved profile">&#9679; ' + profileScore + '% fit</span>' : '';
+      return '<a class="job-card" href="' + escapeHtml(j.url) + '" target="_blank" rel="noopener">' +
+        '<div class="job-row">' +
+          '<div>' +
+            '<div class="job-title">' + escapeHtml(j.title) + '</div>' +
+            '<div class="job-company">' + escapeHtml(j.company) + (j.location ? ' &middot; ' + escapeHtml(j.location) : '') + '</div>' +
+          '</div>' +
+          '<div class="job-date mono">' + fmtDate(j.posted_at || j.discovered) + '</div>' +
+        '</div>' +
+        '<div class="job-tags">' +
+          '<span class="tag">' + escapeHtml((j.category || '').replace(/_/g,' ')) + '</span>' +
+          workplaceTag + levelTag + empTag + salaryTag + sponsorTag + matchBadge + profileMatchBadge +
+        '</div>' +
+      '</a>';
+    }).join('');
+
+    el('pagination').hidden = false;
+    el('pageLabel').textContent = 'Page ' + data.page + ' of ' + data.totalPages;
+    el('prev').disabled = data.page <= 1;
+    el('next').disabled = data.page >= data.totalPages;
+  } catch(e) {
+    el('results').innerHTML = '<div class="empty">Error: ' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+// ── Base filter listeners ─────────────────────────────────────────────────────
+el('q').addEventListener('input', debounce(function(e) { state.q = e.target.value.trim(); state.page = 1; loadJobs(); }, 300));
+document.querySelectorAll('input[name="searchField"]').forEach(function(r) {
+  r.addEventListener('change', function(e) { state.searchField = e.target.value; if (state.q) { state.page = 1; loadJobs(); } });
+});
+el('ats').addEventListener('change',    function(e) { state.ats    = e.target.value;   state.page = 1; loadJobs(); renderChips(); });
+el('remote').addEventListener('change', function(e) { state.remote = e.target.checked; state.page = 1; loadJobs(); renderChips(); });
+el('prev').addEventListener('click', function() { if (state.page > 1) { state.page--; loadJobs(); } });
+el('next').addEventListener('click', function() { state.page++; loadJobs(); });
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildRoleOptions();
+loadMeta();
+loadJobs();
+
+// ── Profile drawer ─────────────────────────────────────────────────────────────
+var PROFILE_KEY = 'jd_profile_v2';
+
+function loadProfile() {
+  try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null') || {}; } catch(e) { return {}; }
+}
+function saveProfileData(p) {
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch(e) {}
+}
+
+// ── Chip toggle ──────────────────────────────────────────────────
+function setupProfileChips(containerId, stateObj, key) {
+  var container = el(containerId);
+  if (!container) return;
+  container.querySelectorAll('.profile-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var val = chip.dataset.val;
+      var current = stateObj[key] || [];
+      var idx = current.indexOf(val);
+      if (idx >= 0) current.splice(idx, 1); else current.push(val);
+      stateObj[key] = current;
+      container.querySelectorAll('.profile-chip').forEach(function(c) {
+        c.classList.toggle('on', current.includes(c.dataset.val));
+      });
+    });
+  });
+}
+
+// ── Skills tag-input ─────────────────────────────────────────────
+var skillsData = { languages:[], frameworks:[], databases:[], tools:[], cloud:[], soft:[] };
+var SKILL_CONTAINERS = [
+  { id:'pf_sk_lang',  key:'languages'  },
+  { id:'pf_sk_fw',    key:'frameworks' },
+  { id:'pf_sk_db',    key:'databases'  },
+  { id:'pf_sk_tools', key:'tools'      },
+  { id:'pf_sk_cloud', key:'cloud'      },
+  { id:'pf_sk_soft',  key:'soft'       },
+];
+
+function renderSkillTags(containerId, key) {
+  var wrap = el(containerId);
+  if (!wrap) return;
+  // Remove old tags but keep the input if present
+  wrap.querySelectorAll('.pf-tag').forEach(function(t){ t.remove(); });
+  var inp = wrap.querySelector('.pf-tag-input');
+  var tags = skillsData[key] || [];
+  tags.forEach(function(tag) {
+    var span = document.createElement('span');
+    span.className = 'pf-tag';
+    span.innerHTML = escapeHtml(tag) + '<span class="pf-tag-x" data-tag="'+escapeHtml(tag)+'" data-key="'+key+'">×</span>';
+    if (inp) wrap.insertBefore(span, inp); else wrap.appendChild(span);
+  });
+}
+
+function addSkillTag(key, value) {
+  var v = value.trim();
+  if (!v) return;
+  if (!skillsData[key]) skillsData[key] = [];
+  if (!skillsData[key].includes(v)) skillsData[key].push(v);
+}
+
+function setupSkillInputs() {
+  SKILL_CONTAINERS.forEach(function(sc) {
+    var wrap = el(sc.id);
+    if (!wrap) return;
+    var inp = document.createElement('input');
+    inp.className = 'pf-tag-input';
+    inp.placeholder = 'Type & Enter…';
+    inp.setAttribute('autocomplete','off');
+    inp.setAttribute('spellcheck','false');
+    wrap.appendChild(inp);
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        var v = inp.value.replace(/,/g,'').trim();
+        if (v) { addSkillTag(sc.key, v); renderSkillTags(sc.id, sc.key); }
+        inp.value = '';
+      } else if (e.key === 'Backspace' && !inp.value) {
+        var arr = skillsData[sc.key] || [];
+        if (arr.length) { arr.pop(); renderSkillTags(sc.id, sc.key); }
+      }
+    });
+    inp.addEventListener('blur', function() {
+      var v = inp.value.replace(/,/g,'').trim();
+      if (v) { addSkillTag(sc.key, v); renderSkillTags(sc.id, sc.key); inp.value = ''; }
+    });
+    wrap.addEventListener('click', function() { inp.focus(); });
+    wrap.addEventListener('click', function(e) {
+      var x = e.target.closest('.pf-tag-x');
+      if (!x) return;
+      var tag = x.dataset.tag; var key2 = x.dataset.key;
+      skillsData[key2] = (skillsData[key2]||[]).filter(function(t){return t!==tag;});
+      renderSkillTags(sc.id, sc.key);
+    });
+  });
+}
+
+// ── Certifications ───────────────────────────────────────────────
+var certsData = [];
+
+function renderCerts() {
+  var list = el('pf_certs_list');
+  if (!list) return;
+  list.innerHTML = '';
+  certsData.forEach(function(cert, i) {
+    var row = document.createElement('div');
+    row.className = 'pf-cert-row';
+    row.innerHTML =
+      '<input class="profile-input" placeholder="Certification name" value="'+escapeHtml(cert.name||'')+'" data-ci="'+i+'" data-cf="name" />' +
+      '<input class="profile-input" placeholder="Issuer / Year" value="'+escapeHtml((cert.issuer||'')+(cert.year?' · '+cert.year:''))+'" data-ci="'+i+'" data-cf="issuer" />' +
+      '<button class="pf-cert-del" data-ci="'+i+'" type="button">×</button>';
+    list.appendChild(row);
+  });
+  list.querySelectorAll('input').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var i2 = parseInt(inp.dataset.ci);
+      certsData[i2][inp.dataset.cf] = inp.value;
+    });
+  });
+  list.querySelectorAll('.pf-cert-del').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      certsData.splice(parseInt(btn.dataset.ci), 1);
+      renderCerts();
+    });
+  });
+}
+
+el('pf_add_cert').addEventListener('click', function() {
+  certsData.push({ name:'', issuer:'', year:'' });
+  renderCerts();
+  var inputs = el('pf_certs_list').querySelectorAll('input');
+  if (inputs.length) inputs[inputs.length - 2].focus();
+});
+
+// ── Avatar live-update ────────────────────────────────────────────
+function updateAvatarPreview() {
+  var name  = el('pf_name').value.trim();
+  var email = el('pf_email').value.trim();
+  var av    = el('pf_avatar');
+  var an    = el('pf_avatar_name');
+  var ae    = el('pf_avatar_email');
+  if (av) av.textContent = name ? name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase() : '?';
+  if (an) an.textContent = name || 'Add your name';
+  if (ae) ae.textContent = email || '—';
+}
+el('pf_name').addEventListener('input', updateAvatarPreview);
+el('pf_email').addEventListener('input', updateAvatarPreview);
+
+// ── Fill UI from saved profile ────────────────────────────────────
+var profileState = {};
+
+function fillProfileUI(p) {
+  el('pf_name').value     = p.name     || '';
+  el('pf_email').value    = p.email    || '';
+  el('pf_phone').value    = p.phone    || '';
+  el('pf_linkedin').value = p.linkedin || '';
+  el('pf_github').value   = p.github   || '';
+  el('pf_summary').value  = p.summary  || '';
+  el('pf_title').value    = p.title    || '';
+  el('pf_location').value = p.location || '';
+  el('pf_salary_min').value = p.salaryMin || '';
+  el('pf_salary_max').value = p.salaryMax || '';
+  el('pf_hourly').value   = p.hourly   || '';
+  if (p.workAuth)  el('pf_work_auth').value  = p.workAuth;
+  if (p.expYears !== undefined) el('pf_exp_years').value = p.expYears;
+
+  // Chips
+  profileState.workplace = p.workplace ? p.workplace.slice() : [];
+  profileState.level     = p.level     ? p.level.slice()     : [];
+  profileState.jobtype   = p.jobtype   ? p.jobtype.slice()   : [];
+  profileState.visa      = p.visa      ? p.visa.slice()      : [];
+  profileState.avail     = p.avail     ? p.avail.slice()     : [];
+
+  ['pf_workplace','pf_level','pf_jobtype','pf_visa','pf_avail'].forEach(function(cid) {
+    var key = cid.replace('pf_','');
+    var c2  = el(cid);
+    if (!c2) return;
+    c2.querySelectorAll('.profile-chip').forEach(function(c) {
+      c.classList.toggle('on', (profileState[key]||[]).includes(c.dataset.val));
+    });
+  });
+
+  // Skills
+  var sk = p.skills2 || {};
+  skillsData = {
+    languages:  (sk.languages  || p.skills || []).slice(),
+    frameworks: (sk.frameworks || []).slice(),
+    databases:  (sk.databases  || []).slice(),
+    tools:      (sk.tools      || []).slice(),
+    cloud:      (sk.cloud      || []).slice(),
+    soft:       (sk.soft       || []).slice(),
+  };
+  SKILL_CONTAINERS.forEach(function(sc) { renderSkillTags(sc.id, sc.key); });
+
+  // Certs
+  certsData = (p.certs || []).map(function(c){ return Object.assign({},c); });
+  renderCerts();
+
+  updateAvatarPreview();
+}
+
+function collectProfileData() {
+  return {
+    name:      el('pf_name').value.trim(),
+    email:     el('pf_email').value.trim(),
+    phone:     el('pf_phone').value.trim(),
+    linkedin:  el('pf_linkedin').value.trim(),
+    github:    el('pf_github').value.trim(),
+    summary:   el('pf_summary').value.trim(),
+    title:     el('pf_title').value.trim(),
+    location:  el('pf_location').value.trim(),
+    salaryMin: parseInt(el('pf_salary_min').value) || null,
+    salaryMax: parseInt(el('pf_salary_max').value) || null,
+    hourly:    parseFloat(el('pf_hourly').value) || null,
+    workAuth:  el('pf_work_auth').value,
+    expYears:  el('pf_exp_years').value,
+    workplace: profileState.workplace || [],
+    level:     profileState.level     || [],
+    jobtype:   profileState.jobtype   || [],
+    visa:      profileState.visa      || [],
+    avail:     profileState.avail     || [],
+    skills:    skillsData.languages,   // legacy flat
+    skills2:   Object.assign({}, skillsData),
+    certs:     certsData.filter(function(c){ return c.name.trim(); }),
+  };
+}
+
+// Update header button label
+function updateProfileBtn(p) {
+  var label = el('profileBtnLabel');
+  if (p && p.name) {
+    label.textContent = p.name.split(' ')[0];
+    el('profileToggle').classList.add('active');
+  } else {
+    label.textContent = 'My Profile';
+    el('profileToggle').classList.remove('active');
+  }
+}
+
+// Open / close drawer
+function openDrawer() {
+  el('profileDrawer').classList.add('open');
+  el('profileOverlay').classList.add('open');
+  el('profileToggle').classList.add('active');
+  el('profileSavedMsg').hidden = true;
+}
+function closeDrawer() {
+  el('profileDrawer').classList.remove('open');
+  el('profileOverlay').classList.remove('open');
+  var p = loadProfile();
+  updateProfileBtn(p);
+}
+
+el('profileToggle').addEventListener('click', function() {
+  if (el('profileDrawer').classList.contains('open')) closeDrawer();
+  else openDrawer();
+});
+el('drawerClose').addEventListener('click', closeDrawer);
+el('profileOverlay').addEventListener('click', closeDrawer);
+
+el('saveProfile').addEventListener('click', function() {
+  var p = collectProfileData();
+  saveProfileData(p);
+  updateProfileBtn(p);
+  el('profileSavedMsg').hidden = false;
+  setTimeout(function() { el('profileSavedMsg').hidden = true; }, 2500);
+  if (p.title && !state.q) {
+    el('q').value = p.title;
+    state.q = p.title;
+    state.page = 1;
+    loadJobs();
+  }
+});
+
+
+// ── Resume parse ─────────────────────────────────────────────────
+(function() {
+  var dropZone = el('resumeDropZone');
+  var fileInput = el('resumeFileInput');
+  var parseBtn  = el('resumeParseBtn');
+  var statusEl  = el('resumeParseStatus');
+  var fileNameEl= el('resumeFileName');
+  var currentFile = null;
+
+  function setFile(f) {
+    currentFile = f;
+    fileNameEl.textContent = f ? '📎 ' + f.name : '';
+    parseBtn.classList.toggle('visible', !!f);
+    statusEl.textContent = '';
+  }
+
+  dropZone.addEventListener('click', function() { fileInput.click(); });
+  fileInput.addEventListener('change', function() {
+    setFile(fileInput.files[0] || null);
+  });
+
+  dropZone.addEventListener('dragover', function(e) {
+    e.preventDefault(); dropZone.classList.add('drag-over');
+  });
+  dropZone.addEventListener('dragleave', function() {
+    dropZone.classList.remove('drag-over');
+  });
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    var f = e.dataTransfer.files[0];
+    if (f) setFile(f);
+  });
+
+  parseBtn.addEventListener('click', function() {
+    if (!currentFile) return;
+    var fd = new FormData();
+    fd.append('resume', currentFile);
+    parseBtn.disabled = true;
+    statusEl.textContent = '⏳ Reading résumé…';
+
+    fetch('/api/parse-resume', { method: 'POST', body: fd })
+      .then(function(r) {
+        if (!r.ok) throw new Error('Server error ' + r.status + ' — please restart the server and try again.');
+        return r.json();
+      })
+      .then(function(data) {
+        if (data.error) { statusEl.textContent = '✗ ' + data.error; parseBtn.disabled = false; return; }
+        var p = loadProfile();
+        // Full replace for every field the extractor covers — including
+        // clearing it if this resume doesn't have that field. A "fill empty
+        // gaps only" merge sounds safe but isn't: once a field is set, it
+        // can never be corrected by re-uploading (a fixed extraction bug,
+        // or just a newer/different resume, silently has no effect on a
+        // field that already holds a value). Fields the extractor has no
+        // opinion on — workplace/level/jobtype/visa/salary/hourly/
+        // availability — are left alone; those are manual preferences, not
+        // resume content, so a resume upload should never touch them.
+        p.name     = data.name     || '';
+        p.email    = data.email    || '';
+        p.phone    = data.phone    || '';
+        p.linkedin = data.linkedin || '';
+        p.github   = data.github   || '';
+        p.summary  = data.summary  || '';
+        p.title    = data.title    || '';
+        p.location = data.location || '';
+        p.workAuth = data.workAuth || '';
+        p.expYears = data.expYears || '';
+        p.skills2  = Object.assign({ languages:[], frameworks:[], databases:[], tools:[], cloud:[], soft:[] }, data.skills2 || {});
+        p.certs    = data.certs || [];
+        saveProfileData(p);
+        fillProfileUI(p);
+        statusEl.textContent = '✓ Profile filled! Review & save below.';
+        parseBtn.disabled = false;
+        // Scroll to identity card
+        el('pf_avatar').scrollIntoView({ behavior:'smooth', block:'center' });
+      })
+      .catch(function(err) {
+        statusEl.textContent = '✗ ' + (err.message||'Parse failed');
+        parseBtn.disabled = false;
+      });
+  });
+})();
+
+// Setup chip groups
+setupProfileChips('pf_workplace', profileState, 'workplace');
+setupProfileChips('pf_level',     profileState, 'level');
+setupProfileChips('pf_jobtype',   profileState, 'jobtype');
+setupProfileChips('pf_visa',      profileState, 'visa');
+setupProfileChips('pf_avail',     profileState, 'avail');
+
+// Setup skills
+setupSkillInputs();
+
+// Init
+(function() {
+  var p = loadProfile();
+  fillProfileUI(p);
+  updateProfileBtn(p);
+})();
+</script>
+</body>
+</html>

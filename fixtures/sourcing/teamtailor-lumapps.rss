@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:tt="https://teamtailor.com/locations" version="2.0">
+  <channel>
+    <title>LumApps</title>
+    <description>Current job openings</description>
+    <link>https://lumapps.teamtailor.com/jobs</link>
+    <item>
+      <title>Product Director</title>
+      <description>&lt;p&gt;&lt;strong&gt;LumApps is now more than just an Employee Experience Platform — it is an AI-powered Employee Hub&lt;/strong&gt; that supports companies in their digital transformation of communication, collaboration, and engagement with their customers, partners, and above all their employees.&lt;/p&gt;&lt;p&gt;Our platfo</description>
+      <pubDate>Tue, 20 Oct 2026 14:30:10 +0200</pubDate>
+      <link>https://job.lumapps.com/jobs/8576188-product-director</link>
+      <remoteStatus>hybrid</remoteStatus>
+      <guid>7dfe9b02-834c-4ae8-afa4-26aeac96b99a</guid>
+      <tt:locations>
+        <tt:location>
+          <tt:name>Paris</tt:name>
+          <tt:address>15 Rue de la Baume</tt:address>
+          <tt:zip>75008</tt:zip>
+          <tt:city>Paris</tt:city>
+          <tt:country>France</tt:country>
+        </tt:location>
+        <tt:location>
+          <tt:name> Tassin-la-Demi-Lune</tt:name>
+          <tt:address>75 Rue François Mermet</tt:address>
+          <tt:zip>69160</tt:zip>
+          <tt:city>Tassin-la-Demi-Lune</tt:city>
+          <tt:country>France</tt:country>
+        </tt:location>
+      </tt:locations>
+      <tt:department>Product EMEA</tt:department>
+      <tt:role/>
+      <tt:division/>
+    </item>
+    <item>
+      <title>Enterprise Account Executive</title>
+      <description>&lt;p&gt;&lt;strong&gt;LumApps is now more than just an Employee Experience Platform — it is an AI-powered Employee Hub&lt;/strong&gt; that supports companies in their digital transformation of communication, collaboration, and engagement with their customers, partners, and above all their employees.&lt;/p&gt;&lt;p&gt;Our platfo</description>
+      <pubDate>Mon, 19 Oct 2026 19:38:55 +0200</pubDate>
+      <link>https://job.lumapps.com/jobs/8571582-enterprise-account-executive</link>
+      <remoteStatus>none</remoteStatus>
+      <guid>efc49bf2-1c91-4f14-9571-07f0738dd183</guid>
+      <tt:locations>
+        <tt:location>
+          <tt:name/>
+          <tt:address>151 S 1st St</tt:address>
+          <tt:zip>78704</tt:zip>
+          <tt:city>Austin</tt:city>
+          <tt:country>United States</tt:country>
+        </tt:location>
+      </tt:locations>
+      <tt:department>Sales USA</tt:department>
+      <tt:role>Enterprise Account Executive</tt:role>
+      <tt:division/>
+    </item>
+  </channel>
+</rss>

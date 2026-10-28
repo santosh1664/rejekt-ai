@@ -1,0 +1,39 @@
+<!doctype html>
+<!-- Test form shaped like an Ashby /application page: no <form>, labels with a
+     "_required_" class, Yes/No answered with button pairs, radio EEO, and a
+     submit that posts JSON then swaps in a thank-you message. -->
+<html><head><meta charset="utf-8"><title>Data Engineer @ Testco</title></head><body>
+<div class="ashby-application-form-container" id="app">
+  <div class="_fieldEntry"><label class="_heading _required_f7 ashby-application-form-question-title" for="_systemfield_name">Name</label><input id="_systemfield_name" name="_systemfield_name" type="text"></div>
+  <div class="_fieldEntry"><label class="_heading _required_f7 ashby-application-form-question-title" for="_systemfield_email">Email</label><input id="_systemfield_email" name="_systemfield_email" type="email"></div>
+  <div class="_fieldEntry"><label class="_heading _required_f7 ashby-application-form-question-title" for="_systemfield_resume">Resume</label><button type="button">Upload File</button><input id="_systemfield_resume" type="file" style="display:none"></div>
+  <div class="_fieldEntry"><label class="_heading _required_f7 ashby-application-form-question-title" for="q-comp">What are your compensation expectations?</label><input id="q-comp" name="q-comp" type="text"></div>
+  <div class="_fieldEntry" data-q="auth"><label class="_heading _required_f7 ashby-application-form-question-title" for="q-auth">Are you authorized to work lawfully in the United States for Testco?</label>
+    <div class="ashby-application-form-input-yesno"><button type="button" aria-pressed="false" data-option="yes">Yes</button><button type="button" aria-pressed="false" data-option="no">No</button></div></div>
+  <div class="_fieldEntry" data-q="spons"><label class="_heading _required_f7 ashby-application-form-question-title" for="q-spons">Will you now or in the future require sponsorship to work in the United States?</label>
+    <div class="ashby-application-form-input-yesno"><button type="button" aria-pressed="false" data-option="yes">Yes</button><button type="button" aria-pressed="false" data-option="no">No</button></div></div>
+  <div class="_fieldEntry"><label class="_heading ashby-application-form-question-title">Gender</label>
+    <div><label><input type="radio" name="eeo-gender" value="Male"> Male</label><label><input type="radio" name="eeo-gender" value="Female"> Female</label><label><input type="radio" name="eeo-gender" value="Decline"> Decline to self-identify</label></div></div>
+  <div class="_fieldEntry"><label class="_heading ashby-application-form-question-title">Veteran Status</label>
+    <div><label><input type="radio" name="eeo-vet" value="1"> I identify as one or more of the classifications of protected veteran listed above</label><label><input type="radio" name="eeo-vet" value="2"> I am not a protected veteran</label><label><input type="radio" name="eeo-vet" value="3"> I decline to self-identify for protected veteran status</label></div></div>
+  <button type="button" id="submit">Submit Application</button>
+</div>
+<script>
+  document.querySelectorAll('[data-option]').forEach(b => b.addEventListener('click', () => {
+    b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', 'false')); b.setAttribute('aria-pressed', 'true');
+  }));
+  document.getElementById('submit').addEventListener('click', async () => {
+    const pressed = q => document.querySelector(`[data-q="${q}"] [aria-pressed="true"]`)?.dataset.option || null;
+    const radio = n => document.querySelector(`input[name="${n}"]:checked`)?.value || null;
+    const body = {
+      name: _systemfield_name.value, email: _systemfield_email.value, comp: document.getElementById('q-comp').value,
+      resume: _systemfield_resume.files[0]?.name || null, auth: pressed('auth'), spons: pressed('spons'),
+      gender: radio('eeo-gender'), veteran: radio('eeo-vet'),
+    };
+    const missing = Object.entries(body).filter(([k, v]) => !v && !['gender', 'veteran'].includes(k)).map(([k]) => k);
+    if (missing.length) { document.getElementById('app').insertAdjacentHTML('afterbegin', `<div role="alert">Missing: ${missing.join(', ')}</div>`); return; }
+    await fetch('/ashby/submit', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    document.getElementById('app').innerHTML = '<h2>Thank you for applying</h2><p>Your application was submitted.</p>';
+  });
+</script>
+</body></html>

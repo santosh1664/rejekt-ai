@@ -1,0 +1,333 @@
+{
+  "_comment": "Benchmark user profiles for matching/evaluate against real job data (scripts/evaluate-recommendations.mjs). Independent of ranking output \u2014 hand-authored per spec Phase 21.",
+  "profiles": [
+    {
+      "id": "entry_swe",
+      "label": "Entry Software Engineer",
+      "profile": {
+        "currentTitle": "Software Engineer",
+        "totalExperienceYears": 0.5,
+        "highestEducationLevel": "BACHELORS",
+        "currentCity": null,
+        "currentState": null,
+        "currentCountry": "US",
+        "workAuthorization": "US_CITIZEN",
+        "needsSponsorship": false
+      },
+      "targetRoles": [
+        {
+          "canonicalRole": "SOFTWARE_ENGINEER",
+          "roleFamily": "SOFTWARE_ENGINEERING",
+          "priority": 1
+        }
+      ],
+      "skills": [
+        "python",
+        "javascript",
+        "sql",
+        "git",
+        "react"
+      ],
+      "preferences": {
+        "preferredWorkplaceTypes": [
+          "REMOTE",
+          "HYBRID"
+        ],
+        "remoteOnly": false,
+        "minSalary": 70000
+      }
+    },
+    {
+      "id": "mid_swe",
+      "label": "Mid Software Engineer",
+      "profile": {
+        "currentTitle": "Software Engineer",
+        "totalExperienceYears": 4,
+        "highestEducationLevel": "BACHELORS",
+        "currentCity": null,
+        "currentState": null,
+        "currentCountry": "US",
+        "workAuthorization": "US_CITIZEN",
+        "needsSponsorship": false
+      },
+      "targetRoles": [
+        {
+          "canonicalRole": "SOFTWARE_ENGINEER",
+          "roleFamily": "SOFTWARE_ENGINEERING",
+          "priority": 1
+        }
+      ],
+      "skills": [
+        "python",
+        "typescript",
+        "react",
+        "aws",
+        "postgresql",
+        "docker"
+      ],
+      "preferences": {
+        "preferredWorkplaceTypes": [
+          "REMOTE"
+        ],
+        "remoteOnly": false,
+        "minSalary": 120000
+      }
+    },
+    {
+      "id": "backend_java",
+      "label": "Backend Java Engineer",
+      "profile": {
+        "currentTitle": "Backend Engineer",
+        "totalExperienceYears": 6,
+        "highestEducationLevel": "BACHELORS",
+        "currentCity": null,
+        "currentState": null,
+        "currentCountry": "US",
+        "workAuthorization": "US_CITIZEN",
+        "needsSponsorship": false
+      },
+      "targetRoles": [
+        {
+          "canonicalRole": "BACKEND_ENGINEER",
+          "roleFamily": "SOFTWARE_ENGINEERING",
+          "priority": 1
+        }
+      ],
+      "skills": [
+        "java",
+        "spring boot",
+        "sql",
+        "kafka",
+        "kubernetes",
+        "aws"
+      ],
+      "preferences": {
+        "preferredWorkplaceTypes": [
+          "HYBRID",
+          "ONSITE"
+        ],
+        "remoteOnly": false,
+        "minSalary": 140000
+      }
+    },
+    {
+      "id": "data_engineer",
+      "label": "Data Engineer",
+      "profile": {
+        "currentTitle": "Data Engineer",
+        "totalExperienceYears": 3,
+        "highestEducationLevel": "BACHELORS",
+        "currentCity": null,
+        "currentState": null,
+        "currentCountry": "US",
+        "workAuthorization": "US_CITIZEN",
+        "needsSponsorship": false
+      },
+      "targetRoles": [
+        {
+          "canonicalRole": "DATA_ENGINEER",
+          "roleFamily": "DATA_SCIENCE",
+          "priority": 1
+        }
+      ],
+      "skills": [
+        "python",
+        "sql",
+        "apache spark",
+        "airflow",
+        "aws",
+        "snowflake"
+      ],
+      "preferences": {
+        "preferredWorkplaceTypes": [
+          "REMOTE"
+        ],
+        "remoteOnly": false,
+        "minSalary": 110000
+      }
+    },
+    {
+      "id": "senior_data_engineer",
+      "label": "Senior Data Engineer",
+      "profile": {
+        "currentTitle": "Senior Data Engineer",
+        "totalExperienceYears": 8,
+        "highestEducationLevel": "MASTERS",
+        "currentCity": null,
+        "currentState": null,
+        "currentCountry": "US",
+        "workAuthorization": "US_CITIZEN",
+        "needsSponsorship": false
+      },
+      "targetRoles": [
+        {
+          "canonicalRole": "DATA_ENGINEER",
+          "roleFamily": "DATA_SCIENCE",
+          "priority": 1
+        }
+      ],
+      "skills": [
+        "python",
+        "sql",
+        "apache spark",
+        "kafka",
+        "airflow",
+        "dbt",
+        "aws",
+        "kubernetes"
+      ],
+      "preferences": {
+        "preferredWorkplaceTypes": [
+          "REMOTE",
+          "HYBRID"
+        ],
+        "remoteOnly": false,
+        "minSalary": 160000
+      }
+    },
+    {
+      "id": "ml_engineer",
+      "label": "ML Engineer",
+      "profile": {
+        "currentTitle": "Machine Learning Engineer",
+        "totalExperienceYears": 4,
+        "highestEducationLevel": "MASTERS",
+        "currentCity": null,
+        "currentState": null,
+        "currentCountry": "US",
+        "workAuthorization": "US_CITIZEN",
+        "needsSponsorship": false
+      },
+      "targetRoles": [
+        {
+          "canonicalRole": "ML_ENGINEER",
+          "roleFamily": "DATA_SCIENCE",
+          "priority": 1
+        }
+      ],
+      "skills": [
+        "python",
+        "pytorch",
+        "machine learning",
+        "aws",
+        "kubernetes",
+        "sql"
+      ],
+      "preferences": {
+        "preferredWorkplaceTypes": [
+          "REMOTE"
+        ],
+        "remoteOnly": false,
+        "minSalary": 150000
+      }
+    },
+    {
+      "id": "qa_automation",
+      "label": "QA Automation Engineer",
+      "profile": {
+        "currentTitle": "QA Automation Engineer",
+        "totalExperienceYears": 3,
+        "highestEducationLevel": "BACHELORS",
+        "currentCity": null,
+        "currentState": null,
+        "currentCountry": "US",
+        "workAuthorization": "US_CITIZEN",
+        "needsSponsorship": false
+      },
+      "targetRoles": [
+        {
+          "canonicalRole": "QA_AUTOMATION_ENGINEER",
+          "roleFamily": "SOFTWARE_ENGINEERING",
+          "priority": 1
+        }
+      ],
+      "skills": [
+        "selenium",
+        "playwright",
+        "python",
+        "java",
+        "ci/cd"
+      ],
+      "preferences": {
+        "preferredWorkplaceTypes": [
+          "REMOTE",
+          "HYBRID"
+        ],
+        "remoteOnly": false,
+        "minSalary": 90000
+      }
+    },
+    {
+      "id": "devops_sre",
+      "label": "DevOps/SRE Engineer",
+      "profile": {
+        "currentTitle": "Site Reliability Engineer",
+        "totalExperienceYears": 5,
+        "highestEducationLevel": "BACHELORS",
+        "currentCity": null,
+        "currentState": null,
+        "currentCountry": "US",
+        "workAuthorization": "US_CITIZEN",
+        "needsSponsorship": false
+      },
+      "targetRoles": [
+        {
+          "canonicalRole": "SITE_RELIABILITY_ENGINEER",
+          "roleFamily": "DEVOPS_SRE",
+          "priority": 1
+        }
+      ],
+      "skills": [
+        "kubernetes",
+        "terraform",
+        "aws",
+        "docker",
+        "python",
+        "prometheus"
+      ],
+      "preferences": {
+        "preferredWorkplaceTypes": [
+          "REMOTE"
+        ],
+        "remoteOnly": false,
+        "minSalary": 130000
+      }
+    },
+    {
+      "id": "data_analyst",
+      "label": "Data Analyst",
+      "profile": {
+        "currentTitle": "Data Analyst",
+        "totalExperienceYears": 2,
+        "highestEducationLevel": "BACHELORS",
+        "currentCity": null,
+        "currentState": null,
+        "currentCountry": "US",
+        "workAuthorization": "US_CITIZEN",
+        "needsSponsorship": false
+      },
+      "targetRoles": [
+        {
+          "canonicalRole": "DATA_ANALYST",
+          "roleFamily": "DATA_SCIENCE",
+          "priority": 1
+        }
+      ],
+      "skills": [
+        "sql",
+        "excel",
+        "tableau",
+        "power bi",
+        "python"
+      ],
+      "preferences": {
+        "preferredWorkplaceTypes": [
+          "REMOTE",
+          "HYBRID"
+        ],
+        "remoteOnly": false,
+        "minSalary": 75000
+      }
+    }
+  ]
+}

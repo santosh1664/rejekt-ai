@@ -1,0 +1,18 @@
+{
+  "_comment": "DEVOPS_SRE role_family in this corpus captures a lot of security-engineering and engineering-management titles alongside core SRE/platform roles — labeled BORDERLINE for security-adjacent (not core SRE) and BAD for management-track/misclassified rather than GOOD, to keep the label meaningfully distinct from a true SRE/platform title match.",
+  "338289": "BORDERLINE",
+  "1303090": "BORDERLINE",
+  "8617": "BAD",
+  "15113": "GOOD",
+  "15519": "BAD",
+  "15722": "BORDERLINE",
+  "1305439": "BAD",
+  "378019": "BORDERLINE",
+  "54176": "BORDERLINE",
+  "65196": "BORDERLINE",
+  "792023": "GOOD",
+  "8559": "BAD",
+  "1282210": "EXCELLENT",
+  "5069436": "BORDERLINE",
+  "9255": "BAD"
+}

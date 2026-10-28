@@ -1,0 +1,18 @@
+{
+  "_comment": "Mid Software Engineer (4 YOE, BACHELORS). Note job 3310101 ('Cookie Crew' @ Insomnia Cookies) is a pre-existing upstream role_family misclassification in the corpus (a food-service posting tagged SOFTWARE_ENGINEERING) — labeled BAD for that reason, not a scoring artifact.",
+  "50355": "BAD",
+  "1286464": "BAD",
+  "59129": "BAD",
+  "33135": "GOOD",
+  "10503": "BAD",
+  "5091264": "EXCELLENT",
+  "58186": "BORDERLINE",
+  "1292450": "BORDERLINE",
+  "1281175": "BAD",
+  "8494": "GOOD",
+  "1297206": "BORDERLINE",
+  "64254": "BAD",
+  "1281749": "GOOD",
+  "3310101": "BAD",
+  "59621": "GOOD"
+}
