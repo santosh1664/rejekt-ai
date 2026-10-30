@@ -446,8 +446,6 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .added-list { margin: 8px 0 0; padding-left: 18px; font-size: 14px; display: grid; gap: 6px; }
 .added-list small { display: block; color: var(--muted); font-size: 12px; }
 /* Applied */
-.import-box { display: flex; gap: 16px; align-items: center; background: var(--signal-soft); color: var(--signal-ink); border-radius: var(--r-lg); padding: 16px 18px; margin-bottom: 18px; }
-.import-box b { font-size: 15px; } .import-box p { margin: 4px 0 0; font-size: 14px; } .import-box > div:first-child { flex: 1; }
 .ap-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 6px; }
 .ap-controls .spacer { flex: 1; }
 .ap-controls select { width: auto; font-size: 13.5px; padding: 7px 10px; }
@@ -575,7 +573,6 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
   .ap-date { width: 100%; order: -1; padding: 0; }
   .ap-side { max-width: none; width: 100%; justify-content: flex-start; }
   .ap-co { flex-wrap: wrap; } .co-when { justify-items: start; }
-  .import-box { flex-direction: column; align-items: flex-start; }
   .ap-controls .spacer { display: none; }
   .jd-actions .move { margin-left: 0; }
   .nav { display: flex; width: 100%; justify-content: space-around; }
@@ -642,7 +639,6 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .badge.review { background: var(--warn-soft); color: var(--warn); border-color: var(--warn-bd); }
 .badge.sent { border-color: var(--ok-bd); }
 .badge.wait { background: var(--info-soft); color: var(--info); border-color: var(--info-bd); }
-.import-box { background: var(--info-soft); color: var(--info); border: 1px solid var(--info-bd); }
 .snip mark { background: var(--warn-soft); color: var(--warn); }
 .have.yes { border-color: var(--ok-bd); }
 .have[data-dl] { cursor: pointer; }
@@ -1901,12 +1897,8 @@ const apState = { q: '', fields: [], source: 'all', view: 'list', page: 1 };
 const fmtDay = d => (d ? new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: new Date(d).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' }) : '');
 const nfmt = n => Number(n || 0).toLocaleString();
 async function renderApplied() {
-  let imp = null;
-  try { ({ data: imp } = await api('GET', `/users/${USER}/imports/tsenta`)); } catch {}
-  const canImport = imp?.available && imp.imported < imp.available.applications && !store.get('hideTsentaImport', false);
   $('#view').innerHTML = `
     <div class="page-head"><div><h1 class="sr-only">Applied</h1><p>Every application you've sent, with the posting and the resume that went out.</p></div></div>
-    ${canImport ? `<div class="import-box"><div><b>Your Tsenta history is ready to import</b><p>${nfmt(imp.available.applications)} applications. For the most recent ${imp.available.details}, the posting is included, and for some the resume Tsenta sent.${imp.imported ? ` ${nfmt(imp.imported)} are already here.` : ''}</p></div><div style="display:flex;gap:8px"><button class="btn quiet" id="apImportHide" type="button">Not now</button><button class="btn primary" id="apImport" type="button">Import</button></div></div>` : ''}
     <form class="searchbar" id="apSearch" role="search"><input id="apQ" type="search" placeholder="Search a company, job title, link or words in the posting" value="${esc(apState.q)}" aria-label="Search applications"><button class="btn primary" type="submit">Search</button></form>
     <div class="ap-controls">
       <div class="ap-fields" role="group" aria-label="Search in">${AP_FIELDS.map(([k, l]) => `<button type="button" class="fchip" data-f="${k}" aria-pressed="${apState.fields.includes(k)}">${l}<span class="n" data-n="${k}"></span></button>`).join('')}</div>
@@ -1925,12 +1917,6 @@ async function renderApplied() {
   }));
   $('#apSource').addEventListener('change', e => { apState.source = e.target.value; apState.page = 1; loadApplied(); });
   $$('.seg [data-v]').forEach(b => b.addEventListener('click', () => { apState.view = b.dataset.v; $$('.seg [data-v]').forEach(x => x.setAttribute('aria-selected', String(x === b))); apState.page = 1; loadApplied(); }));
-  $('#apImport')?.addEventListener('click', async e => {
-  $('#apImportHide')?.addEventListener('click', () => { store.set('hideTsentaImport', true); renderApplied(); });
-    e.target.disabled = true; e.target.textContent = 'Importing…';
-    try { const { data: r } = await api('POST', `/users/${USER}/imports/tsenta`); toast(`Imported ${nfmt(r.applications)} applications from Tsenta.`); renderApplied(); }
-    catch (err) { toast(err.message); e.target.disabled = false; e.target.textContent = 'Import'; }
-  });
   loadApplied();
 }
 function markSnippet(s) { return s ? `<p class="snip">${esc(s.before)}<mark>${esc(s.match)}</mark>${esc(s.after)}</p>` : ''; }
