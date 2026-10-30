@@ -208,7 +208,7 @@ export function buildKeywordSql(ks, params, alias = 'j') {
 export function keywordSearchWarnings(ks) {
   const warnings = [];
   if (ks.exclude.length && ks.scope !== 'title') {
-    warnings.push(`Exclude terms in "${ks.scope}" scope hide every job whose description mentions them (e.g. "senior" appears in most descriptions). Use scope "title" to exclude by title only.`);
+    warnings.push('"Hide jobs mentioning" also checks descriptions, and words like "senior" appear in most of them, so many good jobs are hidden. Search in Titles only to hide by title.');
   }
   return warnings;
 }
