@@ -19,24 +19,26 @@ export const ATS    = 'workable';
 const MAX_PAGES     = 50;
 
 // Workable blocks an IP at roughly 60 requests/min (HTTP 429), no matter how many workers run,
-// so every Workable request in this process goes through one shared gate: 1 per WORKABLE_GAP_MS,
-// and all of them pause together for a minute after a 429.
+// so every Workable request goes through a shared gate per host: 1 per WORKABLE_GAP_MS.
+// apply.workable.com and jobs.workable.com are blocked separately, so a block on one must not stall the other.
 const GAP_MS = +(process.env.WORKABLE_GAP_MS || 1100);
-let nextSlot = 0;
-async function gate() {
-  const now = Date.now(); const at = Math.max(now, nextSlot); nextSlot = at + GAP_MS;
+const hosts = new Map();   // host → { nextSlot, backoff }
+async function gate(h) {
+  const now = Date.now(); const at = Math.max(now, h.nextSlot); h.nextSlot = at + GAP_MS;
   if (at > now) await sleep(at - now);
 }
 // On 429 wait, then try again; each 429 in a row doubles the wait (1 → 2 → 4 … 10 min), a success resets it.
 // Without this every following company hit the block too and was skipped, run after run.
-let backoff = 60_000;
 async function workableJSON(url, opts) {
+  const host = new URL(url).host;
+  if (!hosts.has(host)) hosts.set(host, { nextSlot: 0, backoff: 60_000 });
+  const h = hosts.get(host);
   for (let attempt = 0; ; attempt++) {
-    await gate();
-    try { const data = await fetchJSON(url, { ...opts, retries: 0 }); backoff = 60_000; return data; }
+    await gate(h);
+    try { const data = await fetchJSON(url, { ...opts, retries: 0 }); h.backoff = 60_000; return data; }
     catch (err) {
       if (!/429/.test(err.message) || attempt >= 2) throw err;
-      nextSlot = Math.max(nextSlot, Date.now() + backoff); backoff = Math.min(backoff * 2, 600_000);
+      h.nextSlot = Math.max(h.nextSlot, Date.now() + h.backoff); h.backoff = Math.min(h.backoff * 2, 600_000);
     }
   }
 }
