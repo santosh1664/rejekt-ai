@@ -1903,19 +1903,16 @@ async function renderApplied() {
     <div class="ap-controls">
       <div class="ap-fields" role="group" aria-label="Search in">${AP_FIELDS.map(([k, l]) => `<button type="button" class="fchip" data-f="${k}" aria-pressed="${apState.fields.includes(k)}">${l}<span class="n" data-n="${k}"></span></button>`).join('')}</div>
       <span class="spacer"></span>
-      <select id="apSource" aria-label="Source"><option value="all">All applications</option><option value="app">Sent from here</option><option value="tsenta">From Tsenta</option></select>
       <div class="seg" role="tablist" aria-label="View"><button role="tab" data-v="list" aria-selected="${apState.view === 'list'}">Applications</button><button role="tab" data-v="company" aria-selected="${apState.view === 'company'}">By company</button></div>
     </div>
     <p class="ap-line" id="apLine" aria-live="polite"></p>
     <div id="apList" class="ap-list"></div>
     <div id="apMore"></div>`;
-  $('#apSource').value = apState.source;
   $('#apSearch').addEventListener('submit', e => { e.preventDefault(); apState.q = $('#apQ').value.trim(); apState.page = 1; loadApplied(); });
   $$('.fchip').forEach(b => b.addEventListener('click', () => {
     const f = b.dataset.f; apState.fields = apState.fields.includes(f) ? apState.fields.filter(x => x !== f) : [...apState.fields, f];
     b.setAttribute('aria-pressed', String(apState.fields.includes(f))); apState.page = 1; loadApplied();
   }));
-  $('#apSource').addEventListener('change', e => { apState.source = e.target.value; apState.page = 1; loadApplied(); });
   $$('.seg [data-v]').forEach(b => b.addEventListener('click', () => { apState.view = b.dataset.v; $$('.seg [data-v]').forEach(x => x.setAttribute('aria-selected', String(x === b))); apState.page = 1; loadApplied(); }));
   loadApplied();
 }
