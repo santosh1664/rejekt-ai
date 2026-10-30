@@ -496,8 +496,10 @@ label.field small { color: var(--muted); font-weight: 400; }
 /* Horizontal top-match strip */
 .top-strip { display: flex; gap: 14px; overflow-x: auto; padding: 4px 0 10px; margin: 0 0 24px; scrollbar-width: none; }
 .top-strip::-webkit-scrollbar { display: none; }
-.top-strip .tcard { flex: none; width: 270px; }
-.top-strip .tcard .tc-top { min-height: 130px; }
+.top-strip .tcard { flex: 1 0 250px; display: flex; flex-direction: column; }
+.top-strip .tcard .tc-top { min-height: 150px; flex: 1; }
+.top-strip .tcard .tc-meta { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; padding-right: 50px; font-size: 11px; white-space: nowrap; }
+.top-strip .tcard .tc-top h3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .top-strip .tcard .tc-top small { font-size: 11px; letter-spacing: .02em; text-transform: uppercase; opacity: .6; }
 .top-strip .tcard .tc-top h3 { font-size: 16px; margin-top: 4px; }
 .top-strip .tcard .tc-foot { padding: 8px 8px 4px; }
@@ -1382,8 +1384,8 @@ function topCardHTML(j, i) {
   const sk = jobSkills(j).slice(0, 3).map(x => `<span class="tag" style="font-size:11px">${esc(x)}</span>`).join('');
   return `<article class="tcard" data-job="${j.jobId}" tabindex="0">
     <div class="tc-top" style="--tint:${TINTS[i % TINTS.length]}">
-      <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">${where ? `<span style="font-size:11px;opacity:.7">${where}</span>` : ''}<span style="font-size:11px;opacity:.55;margin-left:auto">${ago(j.postedAt || j.discovered)}</span></div>
-      <h3>${esc(j.title)}</h3>
+      <div class="tc-meta">${where ? `<span style="opacity:.7">${where}</span><span style="opacity:.4">·</span>` : ''}<span style="opacity:.55">${ago(j.postedAt || j.discovered)}</span></div>
+      <h3 title="${esc(j.title)}">${esc(j.title)}</h3>
       ${sk ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">${sk}</div>` : ''}
       <svg class="ring" viewBox="0 0 46 46" role="img" aria-label="${v}% match"><circle cx="23" cy="23" r="19" fill="none" stroke="#0002" stroke-width="3.5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#111" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${(c * v / 100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 23 23)"/><text x="23" y="27" text-anchor="middle" style="font:700 12px var(--text);fill:#111">${v}%</text></svg>
     </div>
