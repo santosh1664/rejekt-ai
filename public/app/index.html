@@ -1843,8 +1843,7 @@ async function renderSent() {
       <aside class="rv-side">
         <nav class="sp-tabs">${TABS.map(([k, l]) => `<a href="#/sent/${id}/${k}" aria-current="${k === tab ? 'page' : 'false'}">${l}</a>`).join('')}</nav>
         ${sentAt ? `<div class="sent-card"><b>Sent ${new Date(sentAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</b><span>${[snap.ats ? pretty(snap.ats) : '', a.source === 'auto' ? 'by auto-apply' : a.source === 'tsenta' ? 'through Tsenta' : ''].filter(Boolean).join(' · ')}</span></div>` : ''}
-        <label class="field" style="margin-top:14px">Status<select id="appStatus">${STATUSES.map(([v, l]) => `<option value="${v}" ${v === a.status ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-        <label class="field" style="margin-top:12px">Notes<textarea id="appNotes" rows="4" placeholder="Recruiter name, interview dates, anything to remember">${esc(a.notes || '')}</textarea></label>
+        <label class="field" style="margin-top:14px">Notes<textarea id="appNotes" rows="4" placeholder="Recruiter name, interview dates, anything to remember">${esc(a.notes || '')}</textarea></label>
         <button class="btn sm" id="saveNotes" type="button" style="margin-top:8px">Save notes</button>
       </aside>
       <div class="rv-main"><div class="sp-body">${(body[tab] || body.form)()}</div></div></div>`;
@@ -1853,9 +1852,6 @@ async function renderSent() {
     const on = e.target.getAttribute('aria-pressed') !== 'true';
     e.target.setAttribute('aria-pressed', on); e.target.textContent = on ? 'Show resume' : 'What changed';
     $('.sp-pdf').src = on ? changesUrl(a.id) : resumeUrl(a.id, false);   // same page view as What changed, no PDF viewer
-  });
-  $('#appStatus').addEventListener('change', async e => {
-    try { await api('PATCH', `/users/${USER}/applications/${a.id}`, { status: e.target.value }); toast(`Moved to ${STATUS_LABEL[e.target.value]}.`); loadApps(); } catch (err) { toast(err.message); }
   });
   $('#saveNotes').addEventListener('click', async () => { await api('PATCH', `/users/${USER}/applications/${a.id}`, { notes: $('#appNotes').value }); toast('Notes saved.'); });
 }
