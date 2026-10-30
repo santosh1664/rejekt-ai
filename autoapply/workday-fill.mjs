@@ -154,7 +154,7 @@ export async function fillWorkday(page, url, book, files, opts = {}) {
       if (name && name === last && step > 0) return { outcome: 'NEEDS_YOU', filled, missing, reason: `Workday would not leave the "${name}" step. Finish it on the company's site.` };
       last = name;
 
-      if (/experience/i.test(name)) { const r = await fillExperience(page, llmCtx?.resumeSections || {}, files); filled.push(...r.filled); missing.push(...r.missing); }
+      if (/experience/i.test(name)) { const r = await fillExperience(page, llmCtx?.resumeSections || {}, files, llmCtx?.job || {}); filled.push(...r.filled); missing.push(...r.missing); }
       const r = await fillStep(page, book, llmCtx, { acceptConsent: !!opts.acceptConsent });
       filled.push(...r.filled); missing.push(...r.missing);
       if (missing.length) return { outcome: 'NEEDS_YOU', filled, missing, reason: `${missing.length} required field${missing.length === 1 ? '' : 's'} need${missing.length === 1 ? 's' : ''} your answer` };

@@ -60,20 +60,34 @@ export async function scanFields(page) {
   });
 }
 
-const OPEN_OPTS = '[role="listbox"]:not([data-automation-id="selectedItemList"]) [role="option"], [data-automation-id="promptOption"]:not([data-automation-id="selectedItem"] *)';
-const optionsOf = async page => page.evaluate(sel => [...document.querySelectorAll(sel)]
-  .filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; })
-  .map((e, i) => ({ label: String(e.innerText || e.textContent || '').replace(/\s+/g, ' ').trim(), value: String(i) })).filter(o => o.label), OPEN_OPTS);
-
-const clickOption = async (page, label) => {
-  const all = page.locator(OPEN_OPTS);
-  const n = await all.count();
-  for (let i = 0; i < n; i++) {
-    const t = ((await all.nth(i).innerText().catch(() => '')) || '').replace(/\s+/g, ' ').trim();
-    if (t && t.toLowerCase() === String(label).toLowerCase() && await all.nth(i).isVisible().catch(() => false)) { await all.nth(i).click(); return true; }
+// Choices of the list that is open right now. Selected chips of other fields (e.g. the phone country
+// code) also use role=option, so anything inside a selected-items list is left out; duplicates collapse.
+const markOptions = page => page.evaluate(() => {
+  document.querySelectorAll('[data-wf-opt]').forEach(e => e.removeAttribute('data-wf-opt'));
+  const seen = new Set(); const out = [];
+  for (const e of document.querySelectorAll('[role="option"], [data-automation-id="promptOption"], [data-automation-id="promptLeafNode"]')) {
+    if (e.closest('[data-automation-id="selectedItemList"], [data-automation-id="selectedItem"]')) continue;
+    const r = e.getBoundingClientRect(); if (!r.width || !r.height) continue;
+    const label = String(e.innerText || e.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!label || seen.has(label.toLowerCase()) || e.querySelector('[role="option"], [data-automation-id="promptOption"]')) continue;
+    seen.add(label.toLowerCase()); e.setAttribute('data-wf-opt', String(out.length)); out.push({ label, value: String(out.length) });
   }
-  return false;
+  return out;
+});
+const optionsOf = page => markOptions(page);
+const clickOption = async (page, label) => {
+  const opt = (await markOptions(page)).find(o => o.label.toLowerCase() === String(label).toLowerCase());
+  if (!opt) return false;
+  const el = page.locator(`[data-wf-opt="${opt.value}"]`).first();
+  await el.scrollIntoViewIfNeeded().catch(() => {});
+  await el.click({ timeout: 4000 }).catch(() => el.click({ force: true }).catch(() => {}));
+  return true;
 };
+/** Close any open list so it can't cover the next field. */
+const closeLists = async page => { await page.keyboard.press('Escape').catch(() => {}); await page.evaluate(() => document.activeElement?.blur?.()).catch(() => {}); await pause(page, 200); };
+// "How did you hear about us?" lists differ per company: prefer the closest of these.
+const SOURCE_PREF = [/linkedin/i, /job board|job site|online job/i, /social media/i, /internet|online|website/i, /career site|careers? (page|site)/i, /other/i];
+const pickSource = opts => { for (const re of SOURCE_PREF) { const o = opts.find(x => re.test(x.label)); if (o) return o; } return null; };
 
 /** Open a dropdown / type-ahead and read its choices (needed before the model can pick one). */
 async function readChoices(page, box, f) {
@@ -110,8 +124,10 @@ async function fillField(page, f, ans) {
       if (!opt) return false;
       const input = box.locator(`input[id="${String(opt.value).replace(/"/g, '\\"')}"]`).first();
       await box.locator(`label[for="${String(opt.value).replace(/"/g, '\\"')}"]`).first().click({ timeout: 4000 }).catch(() => {});
-      if (!(await input.isChecked().catch(() => false))) await input.check({ force: true }).catch(() => {});
-      return input.isChecked().catch(() => false);
+      await pause(page, 300);   // Workday updates the radio a moment after the click
+      const on = async () => (await input.isChecked().catch(() => false)) || (await input.getAttribute('aria-checked').catch(() => '')) === 'true';
+      if (!(await on())) { await input.evaluate(e => e.click()).catch(() => {}); await pause(page, 300); }   // an open list can cover the label
+      return on();
     }
     case 'checkbox': {
       const c = box.locator('input[type=checkbox]').first();
@@ -128,12 +144,18 @@ async function fillField(page, f, ans) {
       await pause(page, 300); return true;
     }
     case 'typeahead': {
+      // Open the list and click the choice; nested lists (Job Board → LinkedIn) get a second level.
       const input = box.locator(`${A('multiselectInputContainer')} input, ${A('multiSelectContainer')} input`).first();
-      await input.click(); await input.fill(String(val).split(',')[0].trim()); await pause(page, 1200); await page.keyboard.press('Enter'); await pause(page, 900);
-      if ((await box.locator(A('selectedItem')).count())) return true;
-      const opts = await optionsOf(page);
-      const opt = chooseOption(opts, val) || opts[0];
-      if (opt && await clickOption(page, opt.label)) { await pause(page, 500); return true; }
+      await input.evaluate(e => { e.scrollIntoView({ block: 'center' }); }); await input.click().catch(() => {}); await pause(page, 900);
+      for (let level = 0; level < 3; level++) {
+        if (await box.locator(A('selectedItem')).count()) return true;
+        let opts = await optionsOf(page);
+        if (!opts.length && level === 0) { await input.fill(String(val).split(',')[0].trim()); await pause(page, 1200); await page.keyboard.press('Enter'); await pause(page, 900); opts = await optionsOf(page); }
+        const opt = chooseOption(opts, val) || (f.id === 'source' || /hear/i.test(f.label || '') ? pickSource(opts) : null) || (level > 0 ? opts[0] : null);
+        if (!opt) break;
+        await clickOption(page, opt.label); await pause(page, 900);
+      }
+      if (await box.locator(A('selectedItem')).count()) { await page.keyboard.press('Escape').catch(() => {}); return true; }
       await page.keyboard.press('Escape'); return false;
     }
     default: return false;
@@ -153,7 +175,8 @@ async function answerFor(page, f, book, ctx, opts) {
   const ans = resolveAnswer(field, book, { acceptConsent: !!opts.acceptConsent });
   let pick = ans.value?.option?.label || (typeof ans.value === 'string' ? ans.value : typeof ans.value === 'boolean' ? (ans.value ? 'Yes' : 'No') : null);
   let source = pick ? ans.source : null;
-  if (['dropdown', 'typeahead'].includes(f.kind)) await page.keyboard.press('Escape').catch(() => {});
+  if (['dropdown', 'typeahead'].includes(f.kind)) await closeLists(page);
+  if (!pick && ans.key === 'referralSource') pick = choices?.length ? pickSource(choices)?.label : book.referralSource;
   // Workday wants a bare number and just the city name; names and extras the profile doesn't hold stay empty.
   const L = f.label.toLowerCase();
   if (/phone number/.test(L)) pick = String(book.phone || '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '') || null;
@@ -255,9 +278,23 @@ async function typeAheadPick(page, id, value) {
   return fillField(page, { wf: 'x', kind }, value).catch(() => false);
 }
 
-export async function fillExperience(page, sections, files) {
+/**
+ * The skills to list: the ones this job's posting mentions first, then the rest in your order, at most `max`.
+ * Version numbers are dropped ("Java 17" → "Java") so Workday's skill search finds them.
+ */
+export function pickSkills(sections, job = {}, max = 15) {
+  const text = ` ${[job.title, job.description].filter(Boolean).join(' ')} `.toLowerCase();
+  const all = [...new Set((sections.skills || []).flatMap(g => g.items || []).map(s => String(s).replace(/\s+\d+(\.\d+)*$/, '').trim()).filter(Boolean))];
+  const hit = s => new RegExp(`[^a-z0-9]${s.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^a-z0-9]`).test(text);
+  return [...all.filter(hit), ...all.filter(s => !hit(s))].slice(0, max);
+}
+
+export async function fillExperience(page, sections, files, job = {}) {
   const filled = []; const missing = [];
-  // 1. Resume: Workday reads it and often fills the history itself.
+  // 1. Resume: remove files an earlier attempt left in this draft, then attach this application's tailored resume once.
+  for (let i = 0; i < 10 && await page.locator(A('delete-file')).count(); i++) {
+    await page.locator(A('delete-file')).first().click().catch(() => {}); await pause(page, 1200);
+  }
   const up = page.locator('input[type=file]').first();
   if (files?.resume && await up.count()) {
     await up.setInputFiles(files.resume); await pause(page, 7000);
@@ -308,16 +345,24 @@ export async function fillExperience(page, sections, files) {
     else await page.keyboard.press('Escape');
     await pause(page, 300);
   }
-  // 4. Skills: the first dozen (skipped when the resume parse or an earlier run already added some)
+  // 4. Skills: up to 15, the job's own first; ones already on the form (resume parse, earlier draft) are kept
   const skillBox = page.locator(`${A('formField-skills')} input`).first();
-  if (await skillBox.count() && !(await page.locator(`${A('formField-skills')} ${A('selectedItem')}`).count())) {
-    const skills = (sections.skills || []).flatMap(g => g.items || []).slice(0, 12);
+  if (await skillBox.count()) {
+    const have = (await page.locator(`${A('formField-skills')} ${A('selectedItem')}`).allInnerTexts().catch(() => [])).map(t => t.trim().toLowerCase());
+    const skills = pickSkills(sections, job, 15).filter(sk => !have.some(h => h.startsWith(sk.toLowerCase()))).slice(0, Math.max(0, 15 - have.length));
     let n = 0;
     for (const sk of skills) {
       await skillBox.evaluate(e => { e.scrollIntoView({ block: 'center' }); e.focus(); });
-      await page.keyboard.type(sk.replace(/\s*\d+$/, ''), { delay: 20 }); await pause(page, 1100);
-      await page.keyboard.press('Enter'); await pause(page, 500);
-      n++;
+      // Workday searches on Enter: an exact match is selected at once, otherwise suggestions appear.
+      const chips = page.locator(`${A('formField-skills')} ${A('selectedItem')}`);
+      const before = await chips.count();
+      await page.keyboard.type(sk, { delay: 20 }); await page.keyboard.press('Enter'); await pause(page, 2000);
+      if ((await chips.count()) > before) { n++; await closeLists(page); continue; }
+      const opts = await optionsOf(page);
+      const opt = opts.find(o => o.label.toLowerCase() === sk.toLowerCase()) || opts.find(o => o.label.toLowerCase().startsWith(sk.toLowerCase())) || opts.find(o => o.label.toLowerCase().includes(sk.toLowerCase()));
+      if (opt) { await clickOption(page, opt.label); await pause(page, 600); if ((await chips.count()) > before) n++; }
+      await closeLists(page);
+      await pause(page, 500);
     }
     if (n) filled.push({ label: 'Skills', key: 'skills', value: `${n} skills`, source: 'profile' });
   }

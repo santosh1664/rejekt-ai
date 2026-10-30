@@ -699,6 +699,12 @@ label.field small { color: var(--muted); font-weight: 400; }
 .lm-ats { font-size: 13.5px; min-height: 20px; }
 .jc.link h3 { margin-top: 6px; }
 #view[data-review] .qitem .top{display:none}
+.wa-row{border:1px solid var(--line,#e6e6e1);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.wa-head{display:flex;align-items:center;margin-bottom:8px}
+.wa-add{display:flex;align-items:center;gap:10px;margin-top:6px}
+.ct-list{display:grid;gap:10px;margin-bottom:12px}
+.ct-row{display:grid;grid-template-columns:1.2fr 1.2fr 1.4fr 1fr auto;gap:10px;align-items:end;border:1px solid var(--line,#e6e6e1);border-radius:12px;padding:12px 14px}
+@media (max-width:860px){.ct-row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -2172,11 +2178,11 @@ async function renderProfile() {
   if (state.profileTab === 'settings') return renderSettingsTab();
 
   const todo = rp.completeness.items.filter(i => !i.done);
-  const contact = [p.city && [p.city, p.state].filter(Boolean).join(', '), p.email, p.phone].filter(Boolean);
+  const contact = [[p.address, p.city, [p.state, p.zip].filter(Boolean).join(' ')].filter(Boolean).join(', '), p.email, p.phone].filter(Boolean);
   const links = [p.linkedin && ['LinkedIn', p.linkedin], p.github && ['GitHub', p.github], p.portfolio && ['Website', p.portfolio]].filter(Boolean);
   $('#tabBody').innerHTML = `<div class="profile">
     <nav class="toc" aria-label="Profile sections">
-      ${[['about', 'About you'], ['looking', 'What you want'], ['summary', 'Summary'], ['experience', 'Experience', counts.experience], ['education', 'Education', counts.education], ['projects', 'Projects', counts.projects], ['skills', 'Skills', counts.skills], ['certifications', 'Certifications', counts.certifications], ['custom', 'Other sections'], ['defaults', 'Application answers']]
+      ${[['about', 'About you'], ['looking', 'What you want'], ['summary', 'Summary'], ['experience', 'Experience', counts.experience], ['education', 'Education', counts.education], ['projects', 'Projects', counts.projects], ['skills', 'Skills', counts.skills], ['certifications', 'Certifications', counts.certifications], ['custom', 'Other sections'], ['workauth', 'Work authorization'], ['contacts', 'People you know'], ['defaults', 'Application answers']]
         .map(([id, l, n]) => `<a href="#/profile" data-jump="${id}">${l}${n != null ? `<span>${n}</span>` : ''}</a>`).join('')}
     </nav>
     <div>
@@ -2198,6 +2204,8 @@ async function renderProfile() {
       <section class="sec" id="sec-skills"><div class="sec-head"><div><h2>Skills</h2><p>Grouped the way you'd list them on a resume. Every job's requirements are checked against these.</p></div><span class="spacer"></span><button class="btn sm" type="button" data-edit-skills>Edit</button></div>
         <div id="skillsBody">${s.skills.length ? s.skills.map(g => `<div style="margin-bottom:12px"><div style="font-weight:600;font-size:14px;margin-bottom:6px">${esc(g.group)}</div><div class="chips">${g.items.map(x => `<span class="tag">${esc(x)}</span>`).join('')}</div></div>`).join('') : '<p class="muted" style="margin:0">No skills yet. Upload a resume or add them by hand.</p>'}</div></section>
       ${['certifications', 'custom'].map(listSectionHTML).join('')}
+      <section class="sec" id="sec-workauth"><div class="sec-head"><div><h2>Work authorization</h2><p>One row per country you'd work in. Forms that ask "Are you authorized to work in…?" or "Will you need sponsorship?" use the row for that country. A country you haven't added comes back to you instead of being guessed.</p></div></div><div id="workAuthBody"></div></section>
+      <section class="sec" id="sec-contacts"><div class="sec-head"><div><h2>People you know</h2><p>When you apply where one of them works, "Do you know anyone here?" and referral questions name them. Everywhere else those questions get "No" or "N/A".</p></div></div><div id="contactsBody"></div></section>
       <section class="sec" id="sec-defaults"><div class="sec-head"><div><h2>Application answers</h2><p>The questions job forms ask every time, answered once.</p></div></div><div id="defaultsBody"></div></section>
     </div></div>`;
 
@@ -2212,7 +2220,7 @@ async function renderProfile() {
   });
   $('[data-edit-skills]').addEventListener('click', openSkillsEditor);
   for (const key of Object.keys(LIST_SECTIONS)) bindListSection(key);
-  renderDefaults();
+  renderDefaults(); renderWorkAuth(); renderContacts();
   renderRoles();
 }
 
@@ -2306,6 +2314,69 @@ function openSkillsEditor() {
     await patchRP({ sections: { skills } }, 'Skills saved.'); renderProfile();
   });
 }
+const WORKAUTH_KEYS = ['authorizedToWork', 'needsSponsorship', 'workCountry'];   // answered per country in renderWorkAuth
+const WA_COUNTRIES = ['United States', 'Canada', 'United Kingdom', 'India', 'Germany', 'Ireland', 'Netherlands', 'France', 'Australia', 'Singapore', 'Israel', 'Mexico', 'Spain', 'Poland', 'Switzerland', 'Sweden', 'Japan', 'Brazil', 'Italy', 'Portugal'];
+const ynSelect = (name, v) => `<select name="${name}"><option value="">Not answered</option><option value="true" ${v === true ? 'selected' : ''}>Yes</option><option value="false" ${v === false ? 'selected' : ''}>No</option></select>`;
+function renderWorkAuth() {
+  const host = $('#workAuthBody'); if (!host) return;
+  let rows = (state.rp.sections.workAuth || []).map(r => ({ ...r }));
+  const draw = () => {
+    const left = WA_COUNTRIES.filter(c => !rows.some(r => r.country === c));
+    host.innerHTML = `<form id="waForm">
+      ${rows.length ? rows.map((r, i) => `<div class="wa-row" data-i="${i}">
+        <div class="wa-head"><b>${esc(r.country)}</b><span class="spacer"></span><button class="btn sm quiet danger" type="button" data-rm="${i}" aria-label="Remove ${esc(r.country)}">Remove</button></div>
+        <div class="form-grid">
+          <label class="field">Authorized to work in ${esc(r.country)}?${ynSelect('authorized', r.authorized)}</label>
+          <label class="field">Need visa sponsorship now or in the future?${ynSelect('needsSponsorship', r.needsSponsorship)}</label>
+          <label class="field">Visa or status <small>optional, for example F-1 OPT or Citizen</small><input name="status" value="${esc(r.status || '')}"></label>
+        </div></div>`).join('') : '<p class="muted" style="margin:0 0 12px">No countries yet. Add the countries you would work in.</p>'}
+      <div class="wa-add"><select id="waPick" aria-label="Country to add"><option value="">Add a country…</option>${left.map(c => `<option>${esc(c)}</option>`).join('')}<option value="__other">Other…</option></select>
+        <span class="spacer"></span><button class="btn primary" type="submit">Save work authorization</button></div></form>`;
+    const read = () => $$('.wa-row', host).forEach(el => {
+      const r = rows[+el.dataset.i]; const v = n => el.querySelector(`[name=${n}]`).value;
+      r.authorized = v('authorized') === '' ? null : v('authorized') === 'true';
+      r.needsSponsorship = v('needsSponsorship') === '' ? null : v('needsSponsorship') === 'true';
+      r.status = v('status').trim();
+    });
+    $('#waPick').addEventListener('change', e => {
+      let c = e.target.value; if (!c) return;
+      if (c === '__other') c = (prompt('Country name') || '').trim();
+      if (!c || rows.some(r => r.country.toLowerCase() === c.toLowerCase())) { draw(); return; }
+      read(); rows.push({ country: c, authorized: null, needsSponsorship: null, status: '' }); draw();
+      host.querySelector(`.wa-row[data-i="${rows.length - 1}"] select`)?.focus();
+    });
+    host.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { read(); rows.splice(+b.dataset.rm, 1); draw(); }));
+    $('#waForm').addEventListener('submit', async e => {
+      e.preventDefault(); read();
+      // The first row (usually the United States) also feeds job matching's sponsorship filter.
+      const main = rows.find(r => r.country === 'United States') || rows[0];
+      const ad = { ...(state.rp.sections.applicationDefaults || {}) };
+      if (main) { ad.workCountry = main.country; if (main.authorized !== null) ad.authorizedToWork = main.authorized; else delete ad.authorizedToWork; if (main.needsSponsorship !== null) ad.needsSponsorship = main.needsSponsorship; else delete ad.needsSponsorship; }
+      await patchRP({ sections: { workAuth: rows, applicationDefaults: ad } }, 'Work authorization saved.'); renderProfile();
+    });
+  };
+  draw();
+}
+const RELATIONS = ['Friend', 'Family member', 'Former colleague', 'Classmate', 'Recruiter', 'Other'];
+function renderContacts() {
+  const host = $('#contactsBody'); if (!host) return;
+  let rows = (state.rp.sections.contacts || []).map(r => ({ ...r }));
+  const draw = () => {
+    host.innerHTML = `<form id="ctForm">
+      ${rows.length ? `<div class="ct-list">${rows.map((c, i) => `<div class="ct-row" data-i="${i}">
+        <label class="field">Name<input name="name" value="${esc(c.name)}" required></label>
+        <label class="field">Company<input name="company" value="${esc(c.company)}" required></label>
+        <label class="field">Email <small>optional</small><input name="email" type="email" value="${esc(c.email || '')}"></label>
+        <label class="field">Relation<select name="relation">${RELATIONS.map(r => `<option ${c.relation === r ? 'selected' : ''}>${r}</option>`).join('')}</select></label>
+        <button class="btn sm quiet danger" type="button" data-rm="${i}" aria-label="Remove ${esc(c.name || 'contact')}">Remove</button></div>`).join('')}</div>` : '<p class="muted" style="margin:0 0 12px">Nobody added. That is fine: those questions get "No".</p>'}
+      <div class="wa-add"><button class="btn" type="button" id="ctAdd">Add a person</button><span class="spacer"></span>${rows.length || (state.rp.sections.contacts || []).length ? '<button class="btn primary" type="submit">Save people</button>' : ''}</div></form>`;
+    const read = () => $$('.ct-row', host).forEach(el => { const c = rows[+el.dataset.i]; for (const n of ['name', 'company', 'email', 'relation']) c[n] = el.querySelector(`[name=${n}]`).value.trim(); });
+    $('#ctAdd').addEventListener('click', () => { read(); rows.push({ name: '', company: '', email: '', relation: 'Friend' }); draw(); host.querySelector(`.ct-row[data-i="${rows.length - 1}"] input`)?.focus(); });
+    host.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { read(); rows.splice(+b.dataset.rm, 1); draw(); }));
+    $('#ctForm').addEventListener('submit', async e => { e.preventDefault(); read(); await patchRP({ sections: { contacts: rows.filter(c => c.name && c.company) } }, 'People saved.'); renderProfile(); });
+  };
+  draw();
+}
 function renderDefaults() {
   const fields = state.fields || {}; const ad = state.rp.sections.applicationDefaults || {};
   const GROUPS = [['authorization', 'Work authorization', 'Used to filter out jobs that won\'t sponsor you, and for every "are you authorized to work" question.'], ['logistics', 'Availability', ''], ['background', 'Background questions', ''], ['eeo', 'Voluntary self-identification', 'Optional. Employers use these only for equal-opportunity reporting, and "Prefer not to say" is always fine.']];
@@ -2316,7 +2387,7 @@ function renderDefaults() {
     if (f.type === 'date') return `<label class="field">${f.label}<input type="date" name="${key}" value="${esc(v || '')}"/></label>`;
     return `<label class="field">${f.label}${f.hint ? ` <small>${esc(f.hint)}</small>` : ''}<input type="text" name="${key}" value="${esc(v || '')}"/></label>`;
   };
-  $('#defaultsBody').innerHTML = `<form id="adForm">${GROUPS.map(([g, title, hint]) => `<div class="ad-group"><h3>${title}</h3>${hint ? `<p class="hint">${hint}</p>` : ''}<div class="form-grid" style="margin-top:${hint ? 0 : 10}px">${Object.entries(fields).filter(([, f]) => f.group === g).map(([k, f]) => input(k, f)).join('')}</div></div>`).join('')}
+  $('#defaultsBody').innerHTML = `<form id="adForm">${GROUPS.map(([g, title, hint]) => `<div class="ad-group"><h3>${title}</h3>${hint ? `<p class="hint">${hint}</p>` : ''}<div class="form-grid" style="margin-top:${hint ? 0 : 10}px">${Object.entries(fields).filter(([k, f]) => f.group === g && !WORKAUTH_KEYS.includes(k)).map(([k, f]) => input(k, f)).join('')}</div></div>`).join('')}
     <div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="btn primary" type="submit">Save answers</button></div></form>`;
   $('#adForm').addEventListener('submit', async e => {
     e.preventDefault();

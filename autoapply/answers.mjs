@@ -36,10 +36,13 @@ export function buildAnswerBook(sections, job = {}, { coverLetter = '', override
     govClearance: ad.govClearance, govTies: ad.govTies,
     // "U.S. worker" (citizen, national, permanent resident, refugee, asylee): never true on a visa
     usPerson: /^(us|u\.s\.?|usa|united states|american)\b/i.test(ad.citizenship || '') || /green card|permanent resident|refugee|asyl/i.test(ad.workPermit || ''),
-    over18: ad.over18, referralSource: ad.referralSource || '',
+    over18: ad.over18, referralSource: ad.referralSource || 'LinkedIn',   // most listings here come from job boards
     hasTransport: ad.hasTransport, needsAccommodations: ad.needsAccommodations,
     gender: ad.gender || '', ethnicity: ad.ethnicity || '', veteran: ad.veteran || '', disability: ad.disability || '',
-    companyName: job.company || '', jobTitle: job.title || '',
+    companyName: job.company || '', jobTitle: job.title || '', jobLocation: job.location || '',
+    workAuth: s.workAuth || [], contacts: s.contacts || [],
+    // legacy single-country answers, used when no country rows exist yet
+    defaultAuth: { country: ad.workCountry || 'United States', authorized: ad.authorizedToWork, needsSponsorship: ad.needsSponsorship },
     savedAnswers: s.savedAnswers || [],
     overrides, // { normalizedQuestion: value } — the person's edits on a reviewed application
   };
@@ -73,6 +76,9 @@ const RULES = [
   ['needsAccommodations', l => /accommodation/.test(l)],
   ['hasTransport', l => /transportation|reliable transport/.test(l)],
   ['referralSource', l => /how did you (hear|find|learn)|where did you (hear|find|learn)|referral source/.test(l)],
+  ['contactDetails', l => /(if (yes|so)|please (provide|list|share)).{0,80}(name|relationship|who)|name (and|&) relationship|relationship to (the )?(employee|them)/.test(l)],
+  ['knowsEmployee', l => /(friend|relative|family member|related to|know (anyone|someone)|acquaint).{0,120}(employ|work|current)|(employ|work).{0,60}(friend|relative|family member)/.test(l)],
+  ['referrerName', l => /referr(ed|er|al)\b(?! source)|who referred|employee referral/.test(l)],
   ['firstName', l => /preferred (first )?name|first name|given name/.test(l)],
   ['lastName', l => /last name|family name|surname/.test(l)],
   ['email', l => /e-?mail/.test(l)],
@@ -89,6 +95,7 @@ const RULES = [
   ['graduationYear', l => /graduat/.test(l)],
   ['gpa', l => /\bgpa\b|grade point/.test(l)],
   ['country', l => /^country\b|country of residence|country you (live|reside)/.test(l)],
+  ['state', l => /^(state|province|state province|state or province|region|state region)$/.test(l)],
   ['address', l => /^(street )?address( line 1)?$|street address/.test(l)],
   ['zip', l => /postal|zip/.test(l)],
   ['location', l => /^(current )?location|\bcity\b|where (are you|do you) (currently )?(located|based|live)|address/.test(l)],
@@ -174,6 +181,10 @@ export function resolveAnswer(field, book, { acceptConsent = false } = {}) {
   let value = null; let source = null;
   if (saved !== null && saved !== undefined) { value = saved; source = 'saved'; }
   else if (key === 'consent') { value = acceptConsent ? true : null; source = acceptConsent ? 'consent setting' : null; }
+  else if (key === 'authorizedToWork' || key === 'needsSponsorship') { value = workAuthAnswer(book, field.label, key); source = value === null ? null : 'profile'; }
+  else if (key === 'knowsEmployee') { value = !!contactAt(book); source = 'profile'; }
+  else if (key === 'contactDetails') { const c = contactAt(book); value = c ? [c.name, c.relation, c.email].filter(Boolean).join(', ') : 'N/A'; source = 'profile'; }
+  else if (key === 'referrerName') { const c = contactAt(book); value = c ? c.name : (field.required ? 'N/A' : null); source = 'profile'; }
   else if (key === 'hispanic') {
     if (book.ethnicity) value = book.ethnicity === 'Prefer not to say' ? 'Prefer not to say' : book.ethnicity === 'Hispanic or Latino';
     source = 'profile';
@@ -195,4 +206,47 @@ export function resolveAnswer(field, book, { acceptConsent = false } = {}) {
   }
   if (typeof value === 'boolean') value = value ? 'Yes' : 'No';
   return { key, value: value === null ? null : String(value), source };
+}
+
+// ── Per-country work authorization and people you know ───────────────────────────────────────
+const COUNTRY_ALIASES = [
+  ['United States', /\b(united states|u\.?\s?s\.?\s?a?\.?|america)\b/i], ['Canada', /\bcanad/i], ['United Kingdom', /\b(united kingdom|u\.?k\.?|england|britain|scotland|wales)\b/i],
+  ['India', /\bindia\b/i], ['Germany', /\bgerman/i], ['France', /\bfrance|french\b/i], ['Netherlands', /\bnetherlands|holland|dutch\b/i], ['Ireland', /\bireland|irish\b/i],
+  ['Australia', /\baustralia/i], ['Singapore', /\bsingapore/i], ['Israel', /\bisrael/i], ['Mexico', /\bmexic/i], ['Spain', /\bspain|spanish\b/i], ['Poland', /\bpoland|polish\b/i],
+  ['Japan', /\bjapan/i], ['Switzerland', /\bswitzerland|swiss\b/i], ['Sweden', /\bswed/i], ['Portugal', /\bportug/i], ['Italy', /\bital(y|ian)\b/i], ['Brazil', /\bbrazil/i],
+];
+const US_STATES = /\b(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)\b/;
+const sameCountry = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+
+/** Canonical country named in a question or a job location, or null. */
+export function countryIn(text, extra = []) {
+  const t = String(text || '');
+  for (const c of extra) if (c && new RegExp(`\\b${c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(t)) return c;
+  for (const [name, re] of COUNTRY_ALIASES) if (re.test(t)) return name;
+  if (US_STATES.test(t)) return 'United States';
+  return null;
+}
+
+/**
+ * "Are you authorized to work in X?" / "Will you need sponsorship in X?": the country comes from the
+ * question, else the job's location, else your first country row. A country you haven't added is
+ * unknown (null), so the form comes back to you instead of guessing.
+ */
+export function workAuthAnswer(book, label, key) {
+  const rows = book.workAuth?.length ? book.workAuth : (book.defaultAuth?.authorized !== undefined || book.defaultAuth?.needsSponsorship !== undefined ? [book.defaultAuth] : []);
+  if (!rows.length) return null;
+  const names = rows.map(r => r.country);
+  const country = countryIn(label, names) || countryIn(book.jobLocation, names) || rows[0].country;
+  const row = rows.find(r => sameCountry(r.country, country));
+  if (!row) return null;
+  const v = key === 'authorizedToWork' ? row.authorized : row.needsSponsorship;
+  return v === undefined ? null : v;
+}
+
+const companyKey = s => String(s || '').toLowerCase().replace(/\b(inc|llc|ltd|corp(oration)?|co|company|technolog(y|ies)|group|holdings|plc|gmbh|limited)\b\.?/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+/** Someone you know at the company you're applying to, or null. */
+export function contactAt(book) {
+  const target = companyKey(book.companyName);
+  if (!target) return null;
+  return (book.contacts || []).find(c => { const k = companyKey(c.company); return k && (k === target || target.includes(k) || k.includes(target)); }) || null;
 }
