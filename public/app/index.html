@@ -444,7 +444,7 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .added-list small { display: block; color: var(--muted); font-size: 12px; }
 /* Applied */
 .import-box { display: flex; gap: 16px; align-items: center; background: var(--signal-soft); color: var(--signal-ink); border-radius: var(--r-lg); padding: 16px 18px; margin-bottom: 18px; }
-.import-box b { font-size: 15px; } .import-box p { margin: 4px 0 0; font-size: 14px; } .import-box > div { flex: 1; }
+.import-box b { font-size: 15px; } .import-box p { margin: 4px 0 0; font-size: 14px; } .import-box > div:first-child { flex: 1; }
 .ap-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 6px; }
 .ap-controls .spacer { flex: 1; }
 .ap-controls select { width: auto; font-size: 13.5px; padding: 7px 10px; }
@@ -458,14 +458,15 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .ap-line { margin: 6px 0 12px; font-size: 14px; color: var(--ink-2); min-height: 1.4em; }
 .ap-list { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
 .ap-list:empty { display: none; }
-.ap-row, .ap-co { display: flex; gap: 14px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line-2); padding: 14px 18px; align-items: flex-start; cursor: pointer; color: inherit; }
+.ap-row, .ap-co { font-family: var(--text); display: flex; gap: 14px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line-2); padding: 14px 18px; align-items: flex-start; cursor: pointer; color: inherit; }
 .ap-row:first-child, .ap-co:first-child { border-top: 0; }
 .ap-row:hover, .ap-co:hover { background: var(--surface-2); }
 .ap-date { width: 64px; flex: none; font-size: 13px; color: var(--muted); padding-top: 2px; font-variant-numeric: tabular-nums; }
 .ap-main, .co-main { flex: 1; min-width: 0; display: grid; gap: 4px; }
 .ap-main h3, .co-main h3 { font-family: var(--display); font-size: 16px; font-weight: 600; margin: 0; }
-.ap-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13.5px; color: var(--muted); }
+.ap-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13.5px; color: var(--muted); }
 .ap-meta b { color: var(--ink-2); font-weight: 600; }
+.ap-meta span::before { content: '·'; margin-right: 10px; opacity: .6; }
 .ap-hits { display: flex; gap: 5px; flex-wrap: wrap; }
 .snip { margin: 2px 0 0; font-size: 13.5px; color: var(--ink-2); line-height: 1.5; }
 .snip mark { background: var(--signal-soft); color: var(--signal-ink); border-radius: 3px; padding: 0 2px; }
@@ -476,7 +477,6 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .co-n b { font-family: var(--display); font-size: 22px; color: var(--ink); line-height: 1.1; }
 .co-when { display: grid; justify-items: end; gap: 6px; font-size: 13px; }
 #apMore { margin: 14px 0 0; }
-.model-panel { margin-top: 22px; }
 .jd-actions .move { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); margin-left: auto; }
 .jd-actions .move select { width: auto; padding: 6px 8px; font-size: 13px; }
 .cov { display: flex; align-items: baseline; gap: 8px; margin: 12px 0 6px; }
@@ -623,7 +623,7 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .score.tier-weak .meter i.on { background: var(--meter-off); filter: brightness(.9); }
 .stat b, .cov b { font-family: var(--head); font-weight: 800; font-size: 38px; letter-spacing: 0; }
 .pct b { font-family: var(--head); font-weight: 900; font-size: 42px; letter-spacing: 0; }
-.row .fit, .ap-meta, .search-meta, .rz-pages, .events small { font-family: var(--mono); font-size: 12.5px; }
+.row .fit, .search-meta, .rz-pages, .events small { font-family: var(--mono); font-size: 12.5px; }
 .tag { font-family: var(--mono); font-size: 12px; border-radius: 999px; padding: 3px 10px; }
 .tag.hit { background: var(--ok-soft); color: var(--ok); border-color: var(--ok-bd); }
 .tag.miss { background: var(--bad-soft); color: var(--bad); border: 1px dashed var(--bad-mid); }
@@ -1821,8 +1821,8 @@ const apState = { q: '', fields: [], source: 'all', view: 'list', page: 1 };
 const fmtDay = d => (d ? new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: new Date(d).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' }) : '');
 const nfmt = n => Number(n || 0).toLocaleString();
 async function renderApplied() {
-  let imp = null; let model = null;
-  try { [{ data: imp }, { data: model }] = await Promise.all([api('GET', `/users/${USER}/imports/tsenta`), api('GET', `/users/${USER}/resume-model`)]); } catch {}
+  let imp = null;
+  try { ({ data: imp } = await api('GET', `/users/${USER}/imports/tsenta`)); } catch {}
   const canImport = imp?.available && imp.imported < imp.available.applications && !store.get('hideTsentaImport', false);
   $('#view').innerHTML = `
     <div class="page-head"><div><h1>Applied</h1><p>Every application you've sent, with the posting and the resume that went out.</p></div></div>
@@ -1836,10 +1836,7 @@ async function renderApplied() {
     </div>
     <p class="ap-line" id="apLine" aria-live="polite"></p>
     <div id="apList" class="ap-list"></div>
-    <div id="apMore"></div>
-    ${model ? `<section class="panel model-panel"><div class="panel-head"><h2>Resume model</h2><span class="spacer"></span><span class="badge ${model.ok ? 'sent' : 'off'}">${model.ok ? 'Running' : 'Not running'}</span></div>
-      <div class="panel-body"><p style="margin:0 0 8px">${model.ok ? `Rewrites use <b>${esc(model.model)}</b> on this computer.` : esc(model.reason || 'The local model is not reachable.')}</p>
-      <p class="muted" style="margin:0;font-size:14px">${model.trainingData ? `Training data so far: ${nfmt(model.trainingData.total)} resumes with their postings (${nfmt(model.trainingData.model_rewrites)} rewritten here, ${nfmt(model.trainingData.from_tsenta)} from Tsenta), ${nfmt(model.trainingData.sent)} sent, ${nfmt(model.trainingData.led_to_interview)} led to an interview. ` : ''}Export it and fine-tune your own model with the steps in docs/resume-model.md.</p></div></section>` : ''}`;
+    <div id="apMore"></div>`;
   $('#apSource').value = apState.source;
   $('#apSearch').addEventListener('submit', e => { e.preventDefault(); apState.q = $('#apQ').value.trim(); apState.page = 1; loadApplied(); });
   $$('.fchip').forEach(b => b.addEventListener('click', () => {
@@ -1886,7 +1883,7 @@ async function loadApplied(append = false) {
           ${a.matchedOn.length ? `<span class="ap-hits">${a.matchedOn.map(m => `<span class="tag cobalt">${esc((AP_FIELDS.find(f => f[0] === m) || [m, m])[1])}</span>`).join(' ')}</span>` : ''}
           ${markSnippet(a.postingSnippet)}</span>
         <span class="ap-side">${a.status !== 'APPLIED' ? `<span class="status st-${a.status}">${esc(STATUS_LABEL[a.status] || pretty(a.status))}</span>` : ''}${a.source === 'tsenta' ? '<span class="tag">Tsenta</span>' : ''}
-          <span class="have ${a.hasDescription ? 'yes' : ''}" title="${a.hasDescription ? 'Posting saved' : 'No posting saved'}">Posting</span>${a.hasResume ? `<span class="have yes" role="link" tabindex="0" data-dl="${a.id}" title="Download the resume you sent">Resume ↓</span>` : `<span class="have" title="No resume saved">Resume</span>`}</span></button>`).join('');
+          ${a.hasResume ? `<span class="have yes" role="link" tabindex="0" data-dl="${a.id}" title="Download the resume you sent">Resume ↓</span>` : ''}</span></button>`).join('');
   }
   if (!append) list.innerHTML = html || `<div class="empty"><b>${apState.q ? 'Nothing matches that search.' : 'Nothing sent yet.'}</b><p class="muted">${apState.q ? 'Try fewer words, or search all fields.' : 'Applications you send from Jobs or Auto-apply show up here with the posting and resume.'}</p></div>`;
   else list.insertAdjacentHTML('beforeend', html);
