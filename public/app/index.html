@@ -1910,40 +1910,28 @@ async function renderAutoApply() {
   list.applications = list.applications.filter(a => a.applyState);   // auto-apply and Apply-button applications alike
   const profiles = await ensureResumeProfiles();
   const apps = list.applications;
-  const by = st => apps.filter(a => a.applyState === st);
-  const failed = by('FAILED');   // Needs you lives on the dashboard and the review page
-  const waiting = apps.filter(a => ['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState));
-  const sent = by('SUBMITTED');
-  const sentToday = sent.filter(a => a.submittedAt && new Date(a.submittedAt).toDateString() === new Date().toDateString()).length;
+  const waiting = apps.filter(a => ['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState));   // results live on the dashboard; this page is setup only
   const lastRun = aa.runs?.find(r => !r.dryRun);
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Auto-apply</h1><p>Finds jobs for each lane, tailors your resume, fills the form, and sends it or waits for your OK.</p></div><span class="spacer"></span>
+    <div class="page-head"><div><h1>Auto-apply</h1><p>Set up what to apply for. Finds jobs for each lane, tailors your resume, fills the form and sends it. Results show on your dashboard.</p></div><span class="spacer"></span>
       <label class="switch"><input type="checkbox" id="aaOn" ${aa.enabled ? 'checked' : ''}><span class="track"></span><span id="aaOnLabel">${aa.enabled ? 'On' : 'Off'}</span></label></div>
     ${!profiles.length ? `<div class="notice info">Set up a resume profile first: auto-apply sends it. <a href="#/profile">Go to Profile</a></div>` : ''}
-    <div class="stats">
-      <div class="stat"><b>${failed.length}</b><span>failed</span></div>
-      <div class="stat"><b>${waiting.length}</b><span>queued to send</span></div>
-      <div class="stat"><b>${sentToday}</b><span>sent today of ${aa.dailyCap}</span></div>
-    </div>
     <div class="aa">
       <div style="display:grid;gap:22px">
-        ${failed.length ? `<section class="panel"><div class="panel-head"><h2>Failed</h2></div><div id="qFailed">${failed.map(queueItemHTML).join('')}</div></section>` : ''}
+        <section class="panel"><div class="panel-head"><h2>Lanes</h2><span class="spacer"></span><button class="btn sm" id="addLane" type="button" ${aa.lanes.length >= 5 ? 'disabled' : ''}>Add lane</button></div>
+          <div class="panel-body" style="padding-top:4px"><p class="muted" style="margin:10px 0 0;font-size:13px">A lane is one kind of role sent with one resume profile.</p>
+          <div id="lanes">${aa.lanes.map(l => laneHTML(l, profiles)).join('') || '<p style="margin:12px 0 0">No lanes yet. Add one to start.</p>'}</div></div></section>
+      </div>
+      <div style="display:grid;gap:22px">
         <section class="panel"><div class="panel-head"><h2>Next run</h2><span class="spacer"></span><button class="btn sm" id="aaPreview" type="button">Preview</button><button class="btn sm primary" id="aaRun" type="button" ${aa.running ? 'disabled' : ''}>${aa.running ? 'Running…' : 'Run now'}</button></div>
           <div class="panel-body" id="aaPlan"><p class="muted" style="margin:0">${lastRun ? `Last run ${ago(lastRun.startedAt)}: ${runLine(lastRun.summary)}.` : 'Not run yet.'} Preview shows which jobs the next run would pick, without sending anything.</p>
           ${waiting.length ? `<p style="margin:10px 0 0;font-size:14px">${waiting.length} application${waiting.length === 1 ? ' is' : 's are'} queued and will be filled on the next run.</p>` : ''}</div></section>
-        <section class="panel"><div class="panel-head"><h2>Sent</h2><span class="spacer"></span><a class="btn sm quiet" href="#/tracker">Open tracker</a></div>
-          <div class="panel-body">${sent.length ? sent.slice(0, 12).map(a => `<div class="app-row" data-open="${a.id}"><div class="t"><b>${esc(a.job?.title || 'Removed job')}</b><span>${esc(a.job?.company || '')}</span></div><span class="muted" style="font-size:13px">${ago(a.submittedAt || a.updatedAt)}</span></div>`).join('') : '<p class="muted" style="margin:0">Nothing sent yet.</p>'}</div></section>
-      </div>
-      <div style="display:grid;gap:22px">
         <section class="panel"><div class="panel-head"><h2>Limits</h2></div><form class="panel-body" id="aaLimits" style="display:grid;gap:12px">
           <div class="form-grid"><label class="field">Applications per day<input type="number" name="dailyCap" min="1" max="100" value="${aa.dailyCap}"></label>
             <label class="field">Per company in 30 days<input type="number" name="perCompanyCap30d" min="1" max="20" value="${aa.perCompanyCap30d}"></label></div>
           <label class="check"><input type="checkbox" name="acceptConsent" ${aa.acceptConsent ? 'checked' : ''}> Tick required "I agree" boxes, such as privacy notices</label>
-          <p class="muted" style="margin:0;font-size:13px">Forms that show a CAPTCHA, or ask something your profile doesn't answer, are never guessed. They come back to you under "Needs you". It fills ${aa.fillableAts.map(pretty).join(', ')} forms; other jobs are skipped.</p>
+          <p class="muted" style="margin:0;font-size:13px">Forms that show a CAPTCHA, or ask something your profile doesn't answer, are never guessed. They come back to you under "Needs you" on the dashboard. It fills ${aa.fillableAts.map(pretty).join(', ')} forms; other jobs are skipped.</p>
           <div><button class="btn sm" type="submit">Save limits</button></div></form></section>
-        <section class="panel"><div class="panel-head"><h2>Lanes</h2><span class="spacer"></span><button class="btn sm" id="addLane" type="button" ${aa.lanes.length >= 5 ? 'disabled' : ''}>Add lane</button></div>
-          <div class="panel-body" style="padding-top:4px"><p class="muted" style="margin:10px 0 0;font-size:13px">A lane is one kind of role sent with one resume profile.</p>
-          <div id="lanes">${aa.lanes.map(l => laneHTML(l, profiles)).join('') || '<p style="margin:12px 0 0">No lanes yet. Add one to start.</p>'}</div></div></section>
       </div>
     </div>`;
 
@@ -1976,8 +1964,6 @@ async function renderAutoApply() {
     pollRun();
   });
   if (aa.running) pollRun();
-  $$('.qitem').forEach(bindQueueItem);
-  $$('.app-row[data-open]').forEach(r => r.addEventListener('click', () => openApplication(r.dataset.open)));
 }
 async function pollRun() {
   for (let i = 0; i < 90; i++) {
