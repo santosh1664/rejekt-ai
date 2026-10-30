@@ -85,6 +85,9 @@ main { min-width: 0; padding: 28px 32px 60px; }
 .page-head h1 { font-size: 30px; font-weight: 700; line-height: 1.1; }
 .page-head p { margin: 6px 0 0; color: var(--ink-2); }
 .page-head .spacer { flex: 1; }
+/* Page names stay for screen readers; the nav already shows which tab you're on. */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.page-head h1.sr-only + p { margin-top: 0; }
 
 /* ═══ Controls ══════════════════════════════════════════════════════════════ */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 8px 14px; font-weight: 600; font-size: 14px; text-decoration: none; white-space: nowrap; }
@@ -1611,7 +1614,7 @@ function renderProfilePanel() {
 // ═══ Jobs (two-pane) ════════════════════════════════════════════════════════
 async function renderJobs() {
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Jobs</h1><p id="jobsLine">Ranked by how well they fit your profile.</p></div></div>
+    <div class="page-head"><div><h1 class="sr-only">Jobs</h1><p id="jobsLine">Ranked by how well they fit your profile.</p></div></div>
     <div class="jobs">
       <div>
         ${searchHTML()}
@@ -1657,7 +1660,7 @@ async function renderTracker() {
   const q = (store.get('trackerQ', '') || '').toLowerCase();
   const apps = state.apps.applications.filter(a => !q || `${a.job?.company} ${a.job?.title}`.toLowerCase().includes(q));
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Tracker</h1><p>Drag a card to another column to move it.</p></div><span class="spacer"></span>
+    <div class="page-head"><div><h1 class="sr-only">Tracker</h1><p>Drag a card to another column to move it.</p></div><span class="spacer"></span>
       <input id="tq" type="search" placeholder="Search companies or roles" value="${esc(q)}" style="width:240px" aria-label="Search tracker"/><button class="btn" id="exportCsv" type="button">Export CSV</button></div>
     <div class="board">${STATUSES.map(([k, l]) => {
       const items = apps.filter(a => a.status === k);
@@ -1902,7 +1905,7 @@ async function renderApplied() {
   try { ({ data: imp } = await api('GET', `/users/${USER}/imports/tsenta`)); } catch {}
   const canImport = imp?.available && imp.imported < imp.available.applications && !store.get('hideTsentaImport', false);
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Applied</h1><p>Every application you've sent, with the posting and the resume that went out.</p></div></div>
+    <div class="page-head"><div><h1 class="sr-only">Applied</h1><p>Every application you've sent, with the posting and the resume that went out.</p></div></div>
     ${canImport ? `<div class="import-box"><div><b>Your Tsenta history is ready to import</b><p>${nfmt(imp.available.applications)} applications. For the most recent ${imp.available.details}, the posting is included, and for some the resume Tsenta sent.${imp.imported ? ` ${nfmt(imp.imported)} are already here.` : ''}</p></div><div style="display:flex;gap:8px"><button class="btn quiet" id="apImportHide" type="button">Not now</button><button class="btn primary" id="apImport" type="button">Import</button></div></div>` : ''}
     <form class="searchbar" id="apSearch" role="search"><input id="apQ" type="search" placeholder="Search a company, job title, link or words in the posting" value="${esc(apState.q)}" aria-label="Search applications"><button class="btn primary" type="submit">Search</button></form>
     <div class="ap-controls">
@@ -1984,7 +1987,7 @@ async function renderAutoApply() {
   const profiles = await ensureResumeProfiles();
   const lastRun = aa.runs?.find(r => !r.dryRun);
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Auto-apply</h1><p>Choose what to apply for. Each lane finds jobs, tailors your resume and fills the form. Results show on your dashboard.</p></div><span class="spacer"></span>
+    <div class="page-head"><div><h1 class="sr-only">Auto-apply</h1><p>Choose what to apply for. Each lane finds jobs, tailors your resume and fills the form. Results show on your dashboard.</p></div><span class="spacer"></span>
       <label class="switch"><input type="checkbox" id="aaOn" ${aa.enabled ? 'checked' : ''}><span class="track"></span><span id="aaOnLabel">${aa.enabled ? 'On' : 'Off'}</span></label></div>
     ${!profiles.length ? `<div class="notice info">Set up a resume profile first: auto-apply sends it. <a href="#/profile">Go to Profile</a></div>` : ''}
     <div class="aa">
@@ -2251,7 +2254,7 @@ async function renderProfile() {
   const initials = (p.fullName || rp.name).split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
   const counts = { experience: s.experience.length, education: s.education.length, projects: s.projects.length, skills: s.skills.reduce((n, g) => n + g.items.length, 0), certifications: s.certifications.length };
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Profile</h1><p>What recruiters and job forms see. Your default profile drives your job matches.</p></div><span class="spacer"></span>
+    <div class="page-head"><div><h1 class="sr-only">Profile</h1><p>What recruiters and job forms see. Your default profile drives your job matches.</p></div><span class="spacer"></span>
       <div class="switcher">
         <select id="rpSelect" aria-label="Choose a profile">${state.resumeProfiles.map(x => `<option value="${x.id}" ${x.id === rp.id ? 'selected' : ''}>${esc(x.name)}${x.isDefault ? ' (default)' : ''}</option>`).join('')}</select>
         <button class="btn" id="rpNew" type="button">New profile</button>
