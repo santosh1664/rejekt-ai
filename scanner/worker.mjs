@@ -111,12 +111,15 @@ export async function processCompany(company, opts = {}) {
     // opts.prefetchedJobs: lib/job-import.mjs has already fetched the board
     // to locate the pasted job — reuse it instead of fetching twice.
     // Quick scans: newest-first boards stop paging once a whole page is jobs we already have.
-    let knownUrls;
+    // "New" must match what gets saved: jobs are keyed by fingerprint (company + title, so one row per
+    // title across cities), and out-of-region jobs are dropped below. Matching by URL kept every page "new".
+    let isNew;
     if (opts.quick && company.ats === 'oraclecloud') {
-      const { rows } = await query(`SELECT url FROM jobs WHERE company_id = $1 AND active`, [company.id]);
-      knownUrls = new Set(rows.map(r => r.url));
+      const { rows } = await query(`SELECT fingerprint FROM jobs WHERE company_id = $1 AND active`, [company.id]);
+      const known = new Set(rows.map(r => r.fingerprint));
+      isNew = (job) => isJobInCoverage(job) && !known.has(computeFingerprint(job));
     }
-    jobs = opts.prefetchedJobs ?? await provider(company, { verbose: opts.verbose, knownUrls });
+    jobs = opts.prefetchedJobs ?? await provider(company, { verbose: opts.verbose, isNew });
   } catch (err) {
     result.error = err.message;
     return result;
