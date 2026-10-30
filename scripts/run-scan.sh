@@ -20,7 +20,7 @@ MODE="--quick"
 MARK="$PROJECT_DIR/logs/last-full-scan"
 if [ ! -f "$MARK" ] || [ -n "$(find "$MARK" -mmin +1200)" ]; then MODE=""; fi
 
-echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) — scan starting (${MODE:+quick}${MODE:-full}) ===" >> "$PROJECT_DIR/logs/scan.log"
+echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) — scan starting ($([ -n "$MODE" ] && echo quick || echo full)) ===" >> "$PROJECT_DIR/logs/scan.log"
 
 "$NODE_BIN" --env-file="$PROJECT_DIR/.env.local" "$PROJECT_DIR/scanner.mjs" --scan $MODE >> "$PROJECT_DIR/logs/scan.log" 2>&1 &
 NODE_PID=$!
