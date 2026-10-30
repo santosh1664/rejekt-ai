@@ -183,15 +183,7 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .row.compact { grid-template-columns: 64px minmax(0, 1fr) auto; padding: 12px 16px; }
 .row.compact h3 { font-size: 16px; }
 .row.leaving { opacity: 0; transform: translateX(12px); transition: opacity .18s, transform .18s; }
-.relevance { margin-top: 14px; border: 1px solid var(--line); border-radius: var(--r-md); padding: 16px; background: var(--surface); }
-.relevance h3 { font-size: 16px; margin-bottom: 4px; }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin: 12px 0; }
-.jcard { border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px; display: grid; gap: 8px; cursor: pointer; background: var(--surface); }
-.jcard:hover { background: var(--surface-2); }
-.jcard h4 { font-size: 15px; font-weight: 600; line-height: 1.25; }
-.jcard .sub { font-size: 13px; color: var(--ink-2); }
-.what-if { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line-2); font-size: 13.5px; }
-.what-if span:first-child { flex: 1; min-width: 200px; }
 .more { display: flex; justify-content: center; padding: 16px; border-top: 1px solid var(--line-2); }
 
 /* ═══ Jobs: two-pane ════════════════════════════════════════════════════════ */
@@ -953,11 +945,10 @@ function searchHTML() {
     ${pill('visa', p.needs_sponsorship ? 'Sponsors visas' : 'Visa', p.needs_sponsorship)}
     ${pill('clearance', p.exclude_clearance_jobs ? 'No clearance' : 'Clearance', p.exclude_clearance_jobs)}
     <span style="flex:1"></span>
-    <button class="btn sm quiet" id="checkRelevance" type="button">Check feed relevance</button>
     <button class="btn sm quiet" id="saveSearch" type="button">${state.saved ? 'Saved search on' : 'Save this search'}</button>
   </div>
   <div id="searchMeta"></div>
-  <div id="relevance" aria-live="polite"></div>`;
+`;
 }
 // The titles and roles you search for are kept, with the filters you had on, so one click brings both back.
 const FILTER_KEYS = ['remote_only', 'preferred_workplace_types', 'preferred_employment_types', 'allowed_countries', 'max_experience_required', 'min_salary', 'salary_is_hard_constraint', 'exclude_clearance_jobs'];
@@ -1079,44 +1070,6 @@ function zeroHTML(feed) {
   if (r === 'FILTERS_NARROW') return `<div class="empty"><h3>Your filters hide every match</h3>Loosen one of these: ${(feed.appliedFilters || []).map(esc).join('; ')}</div>`;
   if (r === 'NOT_ELIGIBLE') return `<div class="empty"><h3>No eligible jobs right now</h3>Every match failed a sponsorship, citizenship or clearance rule.</div>`;
   return `<div class="empty"><h3>No jobs in this window</h3>Widen the date range to see older postings.</div>`;
-}
-
-// ═══ Feed relevance ═════════════════════════════════════════════════════════
-const VERDICTS = {
-  GOOD: ['ok', 'Your feed looks strong.'], THIN: ['info', 'Few strong matches (65+).'],
-  WEAK: ['warn', 'Weak matches. Scores near 50 are a poor fit.'], EMPTY: ['warn', 'Nothing in your feed right now.'],
-};
-function cardHTML(j) {
-  return `<article class="jcard" data-job="${j.jobId}" tabindex="0">${score(j.matchScore)}<h4>${esc(j.title)}</h4>
-    <div class="sub"><b>${esc(j.company)}</b>${whereText(j) ? ' · ' + esc(whereText(j)) : ''}</div></article>`;
-}
-function relevanceHTML(r) {
-  const [cls, msg] = VERDICTS[r.verdict] || VERDICTS.EMPTY;
-  const fixes = r.counterfactuals.map((c, i) => `<div class="what-if"><span><b>${esc(c.label)}</b>: ${c.strong} strong match${c.strong === 1 ? '' : 'es'}, ${c.total} jobs, best ${c.best}%</span><button class="btn sm primary" data-fix="${i}" type="button">Apply</button></div>`).join('');
-  return `<div class="relevance"><h3>Feed relevance</h3>
-    <div class="notice ${cls}" style="margin:8px 0">${msg} ${r.strong} strong of ${r.total}, best ${r.best}%, median ${r.median}%.</div>
-    ${r.top.length ? `<div class="cards">${r.top.map(cardHTML).join('')}</div>` : ''}
-    ${fixes ? `<p class="muted" style="margin:10px 0 2px">What if you loosened one filter?</p>${fixes}` : ''}</div>`;
-}
-function bindRelevance(onChange) {
-  $('#checkRelevance').addEventListener('click', async e => {
-    const btn = e.target; btn.disabled = true; $('#relevance').innerHTML = '<div class="skeleton" style="height:120px;margin-top:14px"></div>';
-    try {
-      const { data: r } = await api('GET', `/users/${USER}/feed-relevance?${feedQuery()}`);
-      $('#relevance').innerHTML = relevanceHTML(r);
-      $('#relevance').onclick = async ev => {
-        const fix = ev.target.closest('[data-fix]'); const card = ev.target.closest('[data-job]');
-        if (card) return openJob(card.dataset.job);
-        if (!fix) return;
-        const { patch } = r.counterfactuals[Number(fix.dataset.fix)];
-        if (patch.prefs) await savePrefs(patch.prefs);
-        if ('visa' in patch) await saveProfileField({ needs_sponsorship: patch.visa });
-        if (patch.posted) { state.posted = patch.posted; store.set('posted', state.posted); }
-        toast('Filter loosened. Switch it back from the filter bar.'); onChange();
-      };
-    } catch (err) { $('#relevance').innerHTML = ''; toast(err.message); }
-    btn.disabled = false;
-  });
 }
 
 // ═══ Job rows ═══════════════════════════════════════════════════════════════
@@ -1470,7 +1423,7 @@ async function renderDashboard() {
     $('#titlesOnly')?.addEventListener('click', () => { $('#scope').value = 'title'; $('#searchForm').requestSubmit(); });
     $('#top').innerHTML = feed.jobs.length ? feed.jobs.slice(0, 5).map(topCardHTML).join('') : zeroHTML(feed);
   };
-  const drawSearch = () => { $('#dashSearch').innerHTML = searchHTML(); bindSearch(refresh); bindRelevance(refresh); };
+  const drawSearch = () => { $('#dashSearch').innerHTML = searchHTML(); bindSearch(refresh); };
   const refresh = async () => {
     if (!$('#dashSearch')) return;
     drawSearch(); $('#top').innerHTML = '<div class="skeleton" style="height:200px;width:220px;border-radius:16px;flex:none"></div>'.repeat(5);
@@ -1599,7 +1552,6 @@ async function renderJobs() {
       <aside class="detail" id="detail" aria-label="Job details">${detailEmpty()}</aside>
     </div>`;
   bindSearch(() => renderJobs());
-  bindRelevance(() => renderJobs());
   $('#list').addEventListener('click', e => { if (e.target.closest('[data-addlink]')) openLinkModal(); });
   bindRows($('#list'));
   await ensureSkills();
