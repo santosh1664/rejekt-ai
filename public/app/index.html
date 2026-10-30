@@ -1825,7 +1825,7 @@ async function renderSent() {
       : `<div class="rv-empty"><b>No form answers saved</b>${a.source === 'tsenta' ? 'Tsenta filled this form; its answers weren\'t part of the import.' : a.source === 'auto' ? 'This one was sent before answers were recorded.' : 'You applied on the company\'s site.'}</div>`}`,
     resume: () => a.hasTailoredResume
       ? `<div class="sp-bar"><b>${rep?.ats ? `Tailored resume · ${rep.ats.score}/10 ATS match` : 'Resume sent'}</b><span style="flex:1"></span>${rep ? `<button class="btn sm quiet" id="spChanges" type="button" aria-pressed="false">What changed</button>` : ''}<a class="btn sm" href="${resumeUrl(a.id, true, true)}" download>Download</a></div>
-         <iframe class="sp-pdf" src="${resumeUrl(a.id)}" title="Resume sent"></iframe>`
+         <iframe class="sp-pdf" src="${resumeUrl(a.id, false)}" title="Resume sent"></iframe>`
       : `<div class="rv-empty"><b>No resume saved</b>The resume for this application wasn't kept.</div>`,
     job: () => `<div class="sp-job"><h3>${esc(j.title || snap.title || '')}</h3><p class="muted">${esc([j.company || snap.company, j.locationText || snap.location].filter(Boolean).join(' · '))}</p>
       ${snap.description ? `<div class="desc">${esc(snap.description)}</div>` : `<p class="muted">The posting text wasn't saved with this application. ${j.url ? `<a href="${esc(j.url)}" target="_blank" rel="noopener">Open the posting</a>` : ''}</p>`}</div>`,
@@ -1851,7 +1851,7 @@ async function renderSent() {
   $('#spChanges')?.addEventListener('click', e => {
     const on = e.target.getAttribute('aria-pressed') !== 'true';
     e.target.setAttribute('aria-pressed', on); e.target.textContent = on ? 'Show resume' : 'What changed';
-    $('.sp-pdf').src = on ? changesUrl(a.id) : resumeUrl(a.id);
+    $('.sp-pdf').src = on ? changesUrl(a.id) : resumeUrl(a.id, false);   // same page view as What changed, no PDF viewer
   });
   $('#appStatus').addEventListener('change', async e => {
     try { await api('PATCH', `/users/${USER}/applications/${a.id}`, { status: e.target.value }); toast(`Moved to ${STATUS_LABEL[e.target.value]}.`); loadApps(); } catch (err) { toast(err.message); }
