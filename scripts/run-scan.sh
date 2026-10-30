@@ -13,9 +13,16 @@ MAX_RUNTIME_SECONDS=10800  # 3h ceiling: scan list grew to ~40k companies, 40 mi
 
 mkdir -p "$PROJECT_DIR/logs"
 
-echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) — scan starting ===" >> "$PROJECT_DIR/logs/scan.log"
+# One full scan a day (sees every job, closes the ones that are gone); quick scans in between only
+# pick up new jobs, which is minutes instead of hours on Oracle Cloud. The orchestrator writes
+# logs/last-full-scan when a full scan completes.
+MODE="--quick"
+MARK="$PROJECT_DIR/logs/last-full-scan"
+if [ ! -f "$MARK" ] || [ -n "$(find "$MARK" -mmin +1200)" ]; then MODE=""; fi
 
-"$NODE_BIN" --env-file="$PROJECT_DIR/.env.local" "$PROJECT_DIR/scanner.mjs" --scan >> "$PROJECT_DIR/logs/scan.log" 2>&1 &
+echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) — scan starting (${MODE:+quick}${MODE:-full}) ===" >> "$PROJECT_DIR/logs/scan.log"
+
+"$NODE_BIN" --env-file="$PROJECT_DIR/.env.local" "$PROJECT_DIR/scanner.mjs" --scan $MODE >> "$PROJECT_DIR/logs/scan.log" 2>&1 &
 NODE_PID=$!
 
 ( sleep "$MAX_RUNTIME_SECONDS"

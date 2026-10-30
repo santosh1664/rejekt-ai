@@ -110,7 +110,13 @@ export async function processCompany(company, opts = {}) {
   try {
     // opts.prefetchedJobs: lib/job-import.mjs has already fetched the board
     // to locate the pasted job — reuse it instead of fetching twice.
-    jobs = opts.prefetchedJobs ?? await provider(company, { verbose: opts.verbose });
+    // Quick scans: newest-first boards stop paging once a whole page is jobs we already have.
+    let knownUrls;
+    if (opts.quick && company.ats === 'oraclecloud') {
+      const { rows } = await query(`SELECT url FROM jobs WHERE company_id = $1 AND active`, [company.id]);
+      knownUrls = new Set(rows.map(r => r.url));
+    }
+    jobs = opts.prefetchedJobs ?? await provider(company, { verbose: opts.verbose, knownUrls });
   } catch (err) {
     result.error = err.message;
     return result;

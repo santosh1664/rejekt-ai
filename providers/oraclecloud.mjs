@@ -44,8 +44,10 @@ export async function fetchAll(company, opts = {}) {
     const block = data?.items?.[0];
     const reqs = block?.requisitionList || [];
     if (page === 0) total = block?.TotalJobsCount ?? reqs.length;
-    for (const r of reqs) if (!seen.has(r.Id)) seen.set(r.Id, normalize(r, company, host, site));
+    let fresh = 0;
+    for (const r of reqs) if (!seen.has(r.Id)) { const job = normalize(r, company, host, site); seen.set(r.Id, job); if (!opts.knownUrls?.has(job.url)) fresh++; }
     if (reqs.length < PAGE_SIZE) break;
+    if (opts.knownUrls && !fresh) break;   // newest first: a page with nothing new means the rest is known too
     await sleep(INTER_REQUEST_DELAY_MS);
   }
   return [...seen.values()];

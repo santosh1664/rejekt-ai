@@ -17,6 +17,9 @@ import { ATS_CONCURRENCY }                     from '../lib/pool.mjs';
 import { processCompany }                      from './worker.mjs';
 import { markClosedJobs }                      from '../freshness/checker.mjs';
 import { matchNewJobs }                        from '../matching/matcher.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Run a full scan across all active companies.
@@ -84,7 +87,7 @@ export async function runScan(opts = {}) {
   }
 
   console.error(`\n🔍  Scanning ${companies.length} companies across ${[...new Set(companies.map(c => c.ats))].join(', ')}`);
-  console.error(`    Mode: ${opts.dryRun ? 'DRY RUN' : 'LIVE'}  |  ${new Date().toISOString()}\n`);
+  console.error(`    Mode: ${opts.dryRun ? 'DRY RUN' : 'LIVE'} · ${opts.quick ? 'quick (new jobs only)' : 'full'}  |  ${new Date().toISOString()}\n`);
 
   // Start audit run
   const runId = opts.dryRun ? null : await startScanRun();
@@ -192,7 +195,8 @@ export async function runScan(opts = {}) {
     // sink the ENTIRE run's status to 'failed' even though the actual scan
     // (fetching + upserting jobs, the time-sensitive part) had already
     // completed successfully — isolate it so it can't do that.
-    if (!opts.dryRun && !opts.skipFreshness) {
+    // Quick runs don't see every job, so only full runs may count jobs as missing.
+    if (!opts.dryRun && !opts.skipFreshness && !opts.quick) {
       console.error('\n🔄  Running freshness check...');
       try {
         const { closed } = await markClosedJobs({ since: new Date(started) });   // only companies this run reached
@@ -211,6 +215,9 @@ export async function runScan(opts = {}) {
 
     // Finish audit run
     if (runId) await finishScanRun(runId, totals, 'completed');
+    if (!opts.dryRun && !opts.quick && !opts.ats && !opts.company) {
+      fs.writeFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'logs', 'last-full-scan'), new Date().toISOString());
+    }
 
     // Summary
     const elapsed = ((Date.now() - started) / 1000).toFixed(1);
