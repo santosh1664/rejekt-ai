@@ -66,8 +66,11 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.015em; margin: 0; }
 .app { display: grid; grid-template-columns: var(--rail) 1fr; min-height: 100vh; }
 .rail { position: sticky; top: 0; height: 100vh; padding: 22px 16px; display: flex; flex-direction: column; gap: 6px; border-right: 1px solid var(--line); background: var(--surface); }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); padding: 4px 8px 18px; }
-.brand svg { width: 30px; height: 30px; flex: none; }
-.brand span { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+.brand img { height: 26px; width: auto; display: block; }
+/* dark-text logo on light theme, white-text logo on dark theme */
+.brand .logo-dark { display: none; }
+:root[data-theme="dark"] .brand .logo-light { display: none; } :root[data-theme="dark"] .brand .logo-dark { display: block; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .brand .logo-light { display: none; } :root:not([data-theme="light"]) .brand .logo-dark { display: block; } }
 .nav a { display: flex; align-items: center; gap: 11px; padding: 9px 10px; border-radius: var(--r-md); text-decoration: none; color: var(--ink-2); font-weight: 500; }
 .nav a svg { width: 18px; height: 18px; flex: none; opacity: .8; }
 .nav a:hover { background: var(--surface-2); }
@@ -589,8 +592,6 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 }
 
 /* ═══ Design v2: white, black actions, pale status tints ═══════════════════════ */
-.brand svg { color: var(--ink); }
-.brand span { font-family: var(--head); text-transform: uppercase; font-weight: 800; font-size: 24px; letter-spacing: .04em; }
 .page-head h1 { font-family: var(--head); font-weight: 900; font-size: 54px; line-height: .92; letter-spacing: 0; text-transform: uppercase; }
 .panel-head h2, .sec-head h2, .rz-examples > summary h2 { font-family: var(--head); text-transform: uppercase; font-weight: 800; font-size: 26px; letter-spacing: .01em; }
 .hero-card h1 { font-family: var(--head); font-weight: 900; font-size: 40px; text-transform: uppercase; line-height: 1; }
@@ -750,8 +751,7 @@ details.earlier>summary{cursor:pointer;font-size:13px;color:var(--ink-2);margin:
 <div class="app">
   <aside class="rail" aria-label="Main navigation">
     <a class="brand" href="#/dashboard" aria-label="Rejekt.ai home">
-      <svg viewBox="0 0 30 30" fill="none" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="6" stroke="currentColor" stroke-width="2"/><path d="M7 21h16M7 15h10M7 9h13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-      <span>Rejekt.ai</span>
+      <img class="logo-light" src="/brand/rejekt-logo.png" alt="Rejekt.ai"><img class="logo-dark" src="/brand/rejekt-logo-dark.png" alt="Rejekt.ai">
     </a>
     <nav class="nav" id="nav">
       <a href="#/dashboard" data-route="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Dashboard</a>
@@ -1388,10 +1388,8 @@ const _DASH_TABS = [
 ];
 
 async function renderDashboard() {
-  const hour = new Date().getHours();
-  const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   $('#view').innerHTML = `
-    <div class="page-head" style="margin-bottom:12px"><div><h1>${greet}</h1></div></div>
+    <h1 class="sr-only">Dashboard</h1>
     <div id="dashSearch" style="margin-bottom:18px"></div>
     <div class="tm-head" style="margin-bottom:8px">
       <h2>Top job matches</h2>
