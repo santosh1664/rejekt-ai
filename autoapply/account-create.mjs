@@ -196,10 +196,10 @@ export async function ensureOnForm(page, formUrl, creds, userId) {
   if (!wall) return { ok: true };
 
   if (!creds?.email) {
-    return { ok: false, reason: 'Login wall detected but no email configured. Connect your Google account in Profile → Gmail Connection.' };
+    return { ok: false, reason: 'Login wall detected but no email configured. Connect your Google account in Settings.' };
   }
   if (!creds?.password) {
-    return { ok: false, reason: 'Login wall detected but no ATS password set. Add one in Profile → ATS Account Password, or the site may require Google Sign-In manually.' };
+    return { ok: false, reason: 'Login wall detected but no ATS password set. Add one in Settings, or the site may require Google Sign-In manually.' };
   }
   return handleLoginWall(page, creds, userId);
 }

@@ -760,6 +760,7 @@ details.earlier>summary{cursor:pointer;font-size:13px;color:var(--ink-2);margin:
       <a href="#/applied" data-route="applied"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/><path d="M15 3v3M9 3v3"/></svg>Applied</a>
       <a href="#/auto-apply" data-route="auto-apply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Auto-apply</a>
       <a href="#/profile" data-route="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profile</a>
+      <a href="#/settings" data-route="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</a>
     </nav>
     <div class="rail-foot">
       <a class="rail-card" id="railProfile" href="#/profile" style="text-decoration:none;color:inherit;display:none"></a>
@@ -884,7 +885,7 @@ async function loadFeed({ append = false, limit = 25 } = {}) {
 }
 
 // ═══ Router ═════════════════════════════════════════════════════════════════
-const ROUTES = { dashboard: renderDashboard, jobs: renderJobs, browse: renderJobs, tracker: renderTracker, applied: renderApplied, 'auto-apply': renderAutoApply, review: renderReview, sent: renderSent, profile: renderProfile };
+const ROUTES = { dashboard: renderDashboard, jobs: renderJobs, browse: renderJobs, tracker: renderTracker, applied: renderApplied, 'auto-apply': renderAutoApply, review: renderReview, sent: renderSent, profile: renderProfile, settings: renderSettings };
 async function route() {
   const name = location.hash.replace(/^#\/?/, '').split(/[/?]/)[0] || 'dashboard';
   const view = ROUTES[name] ? name : 'dashboard';
@@ -975,8 +976,7 @@ async function applyRecent(r) {
   const p = new URLSearchParams(location.search);
   if (p.get('gmail') === 'connected') {
     history.replaceState(null, '', location.pathname + location.hash);
-    // Switch to settings tab after profile loads
-    setTimeout(() => { state.profileTab = 'settings'; route(); }, 200);
+    // the server sends you back to #/settings
     toast('Gmail connected successfully!');
   }
 })();
@@ -2173,7 +2173,7 @@ async function renderProfile() {
         <button class="btn quiet" id="rpRename" type="button">Rename</button>
         ${state.resumeProfiles.length > 1 ? '<button class="btn quiet danger" id="rpDelete" type="button">Delete</button>' : ''}
       </div></div>
-    <div class="tabs" role="tablist">${[['details', 'Profile details'], ['resume', 'Resume'], ['letter', 'Cover letter'], ['settings', 'Settings']].map(([k, l]) => `<button role="tab" type="button" data-tab="${k}" aria-selected="${state.profileTab === k}">${l}</button>`).join('')}</div>
+    <div class="tabs" role="tablist">${[['details', 'Profile details'], ['resume', 'Resume'], ['letter', 'Cover letter']].map(([k, l]) => `<button role="tab" type="button" data-tab="${k}" aria-selected="${state.profileTab === k}">${l}</button>`).join('')}</div>
     <div id="tabBody"></div>`;
 
   $('#rpSelect').addEventListener('change', e => { store.set('rpId', e.target.value); renderProfile(); });
@@ -2194,7 +2194,6 @@ async function renderProfile() {
 
   if (state.profileTab === 'resume') return renderResumeTab();
   if (state.profileTab === 'letter') return renderLetterTab();
-  if (state.profileTab === 'settings') return renderSettingsTab();
 
   const todo = rp.completeness.items.filter(i => !i.done);
   const contact = [[p.address, p.city, [p.state, p.zip].filter(Boolean).join(' ')].filter(Boolean).join(', '), p.email, p.phone].filter(Boolean);
@@ -2769,6 +2768,11 @@ function renderLetterTab() {
 
 
 // ═══ Settings tab ═══════════════════════════════════════════════════════════
+// Settings is its own page in the nav, so it's reachable from anywhere.
+async function renderSettings() {
+  $('#view').innerHTML = `<div class="page-head"><div><h1 class="sr-only">Settings</h1><p>Email and account settings. Auto-apply has its own tab.</p></div></div><div id="tabBody"></div>`;
+  await renderSettingsTab();
+}
 async function renderSettingsTab() {
   $('#tabBody').innerHTML = `
     <div style="max-width:680px">
@@ -2797,34 +2801,6 @@ async function renderSettingsTab() {
         </div>
       </section>
 
-      <!-- Auto-Apply Settings -->
-      <section class="sec" id="sec-autoapply-s">
-        <div class="sec-head"><div><h2>Auto-Apply</h2><p>Control how the auto-apply engine works on your behalf.</p></div></div>
-        <div>
-          <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;">
-            <div>
-              <div style="font-weight:500;font-size:14px;">Enable Auto-Apply</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:2px;">Automatically submit applications while you’re away</div>
-            </div>
-            <input type="checkbox" id="s_autoapply_enabled" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cobalt);">
-          </label>
-          <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;">
-            <div>
-              <div style="font-weight:500;font-size:14px;">Review before submit</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:2px;">Pause for your approval before each application</div>
-            </div>
-            <input type="checkbox" id="s_review_submit" checked style="width:18px;height:18px;cursor:pointer;accent-color:var(--cobalt);">
-          </label>
-          <div style="padding:12px 0;">
-            <div style="font-weight:500;font-size:14px;margin-bottom:6px;">Daily application cap</div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <input type="number" id="s_daily_cap" min="1" max="50" value="10" style="width:70px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--surface);color:var(--ink);">
-              <span style="font-size:13px;color:var(--muted);">applications per day</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- ATS Account -->
       <section class="sec" id="sec-ats">
         <div class="sec-head"><div><h2>ATS Account</h2><p>Some job boards require a login. Set a shared password used when creating accounts.</p></div></div>
@@ -2837,7 +2813,7 @@ async function renderSettingsTab() {
       </section>
 
       <div style="padding:0 0 24px;">
-        <button class="btn primary" id="saveSettingsBtn" type="button">Save settings</button>
+        <button class="btn primary" id="saveSettingsBtn" type="button">Save password</button>
         <span id="settingsSavedMsg" style="display:none;font-size:13px;color:var(--ok);margin-left:12px;">✓ Saved</span>
       </div>
 
@@ -2873,13 +2849,10 @@ async function renderSettingsTab() {
 
   // Save settings
   $('#saveSettingsBtn').addEventListener('click', async () => {
-    const payload = {
-      daily_cap: +($('#s_daily_cap').value) || 10,
-      auto_apply_enabled: $('#s_autoapply_enabled').checked,
-      review_before_submit: $('#s_review_submit').checked,
-    };
+    // Auto-apply settings live on the Auto-apply page; this only saves the ATS password.
     const pw = $('#s_ats_password').value.trim();
-    if (pw) payload.ats_password = pw;
+    if (!pw) return toast('Type a password first.');
+    const payload = { ats_password: pw };
     try {
       await api('PUT', `/users/${USER}/profile`, payload);
       const msg = $('#settingsSavedMsg');

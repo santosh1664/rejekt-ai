@@ -1184,11 +1184,11 @@ async function handleGmailCallback(req, res, q) {
   try {
     const { email } = await exchangeCode(state, code);
     // Redirect back to app with success indicator
-    res.writeHead(302, { Location: `/app/?gmail=connected&email=${encodeURIComponent(email || '')}` });
+    res.writeHead(302, { Location: `/app/?gmail=connected&email=${encodeURIComponent(email || '')}#/settings` });
     return res.end();
   } catch (e) {
     console.error('Gmail callback error:', e.message);
-    res.writeHead(302, { Location: `/app/?gmail=error&reason=${encodeURIComponent(e.message.slice(0, 100))}` });
+    res.writeHead(302, { Location: `/app/?gmail=error&reason=${encodeURIComponent(e.message.slice(0, 100))}#/settings` });
     return res.end();
   }
 }

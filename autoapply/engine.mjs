@@ -356,7 +356,7 @@ export async function submitApplication(userId, appId, { approve = false, browse
     const isWd = detectAts(formUrl || '')?.ats === 'workday';
     const seen = {};
     const wallResult = isWd
-      ? (userCreds?.password ? await workdayAuth(page, formUrl, userCreds, userId, seen) : { ok: false, reason: 'Workday needs an account. Add an ATS password in Profile → ATS Account Password.' })
+      ? (userCreds?.password ? await workdayAuth(page, formUrl, userCreds, userId, seen) : { ok: false, reason: 'Workday needs an account. Add an ATS password in Settings.' })
       : await ensureOnForm(page, formUrl, userCreds, userId);
     if (seen.description) await query(`UPDATE applications SET job_snapshot = jsonb_set(COALESCE(job_snapshot, '{}'::jsonb), '{description}', to_jsonb($1::text))
       WHERE id = $2 AND COALESCE(job_snapshot->>'description', '') = ''`, [seen.description.trim(), appId]).catch(() => {});
