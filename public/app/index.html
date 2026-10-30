@@ -744,6 +744,17 @@ details.earlier>summary{cursor:pointer;font-size:13px;color:var(--ink-2);margin:
 .rv-empty { border: 1px dashed var(--line); border-radius: 14px; padding: 28px; text-align: center; color: var(--ink-2); margin-bottom: 20px; }
 .rv-empty b { display: block; font-size: 16px; color: var(--ink); margin-bottom: 6px; }
 @media (max-width: 820px) { .rv-grid { grid-template-columns: 1fr; } .rv-side { border-right: 0; padding-right: 0; } .rv-main { padding-left: 0; } }
+.searchbar.tokens { flex-wrap: wrap; border-radius: 14px; padding: 6px 6px 6px 14px; gap: 6px; }
+.searchbar.tokens .tk-ico { display: grid; place-items: center; color: var(--muted); }
+.searchbar.tokens .tk-list { display: contents; }
+.searchbar.tokens .tk { display: inline-flex; align-items: center; gap: 6px; background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 5px 6px 5px 10px; font-size: 14px; white-space: nowrap; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.searchbar.tokens .tk button { border: 0; background: none; padding: 0 2px; font-size: 16px; line-height: 1; color: var(--muted); cursor: pointer; }
+.searchbar.tokens .tk button:hover { color: var(--ink); }
+.searchbar.tokens #qIn { flex: 1; min-width: 180px; }
+.exclude-row { background: var(--surface-2); border-radius: 10px; padding: 4px 6px 4px 14px; margin-top: 8px; }
+.exclude-row label { font-weight: 600; color: var(--ink-2); }
+.exclude-row input { flex: 1; border-bottom: 0 !important; }
+.exclude-row select { width: auto; border: 0; background: none; font-size: 13px; color: var(--muted); box-shadow: none !important; }
 </style>
 </head>
 <body>
@@ -832,6 +843,7 @@ const I = {
   x: s => svg('<path d="M6 6l12 12M18 6L6 18"/>', s, 2.2),
   save: s => svg('<path d="M6 3h12v18l-6-4-6 4z"/>', s),
   ext: s => svg('<path d="M14 4h6v6M20 4l-9 9M19 14v6H4V5h6"/>', s),
+  search: s => svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>', s),
   edit: s => svg('<path d="M4 20h4L19 9l-4-4L4 16z"/>', s),
   up: s => svg('<path d="M6 15l6-6 6 6"/>', s),
   trash: s => svg('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>', s),
@@ -927,14 +939,16 @@ function searchHTML() {
   const wp = p.remote_only ? ['REMOTE'] : (p.preferred_workplace_types || []); const emp = p.preferred_employment_types || [];
   const pill = (key, label, on) => `<div class="pill"><button type="button" data-pill="${key}" aria-pressed="${!!on}" aria-haspopup="true">${esc(label)}${I.chev(12)}</button></div>`;
   return `
-  <form class="searchbar" id="searchForm" role="search">
-    <select id="scope" aria-label="Search in" style="width:auto;min-width:max-content"><option value="title">Titles</option><option value="title_description">Titles and descriptions</option><option value="description">Descriptions</option></select>
-    <input id="q" type="search" placeholder="Search roles or skills (separate several with |), or paste a job link" autocomplete="off" value="${esc(state.search.include)}" aria-label="Search" />
-    <button class="btn quiet" id="addTerm" type="button" title="Add another title or keyword (matches any)">+ Add</button>
+  <form class="searchbar tokens" id="searchForm" role="search">
+    <span class="tk-ico">${I.search(17)}</span>
+    <span id="qChips" class="tk-list"></span>
+    <input id="qIn" type="text" autocomplete="off" aria-label="Add a role or skill" />
+    <input id="q" type="hidden" value="${esc(state.search.include)}" />
     <button class="btn primary" type="submit">Search</button>
   </form>
+  <div class="exclude-row"><label for="ex">Exclude</label><input id="ex" type="text" placeholder="Hide jobs mentioning… (separate with |)" value="${esc(state.search.exclude)}" />
+    <select id="scope" aria-label="Look in"><option value="title">In titles</option><option value="title_description">In titles and descriptions</option><option value="description">In descriptions</option></select></div>
   <div class="recent" id="recent" aria-label="Recent searches"></div>
-  <div class="exclude-row"><label for="ex">Hide jobs mentioning</label><input id="ex" type="text" placeholder="senior | staff" value="${esc(state.search.exclude)}" /></div>
   <div class="filters">
     ${pill('date', DATE_OPTS.find(d => d[0] === Number(state.posted))?.[1] || 'Date posted', Number(state.posted) !== 30)}
     ${pill('workplace', wp.length ? wp.map(w => pretty(w)).join(', ') : 'Workplace', wp.length)}
@@ -990,13 +1004,26 @@ function renderRecent() {
 }
 function bindSearch(onChange) {
   $('#scope').value = state.search.scope;
+  // Search terms are chips (like Tsenta); #q keeps the "a | b" string the rest of the page uses.
+  const terms = () => $('#q').value.split('|').map(x => x.trim()).filter(Boolean);
+  const setTerms = t => { $('#q').value = t.join(' | '); drawChips(); };
+  const drawChips = () => {
+    $('#qChips').innerHTML = terms().map((t, i) => `<span class="tk">${esc(t)}<button type="button" data-tk="${i}" aria-label="Remove ${esc(t)}">×</button></span>`).join('');
+    $('#qIn').placeholder = terms().length ? 'Add another…' : 'Search roles or skills, or paste a job link';
+  };
+  drawChips();
+  $('#qChips').addEventListener('click', e => { const b = e.target.closest('[data-tk]'); if (!b) return; setTerms(terms().filter((_, i) => i !== Number(b.dataset.tk))); $('#searchForm').requestSubmit(); });
+  $('#qIn').addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && !e.target.value && terms().length) { setTerms(terms().slice(0, -1)); }
+    if (e.key === ',' && e.target.value.trim()) { e.preventDefault(); setTerms([...terms(), e.target.value.trim()]); e.target.value = ''; }
+  });
   $('#searchForm').addEventListener('submit', e => {
     e.preventDefault();
-    const q = $('#q').value.trim();
-    if (/^https?:\/\//i.test(q)) return importLink(q, e.submitter);
+    const typed = $('#qIn').value.trim();
+    if (/^https?:\/\//i.test(typed)) return importLink(typed, e.submitter).then(ok => { if (ok) $('#qIn').value = ''; });
+    if (typed) { setTerms([...terms(), ...typed.split('|').map(x => x.trim()).filter(Boolean)]); $('#qIn').value = ''; }
     state.search = { include: $('#q').value, exclude: $('#ex').value, scope: $('#scope').value }; rememberSearch(); onChange();
   });
-  $('#addTerm').addEventListener('click', () => { const q = $('#q'); q.value = q.value.trim().replace(/\|$/, '').trim(); q.value += q.value ? ' | ' : ''; q.focus(); });
   renderRecent();
   $('#recent').addEventListener('click', e => {
     const x = e.target.closest('[data-rm]'); const go = e.target.closest('[data-i]');
