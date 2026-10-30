@@ -27,18 +27,30 @@ async function gate() {
   const now = Date.now(); const at = Math.max(now, nextSlot); nextSlot = at + GAP_MS;
   if (at > now) await sleep(at - now);
 }
+// On 429 wait, then try again; each 429 in a row doubles the wait (1 → 2 → 4 … 10 min), a success resets it.
+// Without this every following company hit the block too and was skipped, run after run.
+let backoff = 60_000;
 async function workableJSON(url, opts) {
-  await gate();
-  try { return await fetchJSON(url, { ...opts, retries: 0 }); }
-  catch (err) {
-    if (/429/.test(err.message)) { nextSlot = Math.max(nextSlot, Date.now() + 60_000); await gate(); return fetchJSON(url, { ...opts, retries: 0 }); }
-    throw err;
+  for (let attempt = 0; ; attempt++) {
+    await gate();
+    try { const data = await fetchJSON(url, { ...opts, retries: 0 }); backoff = 60_000; return data; }
+    catch (err) {
+      if (!/429/.test(err.message) || attempt >= 2) throw err;
+      nextSlot = Math.max(nextSlot, Date.now() + backoff); backoff = Math.min(backoff * 2, 600_000);
+    }
   }
-}  // safety cap on pagination loops
+}
 
 // Companies from jobs.workable.com (slug = its 22-char company id, meta.companyId = uuid) have no
 // apply.workable.com account name, so search that API by company name and keep only their own jobs.
 async function fetchHosted(company, opts) {
+  // One request: the company page lists all its jobs. Fall back to the name search only if it's cut short.
+  const page = await workableJSON(`https://jobs.workable.com/api/v1/companies/${company.slug}`, { timeoutMs: 20_000 });
+  if (page && Array.isArray(page.jobs) && page.jobs.length >= (page.totalSize || 0)) return page.jobs.map(j => normalizeHosted(j, company));
+  return searchHosted(company, opts);
+}
+
+async function searchHosted(company, opts) {
   const { companyId, expected = 0 } = company.meta || {};
   const out = [];
   let token = null;
@@ -55,10 +67,10 @@ async function fetchHosted(company, opts) {
 }
 
 function normalizeHosted(j, company) {
-  const loc = j.locations?.[0] || [j.location?.city, j.location?.subregion, j.location?.countryName].filter(Boolean).join(', ');
+  const loc = (j.locations || []).find(l => l !== 'TELECOMMUTE') || [j.location?.city, j.location?.subregion, j.location?.countryName].filter(Boolean).join(', ');
   return {
     url: j.url, title: (j.title || '').trim(), company: company.name, location: normalizeLocation(loc),
-    remote: j.workplace === 'remote' || /remote/i.test(loc), ats: ATS, posted_at: j.created || null,
+    remote: j.workplace === 'remote' || (j.locations || []).includes('TELECOMMUTE') || /remote/i.test(loc), ats: ATS, posted_at: j.created || null,
     raw: { ...j, description: undefined, company: undefined },
   };
 }

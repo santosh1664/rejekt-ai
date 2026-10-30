@@ -344,32 +344,16 @@ app.get('/api/scan-stats', async (req, res) => {
        LIMIT 30
     `);
 
-    // Jobs discovered per ATS per hour, last 48h
+    // Jobs discovered per ATS per hour, last 48h (jobs.ats + the discovered index: fast, no join)
     const { rows: byHour } = await query(`
-      SELECT c.ats,
-             DATE_TRUNC('hour', j.discovered) AS hour,
-             COUNT(*)                          AS jobs_found
-        FROM jobs j
-        JOIN companies c ON c.id = j.company_id
-       WHERE j.discovered > NOW() - INTERVAL '48 hours'
-       GROUP BY c.ats, hour
-       ORDER BY hour ASC, jobs_found DESC
+      SELECT ats, DATE_TRUNC('hour', discovered) AS hour, COUNT(*) AS jobs_found
+        FROM jobs
+       WHERE discovered > NOW() - INTERVAL '48 hours'
+       GROUP BY ats, hour
+       ORDER BY hour ASC
     `);
 
-    // Active jobs total per ATS
-    const { rows: totals } = await query(`
-      SELECT c.ats,
-             COUNT(DISTINCT c.id)                       AS companies,
-             COUNT(j.id)                            AS active_jobs,
-             MAX(j.discovered)                      AS latest_job
-        FROM companies c
-        LEFT JOIN jobs j ON j.company_id = c.id AND j.active = TRUE
-       WHERE c.active = TRUE
-       GROUP BY c.ats
-       ORDER BY active_jobs DESC
-    `);
-
-    res.json({ runs, byHour, totals });
+    res.json({ runs, byHour });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

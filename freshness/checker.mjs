@@ -139,9 +139,12 @@ export async function markClosedJobs(opts = {}) {
       `UPDATE jobs
           SET missed_scans = missed_scans + 1
         WHERE active = TRUE
-          AND last_seen < NOW() - ($1 * interval '1 minute')
+          ${opts.since
+            // a run's own start: not seen since it began, and only companies it scanned cleanly
+            ? `AND last_seen < $1 AND company_id IN (SELECT id FROM companies WHERE last_scan >= $1 AND scan_errors = 0)`
+            : `AND last_seen < NOW() - ($1 * interval '1 minute')`}
           __ID_RANGE__`,
-      [window],
+      [opts.since || window],
       opts,
     );
     const ms1 = Date.now() - t1;

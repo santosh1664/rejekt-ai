@@ -31,6 +31,7 @@
     max-width: 1200px;
     margin: 0 auto;
   }
+  header .controls { margin: 0; }
   header {
     display: flex;
     align-items: center;
@@ -76,8 +77,8 @@
   .ats-stats { color: var(--muted); font-size: 11px; margin-top: 2px; }
   .ats-jobs { font-weight: 700; font-size: 18px; }
   .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 8px; overflow-x: auto; }
-  .chart-inner { display: flex; align-items: flex-end; gap: 3px; height: 110px; min-width: 500px; }
-  .bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 28px; }
+  .chart-inner { display: flex; align-items: flex-end; gap: 2px; height: 130px; }
+  .bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 8px; }
   .bar-stack { display: flex; flex-direction: column-reverse; width: 100%; gap: 1px; }
   .bar-seg { width: 100%; min-height: 2px; border-radius: 2px 2px 0 0; }
   .bar-label { font-size: 9px; color: var(--muted); text-align: center; margin-top: 4px; white-space: nowrap; }
@@ -123,36 +124,30 @@
     <h1>Scan <span>Log</span></h1>
     <div class="meta" id="ts">Loading…</div>
   </div>
-  <button class="refresh-btn" onclick="load();loadLive()">↻ Refresh</button>
+  <div class="controls">
+    <button class="btn btn-start" onclick="ctl('start','scheduled')">▶ Run scan now</button>
+    <button class="btn" onclick="ctl('start','bulk')">Start bulk</button>
+    <button class="btn btn-stop" onclick="ctl('stop','all')">■ Stop all</button>
+    <button class="refresh-btn" onclick="load();loadLive()">↻ Refresh</button>
+  </div>
 </header>
 
-<div class="controls">
-  <button class="btn btn-start" onclick="ctl('start','bulk')">▶ Start bulk (all queued)</button>
-  <button class="btn btn-start" onclick="ctl('start','scheduled')">▶ Run scheduled scan now</button>
-  <button class="btn btn-stop" onclick="ctl('stop','all')">■ Stop all scans</button>
-</div>
-<div class="cards" id="live-cards"></div>
-<h2>Running Now</h2>
-<div id="live-procs"><div class="loading">Loading…</div></div>
+<div class="cards" id="live-cards"><div class="loading">Loading…</div></div>
+
 <h2>Platforms</h2>
 <div class="table-wrap" id="live-platforms"><div class="loading">Loading…</div></div>
 
-<div class="cards" id="cards" style="margin-top:28px"><div class="loading">Loading…</div></div>
-
-<h2>Active Jobs by ATS Portal</h2>
-<div class="ats-grid" id="ats-grid"></div>
-
-<h2>Jobs Discovered — Last 48 Hours</h2>
+<h2>Jobs found per hour · last 48 hours</h2>
 <div class="chart-wrap" id="chart-wrap"><div class="loading">Loading…</div></div>
 
-<h2>Recent Scan Runs</h2>
+<h2>Recent scan runs</h2>
 <div class="table-wrap" id="table-wrap"><div class="loading">Loading…</div></div>
 
 <script>
 const COLORS = {
-  greenhouse:'#3D5FCB', ashby:'#2A8057', lever:'#92650A',
-  smartrecruiters:'#B84A3E', workday:'#6B4FB3',
-  bamboohr:'#4E8F2F', workable:'#B5651D'
+  greenhouse:'#3D5FCB', ashby:'#2A8057', lever:'#92650A', smartrecruiters:'#B84A3E', workday:'#6B4FB3',
+  bamboohr:'#4E8F2F', workable:'#B5651D', breezy:'#1F8A8A', teamtailor:'#C2417A', recruitee:'#5B7DB1',
+  oraclecloud:'#A33A2A', rippling:'#7A5C2E', pinpoint:'#3E7D5A'
 };
 const col = n => COLORS[n?.toLowerCase()] || '#6A6A6A';
 const fmt = n => (n??0).toLocaleString();
@@ -184,36 +179,14 @@ async function load() {
     });
     render(data);
   } catch(e) {
-    document.getElementById('cards').innerHTML = `<div class="err">Error: ${e.message}</div>`;
+    document.getElementById('table-wrap').innerHTML = `<div class="err">Couldn't load scan runs (${e.message}).</div>`;
   }
 }
 
-function render({runs, byHour, totals}) {
+let lastRuns = [];
+function render({runs, byHour}) {
+  lastRuns = runs;
   document.getElementById('ts').textContent = 'Updated ' + new Date().toLocaleTimeString();
-
-  // Cards
-  const last = runs.find(r => r.status==='completed');
-  const live = runs.find(r => r.status==='running');
-  const total = totals.reduce((s,t) => s+Number(t.active_jobs||0), 0);
-  const cos   = totals.reduce((s,t) => s+Number(t.companies||0), 0);
-  const recent5new = runs.slice(0,5).reduce((s,r) => s+Number(r.jobs_new||0), 0);
-  document.getElementById('cards').innerHTML = `
-    <div class="card"><div class="card-label">Active Jobs</div><div class="card-value">${fmt(total)}</div><div class="card-sub">${fmt(cos)} companies tracked</div></div>
-    <div class="card"><div class="card-label">Last Scan</div><div class="card-value" style="font-size:17px">${last?ago(last.started_at):'—'}</div><div class="card-sub">${last?dur(last.elapsed_secs)+' duration':''}</div></div>
-    <div class="card"><div class="card-label">New (last 5 scans)</div><div class="card-value" style="color:var(--success)">+${fmt(recent5new)}</div><div class="card-sub">job listings added</div></div>
-    <div class="card"><div class="card-label">Scanner</div><div class="card-value" style="font-size:15px;margin-top:4px">${live?'<span style="color:var(--accent)">● Running</span>':'<span style="color:var(--success)">✓ Idle</span>'}</div><div class="card-sub">${live?fmt(live.companies_scanned)+' companies done':'waiting for next cycle'}</div></div>
-  `;
-
-  // ATS grid
-  document.getElementById('ats-grid').innerHTML = totals.map(t => `
-    <div class="ats-card">
-      <div class="ats-dot" style="background:${col(t.ats)}"></div>
-      <div class="ats-info">
-        <div class="ats-name">${t.ats}</div>
-        <div class="ats-stats">${fmt(t.companies)} co · latest ${ago(t.latest_job)}</div>
-      </div>
-      <div class="ats-jobs" style="color:${col(t.ats)}">${fmt(t.active_jobs)}</div>
-    </div>`).join('');
 
   // Bar chart
   if (!byHour.length) {
@@ -229,7 +202,7 @@ function render({runs, byHour, totals}) {
     const atsArr = [...atsSet];
     const maxV = Math.max(...hours.map(h => Object.values(hmap[h]).reduce((a,b)=>a+b,0)));
     const bars = hours.map(h => {
-      const label = new Date(h).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      const d = new Date(h), label = d.getHours() % 6 ? '' : d.toLocaleTimeString([],{hour:'numeric'});
       const segs  = atsArr.filter(a => hmap[h][a]>0).map(a => {
         const px = Math.max(2, (hmap[h][a]/maxV)*100);
         return `<div class="bar-seg" style="height:${px}px;background:${col(a)}" title="${a}: ${fmt(hmap[h][a])} jobs"></div>`;
@@ -240,30 +213,27 @@ function render({runs, byHour, totals}) {
       `<div class="legend-item"><div class="legend-dot" style="background:${col(a)}"></div>${a}</div>`
     ).join('');
     document.getElementById('chart-wrap').innerHTML =
-      `<div style="font-size:12px;font-weight:600;margin-bottom:12px">Jobs found per hour · last 48h</div>
-       <div class="chart-inner">${bars}</div>
+      `<div class="chart-inner">${bars}</div>
        <div class="legend">${legend}</div>`;
   }
 
-  // Table
-  document.getElementById('table-wrap').innerHTML = `
+  // Runs table
+  document.getElementById('table-wrap').innerHTML = runs.length ? `
     <table><thead><tr>
-      <th>Started</th><th>Duration</th><th>Status</th>
-      <th>Companies</th><th>Fetched</th><th>New</th>
-      <th>Reactivated</th><th>Closed</th><th>Errors</th>
+      <th>Started</th><th>Duration</th><th>Result</th>
+      <th class="num">Companies</th><th class="num">New jobs</th><th class="num">Closed</th><th class="num">Errors</th>
     </tr></thead><tbody>
-    ${runs.map(r=>`<tr>
+    ${runs.slice(0, 15).map(r=>`<tr>
       <td>${ft(r.started_at)}</td>
       <td class="dim">${dur(r.elapsed_secs)}</td>
-      <td><span class="badge badge-${r.status}">${r.status}</span></td>
-      <td class="dim">${fmt(r.companies_scanned)}</td>
-      <td class="dim">${fmt(r.jobs_fetched)}</td>
-      <td class="pos">+${fmt(r.jobs_new)}</td>
-      <td class="dim">${fmt(r.jobs_reactivated)}</td>
-      <td class="neg">${fmt(r.jobs_closed)}</td>
-      <td class="${Number(r.companies_errored)>0?'neg':'dim'}">${fmt(r.companies_errored)}</td>
+      <td><span class="badge badge-${r.status}">${r.status === 'failed' ? 'stopped early' : r.status}</span></td>
+      <td class="num dim">${fmt(r.companies_scanned)}</td>
+      <td class="num pos">+${fmt(r.jobs_new)}</td>
+      <td class="num ${Number(r.jobs_closed) ? 'neg' : 'dim'}">${fmt(r.jobs_closed)}</td>
+      <td class="num ${Number(r.companies_errored)>0?'neg':'dim'}">${fmt(r.companies_errored)}</td>
     </tr>`).join('')}
-    </tbody></table>`;
+    </tbody></table>` : '<div class="loading">No runs yet.</div>';
+  if (window.lastLive) renderLive(window.lastLive);
 }
 
 const left = secs => {
@@ -274,43 +244,43 @@ const etaTxt = m => m == null ? '—' : m < 60 ? m+'m' : Math.floor(m/60)+'h '+m
 let nextAt = null;
 
 function renderLive(d) {
+  window.lastLive = d;
   const sc = d.schedule, procs = d.processes;
   nextAt = sc.nextAt ? new Date(sc.nextAt) : null;
-  const next = !sc.loaded ? '<span class="neg">not loaded</span>'
+  const next = !sc.loaded ? '<span class="neg">not scheduled</span>'
     : sc.runningNow ? '<span class="pos">running now</span>'
     : '<span id="countdown">—</span>';
-  const bulkTxt = d.bulk.running ? '<span class="pos">running</span>' : '<span class="dim">stopped</span>';
+  const done = lastRuns.find(r => r.status !== 'running');
   document.getElementById('live-cards').innerHTML = `
-    <div class="card"><div class="card-label">Jobs in database</div><div class="card-value">${fmt(d.jobs.total)}</div><div class="card-sub">${fmt(d.jobs.active)} active · ${fmt(d.jobs.total - d.jobs.active)} closed</div></div>
-    <div class="card"><div class="card-label">Scans running</div><div class="card-value">${procs.length}</div><div class="card-sub">${procs.length ? procs.map(p=>p.ats).join(', ') : 'none'}</div></div>
-    <div class="card"><div class="card-label">Next scheduled run</div><div class="card-value" style="font-size:20px">${next}</div><div class="card-sub">every ${sc.intervalSecs ? left(sc.intervalSecs) : '—'} · last start ${ago(sc.lastStart)}</div></div>
-    <div class="card"><div class="card-label">Bulk run</div><div class="card-value" style="font-size:20px">${bulkTxt}</div><div class="card-sub">${d.bulk.lastEvent || '—'}</div></div>
-    <div class="card"><div class="card-label">Ollama</div><div class="card-value" style="font-size:20px">${!d.ollama?.running ? '<span class="neg">not running</span>' : d.ollama.modelInstalled ? '<span class="pos">running</span>' : '<span class="neg">model missing</span>'}</div><div class="card-sub">${d.ollama ? d.ollama.model + (d.ollama.running ? '' : ' · bullets not rewritten') : '—'}</div></div>`;
+    <div class="card"><div class="card-label">Active jobs</div><div class="card-value">${d.jobs.countedAt ? fmt(d.jobs.active) : '…'}</div><div class="card-sub">${d.jobs.countedAt ? `${fmt(d.jobs.total)} in database · counted ${ago(d.jobs.countedAt)}` : 'counting, takes a minute'}</div></div>
+    <div class="card"><div class="card-label">Next scheduled scan</div><div class="card-value" style="font-size:20px">${next}</div><div class="card-sub">every ${sc.intervalSecs ? left(sc.intervalSecs) : '—'} · last started ${ago(sc.lastStart)}</div></div>
+    <div class="card"><div class="card-label">Last finished scan</div><div class="card-value" style="font-size:20px">${done ? (done.status === 'completed' ? '<span class="pos">completed</span>' : '<span class="neg">stopped early</span>') : '—'}</div><div class="card-sub">${done ? ago(done.started_at) + ' · ' + dur(done.elapsed_secs) : ''}</div></div>
+    <div class="card"><div class="card-label">Scanning now</div><div class="card-value" style="font-size:20px">${procs.length ? '<span class="pulse"></span>' + procs.length : '<span class="dim">idle</span>'}</div><div class="card-sub">${procs.length ? procs.map(p => `${p.ats} · ${p.source} · ${left(p.elapsedSecs)}`).join('<br>') : (d.bulk.running ? 'bulk running' : 'waiting for next scan')}</div></div>
+    <div class="card"><div class="card-label">Ollama</div><div class="card-value" style="font-size:20px">${!d.ollama?.running ? '<span class="neg">not running</span>' : d.ollama.modelInstalled ? '<span class="pos">running</span>' : '<span class="neg">model missing</span>'}</div><div class="card-sub">${d.ollama ? d.ollama.model : '—'}</div></div>`;
   tick();
 
-  document.getElementById('live-procs').innerHTML = procs.length ? procs.map(p => `
-    <div class="proc"><span><span class="pulse"></span><b style="text-transform:capitalize">${p.ats}</b></span>
-      <span class="badge badge-running">${p.source}</span><span class="dim">pid ${p.pid}</span><span class="dim">running ${left(p.elapsedSecs)}</span></div>`).join('')
-    : '<div class="loading">No scans running.</div>';
-
+  const status = p => {
+    const live = p.companies - p.dead, pct = live ? p.fresh4h / live : 1;
+    if (p.state === 'running' && pct < 1) return '<span class="state state-running">● scanning</span>';
+    return pct >= 0.9 ? '<span class="state state-idle">on time</span>' : '<span class="state state-waiting">behind</span>';
+  };
   document.getElementById('live-platforms').innerHTML = `
     <table><thead><tr>
-      <th>Platform</th><th>State</th><th class="num">Companies</th><th class="num">Scanned</th><th class="num">Waiting</th>
-      <th class="num">Erroring</th><th class="num">Dead</th><th class="num">Active jobs</th><th class="num">New 1h</th>
-      <th class="num">Speed</th><th class="num">ETA</th><th>Last scan</th><th></th>
+      <th>Platform</th><th>Status</th><th class="num">Companies</th><th class="num">Scanned in last 4h</th><th class="num">Never scanned</th>
+      <th class="num">Errors</th><th class="num">Active jobs</th><th class="num">New 1h</th><th>Last scan</th><th></th>
     </tr></thead><tbody>
-    ${d.platforms.map(p=>`<tr>
+    ${d.platforms.map(p => { const live = p.companies - p.dead, pct = live ? Math.round(100 * p.fresh4h / live) : 100; return `<tr>
       <td style="text-transform:capitalize"><span class="ats-dot" style="display:inline-block;background:${col(p.ats)};margin-right:8px"></span>${p.ats}</td>
-      <td><span class="state state-${p.state}">${p.state === 'running' ? '● running' : p.state === 'waiting' ? 'not running · queued' : 'up to date'}</span></td>
-      <td class="num dim">${fmt(p.companies)}</td><td class="num">${fmt(p.scanned)}</td>
-      <td class="num ${p.waiting?'':'dim'}" style="${p.waiting?'color:var(--warning)':''}">${fmt(p.waiting)}</td>
-      <td class="num ${p.erroring?'neg':'dim'}">${fmt(p.erroring)}</td><td class="num dim">${fmt(p.dead)}</td>
-      <td class="num">${fmt(p.activeJobs)}</td><td class="num pos">${p.new1h?'+'+fmt(p.new1h):'<span class="dim">0</span>'}</td>
-      <td class="num dim">${p.ratePerMin ? p.ratePerMin+'/min' : '—'}</td><td class="num">${etaTxt(p.etaMins)}</td>
+      <td>${status(p)}</td>
+      <td class="num dim">${fmt(live)}</td>
+      <td class="num"><span style="display:inline-block;width:60px;height:6px;border-radius:3px;background:var(--surface2);vertical-align:middle;margin-right:8px;overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:${pct >= 90 ? 'var(--success)' : 'var(--warning)'}"></i></span>${pct}%</td>
+      <td class="num ${p.waiting ? '' : 'dim'}" style="${p.waiting ? 'color:var(--warning)' : ''}">${fmt(p.waiting)}</td>
+      <td class="num ${p.erroring ? 'neg' : 'dim'}">${fmt(p.erroring)}</td>
+      <td class="num">${d.jobs.countedAt ? fmt(p.activeJobs) : '…'}</td><td class="num pos">${p.new1h ? '+' + fmt(p.new1h) : '<span class="dim">0</span>'}</td>
       <td class="dim">${ago(p.lastScan)}</td>
       <td>${p.state === 'running'
-        ? `<button class="btn btn-sm btn-stop" onclick="ctl('stop','${p.ats}')">■ Stop</button>`
-        : `<button class="btn btn-sm btn-start" onclick="ctl('start','${p.ats}')">▶ Start</button>`}</td></tr>`).join('')}
+        ? `<button class="btn btn-sm btn-stop" onclick="ctl('stop','${p.ats}')">Stop</button>`
+        : `<button class="btn btn-sm" onclick="ctl('start','${p.ats}')">Scan</button>`}</td></tr>`; }).join('')}
     </tbody></table>`;
 }
 
@@ -340,7 +310,7 @@ async function ctl(action, target) {
 
 async function loadLive() {
   try { renderLive(await fetch('/api/scan-status').then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.json(); })); }
-  catch (e) { document.getElementById('live-procs').innerHTML = `<div class="err">Live status error: ${e.message}</div>`; }
+  catch (e) { document.getElementById('live-platforms').innerHTML = `<div class="err">Couldn't load platform status (${e.message}). The database may be busy with a scan; it retries every 10 seconds.</div>`; }
 }
 
 load(); loadLive();

@@ -117,10 +117,17 @@ export async function runScan(opts = {}) {
     // buffer for DB round-trips (many jobs) and slow ATS responses → 90s.
     const COMPANY_TIMEOUT_MS = +process.env.COMPANY_TIMEOUT_MS || 90_000;
 
+    // Stop starting new companies once the run's time budget is spent, so the run ends on its own
+    // (saves progress, closes old jobs, matches) before run-scan.sh's 3h kill (135 min leaves time for closing old jobs and matching). Companies left over
+    // are scanned first next run (ORDER BY last_scan). Every run used to be killed, so it never finished.
+    const deadline = started + (+process.env.SCAN_BUDGET_MIN || 135) * 60_000;
+    let leftForNext = 0;
+
     // Dispatch all companies into their ATS pool concurrently
     const tasks = companies.map((company) => {
       const pool = pools[company.ats] || defaultPool;
       return pool(async () => {
+        if (Date.now() > deadline) { leftForNext++; return null; }
         // Wrap processCompany in a per-company timeout so a single hung worker
         // (e.g. dead RDS connection or stalled HTTP response) can't block the
         // entire scan indefinitely.
@@ -168,6 +175,7 @@ export async function runScan(opts = {}) {
     });
 
     await Promise.all(tasks);
+    if (leftForNext) console.error(`\n⏱   Time budget reached: ${leftForNext} companies left for the next run`);
 
     // Batch-update all company last_scan timestamps in 2 queries (instead of N)
     if (!opts.dryRun) {
@@ -187,7 +195,7 @@ export async function runScan(opts = {}) {
     if (!opts.dryRun && !opts.skipFreshness) {
       console.error('\n🔄  Running freshness check...');
       try {
-        const { closed } = await markClosedJobs();
+        const { closed } = await markClosedJobs({ since: new Date(started) });   // only companies this run reached
         totals.jobsClosed = closed;
       } catch (err) {
         console.error(`  ⚠️  Freshness check failed (non-fatal): ${err.message}`);
