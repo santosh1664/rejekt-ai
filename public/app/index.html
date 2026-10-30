@@ -1710,8 +1710,6 @@ async function openApplication(appId) {
   catch (e) { host.innerHTML = `<div class="jd-body"><div class="notice bad">${esc(e.message)}</div></div>`; return; }
   const j = a.job || {}; const snap = a.snapshot || {};
   const rep = a.tailoredResume?.report;
-  // The answers of the attempt that last ran (earlier attempts may have answered differently).
-  const answers = (a.applyDetail?.filled || []).filter(f => f.label && f.value !== '' && f.value != null && !/^contact info$/i.test(f.label));
   const sentAt = a.submittedAt || a.appliedAt;
   const sentLine = (a.applyState === 'SUBMITTED' || a.status === 'APPLIED') && sentAt
     ? `<div class="sent-card"><b>Sent ${new Date(sentAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</b><span>${[snap.ats || j.ats ? pretty(snap.ats || j.ats) : '', a.source === 'auto' ? 'by auto-apply' : a.source === 'tsenta' ? 'through Tsenta' : ''].filter(Boolean).join(' · ')}</span></div>` : '';
@@ -1731,13 +1729,11 @@ async function openApplication(appId) {
       ${['NEEDS_YOU', 'NEEDS_REVIEW', 'FAILED'].includes(a.applyState) ? `<div id="drawerQueue" style="margin-bottom:14px">${queueItemHTML(a)}</div>` : ''}
       ${['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState) ? `<div class="notice info" id="drawerBusy">${a.applyState === 'SUBMITTING' ? 'Filling in the form…' : 'Getting this ready…'} This page updates by itself.</div>` : ''}
       ${sentLine}
-      ${answers.length ? `<section class="jd-sec"><h4>Answers on the form <span class="muted" style="font-weight:400;font-size:13px">${answers.length}</span></h4><dl class="kv">${answers.map(f => `<div><dt>${esc(f.label)}</dt><dd>${esc(f.value)}${f.source === 'llm' ? ' <span class="tag" title="Chosen by the AI from your profile">AI</span>' : ''}</dd></div>`).join('')}</dl></section>` : ''}
       ${rep ? `<section class="jd-sec"><h4>Resume ${a.applyState === 'SUBMITTED' || a.status === 'APPLIED' ? 'sent' : 'for this job'}${a.resumeProfileName ? ` <span class="muted" style="font-weight:400;font-size:13px">from your ${esc(a.resumeProfileName)} profile</span>` : ''}</h4>${resumeSummaryHTML(rep, a.id)}</section>` : ''}
       ${!rep && a.tailoredResume?.sections ? `<section class="jd-sec"><h4>Resume sent${a.source === 'tsenta' ? ', written by Tsenta' : ''}</h4>
         ${a.claimsCheck?.unsupported?.length ? `<p style="font-size:14px;margin:0 0 10px">Added for this job, beyond your ${esc(a.claimsCheck.profileName)} profile: ${a.claimsCheck.unsupported.slice(0, 24).map(x => `<span class="tag cobalt">${esc(x)}</span>`).join(' ')}${a.claimsCheck.unsupported.length > 24 ? ' …' : ''}</p>` : ''}
         <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn sm primary" href="${resumeUrl(a.id, true, true)}" download>Download PDF</a><a class="btn sm" href="${resumeUrl(a.id)}" target="_blank" rel="noopener">Open PDF</a><a class="btn sm" href="${changesUrl(a.id)}" target="_blank" rel="noopener">See what changed</a></div></section>` : ''}
       ${a.coverLetter ? `<section class="jd-sec"><h4>Cover letter</h4><div class="letter">${esc(a.coverLetter)}</div></section>` : ''}
-      <section class="jd-sec"><h4>History</h4>${historyHTML(a.events)}</section>
       <section class="jd-sec"><h4>Notes</h4><textarea id="appNotes" rows="3" placeholder="Recruiter name, interview dates, anything to remember">${esc(a.notes || '')}</textarea>
         <div style="margin-top:8px"><button class="btn sm" id="saveNotes" type="button">Save notes</button></div></section>
       <section class="jd-sec"><h4>The posting${snap.importedFrom === 'tsenta' ? ' <span class="muted" style="font-weight:400;font-size:13px">from your Tsenta history</span>' : snap.capturedAt ? ` <span class="muted" style="font-weight:400;font-size:13px">as saved ${ago(snap.capturedAt)}</span>` : ''}</h4>${snap.description ? `<div class="desc">${esc(snap.description)}</div>` : `<p class="muted" style="margin:0">Only the link was saved. ${j.url ? `<a href="${esc(j.url)}" target="_blank" rel="noopener">Open the posting</a>` : ''}</p>`}</section>
@@ -1760,17 +1756,6 @@ async function openApplication(appId) {
   });
 }
 
-/** History, newest attempt in full; earlier attempts (retries) folded away. */
-function historyHTML(events) {
-  if (!events?.length) return '<p class="muted" style="margin:0">Tracked</p>';
-  const li = e => `<li>${esc(eventText(e))}<small>${new Date(e.at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</small></li>`;
-  let last = -1; events.forEach((e, i) => { if (e.kind === 'auto_apply' && e.to === 'QUEUED') last = i; });
-  if (last <= 1) return `<ul class="events">${events.map(li).join('')}</ul>`;
-  const tries = Math.max(1, events.slice(1, last).filter(e => e.kind === 'auto_apply' && e.to === 'SUBMITTING').length);   // one form fill per attempt
-  return `<ul class="events">${li(events[0])}</ul>
-    <details class="earlier"><summary>${tries} earlier attempt${tries === 1 ? '' : 's'}</summary><ul class="events">${events.slice(1, last).map(li).join('')}</ul></details>
-    <ul class="events">${events.slice(last).map(li).join('')}</ul>`;
-}
 /** Resume card: the score, what changed, downloads; the scoring breakdown folds away. */
 function resumeSummaryHTML(rep, appId) {
   const n = (k, w) => `${k} ${w}${k === 1 ? '' : 's'}`;
