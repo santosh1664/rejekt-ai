@@ -699,6 +699,14 @@ label.field small { color: var(--muted); font-weight: 400; }
 .lm-ats { font-size: 13.5px; min-height: 20px; }
 .jc.link h3 { margin-top: 6px; }
 #view[data-review] .qitem .top{display:none}
+.sent-card{display:flex;flex-direction:column;gap:2px;background:var(--ok-bg,#eef7ee);border-radius:12px;padding:12px 14px;margin-bottom:16px}
+.sent-card span{font-size:13px;color:var(--ink-2)}
+.kv{margin:0;display:grid;gap:0}
+.kv div{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;padding:8px 0;border-bottom:1px solid var(--line,#ecece7)}
+.kv dt{font-size:13px;color:var(--ink-2)} .kv dd{margin:0;font-size:14px}
+.kv .tag{font-size:10px;padding:0 6px;margin-left:4px;vertical-align:1px}
+details.earlier>summary{cursor:pointer;font-size:13px;color:var(--ink-2);margin:6px 0}
+.score-line{display:flex;align-items:baseline;gap:8px} .score-line b{font-size:22px} .score-line span{font-size:13px;color:var(--ink-2)}
 .wa-row{border:1px solid var(--line,#e6e6e1);border-radius:12px;padding:14px 16px;margin-bottom:12px}
 .wa-head{display:flex;align-items:center;margin-bottom:8px}
 .wa-add{display:flex;align-items:center;gap:10px;margin-top:6px}
@@ -1702,10 +1710,15 @@ async function openApplication(appId) {
   catch (e) { host.innerHTML = `<div class="jd-body"><div class="notice bad">${esc(e.message)}</div></div>`; return; }
   const j = a.job || {}; const snap = a.snapshot || {};
   const rep = a.tailoredResume?.report;
+  // The answers of the attempt that last ran (earlier attempts may have answered differently).
+  const answers = (a.applyDetail?.filled || []).filter(f => f.label && f.value !== '' && f.value != null && !/^contact info$/i.test(f.label));
+  const sentAt = a.submittedAt || a.appliedAt;
+  const sentLine = (a.applyState === 'SUBMITTED' || a.status === 'APPLIED') && sentAt
+    ? `<div class="sent-card"><b>Sent ${new Date(sentAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</b><span>${[snap.ats || j.ats ? pretty(snap.ats || j.ats) : '', a.source === 'auto' ? 'by auto-apply' : a.source === 'tsenta' ? 'through Tsenta' : ''].filter(Boolean).join(' · ')}</span></div>` : '';
   host.innerHTML = `
     <div class="jd-head">
       <div style="display:flex;gap:12px;align-items:flex-start"><h2 style="flex:1">${esc(j.title || 'Removed job')}</h2><button class="icon-btn" data-close aria-label="Close">${I.x(16)}</button></div>
-      <div class="sub"><b>${esc(j.company || '')}</b><span>${esc(j.locationText || '')}</span><span class="status st-${a.status}">${esc(STATUS_LABEL[a.status] || pretty(a.status))}</span>${a.applyState ? applyBadge(a.applyState) : ''}</div>
+      <div class="sub"><b>${esc(j.company || '')}</b>${j.locationText ? `<span>${esc(j.locationText)}</span>` : ''}${a.applyState && a.applyState !== 'SUBMITTED' ? applyBadge(a.applyState) : `<span class="status st-${a.status}">${esc(STATUS_LABEL[a.status] || pretty(a.status))}</span>`}</div>
       <div class="jd-actions">
         ${j.jobId && !j.removed ? `<button class="btn" data-job="${j.jobId}">Job details and match</button>` : ''}
         ${j.url ? `<a class="btn quiet" href="${esc(j.url)}" target="_blank" rel="noopener">${I.ext(15)} View posting</a>` : ''}
@@ -1717,16 +1730,17 @@ async function openApplication(appId) {
     <div class="jd-body">
       ${['NEEDS_YOU', 'NEEDS_REVIEW', 'FAILED'].includes(a.applyState) ? `<div id="drawerQueue" style="margin-bottom:14px">${queueItemHTML(a)}</div>` : ''}
       ${['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState) ? `<div class="notice info" id="drawerBusy">${a.applyState === 'SUBMITTING' ? 'Filling in the form…' : 'Getting this ready…'} This page updates by itself.</div>` : ''}
-      <section class="jd-sec"><h4>History</h4><ul class="events">${a.events.map(e => `<li>${esc(eventText(e))}<small>${new Date(e.at).toLocaleString()}</small></li>`).join('') || '<li>Tracked</li>'}</ul></section>
-      ${rep ? `<section class="jd-sec"><h4>Resume ${a.applyState === 'SUBMITTED' || a.status === 'APPLIED' ? 'sent' : 'for this job'}${a.resumeProfileName ? ` · ${esc(a.resumeProfileName)} profile` : ''}</h4>${tailorReportHTML(rep, a.id)}</section>` : ''}
+      ${sentLine}
+      ${answers.length ? `<section class="jd-sec"><h4>Answers on the form <span class="muted" style="font-weight:400;font-size:13px">${answers.length}</span></h4><dl class="kv">${answers.map(f => `<div><dt>${esc(f.label)}</dt><dd>${esc(f.value)}${f.source === 'llm' ? ' <span class="tag" title="Chosen by the AI from your profile">AI</span>' : ''}</dd></div>`).join('')}</dl></section>` : ''}
+      ${rep ? `<section class="jd-sec"><h4>Resume ${a.applyState === 'SUBMITTED' || a.status === 'APPLIED' ? 'sent' : 'for this job'}${a.resumeProfileName ? ` <span class="muted" style="font-weight:400;font-size:13px">from your ${esc(a.resumeProfileName)} profile</span>` : ''}</h4>${resumeSummaryHTML(rep, a.id)}</section>` : ''}
       ${!rep && a.tailoredResume?.sections ? `<section class="jd-sec"><h4>Resume sent${a.source === 'tsenta' ? ', written by Tsenta' : ''}</h4>
         ${a.claimsCheck?.unsupported?.length ? `<p style="font-size:14px;margin:0 0 10px">Added for this job, beyond your ${esc(a.claimsCheck.profileName)} profile: ${a.claimsCheck.unsupported.slice(0, 24).map(x => `<span class="tag cobalt">${esc(x)}</span>`).join(' ')}${a.claimsCheck.unsupported.length > 24 ? ' …' : ''}</p>` : ''}
         <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn sm primary" href="${resumeUrl(a.id, true, true)}" download>Download PDF</a><a class="btn sm" href="${resumeUrl(a.id)}" target="_blank" rel="noopener">Open PDF</a><a class="btn sm" href="${changesUrl(a.id)}" target="_blank" rel="noopener">See what changed</a></div></section>` : ''}
-      ${a.applyDetail?.filled?.length ? `<section class="jd-sec"><h4>Answers on the form</h4><table class="filled">${a.applyDetail.filled.map(f => `<tr class="src-${esc(f.source || '')}"><td>${esc(f.label)}</td><td>${esc(f.value)}</td></tr>`).join('')}</table></section>` : ''}
       ${a.coverLetter ? `<section class="jd-sec"><h4>Cover letter</h4><div class="letter">${esc(a.coverLetter)}</div></section>` : ''}
+      <section class="jd-sec"><h4>History</h4>${historyHTML(a.events)}</section>
       <section class="jd-sec"><h4>Notes</h4><textarea id="appNotes" rows="3" placeholder="Recruiter name, interview dates, anything to remember">${esc(a.notes || '')}</textarea>
         <div style="margin-top:8px"><button class="btn sm" id="saveNotes" type="button">Save notes</button></div></section>
-      <section class="jd-sec"><h4>The posting${snap.importedFrom === 'tsenta' ? ' <span class="muted" style="font-weight:400;font-size:13px">from your Tsenta history</span>' : snap.capturedAt ? ` <span class="muted" style="font-weight:400;font-size:13px">as saved ${ago(snap.capturedAt)}</span>` : ''}</h4><div class="desc">${esc(snap.description || 'No description was saved for this job.')}</div></section>
+      <section class="jd-sec"><h4>The posting${snap.importedFrom === 'tsenta' ? ' <span class="muted" style="font-weight:400;font-size:13px">from your Tsenta history</span>' : snap.capturedAt ? ` <span class="muted" style="font-weight:400;font-size:13px">as saved ${ago(snap.capturedAt)}</span>` : ''}</h4>${snap.description ? `<div class="desc">${esc(snap.description)}</div>` : `<p class="muted" style="margin:0">Only the link was saved. ${j.url ? `<a href="${esc(j.url)}" target="_blank" rel="noopener">Open the posting</a>` : ''}</p>`}</section>
     </div>`;
   host.scrollTop = 0;
   state.openApp = a.id;
@@ -1746,6 +1760,26 @@ async function openApplication(appId) {
   });
 }
 
+/** History, newest attempt in full; earlier attempts (retries) folded away. */
+function historyHTML(events) {
+  if (!events?.length) return '<p class="muted" style="margin:0">Tracked</p>';
+  const li = e => `<li>${esc(eventText(e))}<small>${new Date(e.at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</small></li>`;
+  let last = -1; events.forEach((e, i) => { if (e.kind === 'auto_apply' && e.to === 'QUEUED') last = i; });
+  if (last <= 1) return `<ul class="events">${events.map(li).join('')}</ul>`;
+  const tries = Math.max(1, events.slice(1, last).filter(e => e.kind === 'auto_apply' && e.to === 'SUBMITTING').length);   // one form fill per attempt
+  return `<ul class="events">${li(events[0])}</ul>
+    <details class="earlier"><summary>${tries} earlier attempt${tries === 1 ? '' : 's'}</summary><ul class="events">${events.slice(1, last).map(li).join('')}</ul></details>
+    <ul class="events">${events.slice(last).map(li).join('')}</ul>`;
+}
+/** Resume card: the score, what changed, downloads; the scoring breakdown folds away. */
+function resumeSummaryHTML(rep, appId) {
+  const n = (k, w) => `${k} ${w}${k === 1 ? '' : 's'}`;
+  const ats = rep.ats;
+  return `${ats ? `<div class="score-line"><b>${ats.score}/10</b><span>ATS match${ats.before != null && ats.before !== ats.score ? `, up from ${ats.before}` : ''}</span></div>` : ''}
+    <p style="margin:6px 0;font-size:14px;color:var(--ink-2)">${rep.model ? `${n(rep.editedBullets || 0, 'bullet')} reworded for this job${rep.summaryRewritten ? ' and the summary rewritten' : ''}. Employers, titles and dates are unchanged.` : esc(rep.aiSkipped || 'Sent as written.')}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="btn sm primary" href="${resumeUrl(appId, true, true)}" download>Download PDF</a><a class="btn sm" href="${resumeUrl(appId)}" target="_blank" rel="noopener">Open</a><a class="btn sm quiet" href="${changesUrl(appId)}" target="_blank" rel="noopener">What changed</a></div>
+    ${ats || rep.addedSkills?.length || rep.addedBullets?.length ? `<details class="earlier" style="margin-top:10px"><summary>Score details</summary>${matchReportHTML({ ...rep, model: null, aiSkipped: '' }, null).replace(/<p style="margin:6px 0;font-size:14px">\.<\/p>/, '')}</details>` : ''}`;
+}
 function atsScanHTML(a) {
   if (!a) return '';
   const chips = (list, cls) => list.map(x => `<span class="tag ${cls}">${esc(x)}</span>`).join(' ');

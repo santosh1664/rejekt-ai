@@ -206,6 +206,8 @@ export async function fillStep(page, book, ctx, opts = {}) {
   const filled = []; const missing = [];
   const step = await stepName(page);
   const seen = new Set();
+  // Answers already on the form (an earlier draft, Workday's defaults) are listed too, so the record shows the whole form.
+  const kept = f => filled.push({ label: f.label, key: 'saved', value: String(f.value).slice(0, 100), source: 'on form' });
   // Two passes: an answer can reveal follow-up questions (e.g. "Yes" opens "Which location?").
   for (let pass = 0; pass < 2; pass++) {
   const fields = (await scanFields(page)).filter(f => !seen.has(f.label + f.id));
@@ -216,12 +218,12 @@ export async function fillStep(page, book, ctx, opts = {}) {
     else if (f.value && ['radio', 'checkgroup'].includes(f.kind)) {
       const p = resolveAnswer({ label: f.label, type: 'radio', tag: 'input', options: f.options }, book, { acceptConsent: !!opts.acceptConsent });
       const want = p.value?.option?.label;
-      if (!want || want === f.value) continue;           // nothing definite to correct
+      if (!want || want === f.value) { kept(f); continue; }           // nothing definite to correct
     } else if (f.value && f.kind === 'dropdown' && !/degree|school|fieldOfStudy/i.test(f.id)) {
       const ch = await readChoices(page, page.locator(`[data-wf-id="${f.wf}"]`), f); await page.keyboard.press('Escape').catch(() => {});
       const want = resolveAnswer({ label: f.label, type: 'text', tag: 'select', options: ch }, book, { acceptConsent: !!opts.acceptConsent }).value?.option?.label;
-      if (!want || want === f.value) continue;
-    } else if (f.value && f.kind !== 'checkbox') continue;   // already has an answer (country, phone type…)
+      if (!want || want === f.value) { kept(f); continue; }
+    } else if (f.value && f.kind !== 'checkbox') { kept(f); continue; }   // already has an answer (country, phone type…)
     if (/extension/i.test(f.label)) continue;
     let r;
     try { r = await answerFor(page, f, book, ctx, opts); } catch { r = { pick: null }; }
