@@ -105,7 +105,7 @@ input:not([type]), input[type=text], input[type=url], input[type=email], input[t
 input:focus, select:focus, textarea:focus { border-color: var(--cobalt); box-shadow: 0 0 0 3px var(--cobalt-soft); }
 textarea { resize: vertical; line-height: 1.5; }
 label.field { display: grid; gap: 5px; font-size: 13px; color: var(--ink-2); font-weight: 500; align-content: start; }
-label.field small { color: var(--muted); font-weight: 400; }
+label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; order: 1; }   /* hint sits under the input so labels and inputs line up */
 .check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
 .check input { width: 16px; height: 16px; accent-color: var(--cobalt); }
 .tag { display: inline-flex; align-items: center; gap: 5px; border-radius: 6px; padding: 2px 8px; font-size: 12.5px; font-weight: 500; background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line-2); }
@@ -322,7 +322,7 @@ label.field small { color: var(--muted); font-weight: 400; }
 .entry:hover .tools, .entry:focus-within .tools { opacity: 1; }
 .tools .icon-btn { width: 28px; height: 28px; }
 .tools .icon-btn svg { width: 14px; height: 14px; }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px 14px; align-items: end; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px 14px; align-items: start; }
 .form-grid .wide { grid-column: 1 / -1; }
 .editor { border: 1px solid var(--cobalt); border-radius: var(--r-md); padding: 16px; margin: 4px 0 16px; background: var(--surface-2); }
 .editor .acts { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
@@ -1906,26 +1906,22 @@ async function loadApplied(append = false) {
 // ═══ Auto-apply ═════════════════════════════════════════════════════════════
 const POSTED_OPTS = [[3, 'Past 3 days'], [7, 'Past week'], [14, 'Past 2 weeks'], [30, 'Past month']];
 async function renderAutoApply() {
-  const [{ data: aa }, { data: list }] = await Promise.all([api('GET', `/users/${USER}/auto-apply`), api('GET', `/users/${USER}/applications`)]);
-  list.applications = list.applications.filter(a => a.applyState);   // auto-apply and Apply-button applications alike
+  const { data: aa } = await api('GET', `/users/${USER}/auto-apply`);
   const profiles = await ensureResumeProfiles();
-  const apps = list.applications;
-  const waiting = apps.filter(a => ['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState));   // results live on the dashboard; this page is setup only
   const lastRun = aa.runs?.find(r => !r.dryRun);
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Auto-apply</h1><p>Set up what to apply for. Finds jobs for each lane, tailors your resume, fills the form and sends it. Results show on your dashboard.</p></div><span class="spacer"></span>
+    <div class="page-head"><div><h1>Auto-apply</h1><p>Choose what to apply for. Each lane finds jobs, tailors your resume and fills the form. Results show on your dashboard.</p></div><span class="spacer"></span>
       <label class="switch"><input type="checkbox" id="aaOn" ${aa.enabled ? 'checked' : ''}><span class="track"></span><span id="aaOnLabel">${aa.enabled ? 'On' : 'Off'}</span></label></div>
     ${!profiles.length ? `<div class="notice info">Set up a resume profile first: auto-apply sends it. <a href="#/profile">Go to Profile</a></div>` : ''}
     <div class="aa">
       <div style="display:grid;gap:22px">
         <section class="panel"><div class="panel-head"><h2>Lanes</h2><span class="spacer"></span><button class="btn sm" id="addLane" type="button" ${aa.lanes.length >= 5 ? 'disabled' : ''}>Add lane</button></div>
-          <div class="panel-body" style="padding-top:4px"><p class="muted" style="margin:10px 0 0;font-size:13px">A lane is one kind of role sent with one resume profile.</p>
+          <div class="panel-body" style="padding-top:4px"><p class="muted" style="margin:10px 0 0;font-size:13px">A lane is one kind of role, applied to with one resume profile.</p>
           <div id="lanes">${aa.lanes.map(l => laneHTML(l, profiles)).join('') || '<p style="margin:12px 0 0">No lanes yet. Add one to start.</p>'}</div></div></section>
       </div>
       <div style="display:grid;gap:22px">
         <section class="panel"><div class="panel-head"><h2>Next run</h2><span class="spacer"></span><button class="btn sm" id="aaPreview" type="button">Preview</button><button class="btn sm primary" id="aaRun" type="button" ${aa.running ? 'disabled' : ''}>${aa.running ? 'Running…' : 'Run now'}</button></div>
-          <div class="panel-body" id="aaPlan"><p class="muted" style="margin:0">${lastRun ? `Last run ${ago(lastRun.startedAt)}: ${runLine(lastRun.summary)}.` : 'Not run yet.'} Preview shows which jobs the next run would pick, without sending anything.</p>
-          ${waiting.length ? `<p style="margin:10px 0 0;font-size:14px">${waiting.length} application${waiting.length === 1 ? ' is' : 's are'} queued and will be filled on the next run.</p>` : ''}</div></section>
+          <div class="panel-body" id="aaPlan"><p class="muted" style="margin:0">${lastRun ? `Last run ${ago(lastRun.startedAt)}.` : 'Not run yet.'} Preview shows which jobs the next run would pick, without sending anything.</p></div></section>
         <section class="panel"><div class="panel-head"><h2>Limits</h2></div><form class="panel-body" id="aaLimits" style="display:grid;gap:12px">
           <div class="form-grid"><label class="field">Applications per day<input type="number" name="dailyCap" min="1" max="100" value="${aa.dailyCap}"></label>
             <label class="field">Per company in 30 days<input type="number" name="perCompanyCap30d" min="1" max="20" value="${aa.perCompanyCap30d}"></label></div>
@@ -2362,7 +2358,7 @@ function renderWorkAuth() {
         <div class="wa-head"><b>${esc(r.country)}</b><span class="spacer"></span><button class="btn sm quiet danger" type="button" data-rm="${i}" aria-label="Remove ${esc(r.country)}">Remove</button></div>
         <div class="form-grid">
           <label class="field">Authorized to work in ${esc(r.country)}?${ynSelect('authorized', r.authorized)}</label>
-          <label class="field">Need visa sponsorship now or in the future?${ynSelect('needsSponsorship', r.needsSponsorship)}</label>
+          <label class="field">Need visa sponsorship?${ynSelect('needsSponsorship', r.needsSponsorship)}</label>
           <label class="field">Visa or status <small>optional, for example F-1 OPT or Citizen</small><input name="status" value="${esc(r.status || '')}"></label>
         </div></div>`).join('') : '<p class="muted" style="margin:0 0 12px">No countries yet. Add the countries you would work in.</p>'}
       <div class="wa-add"><select id="waPick" aria-label="Country to add"><option value="">Add a country…</option>${left.map(c => `<option>${esc(c)}</option>`).join('')}<option value="__other">Other…</option></select>
@@ -2414,7 +2410,7 @@ function renderContacts() {
 }
 function renderDefaults() {
   const fields = state.fields || {}; const ad = state.rp.sections.applicationDefaults || {};
-  const GROUPS = [['authorization', 'Work authorization', 'Used to filter out jobs that won\'t sponsor you, and for every "are you authorized to work" question.'], ['logistics', 'Availability', ''], ['background', 'Background questions', ''], ['eeo', 'Voluntary self-identification', 'Optional. Employers use these only for equal-opportunity reporting, and "Prefer not to say" is always fine.']];
+  const GROUPS = [['authorization', 'Visa and citizenship', 'Your visa details. Yes/No sponsorship answers come from Work authorization above.'], ['logistics', 'Availability', ''], ['background', 'Background questions', ''], ['eeo', 'Voluntary self-identification', 'Optional. Employers use these only for equal-opportunity reporting, and "Prefer not to say" is always fine.']];
   const input = (key, f) => {
     const v = ad[key];
     if (f.type === 'bool') return `<label class="field">${f.label}<select name="${key}"><option value="">Not answered</option><option value="true" ${v === true ? 'selected' : ''}>Yes</option><option value="false" ${v === false ? 'selected' : ''}>No</option></select></label>`;
