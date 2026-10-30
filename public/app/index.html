@@ -744,6 +744,23 @@ details.earlier>summary{cursor:pointer;font-size:13px;color:var(--ink-2);margin:
 .rv-empty { border: 1px dashed var(--line); border-radius: 14px; padding: 28px; text-align: center; color: var(--ink-2); margin-bottom: 20px; }
 .rv-empty b { display: block; font-size: 16px; color: var(--ink); margin-bottom: 6px; }
 @media (max-width: 820px) { .rv-grid { grid-template-columns: 1fr; } .rv-side { border-right: 0; padding-right: 0; } .rv-main { padding-left: 0; } }
+/* Sent application page */
+.sp-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line-2); margin: -6px 0 16px; }
+.sp-tabs a { padding: 8px 12px; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.sp-tabs a[aria-current="page"] { color: var(--ink); border-color: var(--ink); }
+.sp-body { max-width: 820px; margin: 0 auto; }
+.sp-card { display: flex; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-bottom: 22px; font-size: 14.5px; }
+.sp-card span { color: var(--muted); }
+.sp-group { margin-bottom: 26px; }
+.sp-group h3 { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; font-weight: 600; padding-bottom: 10px; border-bottom: 1px solid var(--line-2); margin: 0 0 16px; }
+.sp-group h3 small { font-size: 12px; color: var(--muted); font-weight: 400; }
+.sp-field { margin-bottom: 16px; }
+.sp-field label { display: block; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px; }
+.sp-val { background: var(--surface-2); border-radius: 10px; padding: 11px 14px; font-size: 15px; white-space: pre-wrap; }
+.sp-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.sp-pdf { width: 100%; height: calc(100vh - 230px); min-height: 520px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.sp-job h3 { font-size: 20px; margin: 0; } .sp-job .muted { margin: 4px 0 18px; }
+.sp-job .desc { white-space: pre-wrap; font-size: 15px; line-height: 1.65; }
 </style>
 </head>
 <body>
@@ -884,11 +901,11 @@ async function loadFeed({ append = false, limit = 25 } = {}) {
 }
 
 // ═══ Router ═════════════════════════════════════════════════════════════════
-const ROUTES = { dashboard: renderDashboard, jobs: renderJobs, browse: renderJobs, tracker: renderTracker, applied: renderApplied, 'auto-apply': renderAutoApply, review: renderReview, profile: renderProfile };
+const ROUTES = { dashboard: renderDashboard, jobs: renderJobs, browse: renderJobs, tracker: renderTracker, applied: renderApplied, 'auto-apply': renderAutoApply, review: renderReview, sent: renderSent, profile: renderProfile };
 async function route() {
   const name = location.hash.replace(/^#\/?/, '').split(/[/?]/)[0] || 'dashboard';
   const view = ROUTES[name] ? name : 'dashboard';
-  const navKey = view === 'browse' ? 'jobs' : view === 'review' ? 'auto-apply' : view;
+  const navKey = view === 'browse' ? 'jobs' : view === 'review' ? 'dashboard' : view === 'sent' ? 'applied' : view;
   $$('#nav a').forEach(a => { if (a.dataset.route === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   closeDrawer(true);
   state.selected = null;
@@ -1731,6 +1748,8 @@ async function openApplication(appId) {
   // Needs-you items open the full review page, not the drawer.
   const cached = state.apps?.applications?.find(x => x.id === appId);
   if (['NEEDS_YOU', 'NEEDS_REVIEW'].includes(cached?.applyState) && !location.hash.startsWith('#/review/')) { closeDrawer(true); location.hash = `#/review/${appId}`; return; }
+  // Sent applications open the full page (form answers, resume, job), like Tsenta.
+  if (cached && cached.status !== 'SAVED' && !location.hash.startsWith('#/sent/')) { closeDrawer(true); location.hash = `#/sent/${appId}`; return; }
   const host = $('#drawer');
   host.classList.add('open'); $('#scrim').classList.add('open'); host.setAttribute('aria-hidden', 'false');
   host.innerHTML = `<div class="jd-head"><div class="skeleton" style="height:28px;width:70%"></div></div><div class="jd-body"><div class="skeleton" style="height:200px"></div></div>`;
@@ -1783,6 +1802,55 @@ async function openApplication(appId) {
     e.target.disabled = true; e.target.textContent = 'Tailoring…';
     try { await api('POST', `/users/${USER}/applications/${a.id}/tailor`, { mode: 'match' }); openApplication(a.id); } catch (err) { toast(err.message); e.target.disabled = false; }
   });
+}
+
+// ═══ Sent application page (Form / Resume / Job tabs, Prev/Next), like Tsenta ═══════════════
+async function renderSent() {
+  const [, id, tab = 'form'] = location.hash.replace(/^#\/?/, '').split('/');
+  if (!state.apps?.applications?.length) await loadApps();
+  const list = state.apps.applications.filter(x => x.status !== 'SAVED')
+    .sort((x, y) => new Date(y.appliedAt || y.updatedAt) - new Date(x.appliedAt || x.updatedAt));
+  const { data: a } = await api('GET', `/users/${USER}/applications/${id}`);
+  const j = a.job || {}, snap = a.snapshot || {}, d = a.applyDetail || {}, rep = a.tailoredResume?.report;
+  const i = list.findIndex(x => x.id === id), n = list.length;
+  const go = k => `#/sent/${list[(i + k + n) % n]?.id}/${tab}`;
+  const sentAt = a.submittedAt || a.appliedAt;
+  const answers = (d.filled || []).filter(f => f.label && f.value !== '' && f.value != null && !/^contact info$/i.test(f.label));
+  const groups = answers.reduce((m, f) => { (m[f.step || 'Answers on the form'] ||= []).push(f); return m; }, {});
+  const TABS = [['form', 'Form'], ['resume', 'Resume'], ['job', 'Job']];
+  const body = {
+    form: () => `${d.appliedWith ? `<div class="sp-card"><span>Applied using</span><b>${esc(d.appliedWith)}</b></div>` : ''}
+      ${answers.length ? Object.entries(groups).map(([g, fs]) => `<section class="sp-group"><h3>${esc(g)}<small>${fs.length} field${fs.length === 1 ? '' : 's'}</small></h3>
+        ${fs.map(f => `<div class="sp-field"><label>${esc(f.label)}</label><div class="sp-val">${esc(f.value)}${f.source === 'llm' ? ' <span class="tag" title="Chosen by the AI from your profile">AI</span>' : ''}</div></div>`).join('')}</section>`).join('')
+      : `<div class="rv-empty"><b>No form answers saved</b>${a.source === 'tsenta' ? 'Tsenta filled this form; its answers weren\'t part of the import.' : a.source === 'auto' ? 'This one was sent before answers were recorded.' : 'You applied on the company\'s site.'}</div>`}`,
+    resume: () => a.hasTailoredResume
+      ? `<div class="sp-bar"><b>${rep?.ats ? `Tailored resume · ${rep.ats.score}/10 ATS match` : 'Resume sent'}</b><span style="flex:1"></span>${rep ? `<a class="btn sm quiet" href="${changesUrl(a.id)}" target="_blank" rel="noopener">What changed</a>` : ''}<a class="btn sm" href="${resumeUrl(a.id, true, true)}" download>Download</a></div>
+         <iframe class="sp-pdf" src="${resumeUrl(a.id)}" title="Resume sent"></iframe>`
+      : `<div class="rv-empty"><b>No resume saved</b>The resume for this application wasn't kept.</div>`,
+    job: () => `<div class="sp-job"><h3>${esc(j.title || snap.title || '')}</h3><p class="muted">${esc([j.company || snap.company, j.locationText || snap.location].filter(Boolean).join(' · '))}</p>
+      ${snap.description ? `<div class="desc">${esc(snap.description)}</div>` : `<p class="muted">The posting text wasn't saved with this application. ${j.url ? `<a href="${esc(j.url)}" target="_blank" rel="noopener">Open the posting</a>` : ''}</p>`}</div>`,
+  };
+  $('#view').innerHTML = `
+    <div class="rv-head">
+      <a class="btn sm quiet" href="#/applied" aria-label="Back to Applied">←</a>
+      <span class="logo">${esc((j.company || '?')[0].toUpperCase())}</span>
+      <div><h1>${esc(j.title || 'Removed job')}</h1><span class="muted">${esc(j.company || '')}</span></div><span style="flex:1"></span>
+      ${n > 1 && i >= 0 ? `<span class="rv-nav"><a href="${go(-1)}">‹ Prev</a><span class="muted">${i + 1} of ${n}</span><a href="${go(1)}">Next ›</a></span>` : ''}
+      ${j.url ? `<a class="btn sm" href="${esc(j.url)}" target="_blank" rel="noopener">${I.ext(14)} View job posting</a>` : ''}
+      <span class="status st-${a.status}">${a.status === 'APPLIED' ? 'Submitted' : esc(STATUS_LABEL[a.status] || pretty(a.status))}</span></div>
+    <div class="rv-grid">
+      <aside class="rv-side">
+        <nav class="sp-tabs">${TABS.map(([k, l]) => `<a href="#/sent/${id}/${k}" aria-current="${k === tab ? 'page' : 'false'}">${l}</a>`).join('')}</nav>
+        ${sentAt ? `<div class="sent-card"><b>Sent ${new Date(sentAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</b><span>${[snap.ats ? pretty(snap.ats) : '', a.source === 'auto' ? 'by auto-apply' : a.source === 'tsenta' ? 'through Tsenta' : ''].filter(Boolean).join(' · ')}</span></div>` : ''}
+        <label class="field" style="margin-top:14px">Status<select id="appStatus">${STATUSES.map(([v, l]) => `<option value="${v}" ${v === a.status ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+        <label class="field" style="margin-top:12px">Notes<textarea id="appNotes" rows="4" placeholder="Recruiter name, interview dates, anything to remember">${esc(a.notes || '')}</textarea></label>
+        <button class="btn sm" id="saveNotes" type="button" style="margin-top:8px">Save notes</button>
+      </aside>
+      <div class="rv-main"><div class="sp-body">${(body[tab] || body.form)()}</div></div></div>`;
+  $('#appStatus').addEventListener('change', async e => {
+    try { await api('PATCH', `/users/${USER}/applications/${a.id}`, { status: e.target.value }); toast(`Moved to ${STATUS_LABEL[e.target.value]}.`); loadApps(); } catch (err) { toast(err.message); }
+  });
+  $('#saveNotes').addEventListener('click', async () => { await api('PATCH', `/users/${USER}/applications/${a.id}`, { notes: $('#appNotes').value }); toast('Notes saved.'); });
 }
 
 /** Resume card: the score, what changed, downloads; the scoring breakdown folds away. */
@@ -1895,7 +1963,7 @@ async function loadApplied(append = false) {
   $$('[data-dl]:not([data-b])', list).forEach(c => { c.dataset.b = 1;
     const go = e => { e.stopPropagation(); e.preventDefault(); window.location.href = resumeUrl(c.dataset.dl, true, true); };
     c.addEventListener('click', go); c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') go(e); }); });
-  $$('.ap-row:not([data-b])', list).forEach(r => { r.dataset.b = 1; r.addEventListener('click', () => openApplication(r.dataset.app)); });
+  $$('.ap-row:not([data-b])', list).forEach(r => { r.dataset.b = 1; r.addEventListener('click', e => { if (!e.target.closest('[data-dl]')) location.hash = `#/sent/${r.dataset.app}`; }); });
   $$('.ap-co:not([data-b])', list).forEach(r => { r.dataset.b = 1; r.addEventListener('click', () => {
     apState.q = r.dataset.co; apState.fields = ['company']; apState.view = 'list'; apState.page = 1; renderApplied();
   }); });

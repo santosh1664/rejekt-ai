@@ -354,9 +354,12 @@ export async function submitApplication(userId, appId, { approve = false, browse
     }
     // Phase 4: handle ATS login wall (creates account + reads OTP via Gmail)
     const isWd = detectAts(formUrl || '')?.ats === 'workday';
+    const seen = {};
     const wallResult = isWd
-      ? (userCreds?.password ? await workdayAuth(page, formUrl, userCreds, userId) : { ok: false, reason: 'Workday needs an account. Add an ATS password in Profile → ATS Account Password.' })
+      ? (userCreds?.password ? await workdayAuth(page, formUrl, userCreds, userId, seen) : { ok: false, reason: 'Workday needs an account. Add an ATS password in Profile → ATS Account Password.' })
       : await ensureOnForm(page, formUrl, userCreds, userId);
+    if (seen.description) await query(`UPDATE applications SET job_snapshot = jsonb_set(COALESCE(job_snapshot, '{}'::jsonb), '{description}', to_jsonb($1::text))
+      WHERE id = $2 AND COALESCE(job_snapshot->>'description', '') = ''`, [seen.description.trim(), appId]).catch(() => {});
     if (!wallResult.ok) {
       result = wallResult.applied   // the account shows this job as applied already
         ? { outcome: 'SUBMITTED', filled: [], missing: [], reason: wallResult.reason, confirmation: 'Already applied on Workday' }
@@ -382,7 +385,7 @@ export async function submitApplication(userId, appId, { approve = false, browse
     await rm(dir, { recursive: true, force: true }).catch(() => {});
   }
 
-  const base = { formUrl, matchScore: detail.matchScore, filled: result.filled, missing: result.missing, reason: result.reason || null, at: new Date().toISOString() };
+  const base = { formUrl, appliedWith: atsEmail, matchScore: detail.matchScore, filled: result.filled, missing: result.missing, reason: result.reason || null, at: new Date().toISOString() };
   if (result.outcome === 'SUBMITTED') {
     await setApplyState(appId, userId, 'SUBMITTED', { ...base, confirmation: result.confirmation }, { submitted_at: new Date() });
     await updateApplication(userId, appId, { status: 'APPLIED' });

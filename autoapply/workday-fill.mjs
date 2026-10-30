@@ -154,9 +154,9 @@ export async function fillWorkday(page, url, book, files, opts = {}) {
       if (name && name === last && step > 0) return { outcome: 'NEEDS_YOU', filled, missing, reason: `Workday would not leave the "${name}" step. Finish it on the company's site.` };
       last = name;
 
-      if (/experience/i.test(name)) { const r = await fillExperience(page, llmCtx?.resumeSections || {}, files, llmCtx?.job || {}); filled.push(...r.filled); missing.push(...r.missing); }
+      if (/experience/i.test(name)) { const r = await fillExperience(page, llmCtx?.resumeSections || {}, files, llmCtx?.job || {}); filled.push(...r.filled.map(f => ({ ...f, step: name }))); missing.push(...r.missing); }
       const r = await fillStep(page, book, llmCtx, { acceptConsent: !!opts.acceptConsent });
-      filled.push(...r.filled); missing.push(...r.missing);
+      filled.push(...r.filled.map(f => ({ ...f, step: name })));   // the form page, so the app page can group answers missing.push(...r.missing);
       if (missing.length) return { outcome: 'NEEDS_YOU', filled, missing, reason: `${missing.length} required field${missing.length === 1 ? '' : 's'} need${missing.length === 1 ? 's' : ''} your answer` };
 
       const hasCaptcha = await page.evaluate(() => [...document.querySelectorAll('iframe')].some(f => /recaptcha|hcaptcha|cloudflare/.test(f.src || '')));
@@ -209,10 +209,12 @@ async function openAccountStep(page) {
  * (or sign in when one exists), confirming the e-mail through the user's Gmail when asked.
  * Leaves the page on the first step of the application form. Never logs the password.
  */
-export async function workdayAuth(page, jobUrl, creds, userId) {
+export async function workdayAuth(page, jobUrl, creds, userId, seen = {}) {
   const wait = ms => page.waitForTimeout(ms);
   await page.goto(jobUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
   await waitReady(page);
+  // Workday's job list has no description; keep the one on this page for the application's Job tab.
+  seen.description = await page.locator(A('jobPostingDescription')).first().innerText({ timeout: 3000 }).catch(() => '');
   if ((await openAccountStep(page)) === 'applied') return { ok: false, applied: true, reason: 'You already applied to this job on Workday.' };
   if (await inForm(page)) return { ok: true };
   if (!(await page.locator(A('signInContent')).count())) return { ok: false, reason: "Couldn't find Workday's sign-in step. Apply on the company's site." };
