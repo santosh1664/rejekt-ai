@@ -605,4 +605,8 @@ app.listen(PORT, () => {
   // Applications left mid-flight by a restart or a dead run become FAILED ("Try again") instead of spinning forever.
   const reap = () => reapStuckApplications().then(n => n && console.log(`[apply] ${n} interrupted application(s) moved to Failed`)).catch(() => {});
   reap(); setInterval(reap, 60_000);
+  // Fill the job-match cache for recently active people, so the first page after a restart isn't the slow one.
+  query(`SELECT DISTINCT user_id FROM resume_profiles WHERE updated_at > NOW() - INTERVAL '30 days' LIMIT 5`)
+    .then(({ rows }) => Promise.all(rows.map(r => fetch(`http://localhost:${PORT}/v1/users/${r.user_id}/recommendations?limit=6`).catch(() => {}))))
+    .catch(() => {});
 });

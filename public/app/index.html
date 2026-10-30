@@ -702,6 +702,8 @@ label.field small { color: var(--muted); font-weight: 400; }
 .wa-row{border:1px solid var(--line,#e6e6e1);border-radius:12px;padding:14px 16px;margin-bottom:12px}
 .wa-head{display:flex;align-items:center;margin-bottom:8px}
 .wa-add{display:flex;align-items:center;gap:10px;margin-top:6px}
+.wa-head .spacer,.wa-add .spacer{flex:1}
+#waPick{max-width:240px}
 .ct-list{display:grid;gap:10px;margin-bottom:12px}
 .ct-row{display:grid;grid-template-columns:1.2fr 1.2fr 1.4fr 1fr auto;gap:10px;align-items:end;border:1px solid var(--line,#e6e6e1);border-radius:12px;padding:12px 14px}
 @media (max-width:860px){.ct-row{grid-template-columns:1fr 1fr}}
@@ -856,11 +858,12 @@ async function route() {
   closeDrawer(true);
   state.selected = null;
   const mine = ++state.routeSeq;
-  // Renders run one at a time and a superseded one never starts: a slow page finishing late
-  // would otherwise write into (or wipe) the elements of the page you moved on to.
+  // Renders run one at a time and a superseded one never starts. A slow page (the dashboard waiting on
+  // job matches) only holds the next one for a moment: its late updates target its own elements, and
+  // anything it throws after you left is ignored below.
   const prev = state.routeChain;
   let done; state.routeChain = new Promise(r => done = r);
-  await prev;
+  await Promise.race([prev, new Promise(r => setTimeout(r, 600))]);
   if (mine !== state.routeSeq) return done();
   try {
     if (!state.profile && view !== 'profile') await loadProfile();
@@ -868,6 +871,7 @@ async function route() {
     delete $('#view').dataset.review;
     await ROUTES[view]();
   } catch (e) {
+    if (mine !== state.routeSeq) return done();   // a page you already left failed late: not this page's problem
     $('#view').innerHTML = `<div class="notice bad">This page couldn't load: ${esc(e.message)}. The server may be busy, so this is usually temporary. <button class="btn" id="retryRoute" type="button">Try again</button></div>`;
     $('#retryRoute')?.addEventListener('click', route);
   }
@@ -1772,10 +1776,10 @@ const nfmt = n => Number(n || 0).toLocaleString();
 async function renderApplied() {
   let imp = null; let model = null;
   try { [{ data: imp }, { data: model }] = await Promise.all([api('GET', `/users/${USER}/imports/tsenta`), api('GET', `/users/${USER}/resume-model`)]); } catch {}
-  const canImport = imp?.available && imp.imported < imp.available.applications;
+  const canImport = imp?.available && imp.imported < imp.available.applications && !store.get('hideTsentaImport', false);
   $('#view').innerHTML = `
     <div class="page-head"><div><h1>Applied</h1><p>Every application you've sent, with the posting and the resume that went out.</p></div></div>
-    ${canImport ? `<div class="import-box"><div><b>Your Tsenta history is ready to import</b><p>${nfmt(imp.available.applications)} applications. For the most recent ${imp.available.details}, the posting is included, and for some the resume Tsenta sent.${imp.imported ? ` ${nfmt(imp.imported)} are already here.` : ''}</p></div><button class="btn primary" id="apImport" type="button">Import</button></div>` : ''}
+    ${canImport ? `<div class="import-box"><div><b>Your Tsenta history is ready to import</b><p>${nfmt(imp.available.applications)} applications. For the most recent ${imp.available.details}, the posting is included, and for some the resume Tsenta sent.${imp.imported ? ` ${nfmt(imp.imported)} are already here.` : ''}</p></div><div style="display:flex;gap:8px"><button class="btn quiet" id="apImportHide" type="button">Not now</button><button class="btn primary" id="apImport" type="button">Import</button></div></div>` : ''}
     <form class="searchbar" id="apSearch" role="search"><input id="apQ" type="search" placeholder="Search a company, job title, link or words in the posting" value="${esc(apState.q)}" aria-label="Search applications"><button class="btn primary" type="submit">Search</button></form>
     <div class="ap-controls">
       <div class="ap-fields" role="group" aria-label="Search in">${AP_FIELDS.map(([k, l]) => `<button type="button" class="fchip" data-f="${k}" aria-pressed="${apState.fields.includes(k)}">${l}<span class="n" data-n="${k}"></span></button>`).join('')}</div>
@@ -1798,6 +1802,7 @@ async function renderApplied() {
   $('#apSource').addEventListener('change', e => { apState.source = e.target.value; apState.page = 1; loadApplied(); });
   $$('.seg [data-v]').forEach(b => b.addEventListener('click', () => { apState.view = b.dataset.v; $$('.seg [data-v]').forEach(x => x.setAttribute('aria-selected', String(x === b))); apState.page = 1; loadApplied(); }));
   $('#apImport')?.addEventListener('click', async e => {
+  $('#apImportHide')?.addEventListener('click', () => { store.set('hideTsentaImport', true); renderApplied(); });
     e.target.disabled = true; e.target.textContent = 'Importing…';
     try { const { data: r } = await api('POST', `/users/${USER}/imports/tsenta`); toast(`Imported ${nfmt(r.applications)} applications from Tsenta.`); renderApplied(); }
     catch (err) { toast(err.message); e.target.disabled = false; e.target.textContent = 'Import'; }
@@ -2035,7 +2040,7 @@ function queueItemHTML(a) {
     <div class="acts">
       ${a.applyState === 'NEEDS_REVIEW' ? `<button class="btn sm primary" data-approve type="button">Submit application</button>` : ''}
       ${a.applyState === 'NEEDS_YOU' && askable.length ? `<button class="btn sm primary" data-answer type="button" disabled>Answer ${askable.length} required field${askable.length === 1 ? '' : 's'}</button>` : ''}
-      ${a.applyState === 'FAILED' ? `<button class="btn sm primary" data-retry type="button">Try again</button>` : ''}
+      ${a.applyState === 'FAILED' || (a.applyState === 'NEEDS_YOU' && !askable.length) ? `<button class="btn sm ${a.applyState === 'FAILED' ? 'primary' : ''}" data-retry type="button">Try again</button>` : ''}
       ${a.hasTailoredResume ? `<a class="btn sm" href="${resumeUrl(a.id)}" target="_blank" rel="noopener">Resume</a>` : ''}
       ${d.formUrl || a.job?.url ? `<a class="btn sm quiet" href="${esc(d.formUrl || a.job.url)}" target="_blank" rel="noopener">${I.ext(14)} Apply on site</a>` : ''}
       <button class="btn sm quiet" data-details type="button">Details</button>
@@ -2366,7 +2371,7 @@ function renderContacts() {
       ${rows.length ? `<div class="ct-list">${rows.map((c, i) => `<div class="ct-row" data-i="${i}">
         <label class="field">Name<input name="name" value="${esc(c.name)}" required></label>
         <label class="field">Company<input name="company" value="${esc(c.company)}" required></label>
-        <label class="field">Email <small>optional</small><input name="email" type="email" value="${esc(c.email || '')}"></label>
+        <label class="field">Email<input name="email" type="email" placeholder="optional" value="${esc(c.email || '')}"></label>
         <label class="field">Relation<select name="relation">${RELATIONS.map(r => `<option ${c.relation === r ? 'selected' : ''}>${r}</option>`).join('')}</select></label>
         <button class="btn sm quiet danger" type="button" data-rm="${i}" aria-label="Remove ${esc(c.name || 'contact')}">Remove</button></div>`).join('')}</div>` : '<p class="muted" style="margin:0 0 12px">Nobody added. That is fine: those questions get "No".</p>'}
       <div class="wa-add"><button class="btn" type="button" id="ctAdd">Add a person</button><span class="spacer"></span>${rows.length || (state.rp.sections.contacts || []).length ? '<button class="btn primary" type="submit">Save people</button>' : ''}</div></form>`;
