@@ -125,9 +125,8 @@
     <div class="meta" id="ts">Loading…</div>
   </div>
   <div class="controls">
-    <button class="btn btn-start" onclick="ctl('start','scheduled')">▶ Run scan now</button>
-    <button class="btn" onclick="ctl('start','bulk')">Start bulk</button>
-    <button class="btn btn-stop" onclick="ctl('stop','all')">■ Stop all</button>
+    <button class="btn btn-start" id="scanAll" onclick="ctl('start','scheduled')">▶ Scan all now</button>
+    <button class="btn btn-stop" id="stopAll" onclick="ctl('stop','all')">■ Stop all</button>
     <button class="refresh-btn" onclick="load();loadLive()">↻ Refresh</button>
   </div>
 </header>
@@ -258,6 +257,11 @@ function renderLive(d) {
     <div class="card"><div class="card-label">Scanning now</div><div class="card-value" style="font-size:20px">${procs.length ? '<span class="pulse"></span>' + procs.length : '<span class="dim">idle</span>'}</div><div class="card-sub">${procs.length ? procs.map(p => `${p.ats} · ${p.source} · ${left(p.elapsedSecs)}`).join('<br>') : (d.bulk.running ? 'bulk running' : 'waiting for next scan')}</div></div>
     <div class="card"><div class="card-label">Ollama</div><div class="card-value" style="font-size:20px">${!d.ollama?.running ? '<span class="neg">not running</span>' : d.ollama.modelInstalled ? '<span class="pos">running</span>' : '<span class="neg">model missing</span>'}</div><div class="card-sub">${d.ollama ? d.ollama.model : '—'}</div></div>`;
   tick();
+  const all = procs.some(p => p.ats === 'all');
+  const sa = document.getElementById('scanAll');
+  sa.disabled = all; sa.textContent = all ? '● Scanning all platforms…' : '▶ Scan all now';
+  sa.title = all ? '' : `Starts every platform at once (${sc.nextMode === 'full' ? 'full scan' : 'quick scan'})`;
+  document.getElementById('stopAll').disabled = !procs.length;
 
   const status = p => {
     const live = p.companies - p.dead, pct = live ? p.fresh4h / live : 1;
@@ -278,9 +282,9 @@ function renderLive(d) {
       <td class="num ${p.erroring ? 'neg' : 'dim'}">${fmt(p.erroring)}</td>
       <td class="num">${d.jobs.countedAt ? fmt(p.activeJobs) : '…'}</td><td class="num pos">${p.new1h ? '+' + fmt(p.new1h) : '<span class="dim">0</span>'}</td>
       <td class="dim">${ago(p.lastScan)}</td>
-      <td>${p.state === 'running'
+      <td>${procs.some(x => x.ats === p.ats)
         ? `<button class="btn btn-sm btn-stop" onclick="ctl('stop','${p.ats}')">Stop</button>`
-        : `<button class="btn btn-sm" onclick="ctl('start','${p.ats}')">Scan</button>`}</td></tr>`; }).join('')}
+        : all ? '' : `<button class="btn btn-sm" onclick="ctl('start','${p.ats}')">Scan</button>`}</td></tr>`; }).join('')}
     </tbody></table>`;
 }
 
@@ -305,7 +309,7 @@ async function ctl(action, target) {
     toast((await r.json()).message || 'Done');
   } catch (e) { toast('Failed: ' + e.message); }
   // a freshly spawned scan needs a moment to show up in the process list
-  setTimeout(() => { btns.forEach(b => b.disabled = false); loadLive(); load(); }, 2500);
+  setTimeout(() => { btns.forEach(b => b.disabled = false); loadLive(); load(); }, 2500);   // loadLive re-disables what's running
 }
 
 async function loadLive() {
