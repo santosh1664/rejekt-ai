@@ -159,7 +159,8 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .menu .opt input { accent-color: var(--cobalt); }
 .menu .foot { display: flex; justify-content: space-between; border-top: 1px solid var(--line-2); margin-top: 6px; padding-top: 8px; }
 .menu p { font-size: 12.5px; color: var(--muted); margin: 6px 8px; }
-.search-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.search-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; font-size: 13.5px; color: var(--muted); }
+.search-meta .sm-note { margin-left: 4px; padding-left: 12px; border-left: 1px solid var(--line); color: var(--warn); }
 .addlink { display: flex; gap: 8px; align-items: center; margin-top: 14px; padding: 8px 10px 8px 14px; border: 1px dashed var(--line); border-radius: var(--r-md); background: var(--surface-2); font-size: 13.5px; color: var(--ink-2); }
 .addlink label { white-space: nowrap; }
 .addlink input { flex: 1; }
@@ -623,7 +624,7 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .score.tier-weak .meter i.on { background: var(--meter-off); filter: brightness(.9); }
 .stat b, .cov b { font-family: var(--head); font-weight: 800; font-size: 38px; letter-spacing: 0; }
 .pct b { font-family: var(--head); font-weight: 900; font-size: 42px; letter-spacing: 0; }
-.row .fit, .search-meta, .rz-pages, .events small { font-family: var(--mono); font-size: 12.5px; }
+.row .fit, .rz-pages, .events small { font-family: var(--mono); font-size: 12.5px; }
 .tag { font-family: var(--mono); font-size: 12px; border-radius: 999px; padding: 3px 10px; }
 .tag.hit { background: var(--ok-soft); color: var(--ok); border-color: var(--ok-bd); }
 .tag.miss { background: var(--bad-soft); color: var(--bad); border: 1px dashed var(--bad-mid); }
@@ -1057,12 +1058,11 @@ function openFilterMenu(key, host, onChange) {
   });
 }
 function searchMetaHTML(feed) {
-  const warn = (feed?.searchWarnings || []).map(w => `<div class="notice warn">${esc(w)}</div>`).join('');
-  if (!feed?.keywordSearch) return warn;
-  const ks = feed.keywordSearch;
-  return `<div class="search-meta">${ks.include.map(t => `<span class="tag cobalt">${esc(t)}</span>`).join('')}${ks.exclude.map(t => `<span class="tag miss">without ${esc(t)}</span>`).join('')}
-    <span>${feed.total} result${feed.total === 1 ? '' : 's'}. Search matches rank higher, so their scores run above an unsearched list.</span>
-    <button class="btn sm quiet" id="clearSearch" type="button">Clear search</button></div>` + warn;
+  // one quiet line; the search box and "Hide jobs mentioning" already show the terms
+  const ks = feed?.keywordSearch, wide = feed?.searchWarnings?.length;
+  if (!ks && !wide) return '';
+  return `<div class="search-meta">${ks ? `<button class="btn sm quiet" id="clearSearch" type="button">Clear search</button>` : ''}
+    ${wide ? `<span class="sm-note">Hidden words are also checked in descriptions, so many good jobs drop out.</span><button class="btn sm" id="titlesOnly" type="button">Hide by title only</button>` : ''}</div>`;
 }
 function zeroHTML(feed) {
   const r = feed.zeroResultReason;
@@ -1611,6 +1611,7 @@ async function renderJobs() {
   const draw = feed => {
     $('#searchMeta').innerHTML = searchMetaHTML(feed);
     $('#clearSearch')?.addEventListener('click', () => { state.search = { include: '', exclude: '', scope: state.search.scope }; renderJobs(); });
+    $('#titlesOnly')?.addEventListener('click', () => { $('#scope').value = 'title'; $('#searchForm').requestSubmit(); });
     $('#jobsLine').textContent = feed.total ? `${feed.total} jobs, best fit first.` : 'Ranked by how well they fit your profile.';
     $('#list').innerHTML = linkCardHTML() + (feed.jobs.length ? feed.jobs.map(jobCardHTML).join('') + (feed.nextCursor ? `<div class="more" id="sentinel"><span class="muted">Loading more jobs…</span></div>` : '') : zeroHTML(feed));
     watch.disconnect(); if ($('#sentinel')) watch.observe($('#sentinel'));
