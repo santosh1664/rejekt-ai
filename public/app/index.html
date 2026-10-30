@@ -398,7 +398,7 @@ label.field small { color: var(--muted); font-weight: 400; }
 .switch input:checked + .track { background: var(--cobalt); }
 .switch input:checked + .track::after { transform: translateX(18px); }
 .switch input:focus-visible + .track { outline: 2px solid var(--cobalt); outline-offset: 2px; }
-.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 22px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 22px; }
 .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 14px; }
 .stat b { display: block; font-family: var(--display); font-size: 26px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .stat span { font-size: 13px; color: var(--muted); }
@@ -756,7 +756,7 @@ details.earlier>summary{cursor:pointer;font-size:13px;color:var(--ink-2);margin:
       <a href="#/jobs" data-route="jobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Jobs</a>
       <a href="#/tracker" data-route="tracker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/></svg>Tracker<span class="count" id="appliedCount"></span></a>
       <a href="#/applied" data-route="applied"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/><path d="M15 3v3M9 3v3"/></svg>Applied</a>
-      <a href="#/auto-apply" data-route="auto-apply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Auto-apply<span class="count" id="needsCount"></span></a>
+      <a href="#/auto-apply" data-route="auto-apply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Auto-apply</a>
       <a href="#/profile" data-route="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profile</a>
     </nav>
     <div class="rail-foot">
@@ -852,8 +852,6 @@ async function loadApps() {
   state.apps = data;
   const c = data.counts; const active = (c.APPLIED || 0) + (c.INTERVIEWING || 0) + (c.OFFER || 0);
   $('#appliedCount').textContent = active ? String(active) : '';
-  const needs = data.applications.filter(a => a.applyState === 'NEEDS_YOU' || a.applyState === 'NEEDS_REVIEW').length;
-  $('#needsCount').textContent = needs ? String(needs) : '';
   if ($('#appTbody')) drawDashApps(); // refresh dashboard table if visible
 }
 async function loadRailProfile() {
@@ -1913,7 +1911,7 @@ async function renderAutoApply() {
   const profiles = await ensureResumeProfiles();
   const apps = list.applications;
   const by = st => apps.filter(a => a.applyState === st);
-  const review = by('NEEDS_REVIEW'); const needs = [...by('NEEDS_YOU'), ...review]; const failed = by('FAILED');   // Tsenta-style: one Needs you list, Failed apart
+  const failed = by('FAILED');   // Needs you lives on the dashboard and the review page
   const waiting = apps.filter(a => ['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState));
   const sent = by('SUBMITTED');
   const sentToday = sent.filter(a => a.submittedAt && new Date(a.submittedAt).toDateString() === new Date().toDateString()).length;
@@ -1923,14 +1921,12 @@ async function renderAutoApply() {
       <label class="switch"><input type="checkbox" id="aaOn" ${aa.enabled ? 'checked' : ''}><span class="track"></span><span id="aaOnLabel">${aa.enabled ? 'On' : 'Off'}</span></label></div>
     ${!profiles.length ? `<div class="notice info">Set up a resume profile first: auto-apply sends it. <a href="#/profile">Go to Profile</a></div>` : ''}
     <div class="stats">
-      <div class="stat ${needs.length ? 'attn' : ''}"><b>${needs.length}</b><span>need you</span></div>
       <div class="stat"><b>${failed.length}</b><span>failed</span></div>
       <div class="stat"><b>${waiting.length}</b><span>queued to send</span></div>
       <div class="stat"><b>${sentToday}</b><span>sent today of ${aa.dailyCap}</span></div>
     </div>
     <div class="aa">
       <div style="display:grid;gap:22px">
-        ${needs.length ? `<section class="panel"><div class="panel-head"><h2>Needs you</h2><span class="spacer"></span>${review.length ? `<button class="btn sm" id="approveAll" type="button">Submit all ${review.length} reviewed</button>` : ''}</div><div id="qNeeds">${needs.map(queueItemHTML).join('')}</div></section>` : ''}
         ${failed.length ? `<section class="panel"><div class="panel-head"><h2>Failed</h2></div><div id="qFailed">${failed.map(queueItemHTML).join('')}</div></section>` : ''}
         <section class="panel"><div class="panel-head"><h2>Next run</h2><span class="spacer"></span><button class="btn sm" id="aaPreview" type="button">Preview</button><button class="btn sm primary" id="aaRun" type="button" ${aa.running ? 'disabled' : ''}>${aa.running ? 'Running…' : 'Run now'}</button></div>
           <div class="panel-body" id="aaPlan"><p class="muted" style="margin:0">${lastRun ? `Last run ${ago(lastRun.startedAt)}: ${runLine(lastRun.summary)}.` : 'Not run yet.'} Preview shows which jobs the next run would pick, without sending anything.</p>
@@ -1980,11 +1976,6 @@ async function renderAutoApply() {
     pollRun();
   });
   if (aa.running) pollRun();
-  $('#approveAll')?.addEventListener('click', async e => {
-    e.target.disabled = true;
-    for (const a of review) await api('POST', `/users/${USER}/applications/${a.id}/approve`, {});
-    toast(`Submitting ${review.length}…`); renderAutoApply();
-  });
   $$('.qitem').forEach(bindQueueItem);
   $$('.app-row[data-open]').forEach(r => r.addEventListener('click', () => openApplication(r.dataset.open)));
 }
@@ -2129,7 +2120,7 @@ function bindQueueItem(el) {
 let reviewIds = [];
 const reviewNext = (cur = location.hash.split('/')[2]) => {
   const i = reviewIds.indexOf(cur), rest = reviewIds.filter(x => x !== cur);
-  reviewIds = rest; location.hash = rest.length ? `#/review/${rest[Math.min(i, rest.length - 1)]}` : '#/auto-apply';
+  reviewIds = rest; location.hash = rest.length ? `#/review/${rest[Math.min(i, rest.length - 1)]}` : '#/dashboard';
 };
 async function renderReview() {
   const id = location.hash.split('/')[2];
@@ -2137,7 +2128,7 @@ async function renderReview() {
   const todo = data.applications.filter(a => ['NEEDS_YOU', 'NEEDS_REVIEW'].includes(a.applyState));
   if (!reviewIds.includes(id)) reviewIds = todo.map(a => a.id);
   const a = data.applications.find(x => x.id === id);
-  if (!a || !['NEEDS_YOU', 'NEEDS_REVIEW'].includes(a.applyState)) { location.hash = '#/auto-apply'; return; }
+  if (!a || !['NEEDS_YOU', 'NEEDS_REVIEW'].includes(a.applyState)) { location.hash = '#/dashboard'; return; }
   const i = Math.max(0, reviewIds.indexOf(id)), n = reviewIds.length, d = a.applyDetail || {};
   const go = k => `#/review/${reviewIds[(i + k + n) % n]}`;
   const ask = (d.missing || []).filter(m => m.type !== 'file').length;
@@ -2146,7 +2137,7 @@ async function renderReview() {
   $('#view').dataset.review = 1;
   $('#view').innerHTML = `
     <div class="rv-head">
-      <a class="btn sm quiet" href="#/auto-apply" aria-label="Back to Auto-apply">←</a>
+      <a class="btn sm quiet" href="#/dashboard" aria-label="Back to dashboard">←</a>
       <span class="logo">${esc((a.job?.company || '?')[0].toUpperCase())}</span>
       <div><h1>${esc(a.job?.title || 'Removed job')}</h1><span class="muted">${co}</span></div><span style="flex:1"></span>
       ${n > 1 ? `<span class="rv-nav"><a href="${go(-1)}">‹ Prev</a><span class="muted">${i + 1} of ${n}</span><a href="${go(1)}">Next ›</a></span>` : ''}
