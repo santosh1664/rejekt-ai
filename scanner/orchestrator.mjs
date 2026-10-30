@@ -208,8 +208,10 @@ export async function runScan(opts = {}) {
 
     // Matching pass
     if (!opts.dryRun && totals.jobsNew > 0) {
-      console.error('\U0001f465  Running matcher pass...');
-      const { matched } = await matchNewJobs({ since: 120, verbose: opts.verbose }).catch(() => ({ matched: 0 }));
+      console.error('👥  Running matcher pass...');
+      // cover the whole run: runs last up to ~2.5h, a fixed 120 min missed the early new jobs
+      const since = Math.ceil((Date.now() - started) / 60_000) + 5;
+      const { matched } = await matchNewJobs({ since, verbose: opts.verbose }).catch(() => ({ matched: 0 }));
       if (matched > 0) console.error(`   -> ${matched.toLocaleString()} user alerts created`);
     }
 
