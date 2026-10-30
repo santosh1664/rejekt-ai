@@ -257,7 +257,9 @@ ATS values: greenhouse | ashby | lever | workday | bamboohr | workable | smartre
   }
 }
 
-main().catch((err) => {
+// Exit explicitly: requests orphaned by the per-company timeout (e.g. Workable's rate-limit queue
+// during a 429 block) otherwise keep the process alive until the 3h watchdog kills it.
+main().then(() => process.exit(0), (err) => {
   console.error('\n💥 Fatal error:', err.message);
   if (verbose) console.error(err.stack);
   process.exit(1);
