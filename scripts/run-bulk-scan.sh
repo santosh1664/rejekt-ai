@@ -14,6 +14,8 @@ export WORKERS_BAMBOOHR=15 WORKERS_BREEZY=15 WORKERS_RECRUITEE=15 WORKERS_TEAMTA
 
 for ats in "${ATSES[@]}"; do
   for pass in $(seq 1 30); do
+    # "Stop <ats>" on /scan-log drops this flag: skip the rest of this platform, keep the bulk run going.
+    [ -f "$PROJECT_DIR/logs/.skip-$ats" ] && { rm -f "$PROJECT_DIR/logs/.skip-$ats"; break; }
     echo "=== $(date -u +%FT%TZ) $ats pass $pass ===" >> "$LOG"
     "$NODE_BIN" --env-file="$PROJECT_DIR/.env.local" "$PROJECT_DIR/scanner.mjs" --scan --ats "$ats" --skip-freshness --min-age-hours 12 >> "$LOG" 2>&1 &
     PID=$!

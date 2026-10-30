@@ -79,6 +79,8 @@ export const PROVIDERS = {
   rippling,
   teamtailor,
   oraclecloud,
+  // Jobs added by pasting a link on any other site (lib/job-import.mjs). Never scanned: the company row is inactive.
+  manual: async () => [],
 };
 
 /**

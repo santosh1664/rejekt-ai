@@ -281,6 +281,7 @@ function renderLive(d) {
     : '<span id="countdown">—</span>';
   const bulkTxt = d.bulk.running ? '<span class="pos">running</span>' : '<span class="dim">stopped</span>';
   document.getElementById('live-cards').innerHTML = `
+    <div class="card"><div class="card-label">Jobs in database</div><div class="card-value">${fmt(d.jobs.total)}</div><div class="card-sub">${fmt(d.jobs.active)} active · ${fmt(d.jobs.total - d.jobs.active)} closed</div></div>
     <div class="card"><div class="card-label">Scans running</div><div class="card-value">${procs.length}</div><div class="card-sub">${procs.length ? procs.map(p=>p.ats).join(', ') : 'none'}</div></div>
     <div class="card"><div class="card-label">Next scheduled run</div><div class="card-value" style="font-size:20px">${next}</div><div class="card-sub">every ${sc.intervalSecs ? left(sc.intervalSecs) : '—'} · last start ${ago(sc.lastStart)}</div></div>
     <div class="card"><div class="card-label">Bulk run</div><div class="card-value" style="font-size:20px">${bulkTxt}</div><div class="card-sub">${d.bulk.lastEvent || '—'}</div></div>

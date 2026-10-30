@@ -14,6 +14,7 @@
  *      the fine-grained salary-hard-constraint edge cases)
  *   -> score eligible candidates, sort, paginate
  */
+import { cached } from '../lib/stale-cache.mjs';
 import { query } from '../lib/db.mjs';
 import { normalizeTitle } from '../lib/normalize.mjs';
 import { buildJobContracts } from './job-contract.mjs';
@@ -26,7 +27,7 @@ import {
   keywordSearchWarnings, summarizeKeywordSearch,
 } from './keyword-search.mjs';
 
-const CANDIDATE_POOL_SIZE = 2000;
+const CANDIDATE_POOL_SIZE = 600; // reduced from 2000 — 3 DB queries × 2000 rows was the main latency source
 
 export async function loadUserContext(userId) {
   const { rows: profileRows } = await query(
@@ -182,13 +183,20 @@ async function fetchCandidates(filters) {
   // shown, not what gets stored.
   const sql = `
     SELECT id FROM (
-      SELECT DISTINCT ON (j.fingerprint) j.id, j.discovered
-        FROM jobs j WHERE ${conditions.join(' AND ')}
-       ORDER BY j.fingerprint, j.discovered DESC
+      SELECT DISTINCT ON (fingerprint) id, discovered FROM (
+        SELECT j.id, j.fingerprint, j.discovered
+          FROM jobs j WHERE ${conditions.join(' AND ')}
+         ORDER BY j.discovered DESC LIMIT ${CANDIDATE_POOL_SIZE * 3}
+      ) newest
+       ORDER BY fingerprint, discovered DESC
     ) deduped ORDER BY discovered DESC LIMIT ${CANDIDATE_POOL_SIZE}`;
-  const { rows } = await query(sql, params);
-  return rows.map(r => r.id);
+  // ponytail: dedupe runs over the newest 3x pool, not every match — sorting ~1M rows by fingerprint timed out at 30s; raise the multiplier if dupes ever starve the pool
+  return candidateIds(JSON.stringify([sql, params]), sql, params);
 }
+
+// The candidate query is the heaviest one in the app. Reuse it for 5 min, and when the DB is too busy
+// to answer (vacuum, scan writes) serve the last result for up to 24h instead of an error page.
+const candidateIds = cached(async (_k, sql, params) => (await query(sql, params)).rows.map(r => r.id), { ttl: 300_000, maxAge: 24 * 3600_000, max: 100 });
 
 /**
  * @param {string} userId
@@ -213,6 +221,8 @@ export async function generateRecommendations(userId, options = {}) {
     for (const [k, v] of Object.entries(o.profile || {})) if (v !== null && v !== undefined && v !== '') ctx.profile[k] = v;
     if (o.userSkillNames?.length) ctx.userSkillNames = o.userSkillNames;
   }
+  // What-if runs (matching/relevance.mjs) relax one preference without saving it.
+  if (options.preferencesOverride) Object.assign(ctx.preferences, options.preferencesOverride);
   const ks = options.keywordSearch?.active ? options.keywordSearch : null;
   const filters = buildCandidateFilters(userId, ctx, { ...options, keywordSearch: ks });
   const candidateIds = await fetchCandidates(filters);

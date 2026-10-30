@@ -14,7 +14,7 @@
 :root {
   --paper: #FFFFFF; --surface: #FFFFFF; --surface-2: #F6F6F5; --ink: #111111; --ink-2: #3B3B3B; --muted: #6A6A6A;
   --line: #DEDEDC; --line-2: #EBEBE9;
-  --cobalt: #111111; --cobalt-ink: #FFFFFF; --cobalt-soft: #F0F0EE;
+  --cobalt: #17382B; --cobalt-ink: #FFFFFF; --cobalt-soft: #EAF1EC;
   --signal: #F5CE78; --signal-soft: #FFFAEB; --signal-ink: #92650A;
   --ok: #2A8057; --ok-soft: #F2FAF5; --warn: #92650A; --warn-soft: #FFFAEB; --bad: #B84A3E; --bad-soft: #FFF5F3;
   --info: #3D5FCB; --info-soft: #F4F8FF;
@@ -179,6 +179,15 @@ label.field small { color: var(--muted); font-weight: 400; }
 .row.compact { grid-template-columns: 64px minmax(0, 1fr) auto; padding: 12px 16px; }
 .row.compact h3 { font-size: 16px; }
 .row.leaving { opacity: 0; transform: translateX(12px); transition: opacity .18s, transform .18s; }
+.relevance { margin-top: 14px; border: 1px solid var(--line); border-radius: var(--r-md); padding: 16px; background: var(--surface); }
+.relevance h3 { font-size: 16px; margin-bottom: 4px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin: 12px 0; }
+.jcard { border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px; display: grid; gap: 8px; cursor: pointer; background: var(--surface); }
+.jcard:hover { background: var(--surface-2); }
+.jcard h4 { font-size: 15px; font-weight: 600; line-height: 1.25; }
+.jcard .sub { font-size: 13px; color: var(--ink-2); }
+.what-if { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line-2); font-size: 13.5px; }
+.what-if span:first-child { flex: 1; min-width: 200px; }
 .more { display: flex; justify-content: center; padding: 16px; border-top: 1px solid var(--line-2); }
 
 /* ═══ Jobs: two-pane ════════════════════════════════════════════════════════ */
@@ -218,6 +227,22 @@ label.field small { color: var(--muted); font-weight: 400; }
 .drawer.open { transform: none; }
 
 /* ═══ Dashboard ═════════════════════════════════════════════════════════════ */
+.tm-head { display: flex; align-items: center; margin: 0 0 10px; }
+.tm-head h2 { font-size: 15px; font-weight: 600; flex: 1; }
+.tcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-bottom: 26px; }
+.tcards .empty { grid-column: 1 / -1; }
+.tcard { background: var(--surface); border: 1px solid var(--line-2); border-radius: 16px; padding: 6px; cursor: pointer; }
+.tcard:hover { border-color: var(--line); }
+.tcard .tc-top { position: relative; background: var(--tint); color: #111; border-radius: 12px; padding: 14px 16px; min-height: 160px; }
+.tcard .tc-top small { display: block; font-size: 12px; opacity: .65; }
+.tcard .tc-top h3 { font-size: 15.5px; font-weight: 600; line-height: 1.3; margin-top: 4px; padding-right: 46px; }
+.tcard .ring { position: absolute; top: 10px; right: 10px; width: 46px; height: 46px; }
+.tcard .ring text { font: 700 12px var(--text); fill: #111; }
+.tcard .tc-foot { display: flex; align-items: center; gap: 8px; padding: 10px 8px 6px; font-size: 13px; color: var(--muted); }
+.tcard .tc-foot .co { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; gap: 7px; align-items: center; }
+.tcard .av { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--cobalt); color: var(--cobalt-ink); font-size: 10px; font-weight: 700; display: grid; place-items: center; }
+.searchbar { border-radius: 999px; padding: 4px 6px 4px 16px; }
+
 .dash { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 22px; align-items: start; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
 .panel-head { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--line-2); }
@@ -458,6 +483,78 @@ label.field small { color: var(--muted); font-weight: 400; }
 .cov b { font-family: var(--display); font-size: 26px; font-weight: 700; }
 .tcard .aa-badge { margin-top: 8px; }
 
+
+
+/* ═══ Tsenta-style dashboard ════════════════════════════════════════════════ */
+.dash-search { position: relative; margin-bottom: 10px; }
+.dash-search input { width: 100%; padding: 10px 16px 10px 40px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; background: var(--surface); color: var(--ink); }
+.dash-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .45; pointer-events: none; }
+.kw-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.kw-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--ink); color: var(--paper); border-radius: 6px; padding: 4px 10px; font-size: 13px; font-weight: 500; }
+.kw-chip button { background: none; border: none; color: inherit; cursor: pointer; padding: 0; line-height: 1; font-size: 14px; opacity: .7; }
+.kw-chip button:hover { opacity: 1; }
+/* Horizontal top-match strip */
+.top-strip { display: flex; gap: 14px; overflow-x: auto; padding: 4px 0 10px; margin: 0 0 24px; scrollbar-width: none; }
+.top-strip::-webkit-scrollbar { display: none; }
+.top-strip .tcard { flex: none; width: 270px; }
+.top-strip .tcard .tc-top { min-height: 130px; }
+.top-strip .tcard .tc-top small { font-size: 11px; letter-spacing: .02em; text-transform: uppercase; opacity: .6; }
+.top-strip .tcard .tc-top h3 { font-size: 16px; margin-top: 4px; }
+.top-strip .tcard .tc-foot { padding: 8px 8px 4px; }
+.top-strip .tcard .tc-foot .co { font-size: 12px; }
+/* Pass button on top cards */
+.top-strip .tcard .tc-foot .btn-pass { background: none; border: none; font-size: 13px; color: var(--muted); cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+.top-strip .tcard .tc-foot .btn-pass:hover { background: var(--surface-2); color: var(--ink); }
+/* All-applications table */
+.all-apps { margin-top: 8px; }
+.all-apps-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.all-apps-head h2 { font-size: 17px; font-weight: 600; margin: 0; }
+.all-apps-head .spacer { flex: 1; }
+.app-tabs { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; overflow-x: auto; }
+.app-tab { background: none; border: none; font-size: 13.5px; font-weight: 500; color: var(--muted); padding: 5px 12px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
+.app-tab[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+.app-tab .n { font-size: 12px; margin-left: 3px; opacity: .8; }
+.app-search-co { padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: var(--surface); color: var(--ink); width: 180px; flex-shrink: 0; }
+.app-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+.app-table thead th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line-2); }
+.app-table tbody tr { border-top: 1px solid var(--line-2); cursor: pointer; transition: background .1s; }
+.app-table tbody tr:first-child { border-top: 0; }
+.app-table tbody tr:hover { background: var(--surface-2); }
+.app-table td { padding: 11px 14px; font-size: 13.5px; vertical-align: middle; }
+.app-table .co-cell { display: flex; gap: 10px; align-items: center; }
+.app-table .co-av { width: 34px; height: 34px; border-radius: 8px; background: var(--cobalt); color: var(--cobalt-ink); font-size: 14px; font-weight: 700; display: grid; place-items: center; flex: none; text-transform: uppercase; }
+.app-table .co-av img { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; }
+.app-table .co-info b { display: block; font-size: 14px; font-weight: 600; line-height: 1.2; }
+.app-table .co-info span { font-size: 12.5px; color: var(--muted); }
+.app-table .res-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; }
+.app-table .res-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex: none; }
+.app-table .res-badge.none::before { background: var(--muted); }
+.app-table .res-badge.skip::before { background: var(--muted); }
+.status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.status-dot::before { content: ''; width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.status-dot.ok::before { background: var(--ok); }
+.status-dot.warn::before { background: var(--signal); }
+.status-dot.bad::before { background: var(--bad); }
+.status-dot.muted::before { background: var(--muted); }
+.app-table .time-col { color: var(--muted); font-size: 13px; white-space: nowrap; }
+/* job card (Browse) — add Save/Details row */
+.jc-acts { display: flex; gap: 8px; padding: 8px 12px 2px; border-top: 1px solid var(--line-2); }
+.jc-acts .btn { font-size: 12.5px; padding: 5px 10px; }
+
+/* ═══ Inline auto-apply status on job cards ════════════════════════════════ */
+.jc-foot .apply-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; white-space: nowrap; flex: 1; }
+.jc-foot .apply-status.queued  { background: var(--cobalt-soft); color: var(--cobalt); }
+.jc-foot .apply-status.working { background: var(--signal-soft); color: var(--signal-ink); }
+.jc-foot .apply-status.done    { background: var(--ok-soft);     color: var(--ok); }
+.jc-foot .apply-status.failed  { background: var(--bad-soft);    color: var(--bad); }
+.jc-foot .apply-status .spin   { display: inline-block; width: 10px; height: 10px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.row .apply-status { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; margin-left: 6px; }
+.row .apply-status.queued  { background: var(--cobalt-soft); color: var(--cobalt); }
+.row .apply-status.working { background: var(--signal-soft); color: var(--signal-ink); }
+.row .apply-status.done    { background: var(--ok-soft);     color: var(--ok); }
+.row .apply-status.failed  { background: var(--bad-soft);    color: var(--bad); }
+
 /* ═══ Responsive ════════════════════════════════════════════════════════════ */
 @media (max-width: 1180px) {
   .aa { grid-template-columns: 1fr; }
@@ -553,6 +650,55 @@ label.field small { color: var(--muted); font-weight: 400; }
 /* a long job title must not widen a column */
 .dash > *, .aa > *, .jobs > * { min-width: 0; }
 .dash > div, .aa > div { grid-template-columns: minmax(0, 1fr); }
+
+/* ═══ Tsenta-style shell + job cards ════════════════════════════════════════ */
+@media (min-width: 861px) {
+  .app { display: block; padding: 10px; }
+  .rail { height: auto; flex-direction: row; align-items: center; gap: 4px; padding: 8px 14px; border: 1px solid var(--line-2); border-radius: 20px; top: 10px; z-index: 40; }
+  .brand { padding: 0 14px 0 4px; }
+  .nav { display: flex; gap: 2px; }
+  .nav a { padding: 8px 14px; border-radius: 12px; font-size: 14.5px; }
+  .nav a svg { display: none; }
+  .nav a[aria-current="page"] { background: var(--cobalt-soft); color: var(--cobalt); }
+  .rail-foot { margin: 0 0 0 auto; display: flex; align-items: center; }
+  .rail-card { display: none !important; }
+  main { padding: 22px 22px 60px; }
+}
+.jobs { display: block; }
+.jobs .detail { display: none; }
+.jgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; }
+.jgrid .empty, .jgrid .more { grid-column: 1 / -1; }
+.jc { background: var(--surface); border: 1px solid var(--line-2); border-radius: 18px; padding: 6px; display: flex; flex-direction: column; cursor: pointer; }
+.jc:hover { box-shadow: 0 6px 20px #0001; }
+.jc .jc-top { position: relative; background: var(--tint); color: #111; border-radius: 14px 14px 0 0; padding: 16px 16px 10px; min-height: 190px; display: flex; flex-direction: column; gap: 8px; }
+.jc .jc-meta { font-size: 13px; opacity: .8; padding-right: 64px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.jc .jc-meta .rm { background: #2A805722; color: #1d6b45; border-radius: 6px; padding: 1px 7px; }
+.jc h3 { font-size: 21px; font-weight: 500; line-height: 1.2; margin-top: auto; }
+.jc .skills { display: flex; gap: 5px; overflow: hidden; max-height: 26px; flex-wrap: wrap; }
+.jc .skills span { background: #0000000f; border-radius: 999px; padding: 2px 10px; font-size: 12.5px; white-space: nowrap; }
+.jc .ring { position: absolute; top: 12px; right: 12px; width: 54px; height: 54px; }
+.jc .ring text { font: 700 12.5px var(--text); fill: #111; } .jc .ring .m { font: 500 9.5px var(--text); opacity: .6; }
+.jc .jc-bar { display: grid; grid-template-columns: 1fr 1fr; background: var(--tint); border-top: 1px solid #0000000d; border-radius: 0 0 14px 14px; filter: brightness(.97); }
+.jc .jc-bar button { border: 0; background: none; padding: 11px; font-size: 13.5px; color: #111; }
+.jc .jc-bar button:hover { background: #0000000d; }
+.jc .jc-foot { display: flex; align-items: center; gap: 8px; padding: 12px 10px 8px; }
+.jc .jc-foot .co { flex: 1; min-width: 0; display: flex; gap: 9px; align-items: center; font-weight: 600; font-size: 14.5px; line-height: 1.2; }
+.jc .av { flex: none; width: 30px; height: 30px; border-radius: 8px; background: var(--cobalt); color: var(--cobalt-ink); font-weight: 700; display: grid; place-items: center; }
+.jc .btn { border-radius: 999px; }
+.jc.link { cursor: pointer; }
+.jc.link .jc-top { --tint: #D6F5E3; }
+
+.modal-scrim { position: fixed; inset: 0; background: #0006; backdrop-filter: blur(4px); z-index: 90; display: grid; place-items: center; padding: 16px; }
+.modal { position: relative; background: var(--surface); border-radius: 18px; padding: 24px; width: min(480px, 100%); display: grid; gap: 10px; }
+.modal h2 { font-size: 21px; font-weight: 600; }
+.modal label { font-size: 13.5px; font-weight: 600; margin-top: 6px; }
+.modal label .muted { font-weight: 400; }
+.modal textarea { resize: vertical; }
+.lm-hint { background: #D6F5E3; color: #111; border-radius: 12px; padding: 14px; font-size: 14px; }
+.lm-row { display: flex; gap: 8px; } .lm-row input { flex: 1; min-width: 0; }
+.lm-ats { font-size: 13.5px; min-height: 20px; }
+.jc.link h3 { margin-top: 6px; }
+#view[data-review] .qitem .top{display:none}
 </style>
 </head>
 <body>
@@ -594,14 +740,21 @@ const state = {
   profile: null, profileSkills: null, apps: { counts: {}, applications: [] },
   search: store.get('search', { include: '', exclude: '', scope: 'title' }), saved: null, posted: store.get('posted', 30),
   feed: null, cursor: null, selected: null,
-  resumeProfiles: [], rp: null, fields: null, profileTab: 'details',
+  resumeProfiles: [], rp: null, fields: null, profileTab: 'details', routeSeq: 0, routeChain: Promise.resolve(),
 };
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 async function api(method, path, body) {
-  const res = await fetch(API + path, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+  // Reads retry through a busy database (5xx) or a dropped connection; writes never repeat.
+  let res;
+  for (let attempt = 0; ; attempt++) {
+    try { res = await fetch(API + path, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined }); }
+    catch (e) { if (method !== 'GET' || attempt >= 2) throw e; res = null; }
+    if (res && (res.status < 500 || method !== 'GET' || attempt >= 2)) break;
+    await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
+  }
   let data = null; try { data = await res.json(); } catch {}
   if (!res.ok && res.status !== 422) throw Object.assign(new Error(data?.error || data?.errors?.join(', ') || `Request failed (${res.status})`), { status: res.status, data });
   return { status: res.status, data };
@@ -658,6 +811,7 @@ async function loadApps() {
   $('#appliedCount').textContent = active ? String(active) : '';
   const needs = data.applications.filter(a => a.applyState === 'NEEDS_YOU' || a.applyState === 'NEEDS_REVIEW').length;
   $('#needsCount').textContent = needs ? String(needs) : '';
+  if ($('#appTbody')) drawDashApps(); // refresh dashboard table if visible
 }
 async function loadRailProfile() {
   try {
@@ -687,21 +841,31 @@ async function loadFeed({ append = false, limit = 25 } = {}) {
 }
 
 // ═══ Router ═════════════════════════════════════════════════════════════════
-const ROUTES = { dashboard: renderDashboard, jobs: renderJobs, browse: renderJobs, tracker: renderTracker, applied: renderApplied, 'auto-apply': renderAutoApply, profile: renderProfile };
+const ROUTES = { dashboard: renderDashboard, jobs: renderJobs, browse: renderJobs, tracker: renderTracker, applied: renderApplied, 'auto-apply': renderAutoApply, review: renderReview, profile: renderProfile };
 async function route() {
   const name = location.hash.replace(/^#\/?/, '').split(/[/?]/)[0] || 'dashboard';
   const view = ROUTES[name] ? name : 'dashboard';
-  const navKey = view === 'browse' ? 'jobs' : view;
+  const navKey = view === 'browse' ? 'jobs' : view === 'review' ? 'auto-apply' : view;
   $$('#nav a').forEach(a => { if (a.dataset.route === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   closeDrawer(true);
   state.selected = null;
+  const mine = ++state.routeSeq;
+  // Renders run one at a time and a superseded one never starts: a slow page finishing late
+  // would otherwise write into (or wipe) the elements of the page you moved on to.
+  const prev = state.routeChain;
+  let done; state.routeChain = new Promise(r => done = r);
+  await prev;
+  if (mine !== state.routeSeq) return done();
   try {
     if (!state.profile && view !== 'profile') await loadProfile();
-    if (!state.profile && view !== 'profile') { location.hash = '#/profile'; return; }
+    if (!state.profile && view !== 'profile') { location.hash = '#/profile'; return done(); }
+    delete $('#view').dataset.review;
     await ROUTES[view]();
   } catch (e) {
-    $('#view').innerHTML = `<div class="notice bad">This page couldn't load: ${esc(e.message)}. Check that the server is running and the database is migrated (npm run migrate).</div>`;
+    $('#view').innerHTML = `<div class="notice bad">This page couldn't load: ${esc(e.message)}. The server may be busy, so this is usually temporary. <button class="btn" id="retryRoute" type="button">Try again</button></div>`;
+    $('#retryRoute')?.addEventListener('click', route);
   }
+  done();
   loadRailProfile(); loadApps().catch(() => {});
   const jm = location.hash.match(/job=(\d+)/); if (jm) openJob(jm[1]);
 }
@@ -720,7 +884,8 @@ function searchHTML() {
   return `
   <form class="searchbar" id="searchForm" role="search">
     <select id="scope" aria-label="Search in"><option value="title">Titles</option><option value="title_description">Titles and descriptions</option><option value="description">Descriptions</option></select>
-    <input id="q" type="search" placeholder="Search roles or skills, or paste a job link" autocomplete="off" value="${esc(state.search.include)}" aria-label="Search" />
+    <input id="q" type="search" placeholder="Search roles or skills (separate several with |), or paste a job link" autocomplete="off" value="${esc(state.search.include)}" aria-label="Search" />
+    <button class="btn quiet" id="addTerm" type="button" title="Add another title or keyword (matches any)">+ Add</button>
     <button class="btn primary" type="submit">Search</button>
   </form>
   <div class="recent" id="recent" aria-label="Recent searches"></div>
@@ -735,9 +900,11 @@ function searchHTML() {
     ${pill('visa', p.needs_sponsorship ? 'Sponsors visas' : 'Visa', p.needs_sponsorship)}
     ${pill('clearance', p.exclude_clearance_jobs ? 'No clearance' : 'Clearance', p.exclude_clearance_jobs)}
     <span style="flex:1"></span>
+    <button class="btn sm quiet" id="checkRelevance" type="button">Check feed relevance</button>
     <button class="btn sm quiet" id="saveSearch" type="button">${state.saved ? 'Saved search on' : 'Save this search'}</button>
   </div>
-  <div id="searchMeta"></div>`;
+  <div id="searchMeta"></div>
+  <div id="relevance" aria-live="polite"></div>`;
 }
 // The titles and roles you search for are kept, with the filters you had on, so one click brings both back.
 const FILTER_KEYS = ['remote_only', 'preferred_workplace_types', 'preferred_employment_types', 'allowed_countries', 'max_experience_required', 'min_salary', 'salary_is_hard_constraint', 'exclude_clearance_jobs'];
@@ -759,7 +926,17 @@ async function applyRecent(r) {
     state.posted = r.f.posted; store.set('posted', state.posted);
     await savePrefs(r.f.prefs); await saveProfileField({ needs_sponsorship: r.f.visa });
   }
-  route();
+  // Handle post-OAuth redirect (?gmail=connected)
+(function() {
+  const p = new URLSearchParams(location.search);
+  if (p.get('gmail') === 'connected') {
+    history.replaceState(null, '', location.pathname + location.hash);
+    // Switch to settings tab after profile loads
+    setTimeout(() => { state.profileTab = 'settings'; route(); }, 200);
+    toast('Gmail connected successfully!');
+  }
+})();
+route();
 }
 function renderRecent() {
   const host = $('#recent'); if (!host) return;
@@ -774,6 +951,7 @@ function bindSearch(onChange) {
     if (/^https?:\/\//i.test(q)) return importLink(q, e.submitter);
     state.search = { include: $('#q').value, exclude: $('#ex').value, scope: $('#scope').value }; rememberSearch(); onChange();
   });
+  $('#addTerm').addEventListener('click', () => { const q = $('#q'); q.value = q.value.trim().replace(/\|$/, '').trim(); q.value += q.value ? ' | ' : ''; q.focus(); });
   renderRecent();
   $('#recent').addEventListener('click', e => {
     const x = e.target.closest('[data-rm]'); const go = e.target.closest('[data-i]');
@@ -851,7 +1029,64 @@ function zeroHTML(feed) {
   return `<div class="empty"><h3>No jobs in this window</h3>Widen the date range to see older postings.</div>`;
 }
 
+// ═══ Feed relevance ═════════════════════════════════════════════════════════
+const VERDICTS = {
+  GOOD: ['ok', 'Your feed looks strong.'], THIN: ['info', 'Few strong matches (65+).'],
+  WEAK: ['warn', 'Weak matches. Scores near 50 are a poor fit.'], EMPTY: ['warn', 'Nothing in your feed right now.'],
+};
+function cardHTML(j) {
+  return `<article class="jcard" data-job="${j.jobId}" tabindex="0">${score(j.matchScore)}<h4>${esc(j.title)}</h4>
+    <div class="sub"><b>${esc(j.company)}</b>${whereText(j) ? ' · ' + esc(whereText(j)) : ''}</div></article>`;
+}
+function relevanceHTML(r) {
+  const [cls, msg] = VERDICTS[r.verdict] || VERDICTS.EMPTY;
+  const fixes = r.counterfactuals.map((c, i) => `<div class="what-if"><span><b>${esc(c.label)}</b>: ${c.strong} strong match${c.strong === 1 ? '' : 'es'}, ${c.total} jobs, best ${c.best}%</span><button class="btn sm primary" data-fix="${i}" type="button">Apply</button></div>`).join('');
+  return `<div class="relevance"><h3>Feed relevance</h3>
+    <div class="notice ${cls}" style="margin:8px 0">${msg} ${r.strong} strong of ${r.total}, best ${r.best}%, median ${r.median}%.</div>
+    ${r.top.length ? `<div class="cards">${r.top.map(cardHTML).join('')}</div>` : ''}
+    ${fixes ? `<p class="muted" style="margin:10px 0 2px">What if you loosened one filter?</p>${fixes}` : ''}</div>`;
+}
+function bindRelevance(onChange) {
+  $('#checkRelevance').addEventListener('click', async e => {
+    const btn = e.target; btn.disabled = true; $('#relevance').innerHTML = '<div class="skeleton" style="height:120px;margin-top:14px"></div>';
+    try {
+      const { data: r } = await api('GET', `/users/${USER}/feed-relevance?${feedQuery()}`);
+      $('#relevance').innerHTML = relevanceHTML(r);
+      $('#relevance').onclick = async ev => {
+        const fix = ev.target.closest('[data-fix]'); const card = ev.target.closest('[data-job]');
+        if (card) return openJob(card.dataset.job);
+        if (!fix) return;
+        const { patch } = r.counterfactuals[Number(fix.dataset.fix)];
+        if (patch.prefs) await savePrefs(patch.prefs);
+        if ('visa' in patch) await saveProfileField({ needs_sponsorship: patch.visa });
+        if (patch.posted) { state.posted = patch.posted; store.set('posted', state.posted); }
+        toast('Filter loosened. Switch it back from the filter bar.'); onChange();
+      };
+    } catch (err) { $('#relevance').innerHTML = ''; toast(err.message); }
+    btn.disabled = false;
+  });
+}
+
 // ═══ Job rows ═══════════════════════════════════════════════════════════════
+const JTINTS = ['#FBE9D0', '#F5DCDD', '#DCEBFA', '#D6F5E3', '#E8E4FD', '#FFF1C9'];
+function jobCardHTML(j, i) {
+  const v = Math.max(0, Math.min(100, Math.round(j.matchScore || 0))), c = 2 * Math.PI * 22;
+  const wp = j.workplace && !['UNKNOWN', 'ONSITE'].includes(j.workplace) ? pretty(j.workplace) : '';
+  const sk = jobSkills(j).slice(0, 5).map(x => `<span>${esc(x)}</span>`).join('');
+  return `<article class="jc" data-job="${j.jobId}" tabindex="0" style="--tint:${JTINTS[i % JTINTS.length]}">
+    <div class="jc-top"><div class="jc-meta">${whereText(j) && !wp ? `<span>${esc(whereText(j))}</span>` : ''}${wp ? `<span class="rm">${wp}</span>` : ''}<span>${ago(j.postedAt || j.discovered)}</span>${j.scoreRebased ? '<span class="rm">Matches search</span>' : ''}</div>
+      <svg class="ring" viewBox="0 0 54 54" role="img" aria-label="${v}% match"><circle cx="27" cy="27" r="22" fill="none" stroke="#0002" stroke-width="3"/><circle cx="27" cy="27" r="22" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-dasharray="${(c * v / 100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 27 27)"/><text x="27" y="26" text-anchor="middle">${v}%</text><text class="m" x="27" y="37" text-anchor="middle">match</text></svg>
+      <h3>${esc(j.title)}</h3>${sk ? `<div class="skills">${sk}</div>` : ''}</div>
+    <div class="jc-acts"><button class="btn quiet sm" type="button" data-save="${j.jobId}">📋 Save</button><button class="btn quiet sm" type="button" data-jdetail="${j.jobId}">🔍 Details</button></div>
+    <div class="jc-foot" id="jcf-${j.jobId}"><span class="co"><i class="av">${esc((j.company || '?')[0].toUpperCase())}</i>${esc(j.company)}</span>
+      <button class="btn sm quiet" data-link="${j.jobId}" data-url="${esc(j.url || '')}" title="Open original posting" type="button">Link</button>
+      <button class="btn sm" data-pass="${j.jobId}" type="button">Pass</button><button class="btn sm primary" data-apply="${j.jobId}" type="button">Apply</button></div>
+  </article>`;
+}
+function linkCardHTML() {
+  return `<article class="jc link" data-addlink tabindex="0" role="button"><div class="jc-top"><div class="jc-meta">Workday, Greenhouse, Lever…</div><h3>Add your own link</h3><div class="jc-meta" style="padding:0">Paste a URL and optional job description</div></div>
+    <div class="jc-foot"><span class="co">Quick add<br/><span class="muted" style="font-weight:400">Any job board</span></span><button class="btn sm primary" type="button">+ Add</button></div></article>`;
+}
 function rowHTML(j, { compact = false } = {}) {
   const have = new Set(state.profileSkills || []);
   const skills = jobSkills(j); const hits = skills.filter(s => have.has(s.toLowerCase()));
@@ -869,6 +1104,7 @@ function rowHTML(j, { compact = false } = {}) {
     <div class="acts">
       <button class="icon-btn" data-pass="${j.jobId}" title="Not for me" aria-label="Pass on ${esc(j.title)}">${I.x(16)}</button>
       ${compact ? '' : `<button class="icon-btn" data-save="${j.jobId}" title="Save to tracker" aria-label="Save ${esc(j.title)}">${I.save(16)}</button>`}
+      ${j.url ? `<a class="btn sm quiet" href="${esc(j.url)}" target="_blank" rel="noopener" title="Open original posting">Link</a>` : ''}
       <button class="btn sm primary" data-apply="${j.jobId}">Apply</button>
     </div>
   </article>`;
@@ -876,14 +1112,20 @@ function rowHTML(j, { compact = false } = {}) {
 function bindRows(root) {
   const find = id => state.feed?.jobs.find(j => j.jobId === id) || { jobId: id };
   root.addEventListener('click', async e => {
-    const btn = e.target.closest('[data-pass],[data-apply],[data-save]');
+    if (e.target.closest('[data-jdetail]')) { openJob(e.target.closest('[data-jdetail]').dataset.jdetail); return; }
+    const btn = e.target.closest('[data-pass],[data-apply],[data-save],[data-link]');
     if (btn) {
       e.stopPropagation();
       const id = btn.dataset.pass || btn.dataset.apply || btn.dataset.save;
       try {
+        if (btn.dataset.link) { window.open(btn.dataset.url || `https://google.com/search?q=${encodeURIComponent(btn.closest('[data-job]')?.querySelector('h3')?.textContent||'')}`, '_blank', 'noopener'); return; }
         if (btn.dataset.pass) { await api('POST', `/users/${USER}/jobs/${id}/interactions`, { interaction_type: 'SKIP' }); removeRow(id); toast('Passed. This job won\'t come back.'); }
         if (btn.dataset.save) { await api('POST', `/users/${USER}/applications`, { jobId: id, status: 'SAVED' }); toast('Saved to your tracker.'); loadApps(); }
-        if (btn.dataset.apply) applyTo(find(id));
+        if (btn.dataset.apply) {
+          const rowEl = btn.closest('[data-job]');
+          const cardFoot = btn.closest('.jc-foot') || btn.closest('.jc')?.querySelector('.jc-foot') || null;
+          applyTo(find(id), { cardFoot, rowEl });
+        }
       } catch (err) { toast(err.message); }
       return;
     }
@@ -900,26 +1142,127 @@ function removeRow(id) {
   if (state.feed) state.feed.jobs = state.feed.jobs.filter(j => j.jobId !== id);
   if (state.selected === id) { state.selected = null; const d = $('#detail'); if (d) d.innerHTML = detailEmpty(); }
 }
-async function applyTo(job) {
-  if (job.url) window.open(job.url, '_blank', 'noopener');
-  await api('POST', `/users/${USER}/applications`, { jobId: job.jobId, status: 'APPLIED' });
-  removeRow(job.jobId);
-  toast('Posting opened and marked as applied.');
+// ─── Live-status tracker for in-flight auto-apply jobs ─────────────────────
+const _applyPollers = new Map(); // jobId → intervalId
+function _applyStatus(jobId, appId, cardFoot, rowEl) {
+  const LABELS = {
+    QUEUED:      ['queued',  '<span class="spin"></span> Tailoring resume…'],
+    PREPARED:    ['working', '<span class="spin"></span> Opening the form…'],
+    SUBMITTING:  ['working', '<span class="spin"></span> Filling form…'],
+    NEEDS_REVIEW:['working', '👀 Ready: review &amp; submit'],
+    NEEDS_YOU:   ['failed',  '🛑 Needs your input'],
+    SUBMITTED:   ['done',    '✅ Applied!'],
+    FAILED:      ['failed',  '❌ Failed: see Applications'],
+    SKIPPED:     ['done',    'Skipped'],
+  };
+  const render = state => {
+    const [cls, text] = LABELS[state] || ['queued', state];
+    const badge = `<span class="apply-status ${cls}">${text}</span>`;
+    if (cardFoot) {
+      // replace Apply btn with badge, keep Pass btn
+      const applyBtn = cardFoot.querySelector('[data-apply]');
+      if (applyBtn) applyBtn.replaceWith(Object.assign(document.createElement('span'), { className: `apply-status ${cls}`, innerHTML: text }));
+      else { const s = cardFoot.querySelector('.apply-status'); if (s) { s.className = `apply-status ${cls}`; s.innerHTML = text; } }
+    }
+    if (rowEl) {
+      const acts = rowEl.querySelector('.acts');
+      if (acts) {
+        const old = acts.querySelector('.apply-status'); if (old) old.remove();
+        const s = document.createElement('span'); s.className = `apply-status ${cls}`; s.innerHTML = text;
+        acts.appendChild(s);
+        const applyBtn = acts.querySelector('[data-apply]'); if (applyBtn) applyBtn.remove();
+      }
+    }
+  };
+  render('QUEUED');
+  const startedAt = Date.now();
+  const poll = async () => {
+    try {
+      const { data } = await api('GET', `/users/${USER}/applications/${appId}`);
+      const s = data?.applyState;
+      render(s || 'QUEUED');
+      if (['SUBMITTED','FAILED','SKIPPED','NEEDS_YOU','NEEDS_REVIEW'].includes(s) || Date.now() - startedAt > 10 * 60_000) {
+        clearInterval(_applyPollers.get(jobId)); _applyPollers.delete(jobId);
+        if (s === 'SUBMITTED') removeRow(jobId);
+        if (s === 'NEEDS_REVIEW') toast('Form filled. Review and submit it under Applications → Needs you.');
+        if (s === 'FAILED') toast(data.applyDetail?.reason || 'That application failed.');
+        loadApps();
+      }
+    } catch { /* network blip, keep polling */ }
+  };
+  const id = setInterval(poll, 2500);
+  _applyPollers.set(jobId, id);
+  setTimeout(poll, 400); // first check soon
+}
+
+async function applyTo(job, { cardFoot = null, rowEl = null } = {}) {
+  // Create application record
+  const { data: created } = await api('POST', `/users/${USER}/applications`, { jobId: job.jobId, status: 'SAVED' });
+  const appId = created?.id;
+  if (!appId) { toast('Could not start application.'); return; }
+
+  // Start live status badge
+  _applyStatus(job.jobId, appId, cardFoot, rowEl);
+
+  // The server tailors, fills the form and stops for your review; the badge just follows its state.
+  api('POST', `/users/${USER}/applications/${appId}/apply`, {})
+    .catch(err => { toast(err.message); loadApps(); });
+
   loadApps();
 }
-async function importLink(url, button) {
+async function importLink(url, button, description = '') {
   const label = button?.textContent; if (button) { button.disabled = true; button.textContent = 'Checking link…'; }
   try {
-    const res = await fetch(`${API}/jobs/import`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+    const res = await fetch(`${API}/jobs/import`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, description }) });
     const data = await res.json();
     if (data.jobId) {
       toast(data.company?.added ? `Job added. ${data.company.name} will now be scanned automatically.` : 'Job added.');
       if ($('#q')?.value.trim() === url) $('#q').value = '';
-      if ($('#addLinkInput')?.value.trim() === url) $('#addLinkInput').value = '';
       openJob(data.jobId);
-    } else toast(data.message || 'That link couldn\'t be added.');
+      return true;
+    }
+    toast(data.message || 'That link couldn\'t be added.');
+    if (data.code === 'PAGE_UNREADABLE' && !$('#linkModal')) openLinkModal(url);
   } catch (err) { toast(err.message); }
   finally { if (button) { button.disabled = false; button.textContent = label; } }
+  return false;
+}
+// "Add your own link": paste a job URL from any board, optionally fetch or paste its description.
+function openLinkModal(url = '') {
+  $('#linkModal')?.remove();
+  const el = document.createElement('div'); el.id = 'linkModal'; el.className = 'modal-scrim';
+  el.innerHTML = `<form class="modal" role="dialog" aria-modal="true" aria-labelledby="lmT">
+    <button class="icon-btn" type="button" data-x aria-label="Close" style="position:absolute;top:14px;right:14px">${I.x(16)}</button>
+    <h2 id="lmT">Add your own link</h2>
+    <div class="lm-hint">Paste the URL of the job page, from any job board.</div>
+    <label for="lmUrl">Job URL</label>
+    <div class="lm-row"><input id="lmUrl" type="url" required placeholder="https://…" value="${esc(url)}"/><button class="btn" type="button" id="lmFetch">Fetch JD</button></div>
+    <label for="lmJd">Job description <span class="muted">(click “Fetch JD”, or paste it here)</span></label>
+    <textarea id="lmJd" rows="6" placeholder="Click 'Fetch JD' above, or paste the job description here as a fallback."></textarea>
+    <div class="lm-ats muted" id="lmAts" aria-live="polite"></div>
+    <button class="btn primary" type="submit" id="lmGo" style="width:100%;padding:12px">Add job</button></form>`;
+  document.body.appendChild(el);
+  const u = $('#lmUrl', el), jd = $('#lmJd', el), ats = $('#lmAts', el);
+  const detect = async () => {
+    if (!/^https?:\/\//i.test(u.value)) { ats.textContent = ''; return; }
+    try { const r = await (await fetch(`${API}/jobs/import/check?url=${encodeURIComponent(u.value)}`)).json(); ats.textContent = r.supported ? `${pretty(r.ats)} detected` : (r.ats ? `${pretty(r.ats)} detected` : 'Reading the job page directly'); } catch { ats.textContent = ''; }
+  };
+  const close = () => el.remove();
+  el.addEventListener('click', e => { if (e.target === el || e.target.closest('[data-x]')) close(); });
+  el.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  u.addEventListener('change', detect); detect(); u.focus();
+  $('#lmFetch', el).addEventListener('click', async e => {
+    const b = e.target; if (!u.reportValidity()) return; b.disabled = true; b.textContent = 'Fetching…';
+    try {
+      const res = await fetch(`${API}/jobs/import/preview`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: u.value }) });
+      const d = await res.json();
+      if (d.ok) { jd.value = d.description; ats.textContent = `${d.ats ? pretty(d.ats) + ' · ' : ''}${d.title}${d.company ? ' at ' + d.company : ''}`; } else toast(d.message || 'Couldn\'t read that page.');
+    } catch (err) { toast(err.message); }
+    b.disabled = false; b.textContent = 'Fetch JD';
+  });
+  el.firstElementChild.addEventListener('submit', async e => {
+    e.preventDefault(); if (await importLink(u.value.trim(), $('#lmGo', el), jd.value.trim())) close();
+  });
 }
 
 // ═══ Job detail (pane on wide screens, drawer otherwise) ═════════════════════
@@ -941,6 +1284,15 @@ async function openJob(jobId) {
   host.scrollTop = 0;
   bindDetail(host, data, jobId);
   if (!pane) host.querySelector('[data-close]')?.focus();
+}
+// Years of experience: the structured field wins; otherwise the first "N+ years ... experience" in the description.
+function experienceText(j) {
+  const { min, max } = j.experience || {};
+  if (min != null) return { text: max != null && max > min ? `${min}–${max} years` : `${min}+ years` };
+  const m = /(\d{1,2})\s*(?:(?:-|–|to)\s*(\d{1,2}))?\s*\+?\s*(?:years?|yrs?)\b[^.\n]{0,60}?experience|experience[^.\n]{0,40}?(\d{1,2})\s*(?:(?:-|–|to)\s*(\d{1,2}))?\s*\+?\s*(?:years?|yrs?)\b/i.exec(j.description || '');
+  if (!m) return null;
+  const a = m[1] ?? m[3], b = m[2] ?? m[4];
+  return { text: b ? `${a}–${b} years` : `${a}+ years`, fromDescription: true };
 }
 function jobDetailHTML(data, jobId, inDrawer) {
   const j = data.job, m = data.match;
@@ -980,7 +1332,7 @@ function jobDetailHTML(data, jobId, inDrawer) {
       <section class="jd-sec"><h4>The role</h4><dl class="facts">
         ${fact('Pay', money(j.salary) || 'Not posted')}${fact('Workplace', j.workplace && j.workplace !== 'UNKNOWN' ? pretty(j.workplace) : 'Not stated')}
         ${fact('Level', j.seniority && j.seniority !== 'UNKNOWN' ? pretty(j.seniority) : (j.experience?.min != null ? `${j.experience.min}+ years` : 'Not stated'))}${fact('Job type', j.employmentType && j.employmentType !== 'UNKNOWN' ? pretty(j.employmentType) : 'Not stated')}
-        ${fact('Field', pretty(j.roleFamily) || 'Not classified')}<div><dt>Visa sponsorship</dt><dd><span class="tag ${visa[0]}">${visa[1]}</span></dd></div></dl></section>
+        ${fact('Experience required', (e => e ? e.text + (e.fromDescription ? ' (from description)' : '') : 'Not stated')(experienceText(j)))}${fact('Field', pretty(j.roleFamily) || 'Not classified')}<div><dt>Visa sponsorship</dt><dd><span class="tag ${visa[0]}">${visa[1]}</span></dd></div></dl></section>
       ${openings ? `<section class="jd-sec"><h4>${openings.length} openings for this role</h4><div class="openings">${openings.map(o => `<div><span>${esc(o.locationText || 'Location not stated')}${o.current ? ' <span class="tag cobalt">Viewing</span>' : ''}</span>${o.current ? '' : `<button class="btn sm quiet" data-sib="${o.jobId}">Open</button>`}</div>`).join('')}</div></section>` : ''}
       ${req.length ? `<section class="jd-sec"><h4>Required skills</h4><div class="chips">${req.map(chip).join('')}</div></section>` : ''}
       ${other.length ? `<section class="jd-sec"><h4>${req.length ? 'Also mentioned' : 'Skills mentioned'}</h4><div class="chips">${other.map(chip).join('')}</div></section>` : ''}
@@ -1005,32 +1357,177 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawe
 // ═══ Dashboard ══════════════════════════════════════════════════════════════
 const STATUSES = [['SAVED', 'Saved'], ['APPLIED', 'Applied'], ['GHOSTED', 'No reply'], ['INTERVIEWING', 'Interviewing'], ['OFFER', 'Offer'], ['REJECTED', 'Rejected']];
 const STATUS_LABEL = Object.fromEntries(STATUSES);
+const TINTS = ['#FFF1C9', '#D6F5E3', '#E8E4FD', '#FFE1DC'];
+function topCardHTML(j, i) {
+  const v = Math.max(0, Math.min(100, Math.round(j.matchScore || 0))), c = 2 * Math.PI * 19;
+  const where = j.workplace === 'REMOTE' ? 'Remote' : j.locationText ? esc(j.locationText.split(',')[0]) : '';
+  const sk = jobSkills(j).slice(0, 3).map(x => `<span class="tag" style="font-size:11px">${esc(x)}</span>`).join('');
+  return `<article class="tcard" data-job="${j.jobId}" tabindex="0">
+    <div class="tc-top" style="--tint:${TINTS[i % TINTS.length]}">
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">${where ? `<span style="font-size:11px;opacity:.7">${where}</span>` : ''}<span style="font-size:11px;opacity:.55;margin-left:auto">${ago(j.postedAt || j.discovered)}</span></div>
+      <h3>${esc(j.title)}</h3>
+      ${sk ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">${sk}</div>` : ''}
+      <svg class="ring" viewBox="0 0 46 46" role="img" aria-label="${v}% match"><circle cx="23" cy="23" r="19" fill="none" stroke="#0002" stroke-width="3.5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#111" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${(c * v / 100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 23 23)"/><text x="23" y="27" text-anchor="middle" style="font:700 12px var(--text);fill:#111">${v}%</text></svg>
+    </div>
+    <div class="tc-foot">
+      <span class="co"><i class="av">${esc((j.company || '?')[0].toUpperCase())}</i>${esc(j.company)}</span>
+      <button class="btn-pass" data-pass="${j.jobId}" type="button">Pass</button>
+      <button class="btn sm primary" data-apply="${j.jobId}" type="button">Apply</button>
+    </div>
+  </article>`;
+}
+// Dashboard app-table state
+const _dashTab = { active: 'all', q: '' };
+const _DASH_TABS = [
+  ['all', 'All'], ['APPLIED', 'Submitted'], ['in_flight', 'In flight'],
+  ['needs_you', 'Needs you'], ['FAILED', 'Failed'], ['SKIPPED', 'Skipped']
+];
+
 async function renderDashboard() {
-  const first = (state.profile?.full_name || '').split(' ')[0];
   const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'}${first ? `, ${esc(first)}` : ''}</h1><p id="dashLine">Finding your best matches…</p></div></div>
-    <form class="searchbar" id="dashSearch" role="search" style="margin-bottom:22px"><input id="dq" type="search" placeholder="Search roles or skills, or paste a job link" aria-label="Search jobs"/><button class="btn primary" type="submit">Search</button></form>
-    <div class="dash">
-      <section class="panel"><div class="panel-head"><h2>Best matches right now</h2><span class="spacer"></span><a class="btn sm quiet" href="#/jobs">See all jobs</a></div>
-        <div class="list" id="top">${'<div style="padding:16px 18px"><div class="skeleton" style="height:52px"></div></div>'.repeat(4)}</div></section>
-      <div style="display:grid;gap:22px">
-        <section class="panel"><div class="panel-head"><h2>Applications</h2><span class="spacer"></span><a class="btn sm quiet" href="#/tracker">Open tracker</a></div><div class="panel-body" id="pipe"></div></section>
-        <section class="panel" id="profilePanel"></section>
+    <div class="page-head" style="margin-bottom:12px"><div><h1>${greet}</h1></div></div>
+    <div class="dash-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="dq" type="search" placeholder="Search roles or skills, or paste a job link" aria-label="Search jobs"/>
+    </div>
+    <div class="kw-chips" id="kwChips"></div>
+    <div class="tm-head" style="margin-bottom:8px">
+      <h2>Top job matches</h2>
+      <span class="spacer"></span>
+      <button class="btn sm quiet" id="addOwnLink" type="button">+ Add your own</button>
+      <a class="btn sm quiet" href="#/jobs">Browse jobs</a>
+    </div>
+    <div class="top-strip" id="top">${'<div class="skeleton" style="height:200px;width:220px;border-radius:16px;flex:none"></div>'.repeat(5)}</div>
+    <div class="all-apps">
+      <div class="all-apps-head">
+        <h2>All applications</h2>
+        <span class="spacer"></span>
+        <a class="btn sm quiet" href="#/tracker">Open tracker</a>
+        <button class="btn sm" id="approveAllBtn" type="button" style="opacity:.5" disabled>✓ Approve all</button>
       </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <div class="app-tabs" id="appTabs" style="flex:1;min-width:0">${_DASH_TABS.map(([k, l]) => `<button class="app-tab" data-tab="${k}" aria-selected="${_dashTab.active === k}">${l}<span class="n" id="tn-${k}"></span></button>`).join('')}</div>
+        <input class="app-search-co" id="appCoSearch" type="search" placeholder="🔍 Search company" value="${esc(_dashTab.q)}" style="flex-shrink:0;width:160px">
+      </div>
+      <table class="app-table"><thead><tr><th>Company</th><th>Resume</th><th>Status</th><th>Applied</th></tr></thead>
+      <tbody id="appTbody"><tr><td colspan="4"><div class="skeleton" style="height:48px;border-radius:0"></div></td></tr></tbody></table>
+      <div id="appMore"></div>
     </div>`;
-  $('#dashSearch').addEventListener('submit', e => {
-    e.preventDefault(); const q = $('#dq').value.trim(); if (!q) { location.hash = '#/jobs'; return; }
-    if (/^https?:\/\//i.test(q)) return importLink(q, e.submitter);
+
+  // Search submit
+  $('#dq').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const q = e.target.value.trim(); if (!q) return;
+    if (/^https?:\/\//i.test(q)) return importLink(q, null);
     state.search = { include: q, exclude: '', scope: 'title' }; location.hash = '#/jobs';
   });
+  $('#addOwnLink')?.addEventListener('click', () => openLinkModal());
+
+  // Tab switching
+  $$('.app-tab').forEach(b => b.addEventListener('click', () => {
+    _dashTab.active = b.dataset.tab; _dashTab.q = ''; $('#appCoSearch').value = '';
+    $$('.app-tab').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+    drawDashApps();
+  }));
+  $('#appCoSearch').addEventListener('input', e => { _dashTab.q = e.target.value; drawDashApps(); });
+
   bindRows($('#top'));
   await Promise.all([ensureSkills(), loadApps(), loadRailProfile()]);
-  renderPipeline(); renderProfilePanel();
+  drawDashApps();
+
+  // Keyword chips from search state
+  const renderChips = () => {
+    const words = (state.search?.include || '').split('|').map(x => x.trim()).filter(Boolean);
+    $('#kwChips').innerHTML = words.length
+      ? words.map(w => `<span class="kw-chip">${esc(w)}<button data-rm="${esc(w)}" aria-label="Remove ${esc(w)}">×</button></span>`).join('')
+      : '';
+    $$('.kw-chip button', $('#kwChips')).forEach(b => b.addEventListener('click', () => {
+      const words2 = (state.search?.include || '').split('|').map(x => x.trim()).filter(Boolean);
+      state.search = { ...state.search, include: words2.filter(x => x !== b.dataset.rm).join(' | ') };
+      renderChips();
+    }));
+  };
+  renderChips();
+
+  // Load and render top job cards
   const feed = await loadFeed({ limit: 6 });
-  const strong = feed.jobs.filter(j => j.matchScore >= 80).length;
-  $('#dashLine').textContent = feed.total ? `${feed.total} jobs fit your profile${strong ? `, and ${strong} of the top ${feed.jobs.length} are strong matches` : ''}.` : 'No matching jobs yet. Widen your filters or add more skills.';
-  $('#top').innerHTML = feed.jobs.length ? feed.jobs.map(j => rowHTML(j, { compact: true })).join('') : zeroHTML(feed);
+  $('#top').innerHTML = feed.jobs.length ? feed.jobs.slice(0, 5).map(topCardHTML).join('') : zeroHTML(feed);
+}
+
+const _AP_STATUS_DOT = {
+  APPLIED: ['ok', 'Submitted'], SUBMITTED: ['ok', 'Submitted'],
+  in_flight: ['warn', 'In flight'], QUEUED: ['warn', 'Queued'], SUBMITTING: ['warn', 'Filling form…'], PREPARED: ['warn', 'Tailoring resume…'],
+  NEEDS_YOU: ['bad', 'Needs you'], NEEDS_REVIEW: ['bad', 'Review needed'],
+  FAILED: ['bad', 'Application failed'],
+  SKIPPED: ['muted', 'Skipped'], SAVED: ['muted', 'Saved'],
+};
+function _apStatusDot(a) {
+  const st = a.applyState || a.status;
+  const [cls, label] = _AP_STATUS_DOT[st] || ['muted', pretty(st || 'Unknown')];
+  return `<span class="status-dot ${cls}">${esc(label)}</span>`;
+}
+function _apResBadge(a) {
+  if (!a.resumeProfile) return `<span class="res-badge none">—</span>`;
+  if (a.status === 'SKIPPED' || a.applyState === 'SKIPPED') return `<span class="res-badge skip">Skipped</span>`;
+  return `<span class="res-badge">Ready</span>`;
+}
+
+function drawDashApps() {
+  const tbody = $('#appTbody'); if (!tbody) return;
+  const { applications, counts } = state.apps || {};
+  const allApps = applications || [];
+
+  // Update tab counts
+  const submitted = allApps.filter(a => a.status === 'APPLIED').length;
+  const inFlight  = allApps.filter(a => ['QUEUED','PREPARED','SUBMITTING'].includes(a.applyState)).length;
+  const needsYou  = allApps.filter(a => ['NEEDS_YOU','NEEDS_REVIEW'].includes(a.applyState)).length;
+  const failed    = allApps.filter(a => a.applyState === 'FAILED' || (a.status !== 'APPLIED' && a.applyState === 'FAILED')).length;
+  const skipped   = allApps.filter(a => a.status === 'SKIPPED' || a.applyState === 'SKIPPED').length;
+  const tabCounts = { all: allApps.length, APPLIED: submitted, in_flight: inFlight, needs_you: needsYou, FAILED: failed, SKIPPED: skipped };
+  _DASH_TABS.forEach(([k]) => { const el = $(`#tn-${k}`); if (el) el.textContent = tabCounts[k] ? ` ${tabCounts[k]}` : ''; });
+
+  // Approve all: submit everything that's filled and waiting for your OK
+  const approveBtn = $('#approveAllBtn');
+  const toReview = allApps.filter(a => a.applyState === 'NEEDS_REVIEW');
+  if (approveBtn) {
+    approveBtn.disabled = !toReview.length; approveBtn.style.opacity = toReview.length ? '1' : '.4';
+    approveBtn.textContent = toReview.length ? `✓ Submit all ${toReview.length}` : '✓ Submit all';
+    approveBtn.onclick = async () => {
+      approveBtn.disabled = true;
+      for (const a of toReview) await api('POST', `/users/${USER}/applications/${a.id}/approve`, {}).catch(err => toast(err.message));
+      toast(`Submitting ${toReview.length}…`); loadApps();
+    };
+  }
+  // Something is filling a form right now: look again shortly so it moves to the next list by itself.
+  clearTimeout(state.appsTimer);
+  if (inFlight) state.appsTimer = setTimeout(() => { if ($('#appTbody')) loadApps(); }, 4000);
+
+  // Filter
+  let rows = allApps;
+  if (_dashTab.active === 'APPLIED')    rows = allApps.filter(a => a.status === 'APPLIED');
+  if (_dashTab.active === 'in_flight')  rows = allApps.filter(a => ['QUEUED','PREPARED','SUBMITTING'].includes(a.applyState));
+  if (_dashTab.active === 'needs_you')  rows = allApps.filter(a => ['NEEDS_YOU','NEEDS_REVIEW'].includes(a.applyState));
+  if (_dashTab.active === 'FAILED')     rows = allApps.filter(a => a.applyState === 'FAILED');
+  if (_dashTab.active === 'SKIPPED')    rows = allApps.filter(a => a.status === 'SKIPPED' || a.applyState === 'SKIPPED');
+  if (_dashTab.q) rows = rows.filter(a => (a.job?.company || a.company || '').toLowerCase().includes(_dashTab.q.toLowerCase()));
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="4" class="muted" style="padding:24px;text-align:center">No applications here yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.slice(0, 50).map(a => {
+    const co = a.job?.company || a.company || 'Unknown';
+    const title = a.job?.title || a.title || '';
+    return `<tr data-app="${a.id}" style="cursor:pointer">
+      <td><div class="co-cell"><div class="co-av">${esc(co[0] || '?')}</div><div class="co-info"><b>${esc(co)}</b><span>${esc(title)}</span></div></div></td>
+      <td>${_apResBadge(a)}</td>
+      <td>${_apStatusDot(a)}</td>
+      <td class="time-col">${ago(a.appliedAt || a.updatedAt || a.createdAt)}</td>
+    </tr>`;
+  }).join('');
+  $$('#appTbody tr[data-app]').forEach(r => r.addEventListener('click', () => openApplication(r.dataset.app)));
 }
 function renderPipeline() {
   const host = $('#pipe'); if (!host) return;
@@ -1059,23 +1556,37 @@ async function renderJobs() {
     <div class="jobs">
       <div>
         ${searchHTML()}
-        <form class="addlink" id="addLinkForm"><label for="addLinkInput">Found a job elsewhere?</label><input id="addLinkInput" type="url" placeholder="Paste its link to add it" required/><button class="btn sm" type="submit">Add job</button></form>
-        <div class="list" id="list" style="margin-top:14px">${'<div style="padding:18px"><div class="skeleton" style="height:60px"></div></div>'.repeat(6)}</div>
+        <div class="jgrid" id="list">${'<div class="skeleton" style="height:200px;border-radius:var(--r-md)"></div>'.repeat(6)}</div>
       </div>
       <aside class="detail" id="detail" aria-label="Job details">${detailEmpty()}</aside>
     </div>`;
   bindSearch(() => renderJobs());
-  $('#addLinkForm').addEventListener('submit', e => { e.preventDefault(); importLink($('#addLinkInput').value.trim(), e.submitter); });
+  bindRelevance(() => renderJobs());
+  $('#list').addEventListener('click', e => { if (e.target.closest('[data-addlink]')) openLinkModal(); });
   bindRows($('#list'));
   await ensureSkills();
   const draw = feed => {
     $('#searchMeta').innerHTML = searchMetaHTML(feed);
     $('#clearSearch')?.addEventListener('click', () => { state.search = { include: '', exclude: '', scope: state.search.scope }; renderJobs(); });
     $('#jobsLine').textContent = feed.total ? `${feed.total} jobs, best fit first.` : 'Ranked by how well they fit your profile.';
-    $('#list').innerHTML = feed.jobs.length ? feed.jobs.map(j => rowHTML(j)).join('') + (feed.nextCursor ? `<div class="more"><button class="btn" id="loadMore" type="button">Show more jobs</button></div>` : '') : zeroHTML(feed);
-    $('#loadMore')?.addEventListener('click', async e => { e.target.disabled = true; draw(await loadFeed({ append: true })); });
+    $('#list').innerHTML = linkCardHTML() + (feed.jobs.length ? feed.jobs.map(jobCardHTML).join('') + (feed.nextCursor ? `<div class="more" id="sentinel"><span class="muted">Loading more jobs…</span></div>` : '') : zeroHTML(feed));
+    watch.disconnect(); if ($('#sentinel')) watch.observe($('#sentinel'));
   };
-  draw(await loadFeed());
+  // Cards are added as you scroll: 30 first, then 30 more each time the end comes into view.
+  let busy = false;
+  const watch = new IntersectionObserver(async ([e]) => {
+    if (!e.isIntersecting || busy) return; busy = true;
+    try {
+      const before = state.feed.jobs.length, f = await loadFeed({ append: true, limit: 30 });
+      $('#sentinel')?.insertAdjacentHTML('beforebegin', f.jobs.slice(before).map((j, i) => jobCardHTML(j, before + i)).join(''));
+      if (!f.nextCursor) { $('#sentinel')?.remove(); watch.disconnect(); }
+    } catch (err) { toast(err.message); }
+    busy = false;
+  }, { rootMargin: '600px' });
+  // If we have a cached feed (from a previous visit this session), render it now
+  // so the page is instantly populated while the network request completes.
+  if (state.feed?.jobs?.length) draw(state.feed);
+  draw(await loadFeed({ limit: 30 }));
   const pane = $('#detail');
   if (state.feed.jobs[0] && pane && getComputedStyle(pane).display !== 'none' && !/job=/.test(location.hash)) openJob(state.feed.jobs[0].jobId);
 }
@@ -1158,7 +1669,8 @@ const APPLY_STATE = {
   QUEUED: ['wait', 'Queued'], PREPARED: ['wait', 'Ready to send'], SUBMITTING: ['wait', 'Sending'], NEEDS_REVIEW: ['review', 'Waiting for your OK'],
   NEEDS_YOU: ['you', 'Needs you'], SUBMITTED: ['sent', 'Sent'], FAILED: ['you', "Couldn't send"], SKIPPED: ['off', 'Skipped'],
 };
-const applyBadge = st => { const [c, l] = APPLY_STATE[st] || ['off', pretty(st)]; return `<span class="badge ${c}">${esc(l)}</span>`; };
+const _SPIN = '<span style="display:inline-block;width:9px;height:9px;border:1.5px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:3px"></span>';
+const applyBadge = st => { const [c, l] = APPLY_STATE[st] || ['off', pretty(st)]; const spin = c === 'wait' ? _SPIN : ''; return `<span class="badge ${c}">${spin}${esc(l)}</span>`; };
 function eventText(e) {
   if (e.kind === 'note') return 'Notes edited';
   if (e.kind === 'resume') return `Resume tailored${e.detail?.profile ? ` from "${e.detail.profile}"` : ''}`;
@@ -1188,12 +1700,13 @@ async function openApplication(appId) {
         ${j.jobId && !j.removed ? `<button class="btn" data-job="${j.jobId}">Job details and match</button>` : ''}
         ${j.url ? `<a class="btn quiet" href="${esc(j.url)}" target="_blank" rel="noopener">${I.ext(15)} View posting</a>` : ''}
         ${a.hasTailoredResume ? `<a class="btn quiet" href="${resumeUrl(a.id, true, true)}" download>Download resume</a>` : `<button class="btn quiet" data-tailor-app>Tailor resume</button>`}
-        ${a.applyState === 'NEEDS_YOU' || a.applyState === 'NEEDS_REVIEW' ? `<a class="btn primary" href="#/auto-apply">Answer in Auto-apply</a>` : ''}
         <label class="move">Status <select id="appStatus">${STATUSES.map(([v, l]) => `<option value="${v}" ${v === a.status ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       </div>
       ${j.removed && a.source !== 'tsenta' ? `<div class="notice warn" style="margin-bottom:0">The posting has been taken down. What you applied to is kept below.</div>` : ''}
     </div>
     <div class="jd-body">
+      ${['NEEDS_YOU', 'NEEDS_REVIEW', 'FAILED'].includes(a.applyState) ? `<div id="drawerQueue" style="margin-bottom:14px">${queueItemHTML(a)}</div>` : ''}
+      ${['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState) ? `<div class="notice info" id="drawerBusy">${a.applyState === 'SUBMITTING' ? 'Filling in the form…' : 'Getting this ready…'} This page updates by itself.</div>` : ''}
       <section class="jd-sec"><h4>History</h4><ul class="events">${a.events.map(e => `<li>${esc(eventText(e))}<small>${new Date(e.at).toLocaleString()}</small></li>`).join('') || '<li>Tracked</li>'}</ul></section>
       ${rep ? `<section class="jd-sec"><h4>Resume ${a.applyState === 'SUBMITTED' || a.status === 'APPLIED' ? 'sent' : 'for this job'}${a.resumeProfileName ? ` · ${esc(a.resumeProfileName)} profile` : ''}</h4>${tailorReportHTML(rep, a.id)}</section>` : ''}
       ${!rep && a.tailoredResume?.sections ? `<section class="jd-sec"><h4>Resume sent${a.source === 'tsenta' ? ', written by Tsenta' : ''}</h4>
@@ -1206,6 +1719,9 @@ async function openApplication(appId) {
       <section class="jd-sec"><h4>The posting${snap.importedFrom === 'tsenta' ? ' <span class="muted" style="font-weight:400;font-size:13px">from your Tsenta history</span>' : snap.capturedAt ? ` <span class="muted" style="font-weight:400;font-size:13px">as saved ${ago(snap.capturedAt)}</span>` : ''}</h4><div class="desc">${esc(snap.description || 'No description was saved for this job.')}</div></section>
     </div>`;
   host.scrollTop = 0;
+  state.openApp = a.id;
+  const q = host.querySelector('#drawerQueue .qitem'); if (q) bindQueueItem(q);
+  host.querySelector('#drawerBusy') && setTimeout(() => { if (state.openApp === a.id && $('#drawer').classList.contains('open')) openApplication(a.id); }, 4000);
   host.querySelector('[data-close]').addEventListener('click', () => closeDrawer());
   host.querySelector('[data-close]').focus();
   host.querySelector('[data-job]')?.addEventListener('click', () => openJob(j.jobId));
@@ -1332,11 +1848,12 @@ async function loadApplied(append = false) {
 // ═══ Auto-apply ═════════════════════════════════════════════════════════════
 const POSTED_OPTS = [[3, 'Past 3 days'], [7, 'Past week'], [14, 'Past 2 weeks'], [30, 'Past month']];
 async function renderAutoApply() {
-  const [{ data: aa }, { data: list }] = await Promise.all([api('GET', `/users/${USER}/auto-apply`), api('GET', `/users/${USER}/applications?source=auto`)]);
+  const [{ data: aa }, { data: list }] = await Promise.all([api('GET', `/users/${USER}/auto-apply`), api('GET', `/users/${USER}/applications`)]);
+  list.applications = list.applications.filter(a => a.applyState);   // auto-apply and Apply-button applications alike
   const profiles = await ensureResumeProfiles();
   const apps = list.applications;
   const by = st => apps.filter(a => a.applyState === st);
-  const needs = [...by('NEEDS_YOU'), ...by('FAILED')]; const review = by('NEEDS_REVIEW');
+  const review = by('NEEDS_REVIEW'); const needs = [...by('NEEDS_YOU'), ...review]; const failed = by('FAILED');   // Tsenta-style: one Needs you list, Failed apart
   const waiting = apps.filter(a => ['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState));
   const sent = by('SUBMITTED');
   const sentToday = sent.filter(a => a.submittedAt && new Date(a.submittedAt).toDateString() === new Date().toDateString()).length;
@@ -1347,14 +1864,14 @@ async function renderAutoApply() {
     ${!profiles.length ? `<div class="notice info">Set up a resume profile first: auto-apply sends it. <a href="#/profile">Go to Profile</a></div>` : ''}
     <div class="stats">
       <div class="stat ${needs.length ? 'attn' : ''}"><b>${needs.length}</b><span>need you</span></div>
-      <div class="stat"><b>${review.length}</b><span>waiting for your OK</span></div>
+      <div class="stat"><b>${failed.length}</b><span>failed</span></div>
       <div class="stat"><b>${waiting.length}</b><span>queued to send</span></div>
       <div class="stat"><b>${sentToday}</b><span>sent today of ${aa.dailyCap}</span></div>
     </div>
     <div class="aa">
       <div style="display:grid;gap:22px">
-        ${needs.length ? `<section class="panel"><div class="panel-head"><h2>Needs you</h2></div><div id="qNeeds">${needs.map(queueItemHTML).join('')}</div></section>` : ''}
-        ${review.length ? `<section class="panel"><div class="panel-head"><h2>Waiting for your OK</h2><span class="spacer"></span><button class="btn sm" id="approveAll" type="button">Approve all ${review.length}</button></div><div id="qReview">${review.map(queueItemHTML).join('')}</div></section>` : ''}
+        ${needs.length ? `<section class="panel"><div class="panel-head"><h2>Needs you</h2><span class="spacer"></span>${review.length ? `<button class="btn sm" id="approveAll" type="button">Submit all ${review.length} reviewed</button>` : ''}</div><div id="qNeeds">${needs.map(queueItemHTML).join('')}</div></section>` : ''}
+        ${failed.length ? `<section class="panel"><div class="panel-head"><h2>Failed</h2></div><div id="qFailed">${failed.map(queueItemHTML).join('')}</div></section>` : ''}
         <section class="panel"><div class="panel-head"><h2>Next run</h2><span class="spacer"></span><button class="btn sm" id="aaPreview" type="button">Preview</button><button class="btn sm primary" id="aaRun" type="button" ${aa.running ? 'disabled' : ''}>${aa.running ? 'Running…' : 'Run now'}</button></div>
           <div class="panel-body" id="aaPlan"><p class="muted" style="margin:0">${lastRun ? `Last run ${ago(lastRun.startedAt)}: ${runLine(lastRun.summary)}.` : 'Not run yet.'} Preview shows which jobs the next run would pick, without sending anything.</p>
           ${waiting.length ? `<p style="margin:10px 0 0;font-size:14px">${waiting.length} application${waiting.length === 1 ? ' is' : 's are'} queued and will be filled on the next run.</p>` : ''}</div></section>
@@ -1406,7 +1923,7 @@ async function renderAutoApply() {
   $('#approveAll')?.addEventListener('click', async e => {
     e.target.disabled = true;
     for (const a of review) await api('POST', `/users/${USER}/applications/${a.id}/approve`, {});
-    toast(`${review.length} approved. They're sent on the next run.`); renderAutoApply();
+    toast(`Submitting ${review.length}…`); renderAutoApply();
   });
   $$('.qitem').forEach(bindQueueItem);
   $$('.app-row[data-open]').forEach(r => r.addEventListener('click', () => openApplication(r.dataset.open)));
@@ -1497,40 +2014,88 @@ function queueItemHTML(a) {
   const missing = d.missing || [];
   const field = (m, i) => {
     const name = `q${i}`;
-    if (m.options?.length) return `<label class="field">${esc(m.label)}<select name="${name}" data-q="${esc(m.label)}"><option value="">Choose…</option>${m.options.map(o => `<option>${esc(o)}</option>`).join('')}</select></label>`;
-    if (m.type === 'textarea') return `<label class="field">${esc(m.label)}<textarea name="${name}" rows="3" data-q="${esc(m.label)}"></textarea></label>`;
+    if (m.options?.length) return `<label class="field"><span>${esc(m.label)} <em class="req" style="font-style:normal;font-size:11px;background:#fbefc9;color:#8a5a00;border-radius:99px;padding:1px 8px;margin-left:6px">Required</em></span><select name="${name}" data-q="${esc(m.label)}"><option value="">Choose…</option>${m.options.map(o => `<option>${esc(o)}</option>`).join('')}</select></label>`;
+    if (m.type === 'textarea') return `<label class="field"><span>${esc(m.label)} <em class="req" style="font-style:normal;font-size:11px;background:#fbefc9;color:#8a5a00;border-radius:99px;padding:1px 8px;margin-left:6px">Required</em></span><textarea name="${name}" rows="3" data-q="${esc(m.label)}"></textarea></label>`;
     if (m.type === 'file') return `<p class="muted" style="margin:0;font-size:13px">"${esc(m.label)}" asks for a file. Apply on the company's site for this one.</p>`;
-    return `<label class="field">${esc(m.label)}<input name="${name}" data-q="${esc(m.label)}"></label>`;
+    return `<label class="field"><span>${esc(m.label)} <em class="req" style="font-style:normal;font-size:11px;background:#fbefc9;color:#8a5a00;border-radius:99px;padding:1px 8px;margin-left:6px">Required</em></span><input name="${name}" data-q="${esc(m.label)}"></label>`;
   };
   const askable = missing.filter(m => m.type !== 'file');
   return `<div class="qitem" data-app="${a.id}" data-state="${a.applyState}">
     <div class="top"><div class="t"><h3>${esc(a.job?.title || 'Removed job')}</h3><div class="meta"><b>${esc(a.job?.company || '')}</b>${d.matchScore != null ? `<span>${d.matchScore}% match</span>` : ''}<span>${ago(a.updatedAt)}</span></div></div>${applyBadge(a.applyState)}</div>
     ${d.reason ? `<p class="why-stop">${esc(d.reason)}</p>` : ''}
-    ${a.applyState === 'NEEDS_YOU' && missing.length ? `<form class="qform">${missing.map(field).join('')}
+    ${a.applyState === 'NEEDS_YOU' && missing.length ? `${askable.length ? `<div style="background:#fff8e6;border:1px solid #f1dfaa;border-radius:10px;padding:10px 14px;margin-top:10px"><b>${askable.length} detail${askable.length === 1 ? '' : 's'} needed</b><div class="muted" style="font-size:13px">Add only the missing information below. Everything else is already filled.</div></div>` : ''}<form class="qform">${missing.map(field).join('')}
       ${askable.length ? `<label class="check"><input type="checkbox" name="remember" checked> Save these answers to my profile for next time</label>` : ''}</form>` : ''}
-    ${a.applyState === 'NEEDS_REVIEW' && d.filled?.length ? `<details style="margin-top:10px"><summary style="cursor:pointer;font-size:14px">What it filled in (${d.filled.length})</summary><table class="filled">${d.filled.map(f => `<tr class="src-${esc(f.source || '')}"><td>${esc(f.label)}</td><td>${esc(f.value)}</td></tr>`).join('')}</table></details>` : ''}
+    ${a.applyState === 'NEEDS_REVIEW' && d.filled?.length ? `<form class="qform review"><p class="muted" style="margin:10px 0 0;font-size:13px">Check the answers below. Change anything that's wrong, then submit.</p>${d.filled.map(f => f.key === 'resumeFile' || f.key === 'coverLetterFile' || /\.pdf$/.test(f.value || '') ? `<label class="field">${esc(f.label)}<input value="${esc(f.value)}" disabled></label>` : `<label class="field">${esc(f.label)}<input value="${esc(f.value)}" data-orig="${esc(f.value)}" data-e="${esc(f.label)}"></label>`).join('')}</form>` : ''}
     <div class="acts">
-      ${a.applyState === 'NEEDS_REVIEW' ? `<button class="btn sm primary" data-approve type="button">Approve and send</button>` : ''}
-      ${a.applyState === 'NEEDS_YOU' && askable.length ? `<button class="btn sm primary" data-answer type="button">Save answers and send</button>` : ''}
-      ${a.applyState === 'FAILED' ? `<button class="btn sm primary" data-approve type="button">Try again</button>` : ''}
+      ${a.applyState === 'NEEDS_REVIEW' ? `<button class="btn sm primary" data-approve type="button">Submit application</button>` : ''}
+      ${a.applyState === 'NEEDS_YOU' && askable.length ? `<button class="btn sm primary" data-answer type="button" disabled>Answer ${askable.length} required field${askable.length === 1 ? '' : 's'}</button>` : ''}
+      ${a.applyState === 'FAILED' ? `<button class="btn sm primary" data-retry type="button">Try again</button>` : ''}
       ${a.hasTailoredResume ? `<a class="btn sm" href="${resumeUrl(a.id)}" target="_blank" rel="noopener">Resume</a>` : ''}
       ${d.formUrl || a.job?.url ? `<a class="btn sm quiet" href="${esc(d.formUrl || a.job.url)}" target="_blank" rel="noopener">${I.ext(14)} Apply on site</a>` : ''}
       <button class="btn sm quiet" data-details type="button">Details</button>
-      <button class="btn sm quiet" data-skip type="button">Skip</button>
+      <button class="btn sm quiet" data-skip type="button">${a.applyState === 'FAILED' ? 'Skip' : 'Cancel application'}</button>
     </div></div>`;
 }
+const refreshApplications = () => { loadApps(); if (location.hash.startsWith('#/review/')) return reviewNext(); if (location.hash.startsWith('#/auto-apply')) renderAutoApply(); else if ($('#drawer').classList.contains('open') && state.openApp) openApplication(state.openApp); };
 function bindQueueItem(el) {
   const id = el.dataset.app;
-  el.querySelector('[data-skip]').addEventListener('click', async () => { await api('POST', `/users/${USER}/applications/${id}/skip`); toast('Skipped.'); renderAutoApply(); loadApps(); });
-  el.querySelector('[data-details]').addEventListener('click', () => openApplication(id));
-  el.querySelector('[data-approve]')?.addEventListener('click', async () => { await api('POST', `/users/${USER}/applications/${id}/approve`, {}); toast('Approved. It\'s sent on the next run.'); renderAutoApply(); loadApps(); });
+  el.querySelector('[data-skip]').addEventListener('click', async () => { await api('POST', `/users/${USER}/applications/${id}/skip`); toast('Skipped.'); refreshApplications(); });
+  el.querySelector('[data-details]').addEventListener('click', () => { if (['NEEDS_YOU', 'NEEDS_REVIEW'].includes(el.dataset.state) && !el.closest('#view[data-review]')) location.hash = `#/review/${id}`; else openApplication(id); });
+  el.querySelector('[data-retry]')?.addEventListener('click', async e => { e.target.disabled = true; try { await api('POST', `/users/${USER}/applications/${id}/apply`, {}); toast('Trying again…'); } catch (err) { toast(err.message); } refreshApplications(); });
+  el.querySelector('[data-approve]')?.addEventListener('click', async e => {
+    e.target.disabled = true;
+    const edits = {}; $$('[data-e]', el).forEach(f => { if (f.value.trim() && f.value !== f.dataset.orig) edits[f.dataset.e] = f.value.trim(); });
+    try {
+      // edited answers refill the form with the new values, then send; untouched forms send as they are
+      if (Object.keys(edits).length) await api('POST', `/users/${USER}/applications/${id}/answers`, { answers: edits, remember: false, approve: true });
+      else await api('POST', `/users/${USER}/applications/${id}/approve`, {});
+      toast('Submitting…');
+    } catch (err) { toast(err.message); }
+    refreshApplications();
+  });
+  const ansBtn = el.querySelector('[data-answer]');
+  const ready = () => { if (ansBtn) ansBtn.disabled = $$('[data-q]', el).some(f => !f.value.trim()); };
+  el.addEventListener('input', ready); el.addEventListener('change', ready);
   el.querySelector('[data-answer]')?.addEventListener('click', async () => {
     const answers = {}; let blank = 0;
     $$('[data-q]', el).forEach(f => { if (f.value.trim()) answers[f.dataset.q] = f.value.trim(); else blank++; });
     if (blank) { toast(`Answer all ${blank + Object.keys(answers).length} questions first.`); return; }
     await api('POST', `/users/${USER}/applications/${id}/answers`, { answers, remember: !!el.querySelector('[name=remember]')?.checked, approve: true });
-    toast('Saved. It\'s sent on the next run.'); renderAutoApply(); loadApps();
+    toast('Saved. Submitting…'); refreshApplications();
   });
+}
+
+// ═══ Review page (one Needs-you application at a time, like Tsenta) ═════════
+let reviewIds = [];
+const reviewNext = (cur = location.hash.split('/')[2]) => {
+  const i = reviewIds.indexOf(cur), rest = reviewIds.filter(x => x !== cur);
+  reviewIds = rest; location.hash = rest.length ? `#/review/${rest[Math.min(i, rest.length - 1)]}` : '#/auto-apply';
+};
+async function renderReview() {
+  const id = location.hash.split('/')[2];
+  const { data } = await api('GET', `/users/${USER}/applications`);
+  const todo = data.applications.filter(a => ['NEEDS_YOU', 'NEEDS_REVIEW'].includes(a.applyState));
+  if (!reviewIds.includes(id)) reviewIds = todo.map(a => a.id);
+  const a = data.applications.find(x => x.id === id);
+  if (!a || !['NEEDS_YOU', 'NEEDS_REVIEW'].includes(a.applyState)) { location.hash = '#/auto-apply'; return; }
+  const i = Math.max(0, reviewIds.indexOf(id)), n = reviewIds.length, d = a.applyDetail || {};
+  const go = k => `#/review/${reviewIds[(i + k + n) % n]}`;
+  const ask = (d.missing || []).filter(m => m.type !== 'file').length;
+  $('#view').dataset.review = 1;
+  $('#view').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px">
+      <a class="btn sm quiet" href="#/auto-apply">← Auto-apply</a>
+      <div><h1 style="margin:0;font-size:20px">${esc(a.job?.title || 'Removed job')}</h1><span class="muted">${esc(a.job?.company || '')}</span></div><span class="spacer" style="flex:1"></span>
+      ${n > 1 ? `<a class="btn sm quiet" href="${go(-1)}">‹ Prev</a><span class="muted" style="font-size:13px">${i + 1} of ${n}</span><a class="btn sm quiet" href="${go(1)}">Next ›</a>` : ''}
+      ${a.job?.url ? `<a class="btn sm quiet" href="${esc(a.job.url)}" target="_blank" rel="noopener">${I.ext(14)} View job posting</a>` : ''}
+      ${applyBadge(a.applyState)}</div>
+    <div style="display:grid;grid-template-columns:260px minmax(0,720px);gap:28px;align-items:start">
+      <aside><h3 style="margin:0">${a.applyState === 'NEEDS_REVIEW' ? 'Review before submit' : 'Needs your input'}</h3>
+        <p class="muted" style="margin:2px 0 14px;font-size:13px">${a.applyState === 'NEEDS_REVIEW' ? 'Waiting for your approval' : 'Waiting for your answers'}</p>
+        <p style="font-size:14px">${a.applyState === 'NEEDS_REVIEW' ? `Check what we filled in for <b>${esc(a.job?.company || '')}</b>, and edit anything before we submit.` : ask ? `We filled what we could for <b>${esc(a.job?.company || '')}</b>. Add the missing details, then we send it.` : esc(d.reason || '')}</p>
+        <p class="muted" style="font-size:12.5px;background:var(--surface-2,#f4f4f1);border-radius:10px;padding:10px 12px">🔒 The resume file can't be changed here. Everything else is editable.</p></aside>
+      <div>${queueItemHTML(a)}</div></div>`;
+  bindQueueItem($('#view .qitem'));
 }
 
 // ═══ Profile ════════════════════════════════════════════════════════════════
@@ -1583,7 +2148,7 @@ async function renderProfile() {
         <button class="btn quiet" id="rpRename" type="button">Rename</button>
         ${state.resumeProfiles.length > 1 ? '<button class="btn quiet danger" id="rpDelete" type="button">Delete</button>' : ''}
       </div></div>
-    <div class="tabs" role="tablist">${[['details', 'Profile details'], ['resume', 'Resume'], ['letter', 'Cover letter']].map(([k, l]) => `<button role="tab" type="button" data-tab="${k}" aria-selected="${state.profileTab === k}">${l}</button>`).join('')}</div>
+    <div class="tabs" role="tablist">${[['details', 'Profile details'], ['resume', 'Resume'], ['letter', 'Cover letter'], ['settings', 'Settings']].map(([k, l]) => `<button role="tab" type="button" data-tab="${k}" aria-selected="${state.profileTab === k}">${l}</button>`).join('')}</div>
     <div id="tabBody"></div>`;
 
   $('#rpSelect').addEventListener('change', e => { store.set('rpId', e.target.value); renderProfile(); });
@@ -1604,6 +2169,7 @@ async function renderProfile() {
 
   if (state.profileTab === 'resume') return renderResumeTab();
   if (state.profileTab === 'letter') return renderLetterTab();
+  if (state.profileTab === 'settings') return renderSettingsTab();
 
   const todo = rp.completeness.items.filter(i => !i.done);
   const contact = [p.city && [p.city, p.state].filter(Boolean).join(', '), p.email, p.phone].filter(Boolean);
@@ -1718,7 +2284,7 @@ function openEntryEditor(key, index) {
 }
 function openPersonalEditor() {
   const p = state.rp.sections.personal;
-  const fields = [['fullName', 'Full name'], ['headline', 'Headline, for example Software Engineer'], ['email', 'Email'], ['phone', 'Phone'], ['city', 'City'], ['state', 'State'], ['country', 'Country'], ['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['portfolio', 'Website or portfolio'], ['openToWork', 'Open to work', 'bool']];
+  const fields = [['fullName', 'Full name'], ['headline', 'Headline, for example Software Engineer'], ['email', 'Email'], ['phone', 'Phone'], ['address', 'Street address'], ['city', 'City'], ['state', 'State'], ['zip', 'Postal code'], ['country', 'Country'], ['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['portfolio', 'Website or portfolio'], ['openToWork', 'Open to work', 'bool']];
   const host = $('#personalEditor');
   host.innerHTML = `<form class="editor" style="margin-top:14px"><div class="form-grid">${fields.map(([n, l, t]) => fieldInput(n, l, t, p[n])).join('')}</div><div class="acts"><button class="btn quiet" type="button" data-cancel>Cancel</button><button class="btn primary" type="submit">Save details</button></div></form>`;
   const form = host.querySelector('form'); form.querySelector('input').focus();
@@ -2108,6 +2674,129 @@ function renderLetterTab() {
     $('#letter').value = [`Dear {company} hiring team,`, `I'm applying for the {title} role. ${s.summary || ''}`.trim(),
       latest ? `Most recently, as ${latest.title} at ${latest.company}, I ${did}.` : '',
       `I'd welcome the chance to talk about how I can help {company}.`, `Best regards,\n${s.personal.fullName || ''}`].filter(Boolean).join('\n\n');
+  });
+}
+
+
+// ═══ Settings tab ═══════════════════════════════════════════════════════════
+async function renderSettingsTab() {
+  $('#tabBody').innerHTML = `
+    <div style="max-width:680px">
+
+      <!-- Email Integration -->
+      <section class="sec" id="sec-email-int">
+        <div class="sec-head"><div><h2>Email Integration</h2><p>Connect an email account so auto-apply can use your address and read OTP verification emails.</p></div></div>
+
+        <div id="gmailCard" style="border:1px solid var(--line);border-radius:12px;padding:18px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#4285F4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.3-.2-2.7-.5-4z"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;">Gmail <span id="gmailBadge" style="display:none;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-bd)">Connected</span></div>
+              <div style="font-size:13px;color:var(--muted);margin-top:2px;" id="gmailStatusLine">Checking…</div>
+            </div>
+          </div>
+          <p style="font-size:13px;color:var(--ink-2);margin:0 0 14px;max-width:58ch;">Auto-apply uses your Gmail address for job applications and can read OTP verification emails sent back to you.</p>
+          <div id="gmailActions">
+            <button class="btn primary" id="gmailConnectBtn" type="button" style="background:#4285F4;border-color:#4285F4;display:inline-flex;align-items:center;gap:8px;">
+              <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.3-.2-2.7-.5-4z"/></svg>
+              Sign in with Google
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Auto-Apply Settings -->
+      <section class="sec" id="sec-autoapply-s">
+        <div class="sec-head"><div><h2>Auto-Apply</h2><p>Control how the auto-apply engine works on your behalf.</p></div></div>
+        <div>
+          <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;">
+            <div>
+              <div style="font-weight:500;font-size:14px;">Enable Auto-Apply</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">Automatically submit applications while you’re away</div>
+            </div>
+            <input type="checkbox" id="s_autoapply_enabled" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cobalt);">
+          </label>
+          <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;">
+            <div>
+              <div style="font-weight:500;font-size:14px;">Review before submit</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">Pause for your approval before each application</div>
+            </div>
+            <input type="checkbox" id="s_review_submit" checked style="width:18px;height:18px;cursor:pointer;accent-color:var(--cobalt);">
+          </label>
+          <div style="padding:12px 0;">
+            <div style="font-weight:500;font-size:14px;margin-bottom:6px;">Daily application cap</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <input type="number" id="s_daily_cap" min="1" max="50" value="10" style="width:70px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--surface);color:var(--ink);">
+              <span style="font-size:13px;color:var(--muted);">applications per day</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ATS Account -->
+      <section class="sec" id="sec-ats">
+        <div class="sec-head"><div><h2>ATS Account</h2><p>Some job boards require a login. Set a shared password used when creating accounts.</p></div></div>
+        <div style="max-width:360px;">
+          <label style="font-size:13px;font-weight:500;display:block;margin-bottom:5px;">ATS Password</label>
+          <input type="password" id="s_ats_password" placeholder="Stored securely" autocomplete="new-password"
+            style="width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--surface);color:var(--ink);">
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Used only when a job board requires creating an account</div>
+        </div>
+      </section>
+
+      <div style="padding:0 0 24px;">
+        <button class="btn primary" id="saveSettingsBtn" type="button">Save settings</button>
+        <span id="settingsSavedMsg" style="display:none;font-size:13px;color:var(--ok);margin-left:12px;">✓ Saved</span>
+      </div>
+
+    </div>`;
+
+  // Load current Gmail status
+  try {
+    const { data } = await api('GET', `/users/${USER}/gmail/status`);
+    const statusLine = $('#gmailStatusLine');
+    const badge = $('#gmailBadge');
+    const actions = $('#gmailActions');
+    if (data.connected) {
+      statusLine.textContent = 'Connected as ' + (data.email || 'your Google account');
+      badge.style.display = 'inline-block';
+      actions.innerHTML = `<button class="btn quiet" id="gmailDisconnectBtn" type="button" style="color:var(--bad);border-color:var(--bad);">Disconnect Gmail</button>`;
+      $('#gmailDisconnectBtn').addEventListener('click', async () => {
+        await api('DELETE', `/users/${USER}/gmail`);
+        toast('Gmail disconnected.');
+        renderSettingsTab();
+      });
+    } else {
+      statusLine.textContent = 'Not connected';
+      badge.style.display = 'none';
+      $('#gmailConnectBtn').addEventListener('click', async () => {
+        const { data: d } = await api('GET', `/users/${USER}/gmail/auth-url`);
+        if (d.url) window.location.href = d.url;
+      });
+    }
+  } catch(e) {
+    $('#gmailStatusLine').textContent = 'Could not load status';
+    console.error('Gmail status error:', e);
+  }
+
+  // Save settings
+  $('#saveSettingsBtn').addEventListener('click', async () => {
+    const payload = {
+      daily_cap: +($('#s_daily_cap').value) || 10,
+      auto_apply_enabled: $('#s_autoapply_enabled').checked,
+      review_before_submit: $('#s_review_submit').checked,
+    };
+    const pw = $('#s_ats_password').value.trim();
+    if (pw) payload.ats_password = pw;
+    try {
+      await api('PUT', `/users/${USER}/profile`, payload);
+      const msg = $('#settingsSavedMsg');
+      msg.style.display = 'inline';
+      if (pw) $('#s_ats_password').value = '';
+      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    } catch(e) { toast('Save failed: ' + e.message); }
   });
 }
 

@@ -18,6 +18,8 @@ import {
   classifyKeywordMatch, rebaseScore, keywordSearchWarnings,
 } from '../matching/keyword-search.mjs';
 
+import { summarize, verdict, RELAXATIONS } from '../matching/relevance.mjs';
+
 let failures = 0;
 function check(name, cond, detail) {
   if (cond) console.log(`PASS  ${name}`);
@@ -26,6 +28,12 @@ function check(name, cond, detail) {
 
 // ── Pure unit tests ─────────────────────────────────────────────────────────
 function unitTests() {
+  const st = summarize([{ matchScore: 73 }, { matchScore: 48 }, { matchScore: 70 }]);
+  check('relevance summarize counts strong (>=65) and best', st.strong === 2 && st.best === 73, st);
+  check('relevance verdict: 1 strong is THIN, none under 50 is WEAK, no jobs is EMPTY',
+    verdict({ best: 73, strong: 1 }, 3) === 'THIN' && verdict({ best: 48, strong: 0 }, 3) === 'WEAK' && verdict({ best: 0, strong: 0 }, 0) === 'EMPTY');
+  check('every relaxation has a label and a patch', Object.values(RELAXATIONS).every(r => r.label && r.patch && r.override));
+
   check('parseTerms splits on |, trims, dedupes case-insensitively',
     JSON.stringify(parseTerms(' react | Frontend|react ||')) === JSON.stringify(['react', 'Frontend']), parseTerms(' react | Frontend|react ||'));
   check('parseTerms accepts arrays containing | too',

@@ -8,6 +8,7 @@
  *
  * Strategy: fetch with empty searchText to get ALL jobs (no keyword filter).
  * Workday returns up to 200 total per company before CDN throttling; cap at 10 pages.
+ * opts.searchText narrows the board (job import uses it to find one posting past that cap).
  */
 import { fetchJSON, normalizeLocation, sleep, INTER_REQUEST_DELAY_MS } from '../lib/http.mjs';
 
@@ -32,7 +33,7 @@ export async function fetchAll(company, opts = {}) {
     const data = await fetchJSON(apiUrl, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ limit: PAGE_SIZE, offset, searchText: '', appliedFacets: {} }),
+      body:    JSON.stringify({ limit: PAGE_SIZE, offset, searchText: opts.searchText || '', appliedFacets: {} }),
       timeoutMs: 20_000,
     });
 
@@ -41,7 +42,7 @@ export async function fetchAll(company, opts = {}) {
 
     for (const raw of data.jobPostings) {
       const key = raw.externalPath || raw.title;
-      if (!seen.has(key)) seen.set(key, normalize(raw, company, tenant, shard));
+      if (!seen.has(key)) seen.set(key, normalize(raw, company, tenant, shard, site));
     }
 
     if (data.jobPostings.length < PAGE_SIZE) break;
@@ -52,11 +53,11 @@ export async function fetchAll(company, opts = {}) {
   return [...seen.values()];
 }
 
-function normalize(raw, company, tenant, shard) {
+function normalize(raw, company, tenant, shard, site) {
   const loc = raw.locationsText || '';
   return {
     url:       raw.externalPath
-                 ? `https://${tenant}.${shard}.myworkdayjobs.com${raw.externalPath}`
+                 ? `https://${tenant}.${shard}.myworkdayjobs.com/${site}${raw.externalPath}`   // externalPath is '/job/…'; the public page needs the site first
                  : '',
     title:     (raw.title || '').trim(),
     company:   company.name,

@@ -23,6 +23,7 @@
  *   POST /users/:userId/match
  *   GET  /users/:userId/recommendations  ?limit= &cursor= &posted_within_days= &strict=
  *                                         &search= &exclude_search= &search_scope= &use_saved_search=
+ *   GET  /users/:userId/feed-relevance    same filters as /recommendations; scores the feed + "what if" filter patches
  *   GET/PUT/DELETE /users/:userId/search  (saved feed keyword search — see docs/keyword-search.md)
  *   GET  /users/:userId/jobs/:jobId/match  (job detail: description + score breakdown + eligibility)
  *   GET  /users/:userId/applications      ?status=
@@ -58,12 +59,36 @@ import { resolve as resolvePath } from 'node:path';
 import { query, closePool } from '../lib/db.mjs';
 import { matchUserFull }    from '../matching/matcher.mjs';
 import { generateRecommendations, explainJobMatch } from '../matching/recommend.mjs';
+
+// ─── Recommendations cache (avoids rescoring 2000 jobs on every page refresh) ─
+const _recCache = new Map(); // key → { ts, promise }
+const REC_CACHE_TTL = 60_000; // 60 s
+function _recCacheKey(userId, q) {
+  return `${userId}|${q.posted_within_days||''}|${q.strict||''}|${q.use_saved_search||''}|${q.search||''}|${q.exclude_search||''}|${q.search_scope||''}`;
+}
+function _recCacheGet(key) {
+  const e = _recCache.get(key);
+  if (!e) return null;
+  if (Date.now() - e.ts > REC_CACHE_TTL) { _recCache.delete(key); return null; }
+  return e.promise;
+}
+function _recCacheSet(key, promise) {
+  _recCache.set(key, { ts: Date.now(), promise });
+  // Prune stale entries so the map doesn't grow forever
+  if (_recCache.size > 200) {
+    const cutoff = Date.now() - REC_CACHE_TTL;
+    for (const [k, v] of _recCache) if (v.ts < cutoff) _recCache.delete(k);
+  }
+  return promise;
+}
+
+
 import { normalizeRoleInput, normalizeSkillName, normalizeUserLocation, isValidEducationLevel } from '../lib/profile-normalize.mjs';
 import { EDUCATION_LEVELS } from '../lib/education.mjs';
 import { evaluateProfileCompleteness } from '../matching/profile-completeness.mjs';
 import { normalizeKeywordSearch } from '../matching/keyword-search.mjs';
 import { getSavedKeywordSearch, saveKeywordSearch, clearKeywordSearch } from '../matching/saved-search.mjs';
-import { importJobByUrl } from '../lib/job-import.mjs';
+import { importJobByUrl, previewJobByUrl } from '../lib/job-import.mjs';
 import { detectAts, SUPPORTED_ATS } from '../lib/ats-detect.mjs';
 import {
   listResumeProfiles, getResumeProfile, createResumeProfile, updateResumeProfile,
@@ -76,15 +101,17 @@ import {
 } from '../lib/applications.mjs';
 import {
   getSettings as getAutoApplySettings, saveSettings as saveAutoApplySettings, saveLane, deleteLane, planRun, runForUser,
-  prepareApplication, submitApplication, answerApplication, skipApplication, recentRuns, applyStateCounts, FILLABLE_ATS,
+  prepareApplication, submitApplication, startApply, answerApplication, skipApplication, recentRuns, applyStateCounts, FILLABLE_ATS,
 } from '../autoapply/engine.mjs';
 import { renderResumeHTML, renderResumePDF } from '../lib/resume-render.mjs';
 import { normalizeLayout } from '../lib/resume-layout.mjs';
+import { assessFeedRelevance } from '../matching/relevance.mjs';
 import { searchApplied } from '../lib/applied-search.mjs';
 import { importTsentaHistory, tsentaExportAvailable } from '../lib/import-tsenta.mjs';
 import { llmStatus, llmConfig } from '../lib/llm.mjs';
 import { rewriteStats, addManualExample, listManualExamples, deleteManualExample, resumeBeforeTailoring } from '../lib/rewrites.mjs';
 import { diffResumes } from '../lib/resume-diff.mjs';
+import { getAuthUrl, exchangeCode, getGmailStatus, disconnectGmail } from '../lib/gmail.mjs';
 import { unsupportedClaims } from '../lib/resume-tailor.mjs';
 
 const PORT = (() => {
@@ -399,11 +426,51 @@ async function resolveKeywordSearch(userId, q) {
 async function handleRecommendations(req, res, userId, q) {
   const { ks, errors } = await resolveKeywordSearch(userId, q);
   if (errors.length) return json(res, 400, { errors });
+
+  // First page with no cursor? Serve from cache (or prime it).
+  const firstPage = !q.cursor;
+  if (firstPage) {
+    const cacheKey = _recCacheKey(userId, q);
+    let cached = _recCacheGet(cacheKey);
+    if (!cached) {
+      cached = generateRecommendations(userId, {
+        limit: 100, cursor: null, postedWithinDays: q.posted_within_days,
+        strictEducation: q.strict === 'true', keywordSearch: ks,
+      });
+      _recCacheSet(cacheKey, cached);
+    }
+    const full = await cached;
+    // Slice to the requested limit from the cached full page
+    const limit = Math.min(Number(q.limit) || 25, 100);
+    const sliced = { ...full, jobs: full.jobs.slice(0, limit), nextCursor: full.jobs.length > limit ? String(limit) : null };
+    return json(res, 200, sliced);
+  }
+
+  // Subsequent pages: use cursor to slice from cache or fetch fresh
+  const cacheKey = _recCacheKey(userId, { ...q, cursor: undefined });
+  const cached = _recCacheGet(cacheKey);
+  if (cached) {
+    const full = await cached;
+    const offset = Number(q.cursor) || 0;
+    const limit = Math.min(Number(q.limit) || 25, 100);
+    const jobs = full.jobs.slice(offset, offset + limit);
+    return json(res, 200, { ...full, jobs, nextCursor: offset + limit < full.jobs.length ? String(offset + limit) : null });
+  }
+
   const result = await generateRecommendations(userId, {
     limit: q.limit, cursor: q.cursor, postedWithinDays: q.posted_within_days,
     strictEducation: q.strict === 'true', keywordSearch: ks,
   });
   json(res, 200, result);
+}
+
+// Bust the cache for a user (called when profile/preferences change)
+function bustRecCache(userId) { for (const k of _recCache.keys()) if (k.startsWith(userId + '|')) _recCache.delete(k); }
+
+async function handleFeedRelevance(req, res, userId, q) {
+  const { ks, errors } = await resolveKeywordSearch(userId, q);
+  if (errors.length) return json(res, 400, { errors });
+  json(res, 200, await assessFeedRelevance(userId, { postedWithinDays: q.posted_within_days, keywordSearch: ks }));
 }
 
 async function handleGetKeywordSearch(req, res, userId) {
@@ -445,12 +512,18 @@ async function handlePutKeywordSearch(req, res, userId, body) {
   });
 }
 
-const IMPORT_STATUS = { INVALID_URL: 400, ATS_NOT_SUPPORTED: 422, BOARD_UNREACHABLE: 502, SCAN_FAILED: 502 };
+const IMPORT_STATUS = { INVALID_URL: 400, PAGE_UNREADABLE: 422, ATS_NOT_SUPPORTED: 422, BOARD_UNREACHABLE: 502, SCAN_FAILED: 502 };
 
 async function handleImportJob(req, res, body) {
   if (!body?.url) return json(res, 400, { error: 'url is required' });
-  const result = await importJobByUrl(String(body.url));
+  const result = await importJobByUrl(String(body.url), { description: body.description });
   json(res, result.ok ? 200 : (IMPORT_STATUS[result.code] || 400), result);
+}
+
+async function handleImportPreview(req, res, body) {
+  if (!body?.url) return json(res, 400, { error: 'url is required' });
+  const result = await previewJobByUrl(String(body.url));
+  json(res, result.ok ? 200 : (IMPORT_STATUS[result.code] || 422), result);
 }
 
 function handleImportCheck(req, res, q) {
@@ -622,21 +695,30 @@ async function handleApplicationAction(req, res, userId, appId, action, method, 
   }
   if (action === 'answers' && method === 'POST') {
     const r = await answerApplication(userId, String(appId), { answers: body?.answers || {}, remember: body?.remember !== false, approve: body?.approve !== false });
+    if (!r.error && body?.approve !== false) startApply(userId, appId, { approve: true });   // send now, not on the next scheduled run
     return r.error ? fail(r) : json(res, 200, { ...r, application: await getApplication(userId, appId) });
   }
   if (action === 'approve' && method === 'POST') {
     const r = await answerApplication(userId, String(appId), { answers: body?.answers || {}, remember: body?.remember !== false, approve: true });
+    if (!r.error) startApply(userId, appId, { approve: true });
     return r.error ? fail(r) : json(res, 200, { ...r, application: await getApplication(userId, appId) });
   }
   if (action === 'skip' && method === 'POST') {
     const r = await skipApplication(userId, String(appId));
     return r.error ? fail(r) : json(res, 200, await getApplication(userId, appId));
   }
+  if (action === 'apply' && method === 'POST') {
+    // The Apply button / Try again: tailor, fill, stop at review. All on the server.
+    const app = await getApplication(userId, appId);
+    if (!app) return json(res, 404, { error: 'Not found' });
+    startApply(userId, appId, { approve: false });
+    return json(res, 202, { started: true });
+  }
   if (action === 'submit' && method === 'POST') {
     // Fill (and send, when approved) now, in the background.
     const app = await getApplication(userId, appId);
     if (!app) return json(res, 404, { error: 'Not found' });
-    submitApplication(userId, String(appId), { approve: body?.approve !== false }).catch(err => console.error('submit failed:', err));
+    submitApplication(userId, String(appId), { approve: body?.approve === true }).catch(err => console.error('submit failed:', err));
     return json(res, 202, { started: true });
   }
   return json(res, 405, { error: 'Method not allowed' });
@@ -736,7 +818,7 @@ async function handleDeleteKeywordSearch(req, res, userId) {
 
 async function handleGetProfile(req, res, userId) {
   const { rows } = await query(
-    `SELECT pref.*, p.* FROM user_profiles p
+    `SELECT pref.*, p.*, (p.ats_password IS NOT NULL AND length(p.ats_password) > 0) AS ats_password_saved FROM user_profiles p
       LEFT JOIN user_profile_preferences pref ON pref.user_profile_id = p.id
      WHERE p.user_id = $1`, [userId]
   );
@@ -780,6 +862,18 @@ async function handleUpsertProfile(req, res, userId, body) {
       body.current_country ?? null, body.work_authorization ?? null, body.needs_sponsorship ?? null,
       body.full_name ?? null, body.email ?? null, body.phone ?? null, body.summary ?? null, body.open_to_work ?? null]
   );
+  // Street address and postal code live next to city/state/country (see db/migrate-address.mjs)
+  if (body.address_line1 !== undefined || body.postal_code !== undefined) {
+    await query(`UPDATE user_profiles SET address_line1 = COALESCE($2, address_line1), postal_code = COALESCE($3, postal_code) WHERE user_id = $1`,
+      [userId, body.address_line1 ?? null, body.postal_code ?? null]).catch(() => {});
+  }
+  // Persist ats_password if provided (stored separately)
+  if (body.ats_password) {
+    await query(
+      `UPDATE user_profiles SET ats_password = $2 WHERE user_id = $1`,
+      [userId, body.ats_password]
+    ).catch(() => {});
+  }
   // require_sponsorship mirrors user_profiles.needs_sponsorship (the
   // authoritative field — see docs/profile-recommendation-model.md) so any
   // caller still reading the legacy preferences column sees a consistent value.
@@ -971,6 +1065,7 @@ export async function router(req, res) {
     if (path === '/jobs'     && method === 'GET') return await handleListJobs(req, res, q);
     if (path === '/companies'&& method === 'GET') return await handleListCompanies(req, res, q);
     if (path === '/jobs/import' && method === 'POST') return await handleImportJob(req, res, await parseBody(req));
+    if (path === '/jobs/import/preview' && method === 'POST') return await handleImportPreview(req, res, await parseBody(req));
     if (path === '/jobs/import/check' && method === 'GET') return handleImportCheck(req, res, q);
     if (path === '/profile/fields' && method === 'GET') return json(res, 200, APPLICATION_DEFAULT_FIELDS);
 
@@ -992,6 +1087,8 @@ export async function router(req, res) {
 
     if ((m = path.match(/^\/users\/([^/]+)\/match$/)) && method === 'POST')
       return await handleTriggerMatch(req, res, m[1]);
+    if ((m = path.match(/^\/users\/([^/]+)\/feed-relevance$/)) && method === 'GET')
+      return await handleFeedRelevance(req, res, m[1], q);
     if ((m = path.match(/^\/users\/([^/]+)\/recommendations$/)) && method === 'GET')
       return await handleRecommendations(req, res, m[1], q);
     if ((m = path.match(/^\/users\/([^/]+)\/jobs\/(\d+)\/match$/)) && method === 'GET')
@@ -1005,7 +1102,7 @@ export async function router(req, res) {
       if (method === 'PATCH') return await handleUpdateApplication(req, res, m[1], +m[2], await parseBody(req));
       if (method === 'DELETE') return await handleDeleteApplication(req, res, m[1], +m[2]);
     }
-    if ((m = path.match(/^\/users\/([^/]+)\/applications\/(\d+)\/(tailor|resume|changes|answers|approve|skip|submit)$/)))
+    if ((m = path.match(/^\/users\/([^/]+)\/applications\/(\d+)\/(tailor|resume|changes|answers|approve|skip|submit|apply)$/)))
       return await handleApplicationAction(req, res, m[1], +m[2], m[3], method, ['POST', 'PATCH', 'PUT'].includes(method) ? await parseBody(req) : null, q);
     if ((m = path.match(/^\/users\/([^/]+)\/applied$/)) && method === 'GET') return await handleApplied(req, res, m[1], q);
     if ((m = path.match(/^\/users\/([^/]+)\/imports\/tsenta$/))) return await handleTsentaImport(req, res, m[1], method);
@@ -1044,11 +1141,55 @@ export async function router(req, res) {
     if ((m = path.match(/^\/users\/([^/]+)\/jobs\/(\d+)\/interactions$/)) && method === 'POST')
       return await handleInteraction(req, res, m[1], +m[2], await parseBody(req));
 
+    // Gmail OAuth
+    if ((m = path.match(/^\/users\/([^/]+)\/gmail(?:\/(auth-url|status))?$/)))
+      return await handleGmail(req, res, m[1], method, m[2]);
+    if (path === '/auth/gmail/callback' && method === 'GET')
+      return await handleGmailCallback(req, res, q);
+
     json(res, 404, { error: 'Not found' });
 
   } catch (err) {
     console.error('API error:', err.message);
     json(res, 500, { error: 'Internal server error' });
+  }
+}
+
+// ─── Gmail OAuth (lib/gmail.mjs) ─────────────────────────────────────────────
+
+async function handleGmail(req, res, userId, method, sub) {
+  if (method === 'GET' && sub === 'auth-url') {
+    let url;
+    try { url = await getAuthUrl(userId); }
+    catch (e) { return json(res, 503, { error: e.message }); }
+    return json(res, 200, { url });
+  }
+  if (method === 'GET' && sub === 'status') {
+    const status = await getGmailStatus(userId);
+    return json(res, 200, status);
+  }
+  if (method === 'DELETE' && !sub) {
+    await disconnectGmail(userId);
+    return json(res, 200, { ok: true });
+  }
+  return json(res, 404, { error: 'Not found' });
+}
+
+async function handleGmailCallback(req, res, q) {
+  const code  = q.code;
+  const state = q.state;  // userId
+  const error = q.error;
+  if (error) return json(res, 400, { error: `Google OAuth error: ${error}` });
+  if (!code || !state) return json(res, 400, { error: 'Missing code or state' });
+  try {
+    const { email } = await exchangeCode(state, code);
+    // Redirect back to app with success indicator
+    res.writeHead(302, { Location: `/app/?gmail=connected&email=${encodeURIComponent(email || '')}` });
+    return res.end();
+  } catch (e) {
+    console.error('Gmail callback error:', e.message);
+    res.writeHead(302, { Location: `/app/?gmail=error&reason=${encodeURIComponent(e.message.slice(0, 100))}` });
+    return res.end();
   }
 }
 

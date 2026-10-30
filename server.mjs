@@ -12,6 +12,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { query } from './lib/db.mjs';
 import { getScanStatus, reapStaleRuns } from './lib/scan-status.mjs';
+import { reapStuckApplications } from './autoapply/engine.mjs';
 import { startScan, stopScans } from './lib/scan-control.mjs';
 import { normalizeSkillName } from './lib/skills.mjs';
 import { extractResumeSections } from './lib/resume-extract.mjs';
@@ -601,4 +602,7 @@ app.listen(PORT, () => {
   console.log(`\n🌐  Job board running at http://localhost:${PORT}`);
   console.log(`🧭  Dashboard at http://localhost:${PORT}/app`);
   console.log(`📊  Scan log dashboard at http://localhost:${PORT}/scan-log\n`);
+  // Applications left mid-flight by a restart or a dead run become FAILED ("Try again") instead of spinning forever.
+  const reap = () => reapStuckApplications().then(n => n && console.log(`[apply] ${n} interrupted application(s) moved to Failed`)).catch(() => {});
+  reap(); setInterval(reap, 60_000);
 });

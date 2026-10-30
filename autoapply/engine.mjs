@@ -33,8 +33,10 @@ import { trackApplication, updateApplication, setApplyState, recordEvent } from 
 import { recordRewrite, loadStyleExamples, loadBulletBank } from '../lib/rewrites.mjs';
 import { buildAnswerBook } from './answers.mjs';
 import { fillApplication } from './form-fill.mjs';
+import { fillWorkday, workdayAuth } from './workday-fill.mjs';
+import { ensureOnForm } from './account-create.mjs';
 
-export const FILLABLE_ATS = ['greenhouse', 'lever', 'ashby'];
+export const FILLABLE_ATS = ['greenhouse', 'lever', 'ashby', 'workday'];
 const MAX_ATTEMPTS = 3;
 
 // ─── Settings and lanes ──────────────────────────────────────────────────────
@@ -147,6 +149,14 @@ export function applyUrlFor({ url, ats, slug, rawId }) {
   }
   if (which === 'lever' && det?.ats === 'lever' && det.jobId) return `https://${det.host}/${det.slug}/${det.jobId}/apply`;
   if (which === 'ashby' && det?.ats === 'ashby' && det.jobId) return `https://jobs.ashbyhq.com/${det.slug}/${det.jobId}/application`;
+  if (which === 'workday') {
+    const d = det?.ats === 'workday' ? det : (url ? detectAts(url) : null);
+    if (d?.meta?.tenant && d?.meta?.shard && d?.meta?.site) {
+      const reqId = d.jobId || rawId;
+      if (reqId && !url) return `https://${d.meta.tenant}.${d.meta.shard}.myworkdayjobs.com/${d.meta.site}`;
+    }
+    return url || null;   // the job page: its Apply button leads into the account step
+  }
   // Test boards and plain HTML forms served from the developer's own machine.
   if (url && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//.test(url) && process.env.AUTO_APPLY_ALLOW_LOCAL === '1') return url;
   return null;
@@ -263,7 +273,7 @@ async function jobForTailoring(app) {
  * Tailor the resume and build the answers for one application.
  * mode: the lane's tailoring mode, or an explicit one for manual use.
  */
-export async function prepareApplication(userId, appId, { mode = null } = {}) { // `mode` is kept for old callers; there is one way to tailor now
+export async function prepareApplication(userId, appId, { mode = null, track = false } = {}) { // `mode` is kept for old callers; there is one way to tailor now
   const app = await loadApp(appId);
   if (!app || app.user_id !== userId) return { error: 'Not found', code: 404 };
   const rp = app.resume_profile_id ? await getResumeProfile(userId, app.resume_profile_id) : await getDefaultResumeProfile(userId);
@@ -287,7 +297,7 @@ export async function prepareApplication(userId, appId, { mode = null } = {}) { 
     applicationId: appId, mode: tailored.report.mode, model: tailored.report.model || null, job,
     before: rp.sections, after: tailored.sections, report: tailored.report, sent: app.status === 'APPLIED',
   });
-  if (app.source === 'auto') await setApplyState(appId, userId, 'PREPARED', { ...(app.apply_detail || {}), tailoring: tailored.report.mode });
+  if (app.source === 'auto' || track) await setApplyState(appId, userId, 'PREPARED', { ...(app.apply_detail || {}), tailoring: tailored.report.mode });
   else await recordEvent(appId, userId, { kind: 'resume', detail: { tailored: tailored.report.mode, profile: rp.name } });
   return { ok: true, report: tailored.report, resumeProfileName: rp.name };
 }
@@ -303,7 +313,7 @@ export async function submitApplication(userId, appId, { approve = false, browse
   if (!app || app.user_id !== userId) return { error: 'Not found', code: 404 };
   if (!app.tailored_resume) { const p = await prepareApplication(userId, appId); if (p.error) return p; return submitApplication(userId, appId, { approve, browser }); }
   const detail = app.apply_detail || {};
-  const formUrl = detail.formUrl || (app.job_snapshot?.url && applyUrlFor({ url: app.job_snapshot.url, ats: app.job_snapshot.ats }));
+  const formUrl = (app.job_snapshot?.ats === 'workday' ? null : detail.formUrl) || (app.job_snapshot?.url && applyUrlFor({ url: app.job_snapshot.url, ats: app.job_snapshot.ats }));
   if (!formUrl) { await setApplyState(appId, userId, 'NEEDS_YOU', { ...detail, reason: "This form can't be filled automatically. Apply on the company's site." }); return { outcome: 'NEEDS_YOU' }; }
 
   browser ||= await getBrowser();
@@ -312,6 +322,16 @@ export async function submitApplication(userId, appId, { approve = false, browse
     return { error: 'No browser available', code: 503 };
   }
   const rp = await getResumeProfile(userId, app.resume_profile_id);
+  // Credentials for ATS account creation (Phase 4)
+  // Email: prefer profile email, fall back to the Gmail account they connected via OAuth
+  const [{ rows: upRows }, { rows: gmailRows }] = await Promise.all([
+    query(`SELECT email, ats_password FROM user_profiles WHERE user_id = $1`, [userId]).catch(() => ({ rows: [] })),
+    query(`SELECT gmail_email FROM user_gmail_tokens WHERE user_id = $1`, [userId]).catch(() => ({ rows: [] })),
+  ]);
+  const atsEmail = upRows[0]?.email || gmailRows[0]?.gmail_email || rp?.sections?.personal?.email || null;
+  const userCreds = atsEmail
+    ? { email: atsEmail, password: upRows[0]?.ats_password || null, fullName: rp?.sections?.personal?.fullName }
+    : null;
   const settings = await getSettings(userId);
   const tailored = app.tailored_resume;
   const send = approve || app.review_before_submit === false;
@@ -320,7 +340,7 @@ export async function submitApplication(userId, appId, { approve = false, browse
   const dir = await mkdtemp(join(tmpdir(), 'autoapply-'));
   const name = (rp?.sections?.personal?.fullName || 'Resume').replace(/[^A-Za-z0-9]+/g, '_');
   const files = { resume: join(dir, `${name}_Resume.pdf`), coverLetter: null };
-  const page = await browser.newPage();
+  const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });   // Workday hides footer buttons behind its sticky bar on short windows
   await setApplyState(appId, userId, 'SUBMITTING', detail, { attempts: (app.attempts || 0) + 1 });
   let result;
   try {
@@ -332,7 +352,29 @@ export async function submitApplication(userId, appId, { approve = false, browse
       const letterHtml = `<!doctype html><meta charset=utf-8><body style="font:11pt/1.5 Arial;max-width:6.5in;margin:0 auto;white-space:pre-wrap">${esc(app.cover_letter)}</body>`;
       await writeFile(files.coverLetter, await renderResumePDF(letterHtml));
     }
-    result = await fillApplication(page, formUrl, book, files, { submit: send, acceptConsent: settings.acceptConsent });
+    // Phase 4: handle ATS login wall (creates account + reads OTP via Gmail)
+    const isWd = detectAts(formUrl || '')?.ats === 'workday';
+    const wallResult = isWd
+      ? (userCreds?.password ? await workdayAuth(page, formUrl, userCreds, userId) : { ok: false, reason: 'Workday needs an account. Add an ATS password in Profile → ATS Account Password.' })
+      : await ensureOnForm(page, formUrl, userCreds, userId);
+    if (!wallResult.ok) {
+      result = wallResult.applied   // the account shows this job as applied already
+        ? { outcome: 'SUBMITTED', filled: [], missing: [], reason: wallResult.reason, confirmation: 'Already applied on Workday' }
+        : { outcome: 'NEEDS_YOU', filled: [], missing: [], reason: wallResult.reason };
+    } else {
+      const isWorkday = detectAts(formUrl || '')?.ats === 'workday';
+      if (isWorkday) {
+        result = await fillWorkday(page, formUrl, book, files, {
+          alreadyOnPage: true, submit: send, acceptConsent: settings.acceptConsent,
+          llmContext: { job: app.job_snapshot || {}, resumeSections: (tailored.sections || rp?.sections || {}) },
+        });
+      } else {
+        result = await fillApplication(page, formUrl, book, files, {
+          submit: send, acceptConsent: settings.acceptConsent, alreadyOnPage: true,
+          llmContext: { job: app.job_snapshot || {}, resumeSections: (tailored.sections || rp?.sections || {}) },
+        });
+      }
+    }
   } catch (err) {
     result = { outcome: 'FAILED', filled: [], missing: [], reason: err.message.split('\n')[0] };
   } finally {
@@ -349,7 +391,9 @@ export async function submitApplication(userId, appId, { approve = false, browse
   } else if (result.outcome === 'NEEDS_YOU') {
     await setApplyState(appId, userId, 'NEEDS_YOU', base);
   } else {
-    const attempts = (app.attempts || 0) + 1;
+    // Once the Submit button was clicked a retry could send a duplicate, so that failure is final.
+    const clicked = /^Submitted, but/.test(result.reason || '');
+    const attempts = clicked ? MAX_ATTEMPTS : (app.attempts || 0) + 1;
     await setApplyState(appId, userId, attempts >= MAX_ATTEMPTS ? 'FAILED' : 'PREPARED', { ...base, attempts, willRetry: attempts < MAX_ATTEMPTS });
   }
   return { outcome: result.outcome, reason: result.reason, filled: result.filled.length, missing: result.missing };
@@ -386,6 +430,68 @@ export async function skipApplication(userId, appId) {
   return { ok: true };
 }
 
+// ─── Apply pipeline (the Apply button, Submit, Try again) ────────────────────
+
+const APPLY_TIMEOUT_MS = 6 * 60_000;   // tailor + up to 3 fills; a stuck browser must not hold an application forever
+const running = new Set();             // application ids being worked on by this process
+export const isRunning = id => running.has(String(id));
+
+/**
+ * Run one application end to end in the background, owned by the server so a closed tab or a
+ * failed request can't strand it: tailor → fill the form → stop at NEEDS_REVIEW (approve=false),
+ * or send it (approve=true, after the person checked it) → SUBMITTED. Fill errors are retried up
+ * to MAX_ATTEMPTS and then land in FAILED, so every path ends in a visible state.
+ * Returns false when it's already running.
+ */
+export function startApply(userId, appId, { approve = false } = {}) {
+  appId = String(appId);
+  if (running.has(appId)) return false;
+  running.add(appId);
+  const stop = async reason => { await setApplyState(appId, userId, 'FAILED', { ...((await loadApp(appId))?.apply_detail || {}), reason, at: new Date().toISOString() }).catch(() => {}); };
+  let timer;
+  const work = (async () => {
+    let app = await loadApp(appId);
+    if (!app || app.user_id !== userId) return;
+    await query(`UPDATE applications SET attempts = 0 WHERE id = $1`, [appId]);
+    if (!approve || !app.tailored_resume) {
+      await setApplyState(appId, userId, 'QUEUED', app.apply_detail || {});
+      const p = await prepareApplication(userId, appId, { track: true });
+      if (p.error) return stop(p.error);
+    }
+    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+      const r = await submitApplication(userId, appId, { approve });
+      if (r.error) return stop(r.error);
+      if (r.outcome !== 'FAILED') return;          // NEEDS_REVIEW, NEEDS_YOU or SUBMITTED: a stopping point the person can see
+      if ((await loadApp(appId))?.apply_state === 'FAILED') return;   // out of attempts
+      await new Promise(r => setTimeout(r, 3000));
+    }
+  })();
+  Promise.race([work, new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('Timed out. The form took too long to fill. Try again.')), APPLY_TIMEOUT_MS); })])
+    .catch(err => stop(String(err.message).split('\n')[0]))
+    .finally(() => { clearTimeout(timer); running.delete(appId); });
+  return true;
+}
+
+/**
+ * Nothing may sit in QUEUED / PREPARED / SUBMITTING forever. A server restart, or a run that
+ * died, leaves applications nobody is working on; move them to FAILED so "Try again" shows up.
+ * Applications started by the Apply button belong to this process; auto-apply runs may live in
+ * the CLI, so those are only reaped when stuck filling for a long time.
+ */
+export async function reapStuckApplications() {
+  const { rows } = await query(
+    `SELECT id, user_id, apply_detail FROM applications
+      WHERE (source <> 'auto' AND apply_state IN ('QUEUED','PREPARED','SUBMITTING') AND updated_at < NOW() - INTERVAL '1 minute')
+         OR (source = 'auto' AND apply_state = 'SUBMITTING' AND updated_at < NOW() - INTERVAL '15 minutes')`);
+  let n = 0;
+  for (const r of rows) {
+    if (running.has(String(r.id))) continue;
+    await setApplyState(r.id, r.user_id, 'FAILED', { ...(r.apply_detail || {}), reason: 'Interrupted (the server restarted or the run stopped). Try again.', at: new Date().toISOString() });
+    n++;
+  }
+  return n;
+}
+
 // ─── Run ─────────────────────────────────────────────────────────────────────
 
 /**
@@ -413,6 +519,7 @@ export async function runForUser(userId, { dryRun = false, limit = 50, log = () 
       `SELECT id, (answers->>'approved')::boolean AS approved FROM applications
         WHERE user_id = $1 AND apply_state = 'PREPARED' AND source = 'auto' ORDER BY id LIMIT $2`, [userId, limit]);
     for (const { id, approved } of ready) {
+      if (running.has(String(id))) continue;
       const r = await submitApplication(userId, String(id), { approve: !!approved });
       if (r.error) { summary.errors.push({ id: String(id), error: r.error }); if (r.code === 503) break; continue; }
       summary.outcomes[r.outcome] = (summary.outcomes[r.outcome] || 0) + 1;

@@ -15,7 +15,7 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";   -- trigram for fast LIKE/ILIKE searc
 CREATE TABLE IF NOT EXISTS companies (
   id           SERIAL PRIMARY KEY,
   name         TEXT NOT NULL,
-  ats          TEXT NOT NULL,           -- greenhouse | ashby | lever | workday | bamboohr | workable | smartrecruiters | recruitee | breezy | pinpoint | rippling | teamtailor | oraclecloud
+  ats          TEXT NOT NULL,           -- greenhouse | ashby | lever | workday | bamboohr | workable | smartrecruiters | recruitee | breezy | pinpoint | rippling | teamtailor | oraclecloud | manual (pasted link on any other site; never scanned)
   slug         TEXT NOT NULL,           -- ATS-specific identifier (e.g. 'openai', 'nvidia')
   meta         JSONB DEFAULT '{}',      -- extra fields: tenant, shard, site (Workday); domain (BambooHR)
   active       BOOLEAN DEFAULT TRUE,    -- false = board 404'd, skip
@@ -746,3 +746,19 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_applications_user_source_ext
 
 -- "Match the job" (lib/resume-match.mjs) is the default tailoring for new lanes.
 ALTER TABLE auto_apply_lanes ALTER COLUMN tailor_mode SET DEFAULT 'match';
+
+-- ── Gmail OAuth tokens ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS user_gmail_tokens (
+  user_id       UUID PRIMARY KEY,
+  access_token  TEXT NOT NULL,
+  refresh_token TEXT,
+  expiry        TIMESTAMPTZ,
+  gmail_email   TEXT,
+  connected_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── Account credentials for ATS auto-create ───────────────────────────────
+-- Stores the default password users want to use when auto-apply creates
+-- an account on their behalf on an ATS platform.
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS ats_password TEXT;

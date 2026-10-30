@@ -5,10 +5,15 @@
  * Greenhouse, Lever and Ashby forms (and plain HTML forms). It never solves
  * or works around a CAPTCHA: a visible challenge stops the application and
  * hands it to the person.
+ *
+ * LLM fallback: when a required field has no known answer, the configured
+ * cloud LLM (OpenRouter / Anthropic / HF) is called to generate one from the
+ * resume + job context. Pass opts.llmContext = { job, resumeSections } to
+ * enable it.
  */
-import { resolveAnswer } from './answers.mjs';
+import { resolveAnswer, chooseOption } from './answers.mjs';
+import { llmAnswer, llmChoose } from './llm-answers.mjs';
 
-/** Runs in the page: tags every visible control and describes it. */
 function scanForm() {
   const visible = el => {
     const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
@@ -18,7 +23,6 @@ function scanForm() {
   const textOf = el => (el ? el.innerText || el.textContent || '' : '');
   const reqClass = el => !!el && /(^|[\s_-])required/i.test(String(el.className || ''));
   const byIds = ids => ids.split(/\s+/).map(i => textOf(document.getElementById(i))).join(' ');
-  // Returns [text, element] so the label's own "required" class can be read (Ashby).
   function labelOf(el) {
     const lb = el.getAttribute('aria-labelledby'); if (lb) { const t = byIds(lb).trim(); if (t) return [t, document.getElementById(lb.split(/\s+/)[0])]; }
     if (el.id) { const l = document.querySelector(`label[for="${CSS.escape(el.id)}"]`); if (l && textOf(l).trim()) return [textOf(l), l]; }
@@ -46,10 +50,7 @@ function scanForm() {
     return [el.name || '', null];
   }
   const starred = t => /[*✱](\s|$)/.test(t);
-
   const fields = []; let n = 0; const groups = new Map();
-  // The application form is the one holding the resume upload or the most
-  // fields; Ashby renders without a <form>, so fall back to the document.
   const score = f => f.querySelectorAll('input[type=file]').length * 100 + f.querySelectorAll('input, select, textarea').length;
   const form = [...document.forms].filter(f => score(f) >= 3).sort((a, b) => score(b) - score(a))[0] || document;
   for (const el of form.querySelectorAll('input, select, textarea')) {
@@ -76,18 +77,16 @@ function scanForm() {
     el.setAttribute('data-aa-id', id);
     const [raw, lEl] = labelOf(el);
     let label = clean(raw);
-    // Upload widgets often label the input "Attach"; the input's id says what it is.
     if (type === 'file' && !/resume|cv\b|cover/i.test(label)) label = `${label} (${el.id || el.name || 'file'})`;
     const f = {
       id, tag: el.tagName.toLowerCase(), type, name: el.name || '', label,
-      required: el.required || el.getAttribute('aria-required') === 'true' || starred(raw) || reqClass(lEl),
+      required: el.required || el.getAttribute('aria-required') === 'true' || (!(type === 'file' && !/resume|cv\b|cover/i.test(raw)) && (starred(raw) || reqClass(lEl))),
       combobox: el.getAttribute('role') === 'combobox' || el.getAttribute('aria-autocomplete') === 'list',
       accept: el.getAttribute('accept') || '',
     };
     if (f.tag === 'select') f.options = [...el.options].map(o => ({ label: clean(o.textContent), value: o.value }));
     fields.push(f);
   }
-  // Yes/No answered with a pair of buttons (Ashby).
   const pairs = new Map();
   for (const b of form.querySelectorAll('button[data-option], button[aria-pressed]')) {
     if (!/^(yes|no)$/i.test(textOf(b).trim()) || !visible(b)) continue;
@@ -105,7 +104,6 @@ function scanForm() {
   return fields;
 }
 
-/** A challenge the person has to complete. Invisible reCAPTCHA badges don't count. */
 function findChallenge() {
   const shown = el => { const r = el.getBoundingClientRect(); return r.width > 30 && r.height > 30 && getComputedStyle(el).visibility !== 'hidden'; };
   const frames = [...document.querySelectorAll('iframe')].filter(f => {
@@ -140,7 +138,6 @@ async function fillOne(page, field, ans, files) {
     return true;
   }
   if (field.combobox && ans.value?.option) {
-    // A dropdown whose options were read by openCombobox(): open it again and click the one chosen.
     await loc.click();
     const list = await listboxFor(page, loc);
     await list.locator('[role="option"]').filter({ hasText: exactText(ans.value.option.label) }).first().click();
@@ -158,7 +155,6 @@ async function fillOne(page, field, ans, files) {
   }
   if (ans.value === null) return false;
   if (!field.combobox) { await loc.fill(String(ans.value)); return true; }
-  // Typeahead (Greenhouse location, school): type, then pick the matching suggestion.
   const typed = String(ans.value).split(',')[0].trim();
   await loc.fill(typed);
   await page.waitForTimeout(900);
@@ -171,13 +167,11 @@ async function fillOne(page, field, ans, files) {
 
 const exactText = t => new RegExp(`^\\s*${String(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i');
 
-/** The listbox a combobox controls, or the page when it doesn't say. */
 async function listboxFor(page, loc) {
   const id = await loc.getAttribute('aria-controls') || await loc.getAttribute('aria-owns');
   return id ? page.locator(`[id="${id}"]`) : page.locator('body');
 }
 
-/** Open a dropdown-style combobox and read its options (React selects on Greenhouse). */
 async function openCombobox(page, field) {
   const loc = page.locator(`[data-aa-id="${field.id}"]`);
   try {
@@ -186,42 +180,46 @@ async function openCombobox(page, field) {
     const list = await listboxFor(page, loc);
     const labels = (await list.locator('[role="option"]').allInnerTexts()).map(t => t.trim()).filter(Boolean);
     await loc.press('Escape').catch(() => {});
-    // A long list (countries, schools) or "No options" is a typeahead: leave it to typing.
     if (!labels.length || labels.length > 40 || /no options/i.test(labels[0])) return null;
     return labels.map(l => ({ label: l, value: l }));
   } catch { return null; }
 }
 
-/**
- * Open the form, fill it, and either stop (submit: false) or submit.
- *
- * @param {import('playwright-core').Page} page
- * @param {string} url
- * @param {object} book            buildAnswerBook()
- * @param {{ resume: string, coverLetter?: string }} files  paths on disk
- * @param {{ submit?: boolean, acceptConsent?: boolean, screenshotPath?: string, timeoutMs?: number }} opts
- * @returns {Promise<{ outcome: 'FILLED'|'SUBMITTED'|'NEEDS_YOU'|'FAILED', filled: object[], missing: object[], reason?: string, confirmation?: string }>}
- */
+async function tryLLMFill(page, field, book, llmCtx, files) {
+  if (['resumeFile', 'coverLetterFile', 'otherFile'].includes(field.type) || field.type === 'file') return { ok: false };
+  if (field.type === 'checkbox' && !field.group) return { ok: false };
+  const isChoice = field.tag === 'select' || field.type === 'radio' || field.type === 'buttons' || (field.type === 'checkbox' && field.group);
+  if (isChoice && field.options?.length) {
+    const chosenLabel = await llmChoose(field.label, field.options, llmCtx).catch(() => null);
+    if (!chosenLabel) return { ok: false };
+    const opt = chooseOption(field.options, chosenLabel);
+    if (!opt) return { ok: false };
+    try { const ok = await fillOne(page, field, { key: 'llm', value: { option: opt }, source: 'llm' }, files); return { ok, value: opt.label }; }
+    catch { return { ok: false }; }
+  }
+  const text = await llmAnswer(field.label, llmCtx).catch(() => null);
+  if (!text) return { ok: false };
+  try { const ok = await fillOne(page, field, { key: 'llm', value: text, source: 'llm' }, files); return { ok, value: text }; }
+  catch { return { ok: false }; }
+}
+
 export async function fillApplication(page, url, book, files, opts = {}) {
   const timeout = opts.timeoutMs ?? 30_000;
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
-  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
-
-  // Some boards show the description first with an "Apply" button.
-  const applyBtn = page.locator('a, button').filter({ hasText: /^\s*apply( for this job| now)?\s*$/i }).first();
-  if (await applyBtn.count() && !(await page.locator('input[type=file]').count())) {
-    await applyBtn.click().catch(() => {});
+  if (!opts.alreadyOnPage) {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
     await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+    const applyBtn = page.locator('a, button').filter({ hasText: /^\s*apply( for this job| now)?\s*$/i }).first();
+    if (await applyBtn.count() && !(await page.locator('input[type=file]').count())) {
+      await applyBtn.click().catch(() => {});
+      await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+    }
   }
-
   let challenge = await page.evaluate(findChallenge);
   if (challenge) return { outcome: 'NEEDS_YOU', filled: [], missing: [], reason: `${challenge} on the form` };
-
   const fields = await page.evaluate(scanForm);
   if (!fields.some(f => f.type === 'file') && !fields.some(f => /e-?mail/i.test(f.label))) {
     return { outcome: 'FAILED', filled: [], missing: [], reason: 'No application form found on the page' };
   }
-
   const filled = []; const missing = [];
   for (const field of fields) {
     if (field.combobox && !field.options) {
@@ -231,6 +229,11 @@ export async function fillApplication(page, url, book, files, opts = {}) {
     const ans = resolveAnswer(field, book, { acceptConsent: !!opts.acceptConsent });
     let ok = false;
     try { ok = await fillOne(page, field, ans, files); } catch (err) { ok = false; ans.error = err.message.split('\n')[0]; }
+    // LLM fallback for required unknown fields
+    if (!ok && field.required && ans.value === null && opts.llmContext) {
+      const llmResult = await tryLLMFill(page, field, book, opts.llmContext, files);
+      if (llmResult.ok) { filled.push({ label: field.label, key: 'llm', value: llmResult.value, source: 'llm' }); continue; }
+    }
     const shown = ans.value?.option ? ans.value.option.label : ans.value;
     if (ok) filled.push({ label: field.label, key: ans.key, value: field.type === 'file' ? (ans.key === 'resumeFile' ? 'resume.pdf' : 'cover-letter.pdf') : shown, source: ans.source });
     else if (field.required) {
@@ -239,31 +242,23 @@ export async function fillApplication(page, url, book, files, opts = {}) {
     }
   }
   if (opts.screenshotPath) await page.screenshot({ path: opts.screenshotPath, fullPage: true }).catch(() => {});
-
   if (missing.length) return { outcome: 'NEEDS_YOU', filled, missing, reason: `${missing.length} required question${missing.length === 1 ? '' : 's'} need${missing.length === 1 ? 's' : ''} your answer` };
   if (!opts.submit) return { outcome: 'FILLED', filled, missing };
-
   const submit = page.locator('button[type=submit], input[type=submit], button').filter({ hasText: /submit/i }).first();
   const target = (await submit.count()) ? submit : page.locator('button[type=submit], input[type=submit]').first();
   if (!(await target.count())) return { outcome: 'FAILED', filled, missing, reason: 'No submit button found' };
   const before = page.url();
-  await Promise.all([
-    page.waitForNavigation({ timeout: 15_000 }).catch(() => {}),
-    target.click(),
-  ]);
+  await Promise.all([page.waitForNavigation({ timeout: 15_000 }).catch(() => {}), target.click()]);
   await page.waitForTimeout(1500);
-
   challenge = await page.evaluate(findChallenge);
   if (challenge) return { outcome: 'NEEDS_YOU', filled, missing, reason: `${challenge} appeared after submitting; finish it in the browser` };
   const body = await page.locator('body').innerText().catch(() => '');
   const m = body.match(SUCCESS_TEXT);
-  if (m || (page.url() !== before && SUCCESS_URL.test(page.url()))) {
-    return { outcome: 'SUBMITTED', filled, missing, confirmation: m ? m[0] : page.url() };
-  }
+  if (m || (page.url() !== before && SUCCESS_URL.test(page.url()))) return { outcome: 'SUBMITTED', filled, missing, confirmation: m ? m[0] : page.url() };
   const errors = await page.locator('[aria-invalid="true"], [role="alert"], .error, .field-error, .error-message').allInnerTexts().catch(() => []);
   const errText = errors.map(t => t.trim()).filter(Boolean).slice(0, 5);
   if (errText.length) return { outcome: 'NEEDS_YOU', filled, missing, reason: `The form reported: ${errText.join(' · ')}` };
-  return { outcome: 'FAILED', filled, missing, reason: 'Submitted, but no confirmation appeared' };
+  return { outcome: 'FAILED', filled, missing, reason: `Submitted, but no confirmation appeared. It may or may not have gone through, so check the company's email or portal before trying again. The page said: ${body.replace(/\s+/g, ' ').trim().slice(0, 160)}` };
 }
 
 export { scanForm, findChallenge };

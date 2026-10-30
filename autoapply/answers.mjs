@@ -19,7 +19,7 @@ export function buildAnswerBook(sections, job = {}, { coverLetter = '', override
   return {
     firstName: names[0] || '', lastName: names.length > 1 ? names[names.length - 1] : '', fullName: p.fullName,
     email: p.email, phone: p.phone,
-    location: [p.city, p.state, p.country].filter(Boolean).join(', '), city: p.city, state: p.state, country: p.country,
+    location: [p.city, p.state, p.country].filter(Boolean).join(', '), address: p.address || '', zip: p.zip || '', city: p.city, state: p.state, country: p.country,
     linkedin: p.linkedin, github: p.github, website: p.portfolio || p.github || '',
     currentCompany: current.company || '', currentTitle: current.title || '',
     yearsExperience: s.experience.length ? String(Math.floor(totalExperienceYears(s.experience) || 0)) : '',
@@ -32,7 +32,10 @@ export function buildAnswerBook(sections, job = {}, { coverLetter = '', override
     canRelocate: ad.canRelocate, inPersonOk: ad.inPersonOk, startImmediately: ad.startImmediately,
     noticePeriod: ad.noticePeriod || (ad.startImmediately ? 'Immediately' : ''),
     salaryExpectation: ad.salaryExpectation || '',
-    priorEmployee: ad.priorEmployee, govClearance: ad.govClearance, govTies: ad.govTies,
+    priorEmployee: ad.priorEmployee ?? false,   // never worked at the employer unless the profile says so
+    govClearance: ad.govClearance, govTies: ad.govTies,
+    // "U.S. worker" (citizen, national, permanent resident, refugee, asylee): never true on a visa
+    usPerson: /^(us|u\.s\.?|usa|united states|american)\b/i.test(ad.citizenship || '') || /green card|permanent resident|refugee|asyl/i.test(ad.workPermit || ''),
     over18: ad.over18, referralSource: ad.referralSource || '',
     hasTransport: ad.hasTransport, needsAccommodations: ad.needsAccommodations,
     gender: ad.gender || '', ethnicity: ad.ethnicity || '', veteran: ad.veteran || '', disability: ad.disability || '',
@@ -54,6 +57,7 @@ const RULES = [
   ['gender', l => /\bgender\b|\bsex\b/.test(l) && !/orientation|transgender/.test(l)],
   ['veteran', l => /veteran/.test(l)],
   ['disability', l => /disabilit/.test(l)],
+  ['usPerson', l => /u\.?s\.? (worker|person)|(lawful|legal) permanent resident|green card holder|are you a u\.?s\.? citizen/.test(l)],
   ['needsSponsorship', l => /sponsor/.test(l)],
   ['authorizedToWork', l => /(authori[sz]ed|eligible|legally (able|permitted)|right) to work|work authori[sz]ation|employment eligibility/.test(l)],
   ['visaStatus', l => /visa|immigration status|work permit/.test(l)],
@@ -85,6 +89,8 @@ const RULES = [
   ['graduationYear', l => /graduat/.test(l)],
   ['gpa', l => /\bgpa\b|grade point/.test(l)],
   ['country', l => /^country\b|country of residence|country you (live|reside)/.test(l)],
+  ['address', l => /^(street )?address( line 1)?$|street address/.test(l)],
+  ['zip', l => /postal|zip/.test(l)],
   ['location', l => /^(current )?location|\bcity\b|where (are you|do you) (currently )?(located|based|live)|address/.test(l)],
   ['fullName', l => /^(full |legal )?name\b|your name/.test(l)],
 ];
@@ -116,13 +122,20 @@ export function chooseOption(options, wanted) {
   if (exact) return exact;
   const SYN = {
     male: /^(male|man)\b/i, female: /^(female|woman)\b/i, 'non-binary': /non[- ]?binary/i,
-    'not a protected veteran': /not a (protected )?veteran|i am not a|^no\b/i,
+    'not a protected veteran': /^(i am )?not a (protected )?veteran|i am not a|^no\b|not a veteran/i,
     'protected veteran': /identify as (one or more|a protected)|i am a (protected )?veteran|^yes\b/i,
     no: /^no\b/i, yes: /^yes\b/i,
+    'united states': /^(united states( of america)?|usa)$/i, us: /^(united states( of america)?|usa)$/i, usa: /^(united states( of america)?|usa)$/i,
     asian: /asian/i, white: /^white/i, 'black or african american': /black/i, 'hispanic or latino': /hispanic|latin/i,
     'two or more races': /two or more/i, 'native hawaiian or other pacific islander': /hawaiian|pacific/i,
     'american indian or alaska native': /american indian|alaska/i,
   };
+  if (wl === 'not a protected veteran') {   // "I identify as a veteran, just not a protected veteran" means a veteran: never pick it
+    const m = opts.find(o => /not a veteran|i am not a (protected )?veteran/i.test(o.label)) || opts.find(o => /not a protected veteran/i.test(o.label) && !/identify as a veteran/i.test(o.label));
+    if (m) return m;
+  }
+  const lvl = [/^master/, /^bachelor/, /^associate/, /^(doctor|ph\.?\s?d)/, /^high school/].find(r => r.test(wl));
+  if (lvl) { const m = opts.find(o => lvl.test(o.label.trim().toLowerCase())) || opts.find(o => new RegExp(lvl.source.slice(1)).test(o.label.toLowerCase())); if (m) return m; }
   if (SYN[wl]) { const m = opts.find(o => SYN[wl].test(o.label.trim())); if (m) return m; }
   const starts = opts.find(o => o.label.trim().toLowerCase().startsWith(wl));
   if (starts) return starts;
