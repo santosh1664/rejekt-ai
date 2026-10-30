@@ -22,24 +22,26 @@ const MAX_PAGES     = 50;
 // so every Workable request goes through a shared gate per host: 1 per WORKABLE_GAP_MS.
 // apply.workable.com and jobs.workable.com are blocked separately, so a block on one must not stall the other.
 const GAP_MS = +(process.env.WORKABLE_GAP_MS || 1100);
-const hosts = new Map();   // host → { nextSlot, backoff }
+const hosts = new Map();   // host → { nextSlot, blockedUntil, backoff }
 async function gate(h) {
   const now = Date.now(); const at = Math.max(now, h.nextSlot); h.nextSlot = at + GAP_MS;
   if (at > now) await sleep(at - now);
 }
-// On 429 wait, then try again; each 429 in a row doubles the wait (1 → 2 → 4 … 10 min), a success resets it.
-// Without this every following company hit the block too and was skipped, run after run.
+// On 429 the host is treated as blocked for a while; each 429 in a row doubles that (1 → 2 → 4 … 10 min),
+// a success resets it. While blocked, requests fail at once (429, so the company isn't penalized and is
+// retried next run) instead of waiting: waiting held the Workable workers and starved the unblocked host.
 async function workableJSON(url, opts) {
   const host = new URL(url).host;
-  if (!hosts.has(host)) hosts.set(host, { nextSlot: 0, backoff: 60_000 });
+  if (!hosts.has(host)) hosts.set(host, { nextSlot: 0, blockedUntil: 0, backoff: 60_000 });
   const h = hosts.get(host);
-  for (let attempt = 0; ; attempt++) {
-    await gate(h);
-    try { const data = await fetchJSON(url, { ...opts, retries: 0 }); h.backoff = 60_000; return data; }
-    catch (err) {
-      if (!/429/.test(err.message) || attempt >= 2) throw err;
-      h.nextSlot = Math.max(h.nextSlot, Date.now() + h.backoff); h.backoff = Math.min(h.backoff * 2, 600_000);
-    }
+  const blocked = () => { if (Date.now() < h.blockedUntil) throw new Error(`HTTP 429 (${host} blocked, retry next run)`); };
+  blocked();
+  await gate(h);
+  blocked();
+  try { const data = await fetchJSON(url, { ...opts, retries: 0 }); h.backoff = 60_000; return data; }
+  catch (err) {
+    if (/429/.test(err.message)) { h.blockedUntil = Date.now() + h.backoff; h.backoff = Math.min(h.backoff * 2, 600_000); }
+    throw err;
   }
 }
 
