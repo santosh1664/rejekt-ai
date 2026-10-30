@@ -282,7 +282,6 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .tcard b { display: block; font-size: 14px; line-height: 1.3; }
 .tcard .c { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
 .tcard .d { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--muted); }
-.tcard select { width: auto; padding: 3px 6px; font-size: 12px; border-radius: 7px; }
 
 /* ═══ Profile ═══════════════════════════════════════════════════════════════ */
 .switcher { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -1658,26 +1657,29 @@ async function renderTracker() {
   const q = (store.get('trackerQ', '') || '').toLowerCase();
   const apps = state.apps.applications.filter(a => !q || `${a.job?.company} ${a.job?.title}`.toLowerCase().includes(q));
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Tracker</h1><p>Drag a card to move it, or use the menu on each card.</p></div><span class="spacer"></span>
+    <div class="page-head"><div><h1>Tracker</h1><p>Drag a card to another column to move it.</p></div><span class="spacer"></span>
       <input id="tq" type="search" placeholder="Search companies or roles" value="${esc(q)}" style="width:240px" aria-label="Search tracker"/><button class="btn" id="exportCsv" type="button">Export CSV</button></div>
     <div class="board">${STATUSES.map(([k, l]) => {
       const items = apps.filter(a => a.status === k);
       return `<section class="col st-${k}" data-col="${k}" aria-label="${l}"><h3>${l}<span>${items.length}</span></h3>
         ${items.map(a => `<div class="tcard" draggable="true" data-app="${a.id}"><b>${esc(a.job?.title || 'Removed job')}</b><div class="c">${esc(a.job?.company || '')}</div>${a.applyState ? `<div class="aa-badge">${applyBadge(a.applyState)}</div>` : ''}
-          <div class="d"><span>${ago(a.updatedAt)}</span><select data-move="${a.id}" aria-label="Move to">${STATUSES.map(([v, lab]) => `<option value="${v}" ${v === k ? 'selected' : ''}>${lab}</option>`).join('')}<option value="ARCHIVED">Archive</option></select></div></div>`).join('') || '<p class="muted" style="font-size:13px;margin:4px 2px">Nothing here yet.</p>'}
+          <div class="d"><span>${ago(a.updatedAt)}</span></div></div>`).join('') || '<p class="muted" style="font-size:13px;margin:4px 2px">Nothing here yet.</p>'}
       </section>`;
     }).join('')}</div>`;
   $('#tq').addEventListener('input', e => { store.set('trackerQ', e.target.value); clearTimeout(renderTracker.t); renderTracker.t = setTimeout(() => renderTracker().then(() => { const i = $('#tq'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }), 250); });
   const move = async (id, status) => { await api('PATCH', `/users/${USER}/applications/${id}`, { status }); renderTracker(); };
-  $$('[data-move]').forEach(s => s.addEventListener('change', () => move(s.dataset.move, s.value)));
   $$('.tcard').forEach(c => {
     c.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', c.dataset.app));
-    c.addEventListener('click', e => { if (e.target.closest('select')) return; openApplication(c.dataset.app); });
+    c.addEventListener('click', () => openApplication(c.dataset.app));
   });
   $$('.col').forEach(col => {
     col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drop'); });
     col.addEventListener('dragleave', () => col.classList.remove('drop'));
-    col.addEventListener('drop', e => { e.preventDefault(); col.classList.remove('drop'); move(e.dataTransfer.getData('text/plain'), col.dataset.col); });
+    col.addEventListener('drop', e => {
+      e.preventDefault(); col.classList.remove('drop');
+      const id = e.dataTransfer.getData('text/plain');
+      if (state.apps.applications.find(x => x.id === id)?.status !== col.dataset.col) move(id, col.dataset.col);   // dropped back on its own column: nothing to do
+    });
   });
   $('#exportCsv').addEventListener('click', () => {
     const rows = [['Company', 'Role', 'Status', 'Applied', 'Updated', 'Link'], ...state.apps.applications.map(a => [a.job?.company, a.job?.title, a.status, a.appliedAt || '', a.updatedAt, a.job?.url])];
