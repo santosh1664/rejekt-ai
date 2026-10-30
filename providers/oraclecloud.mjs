@@ -12,14 +12,15 @@
  * company.meta = { host, site }   (preferred when present)
  *
  * Large tenants list thousands of reqs, so pages are fetched newest-first
- * and capped (ORACLE_MAX_PAGES, default 40 → 1,000 jobs). The list carries a
+ * and capped (ORACLE_MAX_JOBS, default 1,000). The list carries a
  * short description only; PostedDate is date-only.
  */
 import { fetchJSON, normalizeLocation, sleep, INTER_REQUEST_DELAY_MS } from '../lib/http.mjs';
 
 export const ATS = 'oraclecloud';
-const PAGE_SIZE = 25;
-const MAX_PAGES = parseInt(process.env.ORACLE_MAX_PAGES || '40', 10);
+// The API serves up to 200 per page in about the time it takes for 25 (1.6s vs 1.1s, measured), so 8x fewer requests.
+const PAGE_SIZE = 200;
+const MAX_PAGES = Math.ceil(parseInt(process.env.ORACLE_MAX_JOBS || '1000', 10) / PAGE_SIZE);
 
 export function oracleTarget(company) {
   const [slugHost, slugSite] = String(company.slug || '').split('/');
