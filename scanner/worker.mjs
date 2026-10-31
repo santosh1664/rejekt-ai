@@ -120,6 +120,7 @@ export async function processCompany(company, opts = {}) {
       isNew = (job) => isJobInCoverage(job) && !known.has(computeFingerprint(job));
     }
     jobs = opts.prefetchedJobs ?? await provider(company, { verbose: opts.verbose, isNew });
+    result.truncated = !!jobs?.truncated;   // partial list: freshness must not count its missing jobs as gone
   } catch (err) {
     result.error = err.message;
     return result;
@@ -216,7 +217,9 @@ export async function processCompany(company, opts = {}) {
       );
     } catch (err) {
       if (opts.verbose) console.error(`  ⚠ ${company.name}: touch-unchanged failed: ${err.message}`);
-      // Don't abort — still try to upsert new/changed jobs below
+      // Still upsert new/changed jobs below, but the company must not count as cleanly scanned: its jobs
+      // kept their old last_seen, and freshness would read every one of them as gone (POET: 80 live jobs).
+      result.error = `touch-unchanged failed: ${err.message}`;
     }
   }
 

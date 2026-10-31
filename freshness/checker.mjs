@@ -41,8 +41,9 @@ const THRESHOLD   = parseInt(process.env.MISSED_SCANS_THRESHOLD ?? '2', 10);
 // statement, no single all-table UPDATE) while reducing round-trip count ~3x.
 const BATCH_SIZE  = parseInt(process.env.FRESHNESS_BATCH_SIZE   ?? '15000', 10);
 
-// Each batch gets this timeout.
-const BATCH_TIMEOUT_MS = 30_000;
+// Each batch gets this timeout. 30s was too little while a scan or the Workable feed load keeps RDS busy:
+// one slow batch failed the whole pass and no jobs were closed.
+const BATCH_TIMEOUT_MS = +process.env.FRESHNESS_BATCH_TIMEOUT_MS || 120_000;
 
 // Pause between batches to let autovacuum and other queries breathe.
 const INTER_BATCH_PAUSE_MS = 200;
@@ -129,7 +130,6 @@ export async function markClosedJobs(opts = {}) {
     console.error('  [freshness] client connection error:', err.message);
   });
   try {
-    // Each batch only touches BATCH_SIZE rows — 30s is ample per batch.
     await client.query(`SET statement_timeout = ${BATCH_TIMEOUT_MS}`);
 
     // ── Step 1 — Increment missed_scans for stale jobs (batched by id) ──────
@@ -141,10 +141,12 @@ export async function markClosedJobs(opts = {}) {
         WHERE active = TRUE
           ${opts.since
             // a run's own start: not seen since it began, and only companies it scanned cleanly
-            ? `AND last_seen < $1 AND company_id IN (SELECT id FROM companies WHERE last_scan >= $1 AND scan_errors = 0)`
+            // …except companies whose board was cut off at a page cap (Workday 200, Oracle 1,000 jobs): unseen ≠ gone
+            ? `AND last_seen < $1 AND company_id IN (SELECT id FROM companies WHERE last_scan >= $1 AND scan_errors = 0)
+               AND NOT (company_id = ANY($2::int[]))`
             : `AND last_seen < NOW() - ($1 * interval '1 minute')`}
           __ID_RANGE__`,
-      [opts.since || window],
+      opts.since ? [opts.since, opts.skipCompanies || []] : [window],
       opts,
     );
     const ms1 = Date.now() - t1;

@@ -50,7 +50,8 @@ export async function fetchAll(company, opts = {}) {
     await sleep(INTER_REQUEST_DELAY_MS);
   }
 
-  return [...seen.values()];
+  // Stopped at the page cap: the jobs past it weren't seen, which doesn't mean they're gone (freshness skips these)
+  return Object.assign([...seen.values()], { truncated: seen.size < total && Number.isFinite(total) });
 }
 
 function normalize(raw, company, tenant, shard, site) {

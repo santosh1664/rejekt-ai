@@ -50,7 +50,8 @@ export async function fetchAll(company, opts = {}) {
     if (opts.isNew && !fresh) break;   // newest first: a page with nothing new means the rest is known too
     await sleep(INTER_REQUEST_DELAY_MS);
   }
-  return [...seen.values()];
+  // Stopped at ORACLE_MAX_JOBS or early (quick): the jobs past it weren't seen, which doesn't mean they're gone
+  return Object.assign([...seen.values()], { truncated: seen.size < total && Number.isFinite(total) });
 }
 
 function normalize(r, company, host, site) {

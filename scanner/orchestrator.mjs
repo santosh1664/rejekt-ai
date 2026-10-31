@@ -108,6 +108,7 @@ export async function runScan(opts = {}) {
   // Collect company IDs for batched touchCompany at end (2 queries instead of N)
   const companySuccessIds = [];
   const companyErrorIds   = [];
+  const truncatedIds      = [];   // got only part of their board (page caps): freshness skips them
 
   try {
     // Build one pool per ATS
@@ -165,6 +166,7 @@ export async function runScan(opts = {}) {
           if (!opts.dryRun) companyErrorIds.push(result.companyId);
         } else {
           if (!opts.dryRun) companySuccessIds.push(result.companyId);
+          if (result.truncated) truncatedIds.push(result.companyId);
         }
 
         // Progress log every 50 companies; also save which companies are done so a killed run can resume
@@ -211,7 +213,7 @@ export async function runScan(opts = {}) {
     if (!opts.dryRun && !opts.skipFreshness && !opts.quick) {
       console.error('\n🔄  Running freshness check...');
       try {
-        const { closed } = await markClosedJobs({ since: new Date(started) });   // only companies this run reached
+        const { closed } = await markClosedJobs({ since: new Date(started), skipCompanies: truncatedIds });   // only companies this run reached
         totals.jobsClosed = closed;
       } catch (err) {
         console.error(`  ⚠️  Freshness check failed (non-fatal): ${err.message}`);
