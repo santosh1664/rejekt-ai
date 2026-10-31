@@ -27,21 +27,27 @@ async function gate(h) {
   const now = Date.now(); const at = Math.max(now, h.nextSlot); h.nextSlot = at + GAP_MS;
   if (at > now) await sleep(at - now);
 }
-// On 429 the host is treated as blocked for a while; each 429 in a row doubles that (1 → 2 → 4 … 10 min),
-// a success resets it. While blocked, requests fail at once (429, so the company isn't penalized and is
-// retried next run) instead of waiting: waiting held the Workable workers and starved the unblocked host.
+// A short 429 (Retry-After ≤ 10 min) pauses the host and the request is retried; each 429 in a row doubles
+// the pause (1 → 2 → 4 … 10 min), a success resets it. A long one (apply.workable.com sends hours) marks the
+// host blocked: its requests fail at once (429, so the company isn't penalized and is retried next run)
+// instead of holding the Workable workers. Failing fast on short blocks too drained the whole queue in a minute.
 async function workableJSON(url, opts) {
   const host = new URL(url).host;
   if (!hosts.has(host)) hosts.set(host, { nextSlot: 0, blockedUntil: 0, backoff: 60_000 });
   const h = hosts.get(host);
   const blocked = () => { if (Date.now() < h.blockedUntil) throw new Error(`HTTP 429 (${host} blocked, retry next run)`); };
-  blocked();
-  await gate(h);
-  blocked();
-  try { const data = await fetchJSON(url, { ...opts, retries: 0 }); h.backoff = 60_000; return data; }
-  catch (err) {
-    if (/429/.test(err.message)) { h.blockedUntil = Date.now() + h.backoff; h.backoff = Math.min(h.backoff * 2, 600_000); }
-    throw err;
+  for (let attempt = 0; ; attempt++) {
+    blocked();
+    await gate(h);
+    blocked();
+    try { const data = await fetchJSON(url, { ...opts, retries: 0 }); h.backoff = 60_000; return data; }
+    catch (err) {
+      if (!/429/.test(err.message)) throw err;
+      const retryAfter = +(err.message.match(/Retry-After (\d+)/)?.[1] || 0) * 1000;
+      if (retryAfter > 600_000) { h.blockedUntil = Date.now() + retryAfter; throw err; }
+      h.nextSlot = Math.max(h.nextSlot, Date.now() + Math.max(retryAfter, h.backoff)); h.backoff = Math.min(h.backoff * 2, 600_000);
+      if (attempt >= 2) throw err;
+    }
   }
 }
 
