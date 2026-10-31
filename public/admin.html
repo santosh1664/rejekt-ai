@@ -503,13 +503,14 @@ async function renderInvites() {
     ${rows.map(i => `<tr><td>${esc(i.email)}</td><td>${i.is_admin ? '<span class="badge info">Admin</span>' : 'User'}</td>
       <td class="mono">${i.user_id ? esc(i.linked_email || i.user_id.slice(0, 8) + '…') : '–'}</td><td>${when(i.created_at)}</td>
       <td>${i.used_at ? `<span class="badge ok">Signed up ${ago(i.used_at)}</span>` : '<span class="badge warn">Waiting</span>'}</td>
-      <td>${i.used_at ? '' : `<button class="btn" data-revoke="${esc(i.email)}">Revoke</button>`}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No invites yet.</td></tr>'}
+      <td>${i.used_at ? '' : `<div class="actions"><button class="btn" data-sendinv="${esc(i.email)}">Send invite email</button><button class="btn" data-revoke="${esc(i.email)}">Revoke</button></div>`}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No invites yet.</td></tr>'}
     </tbody></table></div>`;
 }
 renderInvites.after = () => {
   $('#invForm').onsubmit = (e) => { e.preventDefault(); act(e.submitter, () => api('POST', '/admin/api/invites', { email: $('#invEmail').value, user_id: $('#invUser').value.trim() || null, is_admin: $('#invAdmin').checked })); };
   $$('[data-reqinvite]').forEach(b => b.onclick = () => act(b, () => api('POST', '/admin/api/invites', { email: b.dataset.reqinvite })));
   $$('[data-reqdismiss]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/invite-requests/${encodeURIComponent(b.dataset.reqdismiss)}/dismiss`)));
+  $$('[data-sendinv]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/invites/${encodeURIComponent(b.dataset.sendinv)}/send`)));
   $$('[data-revoke]').forEach(b => b.onclick = () => act(b, () => api('DELETE', '/admin/api/invites/' + encodeURIComponent(b.dataset.revoke)), { confirm: ['Revoke this invite?', `${b.dataset.revoke} won't be able to sign up.`, 'Revoke'] }));
 };
 

@@ -70,7 +70,8 @@ $('passRow').hidden = !mode.pass; $('password').required = !!mode.pass;
 if (mode.pass) { $('password').autocomplete = mode.pass; $('passHint').hidden = mode.pass !== 'new-password'; }
 // keep where the user was headed when moving between log in and sign up
 if (params.get('next')) for (const a of $('links').querySelectorAll('a')) a.href += '?next=' + encodeURIComponent(params.get('next'));
-(mode.email ? $('email') : $('password')).focus();
+if (params.get('email') && mode.email) $('email').value = params.get('email');   // from the invite email's link
+(mode.email && !$('email').value ? $('email') : $('password')).focus();
 
 function show(text, kind = 'bad') { const m = $('msg'); m.textContent = text; m.className = 'msg ' + kind; m.hidden = !text; }
 
