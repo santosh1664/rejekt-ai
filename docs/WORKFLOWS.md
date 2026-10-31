@@ -209,7 +209,7 @@ Prints: total companies, active jobs, jobs added in last 24 h, last scan time, s
 ## Scheduled Automation (macOS launchd)
 
 ```bash
-# Install launchd job (scans every 4 hours)
+# Install launchd job (scans every 6 hours)
 cp scripts/com.job-discovery-saas.scan.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.job-discovery-saas.scan.plist
 

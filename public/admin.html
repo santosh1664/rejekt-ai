@@ -433,9 +433,9 @@ renderScans.after = () => {
     $('#scanAll').disabled = all; $('#scanAll').textContent = all ? 'Scanning all platforms…' : 'Scan all now';
     $('#stopAll').disabled = !procs.length;
     renderCards();
-    $('#scanPlatforms').innerHTML = `<table><thead><tr><th>Platform</th><th>Status</th><th>Companies</th><th>Scanned in last 4 h</th><th>Never scanned</th><th>Erroring</th><th>Open jobs</th><th>New 1 h</th><th>Last scan</th><th></th></tr></thead><tbody>
+    $('#scanPlatforms').innerHTML = `<table><thead><tr><th>Platform</th><th>Status</th><th>Companies</th><th>Scanned in last ${d.platforms[0]?.freshHours ?? ''} h</th><th>Never scanned</th><th>Erroring</th><th>Open jobs</th><th>New 1 h</th><th>Last scan</th><th></th></tr></thead><tbody>
       ${d.platforms.map(p => {
-        const live = p.companies - (p.dead || 0), pct = live ? Math.round(100 * p.fresh4h / live) : 100;
+        const live = p.companies - (p.dead || 0), pct = live ? Math.round(100 * p.fresh / live) : 100;
         const running = procs.some(x => x.ats === p.ats);
         const status = p.state === 'running' && pct < 100 ? '<span class="badge info">Scanning</span>' : pct >= 90 ? '<span class="badge ok">On time</span>' : '<span class="badge warn">Behind</span>';
         return `<tr><td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${atsColor(p.ats)};margin-right:8px"></span><b>${esc(p.ats)}</b></td>
