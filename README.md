@@ -163,7 +163,7 @@ For options A and B, confirm it is installed with `ollama list`, then make sure 
 OLLAMA_MODEL=jd-rewriter-v2
 ```
 
-Restart `npm start`. The scan log page (`/scan-log.html`) shows which model is in use and whether Ollama is running.
+Restart `npm start`. The admin portal's System page (`/admin#/system`) shows which model is in use.
 
 ## Use it
 
@@ -174,7 +174,7 @@ Restart `npm start`. The scan log page (`/scan-log.html`) shows which model is i
    - **Download PDF**, **Open PDF** and **See what changed**.
 4. **Tracker and Applied.** Mark a job as applied and its tailored resume is kept under **Applied**, where each row has a **Resume ↓** link to download it again. Opening an application also has **Download resume**.
 5. **Auto-apply.** Create a lane: the titles to look for (your recent titles show as chips), a minimum match, workplace types, how recent, and whether to review before sending. Auto-apply finds matching jobs, tailors a resume for each, and waits in **Waiting for your OK** until you approve.
-6. **Scan log.** `http://localhost:3000/scan-log.html` shows scan history, per-board job counts, and whether Ollama and the model are running.
+6. **Scan log.** Admins see it in the admin portal: `http://localhost:3000/admin#/scans` (scan history, per-platform coverage, start/stop).
 
 ### Reading the ATS score
 

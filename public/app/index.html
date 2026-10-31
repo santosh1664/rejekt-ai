@@ -2872,7 +2872,6 @@ async function renderSettingsTab() {
 // ═══ Theme + boot ═══════════════════════════════════════════════════════════
 const savedTheme = store.get('theme', null); if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 $('#logoutBtn').title = ME?.email || '';
-if (ME?.is_admin) $('#logoutBtn').insertAdjacentHTML('beforebegin', `<a class="theme-btn" href="/admin" style="text-decoration:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>Admin</a>`);
 // An admin has opened this dashboard as the user (admin portal → Open as user)
 if (ME?.impersonator) {
   document.body.insertAdjacentHTML('afterbegin', `<div class="imp-banner" role="status">Viewing as ${esc(ME.email)}, opened by ${esc(ME.impersonator)}. Anything you change is real. <button type="button" id="impBack">Back to admin</button></div>`);

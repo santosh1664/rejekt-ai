@@ -86,7 +86,6 @@ dialog .actions { justify-content: flex-end; }
     <a href="#/system" data-nav="system">System</a>
     <a href="#/audit" data-nav="audit">Audit log</a>
     <div class="foot">
-      <a href="/app/">← Back to dashboard</a>
       <a href="#" id="logout">Log out</a>
       <div class="who" id="who"></div>
     </div>
@@ -150,8 +149,9 @@ const ROUTES = [
   [/^\/companies$/, 'companies', renderCompanies], [/^\/scans$/, 'scans', renderScans], [/^\/invites$/, 'invites', renderInvites],
   [/^\/system$/, 'system', renderSystem], [/^\/audit$/, 'audit', renderAudit],
 ];
-let seq = 0;
+let seq = 0, pollers = [];   // pages that refresh themselves (Scans) register their timers here
 async function route() {
+  pollers.forEach(clearInterval); pollers = [];
   const [path, qs] = location.hash.slice(1).split('?');
   const params = new URLSearchParams(qs || '');
   const hit = ROUTES.find(([re]) => re.test(path || '/')) || ROUTES[0];
@@ -378,22 +378,103 @@ renderCompanies.after = (params) => {
 };
 
 // ─── Scans ──────────────────────────────────────────────────────────────────
+const ATS_COLOR = { greenhouse: '#3D5FCB', ashby: '#2A8057', lever: '#92650A', smartrecruiters: '#B84A3E', workday: '#6B4FB3', bamboohr: '#4E8F2F',
+  workable: '#B5651D', breezy: '#1F8A8A', teamtailor: '#C2417A', recruitee: '#5B7DB1', oraclecloud: '#A33A2A', rippling: '#7A5C2E', pinpoint: '#3E7D5A' };
+const atsColor = (a) => ATS_COLOR[a] || '#6A6A6A';
+const span = (secs) => { const a = Math.abs(Math.round(secs)), h = Math.floor(a / 3600), m = Math.floor(a % 3600 / 60); return h ? `${h}h ${m}m` : m ? `${m}m ${a % 60}s` : `${a}s`; };
+
+// The scan log: live status every 10 s, runs + chart every 30 s, a countdown every second, while this page is open
 async function renderScans() {
-  const s = await api('GET', '/api/scan-status');
-  const running = (s.processes || []).length > 0;
-  return `<h1>Scans</h1><p class="sub">${running ? 'Scanning now.' : 'Not scanning.'} Last started ${when(s.schedule?.lastStart)} · next ${when(s.schedule?.nextAt)} (${esc(s.schedule?.nextMode || '')}).</p>
-    <div class="toolbar"><button class="btn primary" id="scanAll" ${running ? 'disabled' : ''}>Scan all now</button><button class="btn danger" id="stopAll" ${running ? '' : 'disabled'}>Stop all</button>
-      <a class="btn" href="/scan-log" target="_blank">Full scan log ↗</a></div>
-    <div class="tablewrap"><table><thead><tr><th>Platform</th><th>Companies</th><th>Scanned in 4 h</th><th>Erroring</th><th>Open jobs</th><th>Last scan</th></tr></thead><tbody>
-    ${(s.platforms || []).map(p => { const live = p.companies - (p.dead || 0), pct = live ? Math.round(100 * p.fresh4h / live) : 100;
-      return `<tr><td><b>${esc(p.ats)}</b></td><td>${p.companies.toLocaleString()}</td><td><span class="badge ${pct >= 95 ? 'ok' : pct >= 80 ? 'warn' : 'bad'}">${pct}%</span></td>
-      <td>${p.erroring}</td><td>${(p.activeJobs || 0).toLocaleString()}</td><td>${ago(p.lastScan)}</td></tr>`; }).join('')}
-    </tbody></table></div>`;
+  return `<h1>Scans</h1><p class="sub" id="scanSub">Loading…</p>
+    <div class="toolbar"><button class="btn primary" id="scanAll" disabled>Scan all now</button><button class="btn danger" id="stopAll" disabled>Stop all</button></div>
+    <div class="grid kpis" id="scanCards"></div>
+    <h2>Platforms</h2><div class="tablewrap" id="scanPlatforms" style="margin-bottom:18px"><div class="loading" style="padding:16px">Loading…</div></div>
+    <h2>Jobs found per hour · last 48 hours</h2><div class="card" id="scanChart" style="margin-bottom:18px"><div class="loading">Loading…</div></div>
+    <h2>Recent scan runs</h2><div class="tablewrap" id="scanRuns"><div class="loading" style="padding:16px">Loading…</div></div>`;
 }
+let scanLive = null, scanRuns = [], scanNext = null;
 renderScans.after = () => {
-  const ctl = (action) => api('POST', '/api/scan-control', { action, target: action === 'start' ? 'scheduled' : 'all' }).then(r => { if (r.ok === false) throw new Error(r.message); return r; });
-  $('#scanAll').onclick = (e) => act(e.target, () => ctl('start'));
-  $('#stopAll').onclick = (e) => act(e.target, () => ctl('stop'), { confirm: ['Stop all scans?', 'Progress so far is saved. The next scheduled run starts at its usual time.', 'Stop', true] });
+  const ctl = (action, target) => api('POST', '/api/scan-control', { action, target }).then(r => { if (r.ok === false) throw new Error(r.message); return r; });
+  const refresh = () => new Promise(ok => setTimeout(ok, 2500)).then(() => Promise.all([loadLive(), loadRuns()]));   // a new scan takes a moment to appear
+  $('#scanAll').onclick = (e) => act(e.target, () => ctl('start', 'scheduled'), { then: refresh });
+  $('#stopAll').onclick = (e) => act(e.target, () => ctl('stop', 'all'), { then: refresh,
+    confirm: ['Stop all scans?', 'Progress so far is saved. The next scheduled run starts at its usual time.', 'Stop', true] });
+  $('#scanPlatforms').onclick = (e) => {
+    const b = e.target.closest('[data-scan]'); if (!b) return;
+    const [action, ats] = b.dataset.scan.split(':');
+    act(b, () => ctl(action, ats), { then: refresh });
+  };
+
+  function tick() {
+    const el = $('#countdown'); if (!el || !scanNext) return;
+    const s = (scanNext - Date.now()) / 1000;
+    el.textContent = s > 0 ? 'in ' + span(s) : `due now (${span(-s)} late)`;
+  }
+  function renderCards() {
+    const d = scanLive; if (!d) return;
+    const sc = d.schedule, procs = d.processes || [], done = scanRuns.find(r => r.status !== 'running');
+    scanNext = sc.nextAt ? new Date(sc.nextAt) : null;
+    const card = (label, value, sub) => `<div class="card kpi"><div class="l">${label}</div><div class="n" style="font-size:20px">${value}</div><div class="s">${sub}</div></div>`;
+    $('#scanCards').innerHTML =
+      card('Open jobs', d.jobs.countedAt ? d.jobs.active.toLocaleString() : '…', d.jobs.countedAt ? `${d.jobs.total.toLocaleString()} ever found · counted ${ago(d.jobs.countedAt)}` : 'counting, takes a minute') +
+      card('Next scheduled scan', !sc.loaded ? '<span class="badge bad">Not scheduled</span>' : sc.runningNow ? '<span class="badge ok">Running now</span>' : '<span id="countdown">–</span>',
+        `${sc.nextMode === 'full' ? 'full scan (closes gone jobs)' : 'quick scan (new jobs)'} · every ${sc.intervalSecs ? span(sc.intervalSecs) : '–'}<br>last full scan ${ago(sc.lastFull)}`) +
+      card('Last finished run', done ? `<span class="badge ${done.status === 'completed' ? 'ok' : 'bad'}">${done.status === 'completed' ? 'Completed' : 'Stopped early'}</span>` : '–',
+        done ? `${ago(done.started_at)} · ${span(done.elapsed_secs || 0)}` : '') +
+      card('Scanning now', procs.length ? `<span class="badge ok">${procs.length} running</span>` : '<span class="muted">Idle</span>',
+        procs.length ? procs.map(p => `${esc(p.ats)} · ${esc(p.source)} · ${span(p.elapsedSecs)}`).join('<br>') : (d.bulk?.running ? 'bulk run going' : 'waiting for the next scan'));
+    tick();
+  }
+  async function loadLive() {
+    try { scanLive = await api('GET', '/api/scan-status'); }
+    catch (e) { $('#scanPlatforms').innerHTML = `<div class="empty">Couldn't load platform status (${esc(e.message)}). The database may be busy with a scan; retrying every 10 seconds.</div>`; return; }
+    const d = scanLive, procs = d.processes || [], all = procs.some(p => p.ats === 'all');
+    $('#scanSub').textContent = `${procs.length ? 'Scanning now.' : 'Not scanning.'} Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}.`;
+    $('#scanAll').disabled = all; $('#scanAll').textContent = all ? 'Scanning all platforms…' : 'Scan all now';
+    $('#stopAll').disabled = !procs.length;
+    renderCards();
+    $('#scanPlatforms').innerHTML = `<table><thead><tr><th>Platform</th><th>Status</th><th>Companies</th><th>Scanned in last 4 h</th><th>Never scanned</th><th>Erroring</th><th>Open jobs</th><th>New 1 h</th><th>Last scan</th><th></th></tr></thead><tbody>
+      ${d.platforms.map(p => {
+        const live = p.companies - (p.dead || 0), pct = live ? Math.round(100 * p.fresh4h / live) : 100;
+        const running = procs.some(x => x.ats === p.ats);
+        const status = p.state === 'running' && pct < 100 ? '<span class="badge info">Scanning</span>' : pct >= 90 ? '<span class="badge ok">On time</span>' : '<span class="badge warn">Behind</span>';
+        return `<tr><td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${atsColor(p.ats)};margin-right:8px"></span><b>${esc(p.ats)}</b></td>
+          <td>${status}</td><td>${live.toLocaleString()}</td>
+          <td><span style="display:inline-block;width:60px;height:6px;border-radius:3px;background:var(--surface-2);vertical-align:middle;margin-right:8px;overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:${pct >= 90 ? 'var(--ok)' : 'var(--warn)'}"></i></span>${pct}%</td>
+          <td>${p.waiting ? `<span class="badge warn">${p.waiting.toLocaleString()}</span>` : '<span class="muted">0</span>'}</td>
+          <td>${p.erroring ? `<span class="badge bad">${p.erroring}</span>` : '<span class="muted">0</span>'}</td>
+          <td>${d.jobs.countedAt ? (p.activeJobs || 0).toLocaleString() : '…'}</td><td>${p.new1h ? '+' + p.new1h.toLocaleString() : '<span class="muted">0</span>'}</td>
+          <td>${ago(p.lastScan)}</td>
+          <td>${running ? `<button class="btn danger" data-scan="stop:${esc(p.ats)}">Stop</button>` : all ? '' : `<button class="btn" data-scan="start:${esc(p.ats)}">Scan</button>`}</td></tr>`; }).join('')}
+      </tbody></table>`;
+  }
+  async function loadRuns() {
+    let data;
+    try { data = await api('GET', '/api/scan-stats'); } catch (e) { $('#scanRuns').innerHTML = `<div class="empty">Couldn't load scan runs (${esc(e.message)}).</div>`; return; }
+    scanRuns = data.runs; renderCards();
+    const byHour = data.byHour;
+    if (!byHour.length) $('#scanChart').innerHTML = '<div class="empty">No jobs found in the last 48 hours yet.</div>';
+    else {
+      const hours = {}, platforms = new Set();
+      for (const r of byHour) { (hours[r.hour] ||= {})[r.ats] = +r.jobs_found; platforms.add(r.ats); }
+      const keys = Object.keys(hours).sort(), list = [...platforms];
+      const max = Math.max(...keys.map(h => Object.values(hours[h]).reduce((a, b) => a + b, 0)));
+      $('#scanChart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:3px;height:150px;overflow-x:auto">${keys.map(h => {
+          const d = new Date(h), total = Object.values(hours[h]).reduce((a, b) => a + b, 0);
+          return `<div style="flex:1;min-width:8px;display:flex;flex-direction:column;justify-content:flex-end;height:100%" title="${d.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric' })}: ${total.toLocaleString()} jobs">
+            ${list.filter(a => hours[h][a] > 0).map(a => `<div style="height:${Math.max(2, 120 * hours[h][a] / max)}px;background:${atsColor(a)}" title="${esc(a)}: ${hours[h][a].toLocaleString()} jobs"></div>`).join('')}
+            <div class="muted" style="font-size:10px;height:16px;text-align:center">${d.getHours() % 6 ? '' : d.toLocaleTimeString([], { hour: 'numeric' })}</div></div>`; }).join('')}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px">${list.map(a => `<span class="small"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${atsColor(a)};margin-right:5px"></span>${esc(a)}</span>`).join('')}</div>`;
+    }
+    $('#scanRuns').innerHTML = scanRuns.length ? `<table><thead><tr><th>Started</th><th>Took</th><th>Result</th><th>Companies</th><th>New jobs</th><th>Closed</th><th>Errors</th></tr></thead><tbody>
+      ${scanRuns.slice(0, 15).map(r => `<tr><td>${when(r.started_at)}</td><td>${r.elapsed_secs ? span(r.elapsed_secs) : '–'}</td>
+        <td><span class="badge ${{ completed: 'ok', failed: 'bad', running: 'info' }[r.status] || ''}">${r.status === 'failed' ? 'stopped early' : esc(r.status)}</span></td>
+        <td>${(+r.companies_scanned || 0).toLocaleString()}</td><td>+${(+r.jobs_new || 0).toLocaleString()}</td>
+        <td>${(+r.jobs_closed || 0).toLocaleString()}</td><td>${+r.companies_errored ? `<span class="badge bad">${(+r.companies_errored).toLocaleString()}</span>` : '<span class="muted">0</span>'}</td></tr>`).join('')}
+      </tbody></table>` : '<div class="empty">No runs yet.</div>';
+  }
+  loadLive(); loadRuns();
+  pollers.push(setInterval(loadLive, 10_000), setInterval(loadRuns, 30_000), setInterval(tick, 1000));
 };
 
 // ─── Invites ────────────────────────────────────────────────────────────────

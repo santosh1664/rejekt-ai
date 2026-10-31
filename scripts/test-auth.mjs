@@ -27,7 +27,10 @@ try {
     assert.equal((await req(`/v1/users/${OTHER}/profile`)).status, 401);
     assert.equal((await req('/api/jobs')).status, 401);
   });
-  await check('logged out: scan log redirects to login', async () => assert.equal((await req('/scan-log')).status, 302));
+  await check('logged out: admin portal redirects to login; old /scan-log is gone', async () => {
+    assert.equal((await req('/admin')).status, 302);
+    assert.notEqual((await req('/scan-log')).status, 200);
+  });
   await check('login page and logo are public', async () => {
     assert.equal((await req('/login')).status, 200); assert.equal((await req('/brand/rejekt-logo.png')).status, 200);
   });
@@ -64,8 +67,9 @@ try {
     assert.equal((await req(`/v1/users/${OTHER}/profile`, { cookie })).status, 403);
     assert.equal((await req(`/v1/users/${OTHER}/applications`, { method: 'POST', cookie, body: {} })).status, 403);
   });
-  await check('scan log and scan controls: admins only', async () => {
-    assert.equal((await req('/scan-log', { cookie })).status, 403);
+  await check('admin portal and scan controls: admins only', async () => {
+    assert.equal((await req('/admin', { cookie })).status, 403);
+    assert.equal((await req('/api/scan-status', { cookie })).status, 403);
     assert.equal((await req('/api/scan-control', { method: 'POST', cookie, body: { action: 'start', target: 'scheduled' } })).status, 403);
   });
   await check('cross-site POST is blocked', async () => {

@@ -34,8 +34,13 @@ const appBase  = /^https?:/.test(APP_URL) ? new URL(APP_URL).origin : '';
 const appHost  = appBase && new URL(appBase).host;
 const LOGIN    = `${process.env.SITE_URL || ''}/login`;
 const siteUrl  = (req) => process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
-// where to go after logging in: a same-site path the user was headed to, else the dashboard
-const afterLogin = (next) => (typeof next === 'string' && /^\/(?![/\\])/.test(next) && !/^\/(login|signup)/.test(next) ? appBase + next : APP_URL);
+// where to go after logging in: admins → the admin portal; users → a same-site path they were headed to, else the dashboard
+const ADMIN_URL = `${appBase}/admin`;
+const afterLogin = (next, user) => {
+  const path = typeof next === 'string' && /^\/(?![/\\])/.test(next) && !/^\/(login|signup)/.test(next) ? next : null;
+  if (user?.is_admin) return path?.startsWith('/admin') ? appBase + path : ADMIN_URL;
+  return path && !path.startsWith('/admin') ? appBase + path : APP_URL;
+};
 
 // Who's asking (null when logged out)
 app.use(async (req, res, next) => {
@@ -55,7 +60,7 @@ const authJson = express.json({ limit: '10kb' });
 const ip = (req) => req.ip || req.socket.remoteAddress;
 const signedIn = (res, user, next) => auth.createSession(user.id).then(raw => {
   res.setHeader('Set-Cookie', auth.sessionCookie(raw));
-  res.json({ redirect: afterLogin(next) });
+  res.json({ redirect: afterLogin(next, user) });
 });
 
 app.post('/auth/login', authJson, async (req, res) => {
@@ -98,13 +103,13 @@ app.get('/auth/me', (req, res) => req.user ? res.json(req.user) : res.status(401
 
 // Login pages: one file, the path picks the form. Logged in already → straight to the dashboard.
 app.get(['/login', '/signup', '/forgot', '/reset'], (req, res) => {
-  if (req.user && ['/login', '/signup'].includes(req.path)) return res.redirect(afterLogin(req.query.next));
+  if (req.user && ['/login', '/signup'].includes(req.path)) return res.redirect(afterLogin(req.query.next, req.user));
   res.sendFile(join(__dirname, 'public', 'login.html'));
 });
 
 // Everything else needs a session; scan controls need an admin.
 const PUBLIC = /^\/(brand\/|favicon|login\.html$)/;
-const ADMIN  = /^\/(admin|scan-log|api\/scan-)/;
+const ADMIN  = /^\/(admin|api\/scan-)/;
 app.use((req, res, next) => {
   if (PUBLIC.test(req.path) || req.path === '/v1/health') return next();
   if (!req.user) {
@@ -117,6 +122,7 @@ app.use((req, res, next) => {
 
 // The dashboard page, with the logged-in user written into it (it used to invent a random id in localStorage)
 function sendApp(req, res) {
+  if (req.user.is_admin) return res.redirect(ADMIN_URL);   // admins work in the admin portal ("Open as user" to see a user's dashboard)
   const me = JSON.stringify({ id: req.user.id, email: req.user.email, is_admin: req.user.is_admin,
                              impersonator: req.user.impersonator_email || null }).replace(/</g, '\\u003c');
   const html = readFileSync(join(__dirname, 'public', 'app', 'index.html'), 'utf8')
@@ -491,10 +497,6 @@ app.post('/api/scan-control', express.json(), async (req, res) => {
   catch (err) { res.status(500).json({ ok: false, message: err.message }); }
 });
 
-// Serve the scan log dashboard
-app.get('/scan-log', (_req, res) => {
-  res.sendFile(join(__dirname, 'public', 'scan-log.html'));
-});
 
 
 // ─── POST /api/parse-resume ──────────────────────────────────────────────────
@@ -690,7 +692,7 @@ app.post('/api/parse-resume', (req, res) => {
 app.listen(PORT, () => {
   console.log(`\n🌐  Job board running at http://localhost:${PORT}`);
   console.log(`🧭  Dashboard at http://localhost:${PORT}/app`);
-  console.log(`📊  Scan log dashboard at http://localhost:${PORT}/scan-log\n`);
+  console.log(`🛡   Admin portal (scans, users, …) at http://localhost:${PORT}/admin\n`);
   // Applications left mid-flight by a restart or a dead run become FAILED ("Try again") instead of spinning forever.
   const reap = () => reapStuckApplications().then(n => n && console.log(`[apply] ${n} interrupted application(s) moved to Failed`)).catch(() => {});
   reap(); setInterval(reap, 60_000);

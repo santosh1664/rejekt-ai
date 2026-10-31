@@ -34,6 +34,18 @@ try {
     assert.equal((await call('/admin/api/overview', { cookie: U })).status, 403);
   });
   await check('logged out: portal redirects to login', async () => assert.equal((await call('/admin')).status, 302));
+  await check('admins log in to the portal, and the dashboard sends them there', async () => {
+    const l = await call('/auth/login', { method: 'POST', body: { email: ADMIN, password: PASS } });
+    assert.match(l.data.redirect, /\/admin$/);
+    const u = await call('/auth/login', { method: 'POST', body: { email: USER, password: PASS, next: '/admin' } });
+    assert.equal(u.data.redirect, process.env.APP_URL || '/app/');            // users never get sent to the portal
+    const d = await call('/app/', { cookie: A }); assert.equal(d.status, 302); assert.match(d.res.headers.get('location'), /\/admin$/);
+    const lp = await call('/login', { cookie: A }); assert.match(lp.res.headers.get('location'), /\/admin$/);
+  });
+  await check('the scan log lives in the portal: status and runs load for admins', async () => {
+    assert.equal((await call('/api/scan-status', { cookie: A })).status, 200);
+    assert.equal((await call('/api/scan-stats', { cookie: A })).status, 200);
+  });
   await check('overview loads with health, states and attention list', async () => {
     const { status, data } = await call('/admin/api/overview', { cookie: A });
     assert.equal(status, 200); for (const k of ['users', 'states', 'attention', 'runs', 'jobs']) assert.ok(k in data, k);
