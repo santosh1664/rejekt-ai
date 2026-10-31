@@ -49,7 +49,10 @@
     "ml:rewriter:generate": "node --env-file=.env.local ml/generate-best-of-n.mjs",
     "ml:rewriter:eval-ats": "node --env-file=.env.local ml/eval-ats.mjs",
     "ml:rewriter:idf": "node ml/build-posting-idf.mjs",
-    "test:resume-layout": "node scripts/test-resume-layout.mjs"
+    "test:resume-layout": "node scripts/test-resume-layout.mjs",
+    "test:auth": "node --env-file=.env.local scripts/test-auth.mjs",
+    "migrate:auth": "node --env-file=.env.local db/migrate-auth.mjs",
+    "invite": "node --env-file=.env.local scripts/invite.mjs"
   },
   "dependencies": {
     "@neon/config": "^1.4.2",

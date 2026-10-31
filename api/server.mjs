@@ -126,8 +126,6 @@ function json(res, statusCode, body) {
   res.writeHead(statusCode, {
     'Content-Type':  'application/json',
     'Content-Length': Buffer.byteLength(payload),
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
   });
   res.end(payload);
 }
@@ -1046,18 +1044,16 @@ async function handleInteraction(req, res, userId, jobId, body) {
 // ─── Router ──────────────────────────────────────────────────────────────────
 
 export async function router(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204, {
-      'Access-Control-Allow-Origin':  '*',
-      'Access-Control-Allow-Methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-    });
-    return res.end();
-  }
+  // Same-origin only: the dashboard calls /v1 on its own host, so no CORS headers (they used to allow any site)
+  if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
 
   const path   = req.url.split('?')[0].replace(/\/$/, '') || '/';
   const q      = parseQuery(req.url);
   const method = req.method;
+
+  // Every per-user route is /users/<id>/…: only that user may touch it (req.user comes from the session, server.mjs)
+  const owner = path.match(/^\/users\/([^/]+)/);
+  if (owner && owner[1] !== req.user?.id) return json(res, 403, { error: 'Not your account' });
 
   try {
     if (path === '/health'   && method === 'GET') return await handleHealth(req, res);
@@ -1182,7 +1178,7 @@ async function handleGmailCallback(req, res, q) {
   if (error) return json(res, 400, { error: `Google OAuth error: ${error}` });
   if (!code || !state) return json(res, 400, { error: 'Missing code or state' });
   try {
-    const { email } = await exchangeCode(state, code);
+    const { email } = await exchangeCode(state, code, req.user?.id);
     // Redirect back to app with success indicator
     res.writeHead(302, { Location: `/app/?gmail=connected&email=${encodeURIComponent(email || '')}#/settings` });
     return res.end();

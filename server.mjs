@@ -17,14 +17,103 @@ import { startScan, stopScans } from './lib/scan-control.mjs';
 import { normalizeSkillName } from './lib/skills.mjs';
 import { extractResumeSections } from './lib/resume-extract.mjs';
 import { router as apiRouter } from './api/server.mjs';
+import { readFileSync } from 'fs';
+import * as auth from './lib/auth.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 
 const app = express();
-// The dashboard lives at /app. The older single page stays at /index.html.
-app.get('/', (req, res) => res.redirect('/app/'));
-app.use(express.static(join(__dirname, 'public')));
+
+// ─── Login ───────────────────────────────────────────────────────────────────
+// rejekt.ai serves the login pages; after logging in you land on APP_URL (https://dashboard.rejekt.ai in
+// production, /app/ locally). The session cookie is set for COOKIE_DOMAIN (.rejekt.ai) so both hosts see it.
+const APP_URL  = process.env.APP_URL || '/app/';
+const appBase  = /^https?:/.test(APP_URL) ? new URL(APP_URL).origin : '';
+const appHost  = appBase && new URL(appBase).host;
+const LOGIN    = `${process.env.SITE_URL || ''}/login`;
+const siteUrl  = (req) => process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
+// where to go after logging in: a same-site path the user was headed to, else the dashboard
+const afterLogin = (next) => (typeof next === 'string' && /^\/(?![/\\])/.test(next) && !/^\/(login|signup)/.test(next) ? appBase + next : APP_URL);
+
+// Who's asking (null when logged out)
+app.use(async (req, res, next) => {
+  try { req.user = await auth.userFromToken(auth.readCookie(req)); next(); } catch (e) { next(e); }
+});
+
+// A cross-site page can't make a logged-in browser change anything (SameSite=Lax already withholds the cookie)
+app.use((req, res, next) => {
+  const origin = req.get('origin');
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method) || !origin) return next();
+  const allowed = [req.get('host'), appHost, process.env.SITE_URL && new URL(process.env.SITE_URL).host].filter(Boolean);
+  try { if (allowed.includes(new URL(origin).host)) return next(); } catch {}
+  res.status(403).json({ error: 'Cross-site request blocked' });
+});
+
+const authJson = express.json({ limit: '10kb' });
+const ip = (req) => req.ip || req.socket.remoteAddress;
+const signedIn = (res, user, next) => auth.createSession(user.id).then(raw => {
+  res.setHeader('Set-Cookie', auth.sessionCookie(raw));
+  res.json({ redirect: afterLogin(next) });
+});
+
+app.post('/auth/login', authJson, async (req, res) => {
+  const { email, password, next } = req.body || {};
+  if (auth.tooManyAttempts(`login:${ip(req)}:${auth.normEmail(email)}`)) return res.status(429).json({ error: 'Too many tries. Wait 15 minutes.' });
+  const r = await auth.logIn(email, password);
+  return r.error ? res.status(401).json(r) : signedIn(res, r.user, next);
+});
+app.post('/auth/signup', authJson, async (req, res) => {
+  const { email, password, next } = req.body || {};
+  if (auth.tooManyAttempts(`signup:${ip(req)}`)) return res.status(429).json({ error: 'Too many tries. Wait 15 minutes.' });
+  const r = await auth.signUp(email, password);
+  return r.error ? res.status(400).json(r) : signedIn(res, r.user, next);
+});
+app.post('/auth/logout', async (req, res) => {
+  await auth.endSession(auth.readCookie(req));
+  res.setHeader('Set-Cookie', auth.sessionCookie('', { clear: true }));
+  res.json({ redirect: LOGIN });
+});
+app.post('/auth/forgot', authJson, async (req, res) => {
+  if (auth.tooManyAttempts(`forgot:${ip(req)}`, 5)) return res.status(429).json({ error: 'Too many tries. Wait 15 minutes.' });
+  await auth.startReset(req.body?.email, siteUrl(req));
+  res.json({ ok: true });   // same answer whether or not the account exists
+});
+app.post('/auth/reset', authJson, async (req, res) => {
+  const r = await auth.finishReset(req.body?.token, req.body?.password);
+  res.status(r.error ? 400 : 200).json(r);
+});
+app.get('/auth/me', (req, res) => req.user ? res.json(req.user) : res.status(401).json({ error: 'Not logged in' }));
+
+// Login pages: one file, the path picks the form. Logged in already → straight to the dashboard.
+app.get(['/login', '/signup', '/forgot', '/reset'], (req, res) => {
+  if (req.user && ['/login', '/signup'].includes(req.path)) return res.redirect(afterLogin(req.query.next));
+  res.sendFile(join(__dirname, 'public', 'login.html'));
+});
+
+// Everything else needs a session; scan controls need an admin.
+const PUBLIC = /^\/(brand\/|favicon|login\.html$)/;
+const ADMIN  = /^\/(scan-log|api\/scan-)/;
+app.use((req, res, next) => {
+  if (PUBLIC.test(req.path) || req.path === '/v1/health') return next();
+  if (!req.user) {
+    if (/^\/(v1|api)\//.test(req.path)) return res.status(401).json({ error: 'Log in first' });
+    return res.redirect(`${LOGIN}?next=${encodeURIComponent(req.originalUrl)}`);
+  }
+  if (ADMIN.test(req.path) && !req.user.is_admin) return res.status(403).send('Admins only');
+  next();
+});
+
+// The dashboard page, with the logged-in user written into it (it used to invent a random id in localStorage)
+function sendApp(req, res) {
+  const me = JSON.stringify({ id: req.user.id, email: req.user.email, is_admin: req.user.is_admin }).replace(/</g, '\\u003c');
+  const html = readFileSync(join(__dirname, 'public', 'app', 'index.html'), 'utf8')
+    .replace('<script>', `<script>window.RJ_USER = ${me};</script>\n<script>`);
+  res.type('html').send(html);
+}
+// dashboard.rejekt.ai/ is the dashboard itself; on the login site / goes to it
+app.get('/', (req, res) => (appHost && req.get('host') === appHost ? sendApp(req, res) : res.redirect(APP_URL)));
+app.use(express.static(join(__dirname, 'public'), { index: false }));
 
 // Dashboard (public/app) talks to the REST API (api/server.mjs) on the same
 // origin under /v1 — e.g. GET /v1/users/:id/recommendations. Express strips
@@ -32,7 +121,7 @@ app.use(express.static(join(__dirname, 'public')));
 app.use('/v1', (req, res) => { apiRouter(req, res); });
 app.get(['/app', '/app/{*rest}'], (req, res, next) => {
   if (/\.[a-z0-9]+$/i.test(req.path)) return next(); // real files fall through to static
-  res.sendFile(join(__dirname, 'public', 'app', 'index.html'));
+  sendApp(req, res);
 });
 
 // ─── Seniority bucket mapping ───────────────────────────────────────────────

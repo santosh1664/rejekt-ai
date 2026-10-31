@@ -765,6 +765,7 @@ details.earlier>summary{cursor:pointer;font-size:13px;color:var(--ink-2);margin:
       <a class="rail-card" id="railProfile" href="#/profile" style="text-decoration:none;color:inherit;display:none"></a>
       <a class="theme-btn" href="#/settings" data-route="settings" style="text-decoration:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</a>
       <button class="theme-btn" id="themeBtn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg><span>Switch theme</span></button>
+      <button class="theme-btn" id="logoutBtn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Log out</span></button>
     </div>
   </aside>
   <main id="view" tabindex="-1"></main>
@@ -779,8 +780,11 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('jd.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('jd.' + k, JSON.stringify(v)); } catch {} },
 };
-let USER = store.get('userId', null);
-if (!USER) { USER = crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ Math.random() * 16 >> c / 4).toString(16)); store.set('userId', USER); }
+// The server writes the logged-in user into the page (server.mjs sendApp)
+const ME = window.RJ_USER;
+if (!ME) location.assign('/login?next=' + encodeURIComponent(location.pathname + location.hash));
+const USER = ME?.id;
+const toLogin = () => location.assign('/login?next=' + encodeURIComponent(location.pathname + location.hash));
 
 const state = {
   profile: null, profileSkills: null, apps: { counts: {}, applications: [] },
@@ -801,6 +805,7 @@ async function api(method, path, body) {
     if (res && (res.status < 500 || method !== 'GET' || attempt >= 2)) break;
     await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
   }
+  if (res.status === 401) { toLogin(); throw new Error('Your session ended. Log in again.'); }
   let data = null; try { data = await res.json(); } catch {}
   if (!res.ok && res.status !== 422) throw Object.assign(new Error(data?.error || data?.errors?.join(', ') || `Request failed (${res.status})`), { status: res.status, data });
   return { status: res.status, data };
@@ -2863,6 +2868,11 @@ async function renderSettingsTab() {
 
 // ═══ Theme + boot ═══════════════════════════════════════════════════════════
 const savedTheme = store.get('theme', null); if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+$('#logoutBtn').title = ME?.email || '';
+$('#logoutBtn').addEventListener('click', async () => {
+  const r = await fetch('/auth/logout', { method: 'POST' }).then(r => r.json()).catch(() => ({}));
+  location.assign(r.redirect || '/login');
+});
 $('#themeBtn').addEventListener('click', () => {
   const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
   document.documentElement.dataset.theme = dark ? 'light' : 'dark'; store.set('theme', document.documentElement.dataset.theme);
