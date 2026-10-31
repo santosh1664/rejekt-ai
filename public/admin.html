@@ -213,18 +213,23 @@ renderOverview.after = () => {
 // ─── Users ──────────────────────────────────────────────────────────────────
 async function renderUsers(params) {
   const q = params.get('q') || '';
-  const users = await api('GET', '/admin/api/users?q=' + encodeURIComponent(q));
-  return `<h1>Users</h1><p class="sub">Every account. Open one to see their data and fix things for them.</p>
+  const all = await api('GET', '/admin/api/users?q=' + encodeURIComponent(q));
+  const users = all.filter(u => !u.is_admin), admins = all.filter(u => u.is_admin);   // admins aren't users: listed on their own
+  return `<h1>Users</h1><p class="sub">${users.length} user${users.length === 1 ? '' : 's'}. Open one to see their data and fix things for them.</p>
     <div class="toolbar"><input type="search" id="uq" placeholder="Search email or name" value="${esc(q)}"><a class="btn" href="#/invites">Invite someone</a></div>
-    <div class="tablewrap"><table><thead><tr><th>User</th><th>Role</th><th>Last login</th><th>Applications</th><th>Auto-apply</th><th>Gmail</th></tr></thead><tbody>
+    <div class="tablewrap"><table><thead><tr><th>User</th><th>Status</th><th>Last login</th><th>Applications</th><th>Auto-apply</th><th>Gmail</th></tr></thead><tbody>
     ${users.map(u => `<tr class="click" data-href="#/users/${u.id}">
       <td><b>${esc(u.full_name || u.email)}</b><div class="muted small">${esc(u.email)}</div></td>
-      <td>${u.disabled_at ? '<span class="badge bad">Disabled</span>' : u.is_admin ? '<span class="badge info">Admin</span>' : '<span class="badge">User</span>'}</td>
+      <td>${u.disabled_at ? '<span class="badge bad">Disabled</span>' : '<span class="badge ok">Active</span>'}</td>
       <td>${ago(u.last_login_at)}</td>
       <td>${u.apps}${u.needs_you ? ` · <span class="badge warn">${u.needs_you} need them</span>` : ''}${u.failed ? ` · <span class="badge bad">${u.failed} failed</span>` : ''}</td>
       <td>${u.auto_apply ? '<span class="badge ok">On</span>' : '<span class="badge">Off</span>'}</td>
       <td>${u.gmail ? '<span class="badge ok">Connected</span>' : '<span class="muted">–</span>'}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No users match.</td></tr>'}
-    </tbody></table></div>`;
+    </tbody></table></div>
+    ${admins.length ? `<h2 style="margin-top:26px">Admins</h2><div class="tablewrap"><table><thead><tr><th>Admin</th><th>Status</th><th>Last login</th></tr></thead><tbody>
+      ${admins.map(u => `<tr class="click" data-href="#/users/${u.id}"><td><b>${esc(u.email)}</b></td>
+        <td>${u.disabled_at ? '<span class="badge bad">Disabled</span>' : '<span class="badge info">Admin</span>'}</td><td>${ago(u.last_login_at)}</td></tr>`).join('')}
+    </tbody></table></div>` : ''}`;
 }
 renderUsers.after = () => {
   const i = $('#uq'); let t; i.oninput = () => { clearTimeout(t); t = setTimeout(() => location.hash = '#/users' + (i.value ? '?q=' + encodeURIComponent(i.value) : ''), 300); };

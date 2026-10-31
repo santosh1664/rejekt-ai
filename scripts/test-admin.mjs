@@ -49,6 +49,8 @@ try {
   await check('overview loads with health, states and attention list', async () => {
     const { status, data } = await call('/admin/api/overview', { cookie: A });
     assert.equal(status, 200); for (const k of ['users', 'states', 'attention', 'runs', 'jobs']) assert.ok(k in data, k);
+    const { rows: [c] } = await query(`SELECT count(*) FILTER (WHERE NOT is_admin)::int users FROM users`);
+    assert.equal(data.users.total, c.users, 'admins are not counted as users');
   });
   await check('users list and user detail (no ATS password exposed)', async () => {
     const list = await call('/admin/api/users?q=' + encodeURIComponent(USER), { cookie: A });
