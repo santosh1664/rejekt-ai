@@ -116,6 +116,9 @@ app.get(['/login', '/signup', '/forgot', '/reset'], (req, res) => {
   res.sendFile(join(__dirname, 'public', 'login.html'));
 });
 
+// Terms, Privacy Policy, AI disclosure: public, one page (public/legal.html) picks the document by path
+app.get(['/terms', '/privacy', '/ai'], (req, res) => res.sendFile(join(__dirname, 'public', 'legal.html')));
+
 // The landing page: logged out on the main site; logged in → your dashboard (admins → the portal)
 app.get('/', (req, res, next) => {
   if (appHost && req.get('host') === appHost) return next();          // dashboard.rejekt.ai/ is the dashboard
@@ -124,7 +127,7 @@ app.get('/', (req, res, next) => {
 });
 
 // Everything else needs a session; scan controls need an admin.
-const PUBLIC = /^\/(brand\/|favicon|login\.html$|landing\.html$)/;
+const PUBLIC = /^\/(brand\/|favicon|login\.html$|landing\.html$|legal\.html$)/;
 const ADMIN  = /^\/(admin|api\/scan-)/;
 app.use((req, res, next) => {
   if (PUBLIC.test(req.path) || req.path === '/v1/health') return next();

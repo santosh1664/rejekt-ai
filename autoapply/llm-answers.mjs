@@ -12,7 +12,7 @@
  * Uses the same LLM_PROVIDER / API key as resume tailoring (lib/llm.mjs), so
  * no extra key is needed when OpenRouter is already configured.
  */
-import { llmConfig } from '../lib/llm.mjs';
+import { llmConfig, OPENROUTER_PRIVACY } from '../lib/llm.mjs';
 
 const SYSTEM = `You are filling out a job application on behalf of the candidate.
 Answer each question honestly and concisely using ONLY information from the resume and job provided.
@@ -75,7 +75,8 @@ async function callText(cfg, system, userPrompt, maxTokens = 300) {
     const res = await fetch(url, {
       method: 'POST', signal: ac.signal,
       headers: { 'content-type': 'application/json', authorization: `Bearer ${cfg.apiKey}` },
-      body: JSON.stringify({ model: cfg.model, max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: system }, { role: 'user', content: userPrompt }] }),
+      body: JSON.stringify({ model: cfg.model, max_tokens: maxTokens, temperature: 0.3, messages: [{ role: 'system', content: system }, { role: 'user', content: userPrompt }],
+        ...(cfg.provider === 'openrouter' ? OPENROUTER_PRIVACY : {}) }),
     });
     if (!res.ok) return null;
     const d = await res.json();

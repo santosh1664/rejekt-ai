@@ -46,6 +46,7 @@ a { color: var(--ink); }
     <label id="passRow">Password <input id="password" type="password" required>
       <span class="hint" id="passHint" hidden>At least 10 characters.</span></label>
     <button id="submit" type="submit"></button>
+    <p class="hint" id="agree" hidden>By creating an account you agree to our <a href="/terms" target="_blank">Terms of Service</a> and confirm you've read our <a href="/privacy" target="_blank">Privacy Policy</a> and <a href="/ai" target="_blank">AI disclosure</a>.</p>
   </form>
   <div class="links" id="links"></div>
 </main>
@@ -65,7 +66,7 @@ const params = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
 document.title = `${mode.title} · Rejekt.ai`;
 $('title').textContent = mode.title; $('sub').textContent = mode.sub; $('submit').textContent = mode.button; $('links').innerHTML = mode.links;
-$('emailRow').hidden = !mode.email; $('email').required = !!mode.email;
+$('emailRow').hidden = !mode.email; $('agree').hidden = location.pathname !== '/signup'; $('email').required = !!mode.email;
 $('passRow').hidden = !mode.pass; $('password').required = !!mode.pass;
 if (mode.pass) { $('password').autocomplete = mode.pass; $('passHint').hidden = mode.pass !== 'new-password'; }
 // keep where the user was headed when moving between log in and sign up

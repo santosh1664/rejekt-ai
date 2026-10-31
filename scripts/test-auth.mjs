@@ -36,6 +36,11 @@ try {
     assert.equal((await req('/auth/request-invite', { method: 'POST', body: { email: 'not-an-email' } })).status, 400);
     assert.equal((await req('/auth/request-invite', { method: 'POST', body: { email: EMAIL, note: 'backend' } })).status, 200);
   });
+  await check('Terms, Privacy Policy and AI disclosure are public', async () => {
+    for (const [path, text] of [['/terms', 'Terms of Service'], ['/privacy', 'Privacy Policy'], ['/ai', 'AI disclosure']]) {
+      const r = await req(path); assert.equal(r.status, 200, path); assert.ok((await r.text()).includes(text), path);
+    }
+  });
   await check('login page and logo are public', async () => {
     assert.equal((await req('/login')).status, 200); assert.equal((await req('/brand/rejekt-logo.png')).status, 200);
   });
