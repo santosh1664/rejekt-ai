@@ -7,7 +7,7 @@
  * The rest are grouped by company name into companies with meta.feed (slug "feed/<name>"), which get their
  * jobs only from here. Workable allows about one download an hour (429 otherwise): one per scan run.
  */
-import { query } from '../lib/db.mjs';
+import { query, slowQuery } from '../lib/db.mjs';
 import { normalizeLocation } from '../lib/http.mjs';
 import { isJobInCoverage } from '../lib/geo.mjs';
 
@@ -53,14 +53,15 @@ export function parseJob(xml) {
 /** @returns {Promise<Array<{company, jobs}>>} feed-only companies (upserted) with their jobs */
 export async function loadWorkableFeed({ verbose } = {}) {
   const started = Date.now();
-  const res = await fetch(FEED_URL, { headers: { 'User-Agent': 'rejekt-ai/1.0' } });
-  if (!res.ok) throw new Error(`Workable feed HTTP ${res.status}${res.headers.get('retry-after') ? ` (Retry-After ${res.headers.get('retry-after')}s)` : ''}`);
-
-  // What we already scan per company: their job codes, and their names
-  const { rows: known } = await query(`
+  // What we already scan per company: their job codes, and their names. Looked up before the download,
+  // which Workable allows about once an hour, so a slow database can't waste it. Runs past the pool's
+  // 30s limit while a scan loads the database.
+  const known = await slowQuery(`
     SELECT c.name, (c.meta ? 'feed') AS feed, j.url FROM companies c
       LEFT JOIN jobs j ON j.company_id = c.id AND j.active
      WHERE c.ats = 'workable'`);
+  const res = await fetch(FEED_URL, { headers: { 'User-Agent': 'rejekt-ai/1.0' } });
+  if (!res.ok) throw new Error(`Workable feed HTTP ${res.status}${res.headers.get('retry-after') ? ` (Retry-After ${res.headers.get('retry-after')}s)` : ''}`);
   const knownCodes = new Set(known.map(r => r.url?.match(/\/j\/([A-Z0-9]+)/i)?.[1]?.toUpperCase()).filter(Boolean));
   const scannedNames = new Set(known.filter(r => !r.feed).map(r => norm(r.name)));
 
