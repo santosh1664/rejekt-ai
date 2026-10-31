@@ -122,6 +122,13 @@ try {
     assert.equal((await call('/admin/api/invites/' + encodeURIComponent(email), { method: 'DELETE', cookie: A })).status, 200);
     assert.equal((await call('/admin/api/invites', { method: 'POST', cookie: A, body: { email: USER } })).status, 400);   // already has an account
   });
+  await check('job data: admins only; answers at once (counting runs in the background)', async () => {
+    assert.equal((await call('/admin/api/job-data', { cookie: jar(await login(USER)) })).status, 403);   // U ended with the disable check
+    const t = Date.now(), r = await call('/admin/api/job-data', { cookie: A });
+    assert.equal(r.status, 200); assert.ok(Date.now() - t < 5000, 'no waiting on the count');
+    assert.ok(r.data.matrix || r.data.counting || r.data.error !== undefined);
+    if (r.data.matrix) { assert.ok(r.data.totals.open_jobs > 0); assert.ok(r.data.roles.length > 0); }
+  });
   await check('system page', async () => {
     const s = await call('/admin/api/system', { cookie: A }); assert.equal(s.status, 200); assert.equal(s.data.db.ok, true);
   });
