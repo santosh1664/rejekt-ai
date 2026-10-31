@@ -51,8 +51,8 @@ export async function runScan(opts = {}) {
   }
 
   // Load companies
-  // Workable feed-only companies have no board of their own; they get their jobs from the feed below
-  let sql    = `SELECT id, name, ats, slug, meta FROM companies WHERE active = TRUE AND NOT (ats = 'workable' AND meta ? 'feed')`;
+  // Workable feed-only and jobs.workable.com companies get their jobs from the Workable feed below
+  let sql    = `SELECT id, name, ats, slug, meta FROM companies WHERE active = TRUE AND NOT (ats = 'workable' AND (meta ? 'feed' OR meta ? 'companyId'))`;
   const params = [];
   if (opts.ats) {
     params.push(opts.ats.toLowerCase());
