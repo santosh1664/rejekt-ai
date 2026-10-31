@@ -1,22 +1,12 @@
 /**
  * providers/workable.mjs
- * GET https://apply.workable.com/api/v3/accounts/{slug}/jobs
- * Public API — no auth needed.
- * Workable uses cursor-based pagination: response.nextCursor
- *
- * Request body (POST): { query: '', location: [], remote: [], department: [], worktype: [], limit: 10 }
- * Actually it's a POST to get jobs list.
- *
- * Alternative simpler GET:
- * GET https://{slug}.workable.com/spi/v3/jobs  (requires bearer token — not public)
- *
- * Use the public apply API instead:
- * POST https://apply.workable.com/api/v3/accounts/{slug}/jobs
+ * Accounts:          GET https://apply.workable.com/api/v1/widget/accounts/{slug}   (all jobs, one request)
+ * jobs.workable.com: GET https://jobs.workable.com/api/v1/companies/{companyId}     (see fetchHosted)
+ * Public, no auth.
  */
 import { fetchJSON, normalizeLocation, sleep, INTER_REQUEST_DELAY_MS } from '../lib/http.mjs';
 
 export const ATS    = 'workable';
-const MAX_PAGES     = 50;
 
 // Workable blocks an IP at roughly 60 requests/min (HTTP 429), no matter how many workers run,
 // so every Workable request goes through a shared gate per host: 1 per WORKABLE_GAP_MS.
@@ -87,36 +77,11 @@ function normalizeHosted(j, company) {
 
 export async function fetchAll(company, opts = {}) {
   if (company.meta?.companyId) return fetchHosted(company, opts);
-  const url  = `https://apply.workable.com/api/v3/accounts/${company.slug}/jobs`;
-  const all  = [];
-  let   cursor = null;
-  let   pages  = 0;
-
-  do {
-    if (opts.verbose) console.error(`  → POST ${url} cursor=${cursor ?? 'start'}`);
-
-    // Workable's API now rejects an explicit `limit` field ({"limit":"Not allowed"}) —
-    // page size is fixed server-side; only pass the cursor token.
-    const body = { query: '', location: [], remote: [], department: [], worktype: [] };
-    if (cursor) body.token = cursor;
-
-    const data = await workableJSON(url, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(body),
-      timeoutMs: 20_000,
-    });
-
-    const results = data?.results ?? [];
-    for (const raw of results) all.push(normalize(raw, company));
-
-    cursor = data?.nextPage ?? data?.nextCursor ?? null;   // API returns `nextPage`; it was read as `nextCursor`, so only page 1 (10 jobs) was ever fetched
-    pages++;
-
-    if (cursor) await sleep(INTER_REQUEST_DELAY_MS);
-  } while (cursor && pages < MAX_PAGES);
-
-  return all;
+  // The v1 widget lists every job in one GET; the v3 API pages 10 at a time and got the IP blocked for hours.
+  const data = await workableJSON(`https://apply.workable.com/api/v1/widget/accounts/${company.slug}`, { timeoutMs: 20_000 });
+  if (!Array.isArray(data?.jobs)) throw new Error('Workable widget: no jobs list');
+  // keep the URL format already stored (/{slug}/j/{code}/), or every job would look new
+  return data.jobs.map(raw => normalize({ ...raw, url: undefined, remote: raw.telecommuting }, company));
 }
 
 function normalize(raw, company) {
