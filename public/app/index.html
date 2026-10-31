@@ -77,6 +77,9 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.015em; margin: 0; }
 .nav a[aria-current="page"] { background: var(--cobalt-soft); color: var(--cobalt); }
 .nav a .count { margin-left: auto; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .rail-foot { margin-top: auto; display: grid; gap: 10px; }
+.imp-banner { position: sticky; top: 0; z-index: 60; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+  padding: 9px 16px; background: var(--signal); color: #111; font-size: 14px; font-weight: 500; }
+.imp-banner button { font: inherit; font-weight: 600; padding: 5px 12px; border-radius: 8px; border: 0; background: #111; color: #fff; cursor: pointer; }
 .rail-card { border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px; font-size: 13px; }
 .rail-card b { display: block; font-size: 13px; }
 .bar { height: 6px; border-radius: 6px; background: var(--line-2); overflow: hidden; margin-top: 8px; }
@@ -2869,6 +2872,15 @@ async function renderSettingsTab() {
 // ═══ Theme + boot ═══════════════════════════════════════════════════════════
 const savedTheme = store.get('theme', null); if (savedTheme) document.documentElement.dataset.theme = savedTheme;
 $('#logoutBtn').title = ME?.email || '';
+if (ME?.is_admin) $('#logoutBtn').insertAdjacentHTML('beforebegin', `<a class="theme-btn" href="/admin" style="text-decoration:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>Admin</a>`);
+// An admin has opened this dashboard as the user (admin portal → Open as user)
+if (ME?.impersonator) {
+  document.body.insertAdjacentHTML('afterbegin', `<div class="imp-banner" role="status">Viewing as ${esc(ME.email)}, opened by ${esc(ME.impersonator)}. Anything you change is real. <button type="button" id="impBack">Back to admin</button></div>`);
+  $('#impBack').addEventListener('click', async () => {
+    const r = await fetch('/auth/return', { method: 'POST' }).then(r => r.json()).catch(() => ({}));
+    location.assign(r.redirect || '/login');
+  });
+}
 $('#logoutBtn').addEventListener('click', async () => {
   const r = await fetch('/auth/logout', { method: 'POST' }).then(r => r.json()).catch(() => ({}));
   location.assign(r.redirect || '/login');

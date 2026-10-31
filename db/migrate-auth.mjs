@@ -46,4 +46,20 @@ await query(`
   )`);
 console.log('✓ password_resets');
 
+// Admin portal (lib/admin.mjs): disabled accounts, "open as user" sessions, and a record of every admin action
+await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS disabled_at TIMESTAMPTZ`);
+await query(`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS impersonator_id UUID REFERENCES users(id) ON DELETE CASCADE`);
+await query(`
+  CREATE TABLE IF NOT EXISTS admin_audit (
+    id         BIGSERIAL PRIMARY KEY,
+    admin_id   UUID REFERENCES users(id) ON DELETE SET NULL,
+    admin_email TEXT,
+    action     TEXT NOT NULL,
+    target     TEXT,
+    detail     JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`);
+await query(`CREATE INDEX IF NOT EXISTS idx_admin_audit_created ON admin_audit(created_at DESC)`);
+console.log('✓ admin: users.disabled_at, sessions.impersonator_id, admin_audit');
+
 await closePool();

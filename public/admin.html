@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin · Rejekt.ai</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M8 22h16M8 16h10M8 10h13' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+<style>
+:root {
+  --paper: #FFFFFF; --surface: #FFFFFF; --surface-2: #F6F6F5; --ink: #111111; --ink-2: #3B3B3B; --muted: #6A6A6A;
+  --line: #DEDEDC; --line-2: #EBEBE9; --cobalt: #17382B; --cobalt-ink: #FFFFFF; --cobalt-soft: #EAF1EC;
+  --ok: #2A8057; --ok-soft: #F2FAF5; --warn: #92650A; --warn-soft: #FFFAEB; --bad: #B84A3E; --bad-soft: #FFF5F3; --info: #3D5FCB; --info-soft: #F4F8FF;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --paper: #0E0E0E; --surface: #161616; --surface-2: #1E1E1E; --ink: #F2F2F2; --ink-2: #CFCFCF; --muted: #9A9A9A;
+  --line: #2C2C2C; --line-2: #232323; --cobalt: #F2F2F2; --cobalt-ink: #111111; --cobalt-soft: #262626;
+  --ok: #6FD3A0; --ok-soft: #14261D; --warn: #E9C46A; --warn-soft: #2E2812; --bad: #F2948A; --bad-soft: #2E1A17; --info: #9DB6F5; --info-soft: #172036; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface-2); color: var(--ink); font: 14px/1.5 'Schibsted Grotesk', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+nav { background: var(--surface); border-right: 1px solid var(--line); padding: 20px 14px; display: flex; flex-direction: column; gap: 2px; position: sticky; top: 0; height: 100vh; }
+nav .logo { height: 20px; width: auto; align-self: flex-start; margin: 0 8px 4px; } nav .tag { margin: 0 8px 18px; font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.logo-dark { display: none; } @media (prefers-color-scheme: dark) { .logo-light { display: none; } .logo-dark { display: block; } }
+nav a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; text-decoration: none; color: var(--ink-2); font-weight: 500; }
+nav a:hover { background: var(--surface-2); } nav a[aria-current="page"] { background: var(--cobalt-soft); color: var(--ink); font-weight: 600; }
+nav a .count { margin-left: auto; font-size: 12px; background: var(--bad-soft); color: var(--bad); border-radius: 99px; padding: 0 7px; font-weight: 600; }
+nav .foot { margin-top: auto; display: grid; gap: 2px; border-top: 1px solid var(--line-2); padding-top: 10px; }
+nav .who { padding: 4px 10px; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+main { padding: 28px 32px 60px; max-width: 1240px; width: 100%; }
+h1 { font-size: 22px; letter-spacing: -0.015em; margin: 0 0 4px; } h2 { font-size: 15px; margin: 0 0 12px; }
+.sub { color: var(--muted); margin: 0 0 22px; }
+.grid { display: grid; gap: 14px; } .kpis { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); margin-bottom: 18px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+.kpi .n { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; } .kpi .l { color: var(--muted); font-size: 13px; }
+.kpi .s { font-size: 12px; color: var(--muted); }
+.two { grid-template-columns: 1.4fr 1fr; align-items: start; } @media (max-width: 1000px) { .two { grid-template-columns: 1fr; } }
+table { width: 100%; border-collapse: collapse; } th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+tr.click { cursor: pointer; } tr.click:hover td { background: var(--surface-2); }
+.tablewrap { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: auto; }
+.tablewrap table td:first-child, .tablewrap table th:first-child { padding-left: 16px; }
+.muted { color: var(--muted); } .mono { font-family: var(--mono); font-size: 12px; } .small { font-size: 12px; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.badge.ok { background: var(--ok-soft); color: var(--ok); } .badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.bad { background: var(--bad-soft); color: var(--bad); } .badge.info { background: var(--info-soft); color: var(--info); }
+.btn { font: inherit; font-weight: 600; font-size: 13px; padding: 7px 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
+.btn:hover { background: var(--surface-2); } .btn.primary { background: var(--cobalt); color: var(--cobalt-ink); border-color: transparent; }
+.btn.danger { color: var(--bad); border-color: var(--bad-soft); } .btn[disabled] { opacity: .55; cursor: progress; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+input, select { font: inherit; padding: 8px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); }
+input[type=search] { min-width: 280px; }
+.att { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line-2); } .att:last-child { border-bottom: 0; }
+.att .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; } .att .dot.bad { background: var(--bad); } .att .dot.warn { background: var(--warn); }
+.att .t { flex: 1; }
+.empty { padding: 26px; text-align: center; color: var(--muted); }
+dl { display: grid; grid-template-columns: 170px 1fr; gap: 6px 14px; margin: 0; } dt { color: var(--muted); } dd { margin: 0; overflow-wrap: anywhere; }
+pre { font-family: var(--mono); font-size: 12px; background: var(--surface-2); padding: 12px; border-radius: 10px; overflow: auto; max-height: 360px; margin: 0; white-space: pre-wrap; }
+.timeline { display: grid; gap: 8px; } .timeline div { border-left: 2px solid var(--line); padding-left: 10px; }
+.back { display: inline-block; margin-bottom: 10px; color: var(--muted); text-decoration: none; } .back:hover { color: var(--ink); }
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 10px; font-weight: 500; z-index: 100; max-width: 90vw; }
+.toast.bad { background: var(--bad); color: #fff; }
+dialog { border: 1px solid var(--line); border-radius: 14px; padding: 20px; background: var(--surface); color: var(--ink); max-width: 460px; width: 92vw; }
+dialog::backdrop { background: rgb(0 0 0 / .35); } dialog h3 { margin: 0 0 8px; font-size: 16px; } dialog p { margin: 0 0 16px; color: var(--ink-2); }
+dialog .actions { justify-content: flex-end; }
+.linkbox { display: flex; gap: 8px; margin-top: 10px; } .linkbox input { flex: 1; font-family: var(--mono); font-size: 12px; }
+.loading { color: var(--muted); padding: 30px 0; }
+@media (max-width: 760px) { .shell { grid-template-columns: 1fr; } nav { position: static; height: auto; flex-direction: row; flex-wrap: wrap; } nav .logo, nav .tag, nav .foot { display: none; } main { padding: 18px; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav aria-label="Admin">
+    <img class="logo logo-light" src="/brand/rejekt-logo.png" alt="Rejekt.ai"><img class="logo logo-dark" src="/brand/rejekt-logo-dark.png" alt="Rejekt.ai">
+    <div class="tag">Admin</div>
+    <a href="#/" data-nav="overview">Overview <span class="count" id="navAttention" hidden></span></a>
+    <a href="#/users" data-nav="users">Users</a>
+    <a href="#/applications" data-nav="applications">Applications</a>
+    <a href="#/companies" data-nav="companies">Companies &amp; jobs</a>
+    <a href="#/scans" data-nav="scans">Scans</a>
+    <a href="#/invites" data-nav="invites">Invites</a>
+    <a href="#/system" data-nav="system">System</a>
+    <a href="#/audit" data-nav="audit">Audit log</a>
+    <div class="foot">
+      <a href="/app/">← Back to dashboard</a>
+      <a href="#" id="logout">Log out</a>
+      <div class="who" id="who"></div>
+    </div>
+  </nav>
+  <main id="view" tabindex="-1"><div class="loading">Loading…</div></main>
+</div>
+<dialog id="confirm"><h3 id="cTitle"></h3><p id="cText"></p><div class="actions"><button class="btn" value="no" id="cNo">Cancel</button><button class="btn primary" id="cYes">Confirm</button></div></dialog>
+<dialog id="linkDlg"><h3>Password reset link</h3><p id="linkText"></p><div class="linkbox"><input id="linkVal" readonly><button class="btn primary" id="linkCopy">Copy</button></div><div class="actions" style="margin-top:14px"><button class="btn" id="linkClose">Done</button></div></dialog>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const view = $('#view');
+
+async function api(method, path, body) {
+  const res = await fetch(path, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+  if (res.status === 401) { location.assign('/login?next=' + encodeURIComponent('/admin' + location.hash)); throw new Error('Log in again'); }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || data.message || `Request failed (${res.status})`);
+  return data;
+}
+function toast(msg, bad = false) {
+  $$('.toast').forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast' + (bad ? ' bad' : ''); t.setAttribute('role', 'status'); t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 4500);
+}
+function confirmBox(title, text, yes = 'Confirm', danger = false) {
+  const d = $('#confirm'); $('#cTitle').textContent = title; $('#cText').textContent = text; $('#cYes').textContent = yes;
+  $('#cYes').className = 'btn ' + (danger ? 'danger' : 'primary');
+  return new Promise(ok => {
+    const done = (v) => { d.close(); $('#cYes').onclick = $('#cNo').onclick = null; ok(v); };
+    $('#cYes').onclick = () => done(true); $('#cNo').onclick = () => done(false); d.oncancel = () => done(false);
+    d.showModal();
+  });
+}
+// Run an action button: optional confirm, disable while running, toast the result, then refresh
+async function act(btn, fn, { confirm, then } = {}) {
+  if (confirm && !(await confirmBox(...confirm))) return;
+  btn.disabled = true;
+  try { const r = await fn(); if (r?.message) toast(r.message); if (then) await then(r); else await route(); }
+  catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; }
+}
+
+const when = (d) => d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+function ago(d) {
+  if (!d) return 'never'; const s = (Date.now() - new Date(d)) / 1000;
+  if (s < 60) return 'just now'; if (s < 3600) return `${Math.round(s / 60)} min ago`; if (s < 86400) return `${Math.round(s / 3600)} h ago`;
+  return `${Math.round(s / 86400)} d ago`;
+}
+const STATE = { SUBMITTED: 'ok', APPLIED: 'ok', NEEDS_YOU: 'warn', PREPARED: 'info', QUEUED: 'info', SUBMITTING: 'info', FAILED: 'bad', SKIPPED: '', SAVED: '', REJECTED: 'bad', STUCK: 'bad' };
+const PRETTY = { NEEDS_YOU: 'Needs you', SUBMITTED: 'Submitted', FAILED: 'Failed', PREPARED: 'Ready to send', QUEUED: 'Queued', SUBMITTING: 'Sending', SKIPPED: 'Skipped', SAVED: 'Saved', APPLIED: 'Applied', REJECTED: 'Rejected', STUCK: 'Stuck' };
+const badge = (state) => `<span class="badge ${STATE[state] ?? ''}">${esc(PRETTY[state] || state || '–')}</span>`;
+const appState = (a) => a.apply_state || a.status;
+
+// ─── Router ─────────────────────────────────────────────────────────────────
+const ROUTES = [
+  [/^\/?$/, 'overview', renderOverview], [/^\/users$/, 'users', renderUsers], [/^\/users\/([\w-]+)$/, 'users', renderUser],
+  [/^\/applications$/, 'applications', renderApps], [/^\/applications\/(\d+)$/, 'applications', renderApp],
+  [/^\/companies$/, 'companies', renderCompanies], [/^\/scans$/, 'scans', renderScans], [/^\/invites$/, 'invites', renderInvites],
+  [/^\/system$/, 'system', renderSystem], [/^\/audit$/, 'audit', renderAudit],
+];
+let seq = 0;
+async function route() {
+  const [path, qs] = location.hash.slice(1).split('?');
+  const params = new URLSearchParams(qs || '');
+  const hit = ROUTES.find(([re]) => re.test(path || '/')) || ROUTES[0];
+  $$('nav a[data-nav]').forEach(a => a.dataset.nav === hit[1] ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  const mine = ++seq;
+  try {
+    const html = await hit[2](...((path || '/').match(hit[0]) || []).slice(1), params);
+    if (mine !== seq) return;
+    if (html != null) view.innerHTML = html;
+    hit[2].after?.(params);
+  } catch (e) { if (mine === seq) view.innerHTML = `<div class="card"><b>Couldn't load this page.</b><p class="muted">${esc(e.message)}</p><button class="btn" onclick="route()">Try again</button></div>`; }
+}
+window.addEventListener('hashchange', () => { view.innerHTML = '<div class="loading">Loading…</div>'; route(); });
+
+// ─── Overview ───────────────────────────────────────────────────────────────
+async function renderOverview() {
+  const o = await api('GET', '/admin/api/overview');
+  const n = (st) => o.states.find(s => s.state === st)?.n || 0;
+  const nav = $('#navAttention'); nav.hidden = !o.attention.length; nav.textContent = o.attention.length;
+  const kpi = (num, label, sub = '') => `<div class="card kpi"><div class="n">${num}</div><div class="l">${label}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>`;
+  return `
+    <h1>Overview</h1><p class="sub">${o.scanning ? 'A scan is running now.' : `Next scan ${o.schedule?.nextAt ? when(o.schedule.nextAt) : 'not scheduled'}.`}</p>
+    <div class="grid kpis">
+      ${kpi(o.users.total, 'Users', `${o.users.active7d} active this week${o.users.disabled ? ` · ${o.users.disabled} disabled` : ''}`)}
+      ${kpi((o.jobs?.active ?? 0).toLocaleString(), 'Open jobs', `${(o.jobs?.total ?? 0).toLocaleString()} ever found`)}
+      ${kpi(o.submittedToday, 'Sent in 24 h')}
+      ${kpi(n('NEEDS_YOU'), 'Waiting on users')}
+      ${kpi(n('FAILED'), 'Failed')}
+      ${kpi(o.stuck, 'Stuck')}
+      ${kpi(o.pendingInvites, 'Pending invites')}
+    </div>
+    <div class="grid two">
+      <div class="card"><h2>Needs attention</h2>
+        ${o.attention.length ? o.attention.map((a, i) => `<div class="att"><span class="dot ${a.level}"></span><span class="t">${esc(a.text)}</span>
+          ${a.fix ? `<button class="btn" data-fix="${a.fix}">${esc(a.fixLabel)}</button>` : `<a class="btn" href="${a.link}">${esc(a.fixLabel)}</a>`}</div>`).join('')
+          : '<div class="empty">Nothing needs you right now.</div>'}
+      </div>
+      <div class="card"><h2>Applications by state</h2>
+        <table><tbody>${o.states.map(s => `<tr class="click" data-href="#/applications?state=${encodeURIComponent(s.state)}"><td>${badge(s.state)}</td><td style="text-align:right">${s.n}</td></tr>`).join('') || '<tr><td class="muted">None yet</td></tr>'}</tbody></table>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px"><h2>Recent scan runs</h2>
+      <table><thead><tr><th>Run</th><th>Started</th><th>Took</th><th>Status</th><th>Companies</th><th>Errors</th><th>New jobs</th><th>Closed</th></tr></thead><tbody>
+      ${o.runs.map(r => `<tr><td class="mono">#${r.id}</td><td>${when(r.started_at)}</td><td>${r.finished_at ? Math.round((new Date(r.finished_at) - new Date(r.started_at)) / 60000) + ' min' : '–'}</td>
+        <td><span class="badge ${{ completed: 'ok', failed: 'bad', running: 'info' }[r.status] || ''}">${esc(r.status)}</span></td>
+        <td>${(r.companies_scanned || 0).toLocaleString()}</td><td>${(r.companies_errored || 0).toLocaleString()}</td><td>${(r.jobs_new || 0).toLocaleString()}</td><td>${(r.jobs_closed || 0).toLocaleString()}</td></tr>`).join('')}
+      </tbody></table></div>`;
+}
+renderOverview.after = () => {
+  $$('[data-fix]').forEach(b => b.onclick = () => act(b, () => b.dataset.fix === 'scan-all'
+    ? api('POST', '/api/scan-control', { action: 'start', target: 'scheduled' })
+    : api('POST', '/admin/api/overview/action', { action: b.dataset.fix }),
+    { confirm: b.dataset.fix === 'release-stuck' ? ['Release stuck applications?', 'They were interrupted mid-send. They\'ll show as failed with "Try again", so nothing is sent twice by surprise.', 'Release'] : null }));
+};
+
+// ─── Users ──────────────────────────────────────────────────────────────────
+async function renderUsers(params) {
+  const q = params.get('q') || '';
+  const users = await api('GET', '/admin/api/users?q=' + encodeURIComponent(q));
+  return `<h1>Users</h1><p class="sub">Every account. Open one to see their data and fix things for them.</p>
+    <div class="toolbar"><input type="search" id="uq" placeholder="Search email or name" value="${esc(q)}"><a class="btn" href="#/invites">Invite someone</a></div>
+    <div class="tablewrap"><table><thead><tr><th>User</th><th>Role</th><th>Last login</th><th>Applications</th><th>Auto-apply</th><th>Gmail</th></tr></thead><tbody>
+    ${users.map(u => `<tr class="click" data-href="#/users/${u.id}">
+      <td><b>${esc(u.full_name || u.email)}</b><div class="muted small">${esc(u.email)}</div></td>
+      <td>${u.disabled_at ? '<span class="badge bad">Disabled</span>' : u.is_admin ? '<span class="badge info">Admin</span>' : '<span class="badge">User</span>'}</td>
+      <td>${ago(u.last_login_at)}</td>
+      <td>${u.apps}${u.needs_you ? ` · <span class="badge warn">${u.needs_you} need them</span>` : ''}${u.failed ? ` · <span class="badge bad">${u.failed} failed</span>` : ''}</td>
+      <td>${u.auto_apply ? '<span class="badge ok">On</span>' : '<span class="badge">Off</span>'}</td>
+      <td>${u.gmail ? '<span class="badge ok">Connected</span>' : '<span class="muted">–</span>'}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No users match.</td></tr>'}
+    </tbody></table></div>`;
+}
+renderUsers.after = () => {
+  const i = $('#uq'); let t; i.oninput = () => { clearTimeout(t); t = setTimeout(() => location.hash = '#/users' + (i.value ? '?q=' + encodeURIComponent(i.value) : ''), 300); };
+  i.focus(); i.setSelectionRange(i.value.length, i.value.length);
+};
+
+let currentUser = null;
+async function renderUser(id) {
+  const d = await api('GET', '/admin/api/users/' + id); currentUser = d.user;
+  const u = d.user, p = d.profile || {};
+  const btn = (action, label, cls = '') => `<button class="btn ${cls}" data-uact="${action}">${label}</button>`;
+  return `<a class="back" href="#/users">← Users</a>
+    <h1>${esc(u.full_name || u.email)} ${u.is_admin ? '<span class="badge info">Admin</span>' : ''} ${u.disabled_at ? '<span class="badge bad">Disabled</span>' : ''}</h1>
+    <p class="sub">${esc(u.email)} · joined ${when(u.created_at)} · last login ${ago(u.last_login_at)}</p>
+    <div class="card" style="margin-bottom:14px"><h2>Fix things</h2><div class="actions">
+      ${!u.is_admin && !u.disabled_at ? btn('impersonate', 'Open as user', 'primary') : ''}
+      ${btn('reset-link', 'Make password reset link')}
+      ${btn('signout', `Sign out everywhere (${u.sessions})`)}
+      ${u.auto_apply ? btn('pause-auto', 'Pause auto-apply') : btn('resume-auto', 'Turn auto-apply on')}
+      ${u.is_admin ? btn('remove-admin', 'Remove admin') : btn('make-admin', 'Make admin')}
+      ${u.disabled_at ? btn('enable', 'Enable account') : btn('disable', 'Disable account', 'danger')}
+    </div><p class="muted small" style="margin:10px 0 0">Open as user shows their dashboard exactly as they see it, for 1 hour. Anything you change there is real and is recorded in the audit log.</p></div>
+    <div class="grid two">
+      <div class="card"><h2>Profile</h2><dl>
+        <dt>Name</dt><dd>${esc(p.full_name || '–')}</dd><dt>Contact email</dt><dd>${esc(p.email || '–')}</dd><dt>Phone</dt><dd>${esc(p.phone || '–')}</dd>
+        <dt>Title</dt><dd>${esc(p.current_title || '–')}</dd><dt>Experience</dt><dd>${p.total_experience_years ?? '–'} years</dd>
+        <dt>Location</dt><dd>${esc([p.current_city, p.current_state, p.current_country].filter(Boolean).join(', ') || '–')}</dd>
+        <dt>Work authorization</dt><dd>${esc(p.work_authorization || '–')}${p.needs_sponsorship ? ' · needs sponsorship' : ''}</dd>
+        <dt>ATS password</dt><dd>${p.has_ats_password ? 'Set (hidden)' : '<span class="badge warn">Not set</span>'}</dd>
+        <dt>Gmail</dt><dd>${u.gmail ? esc(u.gmail_email || 'Connected') : '<span class="muted">Not connected</span>'}</dd>
+        <dt>User ID</dt><dd class="mono">${esc(u.id)}</dd>
+      </dl></div>
+      <div class="card"><h2>Auto-apply</h2><dl>
+        <dt>Status</dt><dd>${u.auto_apply ? '<span class="badge ok">On</span>' : '<span class="badge">Off</span>'}</dd>
+        <dt>Daily cap</dt><dd>${d.settings?.daily_cap ?? '–'}</dd><dt>Per company / 30 days</dt><dd>${d.settings?.per_company_cap_30d ?? '–'}</dd>
+        <dt>Lanes</dt><dd>${d.lanes.map(l => `${esc(l.name)} ${l.enabled ? '<span class="badge ok">on</span>' : '<span class="badge">off</span>'}`).join('<br>') || '–'}</dd>
+        <dt>Resumes</dt><dd>${d.resumes.map(r => `${esc(r.name)}${r.is_default ? ' <span class="badge">default</span>' : ''}`).join('<br>') || '<span class="badge warn">None</span>'}</dd>
+      </dl></div>
+    </div>
+    <div class="tablewrap" style="margin-top:14px"><table><thead><tr><th>Application</th><th>State</th><th>Problem</th><th>Updated</th></tr></thead><tbody>
+      ${d.applications.map(a => `<tr class="click" data-href="#/applications/${a.id}"><td><b>${esc(a.company || '–')}</b><div class="muted small">${esc(a.title || '')}</div></td>
+        <td>${badge(appState(a))}</td><td class="small">${esc(a.reason || '')}</td><td>${ago(a.updated_at)}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">No applications.</td></tr>'}
+    </tbody></table></div>
+    ${d.history.length ? `<div class="card" style="margin-top:14px"><h2>Admin actions on this account</h2><div class="timeline">
+      ${d.history.map(h => `<div><b>${esc(h.action)}</b> <span class="muted">by ${esc(h.admin_email)} · ${when(h.created_at)}</span></div>`).join('')}</div></div>` : ''}`;
+}
+const USER_CONFIRM = {
+  impersonate: (u) => ['Open as this user?', `You'll see ${u.email}'s dashboard for 1 hour. Changes you make there are real. A yellow banner lets you come back.`, 'Open as user'],
+  signout: (u) => ['Sign out everywhere?', `${u.email} will have to log in again on every device.`, 'Sign out'],
+  disable: (u) => ['Disable this account?', `${u.email} is signed out and can't log in until you enable the account again. Their data stays.`, 'Disable', true],
+  'make-admin': (u) => ['Make admin?', `${u.email} will be able to see every user and do everything in this portal.`, 'Make admin'],
+  'remove-admin': (u) => ['Remove admin?', `${u.email} loses access to this portal.`, 'Remove'],
+  'pause-auto': (u) => ['Pause auto-apply?', `No new applications will be sent for ${u.email} until it's turned back on.`, 'Pause'],
+  'resume-auto': (u) => ['Turn auto-apply on?', `Rejekt.ai will start sending applications for ${u.email} again, using their lanes and caps.`, 'Turn on'],
+};
+renderUser.after = () => {
+  $$('[data-uact]').forEach(b => b.onclick = () => {
+    const action = b.dataset.uact;
+    act(b, () => api('POST', `/admin/api/users/${currentUser.id}/action`, { action }), {
+      confirm: USER_CONFIRM[action]?.(currentUser),
+      then: async (r) => {
+        if (r.redirect) return location.assign(r.redirect);
+        if (r.link) { $('#linkText').textContent = r.message; $('#linkVal').value = r.link; $('#linkDlg').showModal(); }
+        await route();
+      },
+    });
+  });
+};
+$('#linkCopy').onclick = async () => { await navigator.clipboard.writeText($('#linkVal').value).catch(() => {}); $('#linkVal').select(); toast('Copied'); };
+$('#linkClose').onclick = () => $('#linkDlg').close();
+
+// ─── Applications ───────────────────────────────────────────────────────────
+async function renderApps(params) {
+  const state = params.get('state') || '', q = params.get('q') || '';
+  const rows = await api('GET', `/admin/api/applications?state=${encodeURIComponent(state)}&q=${encodeURIComponent(q)}&user=${encodeURIComponent(params.get('user') || '')}`);
+  const opts = ['', 'NEEDS_YOU', 'FAILED', 'STUCK', 'PREPARED', 'SUBMITTED', 'SKIPPED', 'SAVED', 'APPLIED'];
+  return `<h1>Applications</h1><p class="sub">Every user's applications. Open one for its full history and error.</p>
+    <div class="toolbar"><select id="as">${opts.map(o => `<option value="${o}" ${o === state ? 'selected' : ''}>${o ? PRETTY[o] : 'All states'}</option>`).join('')}</select>
+      <input type="search" id="aq" placeholder="Company or job title" value="${esc(q)}"><span class="muted">${rows.length}${rows.length === 300 ? '+' : ''} shown</span></div>
+    <div class="tablewrap"><table><thead><tr><th>Job</th><th>User</th><th>State</th><th>Problem</th><th>Tries</th><th>Updated</th></tr></thead><tbody>
+    ${rows.map(a => `<tr class="click" data-href="#/applications/${a.id}"><td><b>${esc(a.company || '–')}</b><div class="muted small">${esc(a.title || '')}</div></td>
+      <td class="small">${esc(a.email || a.user_id)}</td><td>${badge(appState(a))}${a.source === 'auto' ? ' <span class="muted small">auto</span>' : ''}</td>
+      <td class="small">${esc(a.reason || '')}</td><td>${a.attempts ?? 0}</td><td>${ago(a.updated_at)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No applications match.</td></tr>'}
+    </tbody></table></div>`;
+}
+renderApps.after = () => {
+  const go = () => location.hash = `#/applications?state=${encodeURIComponent($('#as').value)}&q=${encodeURIComponent($('#aq').value)}`;
+  $('#as').onchange = go; let t; $('#aq').oninput = () => { clearTimeout(t); t = setTimeout(go, 350); };
+};
+
+let currentApp = null;
+async function renderApp(id) {
+  const a = await api('GET', '/admin/api/applications/' + id); currentApp = a;
+  const det = a.apply_detail || {};
+  const waiting = ['NEEDS_YOU', 'PREPARED', 'FAILED'].includes(a.apply_state);
+  return `<a class="back" href="javascript:history.back()">← Back</a>
+    <h1>${esc(a.job?.company || 'Application')} · ${esc(a.job?.title || '')}</h1>
+    <p class="sub">${badge(appState(a))} for <a href="#/users/${a.user_id}">${esc(a.email || a.user_id)}</a> · ${a.source || 'manual'} · ${a.attempts ?? 0} tries · updated ${ago(a.updated_at)}</p>
+    <div class="card" style="margin-bottom:14px"><h2>Fix it</h2><div class="actions">
+      ${waiting ? '<button class="btn" id="skipApp">Skip it</button>' : ''}
+      <a class="btn primary" href="#/users/${a.user_id}">Open the user to retry or answer</a>
+      ${a.job?.url ? `<a class="btn" href="${esc(a.job.url)}" target="_blank" rel="noopener">Job posting ↗</a>` : ''}
+      ${det.formUrl ? `<a class="btn" href="${esc(det.formUrl)}" target="_blank" rel="noopener">Application form ↗</a>` : ''}
+    </div><p class="muted small" style="margin:10px 0 0">Retrying or answering questions sends a real application, so it's done from the user's own dashboard (Open as user).</p></div>
+    <div class="grid two">
+      <div class="card"><h2>What happened</h2><dl>
+        <dt>Problem</dt><dd>${esc(det.reason || '–')}</dd>
+        <dt>Missing answers</dt><dd>${(det.missing || []).map(m => esc(m.label || m.name || m)).join('<br>') || '–'}</dd>
+        <dt>Fields filled</dt><dd>${(det.filled || []).length}</dd>
+        <dt>Match score</dt><dd>${det.matchScore ?? '–'}</dd>
+        <dt>Submitted</dt><dd>${when(a.submitted_at)}</dd><dt>Created</dt><dd>${when(a.created_at)}</dd>
+      </dl></div>
+      <div class="card"><h2>History</h2><div class="timeline">
+        ${a.events.map(e => `<div><b>${esc(e.kind === 'status' ? `${e.from_status || '–'} → ${e.to_status || '–'}` : e.kind)}</b> <span class="muted small">${when(e.created_at)}</span>
+          ${e.detail?.reason ? `<div class="small">${esc(e.detail.reason)}</div>` : ''}</div>`).join('') || '<span class="muted">No events.</span>'}</div></div>
+    </div>
+    <details class="card" style="margin-top:14px"><summary><b>Raw details</b></summary><pre>${esc(JSON.stringify({ apply_detail: a.apply_detail, answers: a.answers, job: a.job }, null, 2))}</pre></details>`;
+}
+renderApp.after = () => {
+  const b = $('#skipApp'); if (b) b.onclick = () => act(b, () => api('POST', `/admin/api/applications/${currentApp.id}/action`, { action: 'skip' }),
+    { confirm: ['Skip this application?', "It stops waiting on the user and won't be sent.", 'Skip'] });
+};
+
+// ─── Companies & jobs ───────────────────────────────────────────────────────
+async function renderCompanies(params) {
+  const q = params.get('q') || '', jq = params.get('job') || '';
+  const [cos, jobs] = await Promise.all([q ? api('GET', '/admin/api/companies?q=' + encodeURIComponent(q)) : [], jq ? api('GET', '/admin/api/jobs/find?q=' + encodeURIComponent(jq)) : []]);
+  return `<h1>Companies &amp; jobs</h1><p class="sub">When a user says a job is missing, wrong, or still shows after it closed.</p>
+    <div class="grid two">
+      <div><div class="toolbar"><input type="search" id="cq" placeholder="Company name or board slug" value="${esc(q)}"></div>
+        ${q ? `<div class="tablewrap"><table><thead><tr><th>Company</th><th>Status</th><th>Open jobs</th><th>Last scan</th><th></th></tr></thead><tbody>
+        ${cos.map(c => `<tr><td><b>${esc(c.name)}</b><div class="muted small">${esc(c.ats)} · ${esc(c.slug)}</div></td>
+          <td>${c.active ? '<span class="badge ok">On</span>' : '<span class="badge">Off</span>'}${c.scan_errors ? ` <span class="badge bad">${c.scan_errors} errors</span>` : ''}</td>
+          <td>${c.active_jobs}</td><td>${ago(c.last_scan)}</td>
+          <td><div class="actions">${c.active ? `<button class="btn" data-cact="rescan" data-id="${c.id}">Scan now</button><button class="btn" data-cact="deactivate" data-id="${c.id}">Turn off</button>` : `<button class="btn" data-cact="activate" data-id="${c.id}">Turn on</button>`}
+            ${c.scan_errors ? `<button class="btn" data-cact="clear-errors" data-id="${c.id}">Clear errors</button>` : ''}</div></td></tr>`).join('') || '<tr><td colspan="5" class="empty">No companies match.</td></tr>'}
+        </tbody></table></div>` : '<div class="card empty">Search a company to scan it now, turn it on or off, or clear its errors.</div>'}</div>
+      <div><div class="toolbar"><input type="search" id="jq" placeholder="Job ID or exact posting URL" value="${esc(jq)}"></div>
+        ${jq ? (jobs.map(j => `<div class="card" style="margin-bottom:10px"><b>${esc(j.title)}</b><div class="muted">${esc(j.company)} · ${esc(j.location || '')}</div>
+          <dl style="margin:10px 0"><dt>Status</dt><dd>${j.active ? '<span class="badge ok">Open</span>' : `<span class="badge">Closed ${when(j.closed_at)}</span>`}</dd>
+          <dt>Last seen on board</dt><dd>${ago(j.last_seen)} · missed ${j.missed_scans} scans</dd><dt>Found</dt><dd>${when(j.discovered)}</dd><dt>Job ID</dt><dd class="mono">${j.id}</dd></dl>
+          <div class="actions">${j.active ? `<button class="btn" data-jact="close" data-id="${j.id}">Close job</button>` : `<button class="btn" data-jact="reopen" data-id="${j.id}">Reopen job</button>`}
+            <a class="btn" href="${esc(j.url)}" target="_blank" rel="noopener">Posting ↗</a></div></div>`).join('') || '<div class="card empty">No job with that ID or URL.</div>')
+          : '<div class="card empty">Find a job to close it or bring it back.</div>'}</div>
+    </div>`;
+}
+renderCompanies.after = (params) => {
+  const go = () => location.hash = `#/companies?q=${encodeURIComponent($('#cq').value)}&job=${encodeURIComponent($('#jq').value)}`;
+  for (const id of ['#cq', '#jq']) { let t; $(id).oninput = () => { clearTimeout(t); t = setTimeout(go, 450); }; }
+  $$('[data-cact]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/companies/${b.dataset.id}/action`, { action: b.dataset.cact }),
+    { confirm: b.dataset.cact === 'deactivate' ? ['Turn off this company?', 'It stops being scanned. Its open jobs stay until they would normally close.', 'Turn off'] : null }));
+  $$('[data-jact]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/jobs/${b.dataset.id}/action`, { action: b.dataset.jact }),
+    { confirm: b.dataset.jact === 'close' ? ['Close this job?', "It stops showing to users. If it's still on the company's board, the next scan reopens it.", 'Close job'] : null }));
+};
+
+// ─── Scans ──────────────────────────────────────────────────────────────────
+async function renderScans() {
+  const s = await api('GET', '/api/scan-status');
+  const running = (s.processes || []).length > 0;
+  return `<h1>Scans</h1><p class="sub">${running ? 'Scanning now.' : 'Not scanning.'} Last started ${when(s.schedule?.lastStart)} · next ${when(s.schedule?.nextAt)} (${esc(s.schedule?.nextMode || '')}).</p>
+    <div class="toolbar"><button class="btn primary" id="scanAll" ${running ? 'disabled' : ''}>Scan all now</button><button class="btn danger" id="stopAll" ${running ? '' : 'disabled'}>Stop all</button>
+      <a class="btn" href="/scan-log" target="_blank">Full scan log ↗</a></div>
+    <div class="tablewrap"><table><thead><tr><th>Platform</th><th>Companies</th><th>Scanned in 4 h</th><th>Erroring</th><th>Open jobs</th><th>Last scan</th></tr></thead><tbody>
+    ${(s.platforms || []).map(p => { const live = p.companies - (p.dead || 0), pct = live ? Math.round(100 * p.fresh4h / live) : 100;
+      return `<tr><td><b>${esc(p.ats)}</b></td><td>${p.companies.toLocaleString()}</td><td><span class="badge ${pct >= 95 ? 'ok' : pct >= 80 ? 'warn' : 'bad'}">${pct}%</span></td>
+      <td>${p.erroring}</td><td>${(p.activeJobs || 0).toLocaleString()}</td><td>${ago(p.lastScan)}</td></tr>`; }).join('')}
+    </tbody></table></div>`;
+}
+renderScans.after = () => {
+  const ctl = (action) => api('POST', '/api/scan-control', { action, target: action === 'start' ? 'scheduled' : 'all' }).then(r => { if (r.ok === false) throw new Error(r.message); return r; });
+  $('#scanAll').onclick = (e) => act(e.target, () => ctl('start'));
+  $('#stopAll').onclick = (e) => act(e.target, () => ctl('stop'), { confirm: ['Stop all scans?', 'Progress so far is saved. The next scheduled run starts at its usual time.', 'Stop', true] });
+};
+
+// ─── Invites ────────────────────────────────────────────────────────────────
+async function renderInvites() {
+  const rows = await api('GET', '/admin/api/invites');
+  return `<h1>Invites</h1><p class="sub">Sign-up is invite-only. Invite an email, then they create their account at /signup.</p>
+    <form class="card toolbar" id="invForm" style="margin-bottom:14px">
+      <input type="email" id="invEmail" placeholder="email@company.com" required style="min-width:240px">
+      <input id="invUser" placeholder="Existing user ID (optional)" style="min-width:250px" class="mono">
+      <label class="small"><input type="checkbox" id="invAdmin"> Admin</label>
+      <button class="btn primary" type="submit">Invite</button></form>
+    <div class="tablewrap"><table><thead><tr><th>Email</th><th>Role</th><th>Linked to</th><th>Invited</th><th>Status</th><th></th></tr></thead><tbody>
+    ${rows.map(i => `<tr><td>${esc(i.email)}</td><td>${i.is_admin ? '<span class="badge info">Admin</span>' : 'User'}</td>
+      <td class="mono">${i.user_id ? esc(i.linked_email || i.user_id.slice(0, 8) + '…') : '–'}</td><td>${when(i.created_at)}</td>
+      <td>${i.used_at ? `<span class="badge ok">Signed up ${ago(i.used_at)}</span>` : '<span class="badge warn">Waiting</span>'}</td>
+      <td>${i.used_at ? '' : `<button class="btn" data-revoke="${esc(i.email)}">Revoke</button>`}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No invites yet.</td></tr>'}
+    </tbody></table></div>`;
+}
+renderInvites.after = () => {
+  $('#invForm').onsubmit = (e) => { e.preventDefault(); act(e.submitter, () => api('POST', '/admin/api/invites', { email: $('#invEmail').value, user_id: $('#invUser').value.trim() || null, is_admin: $('#invAdmin').checked })); };
+  $$('[data-revoke]').forEach(b => b.onclick = () => act(b, () => api('DELETE', '/admin/api/invites/' + encodeURIComponent(b.dataset.revoke)), { confirm: ['Revoke this invite?', `${b.dataset.revoke} won't be able to sign up.`, 'Revoke'] }));
+};
+
+// ─── System ─────────────────────────────────────────────────────────────────
+async function renderSystem() {
+  const s = await api('GET', '/admin/api/system');
+  const yes = (v, ok = 'Set up', no = 'Not set up') => v ? `<span class="badge ok">${ok}</span>` : `<span class="badge warn">${no}</span>`;
+  return `<h1>System</h1><p class="sub">What the app runs on, and what's misconfigured.</p>
+    <div class="grid two"><div class="card"><dl>
+      <dt>Server</dt><dd>Up ${s.uptimeMin} min · Node ${esc(s.node)}</dd>
+      <dt>Database</dt><dd>${s.db.ok ? `<span class="badge ok">OK</span> ${s.db.ms} ms · ${esc(s.db.size)}` : `<span class="badge bad">Down</span> ${esc(s.db.error)}`}</dd>
+      <dt>Resume rewriting</dt><dd>${esc(s.llm.provider)} · ${esc(s.llm.model)} ${s.llm.keySet ? '' : '<span class="badge bad">API key missing</span>'}</dd>
+      <dt>Reset emails (Resend)</dt><dd>${yes(s.email.resend, 'Set up', 'Not set up: reset links only go to the server log')}</dd>
+      <dt>Gmail connect</dt><dd>${yes(s.gmailOAuth)}</dd>
+      <dt>Dashboard URL</dt><dd class="mono">${esc(s.urls.app)}</dd><dt>Login site</dt><dd class="mono">${esc(s.urls.site || 'same host')}</dd>
+      <dt>Cookie domain</dt><dd class="mono">${esc(s.urls.cookieDomain || 'this host only')}</dd>
+    </dl></div>
+    <div class="card"><h2>Recent server errors</h2>${s.errors.length ? `<pre>${esc(s.errors.join('\n'))}</pre>` : '<div class="empty">None in the server log.</div>'}</div></div>`;
+}
+
+// ─── Audit ──────────────────────────────────────────────────────────────────
+async function renderAudit() {
+  const rows = await api('GET', '/admin/api/audit');
+  return `<h1>Audit log</h1><p class="sub">Every change made from this portal.</p>
+    <div class="tablewrap"><table><thead><tr><th>When</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td>${when(r.created_at)}</td><td>${esc(r.admin_email)}</td><td><b>${esc(r.action)}</b></td>
+      <td class="small">${/^[0-9a-f-]{36}$/.test(r.target || '') ? `<a href="#/users/${r.target}">${esc(r.detail?.email || r.target.slice(0, 8) + '…')}</a>` : esc(r.target || '–')}</td>
+      <td class="mono">${esc(r.detail ? JSON.stringify(r.detail) : '')}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Nothing yet.</td></tr>'}
+    </tbody></table></div>`;
+}
+
+// rows that link somewhere
+view.addEventListener('click', (e) => { const tr = e.target.closest('tr[data-href]'); if (tr && !e.target.closest('a,button')) location.hash = tr.dataset.href; });
+$('#logout').onclick = async (e) => { e.preventDefault(); const r = await fetch('/auth/logout', { method: 'POST' }).then(r => r.json()).catch(() => ({})); location.assign(r.redirect || '/login'); };
+fetch('/auth/me').then(r => r.json()).then(me => $('#who').textContent = me.email || '').catch(() => {});
+route();
+</script>
+</body>
+</html>

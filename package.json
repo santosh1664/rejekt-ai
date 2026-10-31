@@ -51,6 +51,7 @@
     "ml:rewriter:idf": "node ml/build-posting-idf.mjs",
     "test:resume-layout": "node scripts/test-resume-layout.mjs",
     "test:auth": "node --env-file=.env.local scripts/test-auth.mjs",
+    "test:admin": "node --env-file=.env.local scripts/test-admin.mjs",
     "migrate:auth": "node --env-file=.env.local db/migrate-auth.mjs",
     "invite": "node --env-file=.env.local scripts/invite.mjs"
   },

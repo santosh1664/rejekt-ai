@@ -19,6 +19,7 @@ import { extractResumeSections } from './lib/resume-extract.mjs';
 import { router as apiRouter } from './api/server.mjs';
 import { readFileSync } from 'fs';
 import * as auth from './lib/auth.mjs';
+import { router as adminRouter } from './lib/admin.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -71,8 +72,18 @@ app.post('/auth/signup', authJson, async (req, res) => {
 });
 app.post('/auth/logout', async (req, res) => {
   await auth.endSession(auth.readCookie(req));
-  res.setHeader('Set-Cookie', auth.sessionCookie('', { clear: true }));
+  await auth.endSession(auth.readCookie(req, auth.ADMIN_COOKIE));   // logging out while "Open as user" ends both
+  res.setHeader('Set-Cookie', [auth.sessionCookie('', { clear: true }), auth.sessionCookie('', { clear: true, name: auth.ADMIN_COOKIE })]);
   res.json({ redirect: LOGIN });
+});
+// Leave "Open as user": end that session and switch back to the admin's own
+app.post('/auth/return', async (req, res) => {
+  const adminRaw = auth.readCookie(req, auth.ADMIN_COOKIE);
+  const admin = await auth.userFromToken(adminRaw);
+  if (req.user?.impersonator_id) await auth.endSession(auth.readCookie(req));
+  const back = admin?.is_admin;
+  res.setHeader('Set-Cookie', [auth.sessionCookie('', { clear: true, name: auth.ADMIN_COOKIE }), auth.sessionCookie(back ? adminRaw : '', { clear: !back })]);
+  res.json({ redirect: back ? `/admin#/users/${req.user?.id || ''}` : LOGIN });
 });
 app.post('/auth/forgot', authJson, async (req, res) => {
   if (auth.tooManyAttempts(`forgot:${ip(req)}`, 5)) return res.status(429).json({ error: 'Too many tries. Wait 15 minutes.' });
@@ -93,7 +104,7 @@ app.get(['/login', '/signup', '/forgot', '/reset'], (req, res) => {
 
 // Everything else needs a session; scan controls need an admin.
 const PUBLIC = /^\/(brand\/|favicon|login\.html$)/;
-const ADMIN  = /^\/(scan-log|api\/scan-)/;
+const ADMIN  = /^\/(admin|scan-log|api\/scan-)/;
 app.use((req, res, next) => {
   if (PUBLIC.test(req.path) || req.path === '/v1/health') return next();
   if (!req.user) {
@@ -106,7 +117,8 @@ app.use((req, res, next) => {
 
 // The dashboard page, with the logged-in user written into it (it used to invent a random id in localStorage)
 function sendApp(req, res) {
-  const me = JSON.stringify({ id: req.user.id, email: req.user.email, is_admin: req.user.is_admin }).replace(/</g, '\\u003c');
+  const me = JSON.stringify({ id: req.user.id, email: req.user.email, is_admin: req.user.is_admin,
+                             impersonator: req.user.impersonator_email || null }).replace(/</g, '\\u003c');
   const html = readFileSync(join(__dirname, 'public', 'app', 'index.html'), 'utf8')
     .replace('<script>', `<script>window.RJ_USER = ${me};</script>\n<script>`);
   res.type('html').send(html);
@@ -114,6 +126,10 @@ function sendApp(req, res) {
 // dashboard.rejekt.ai/ is the dashboard itself; on the login site / goes to it
 app.get('/', (req, res) => (appHost && req.get('host') === appHost ? sendApp(req, res) : res.redirect(APP_URL)));
 app.use(express.static(join(__dirname, 'public'), { index: false }));
+
+// Admin portal (admins only, see the gate above)
+app.get('/admin', (req, res) => res.sendFile(join(__dirname, 'public', 'admin.html')));
+app.use('/admin/api', adminRouter);
 
 // Dashboard (public/app) talks to the REST API (api/server.mjs) on the same
 // origin under /v1 — e.g. GET /v1/users/:id/recommendations. Express strips
