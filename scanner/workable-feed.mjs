@@ -59,10 +59,12 @@ export async function loadWorkableFeed({ verbose } = {}) {
   const started = Date.now();
   // Account companies (apply.workable.com, scanned one by one): their job codes and names are skipped here.
   // Only theirs: a feed company must get its whole list every run, or a full scan reads the rest as gone.
-  // Looked up before the download (Workable allows about one an hour), with a long limit (slow under scan load).
+  // Looked up before the download (Workable allows about one an hour). One index lookup per company
+  // (OFFSET 0 stops the planner flattening it): a plain join read the whole 18 GB jobs table for ~4 min
+  // under scan load, and the other companies' updates timed out meanwhile. Now ~0.5 s.
   const accounts = await slowQuery(`
     SELECT c.name, j.url FROM companies c
-      LEFT JOIN jobs j ON j.company_id = c.id AND j.active
+      LEFT JOIN LATERAL (SELECT url FROM jobs WHERE company_id = c.id AND active OFFSET 0) j ON TRUE
      WHERE c.ats = 'workable' AND NOT (c.meta ? 'feed' OR c.meta ? 'companyId')`);
   const { rows: hosted } = await query(`
     SELECT id, name, ats, slug, meta, active FROM companies WHERE ats = 'workable' AND meta ? 'companyId'`);
