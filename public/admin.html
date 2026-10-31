@@ -211,13 +211,31 @@ renderOverview.after = () => {
 };
 
 // ─── Users ──────────────────────────────────────────────────────────────────
+// Search pages draw their boxes once; typing reloads only the results (redrawing the page took the focus away)
+function liveSearch(inputs, hashFor, load) {
+  let t;
+  for (const el of inputs) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
+    clearTimeout(t);
+    t = setTimeout(() => { history.replaceState(null, '', hashFor()); load(); }, el.tagName === 'SELECT' ? 0 : 300);
+  });
+  load();
+}
+let searchSeq = 0;   // a slower, older search never overwrites a newer one
+
 async function renderUsers(params) {
-  const q = params.get('q') || '';
-  const all = await api('GET', '/admin/api/users?q=' + encodeURIComponent(q));
-  const users = all.filter(u => !u.is_admin), admins = all.filter(u => u.is_admin);   // admins aren't users: listed on their own
-  return `<h1>Users</h1><p class="sub">${users.length} user${users.length === 1 ? '' : 's'}. Open one to see their data and fix things for them.</p>
-    <div class="toolbar"><input type="search" id="uq" placeholder="Search email or name" value="${esc(q)}"><a class="btn" href="#/invites">Invite someone</a></div>
-    <div class="tablewrap"><table><thead><tr><th>User</th><th>Status</th><th>Last login</th><th>Applications</th><th>Auto-apply</th><th>Gmail</th></tr></thead><tbody>
+  return `<h1>Users</h1><p class="sub" id="usersSub">Open one to see their data and fix things for them.</p>
+    <div class="toolbar"><input type="search" id="uq" placeholder="Search email or name" value="${esc(params.get('q') || '')}"><a class="btn" href="#/invites">Invite someone</a></div>
+    <div id="usersList"><div class="loading">Loading…</div></div>`;
+}
+renderUsers.after = () => {
+  const q = $('#uq');
+  liveSearch([q], () => '#/users' + (q.value ? '?q=' + encodeURIComponent(q.value) : ''), async () => {
+    const mine = ++searchSeq;
+    const all = await api('GET', '/admin/api/users?q=' + encodeURIComponent(q.value)).catch(e => { toast(e.message, true); return null; });
+    if (!all || mine !== searchSeq || !$('#usersList')) return;
+    const users = all.filter(u => !u.is_admin), admins = all.filter(u => u.is_admin);   // admins aren't users: listed on their own
+    $('#usersSub').textContent = `${users.length} user${users.length === 1 ? '' : 's'}. Open one to see their data and fix things for them.`;
+    $('#usersList').innerHTML = `<div class="tablewrap"><table><thead><tr><th>User</th><th>Status</th><th>Last login</th><th>Applications</th><th>Auto-apply</th><th>Gmail</th></tr></thead><tbody>
     ${users.map(u => `<tr class="click" data-href="#/users/${u.id}">
       <td><b>${esc(u.full_name || u.email)}</b><div class="muted small">${esc(u.email)}</div></td>
       <td>${u.disabled_at ? '<span class="badge bad">Disabled</span>' : '<span class="badge ok">Active</span>'}</td>
@@ -230,10 +248,8 @@ async function renderUsers(params) {
       ${admins.map(u => `<tr class="click" data-href="#/users/${u.id}"><td><b>${esc(u.email)}</b></td>
         <td>${u.disabled_at ? '<span class="badge bad">Disabled</span>' : '<span class="badge info">Admin</span>'}</td><td>${ago(u.last_login_at)}</td></tr>`).join('')}
     </tbody></table></div>` : ''}`;
-}
-renderUsers.after = () => {
-  const i = $('#uq'); let t; i.oninput = () => { clearTimeout(t); t = setTimeout(() => location.hash = '#/users' + (i.value ? '?q=' + encodeURIComponent(i.value) : ''), 300); };
-  i.focus(); i.setSelectionRange(i.value.length, i.value.length);
+  });
+  q.focus(); q.setSelectionRange(q.value.length, q.value.length);
 };
 
 let currentUser = null;
@@ -303,21 +319,26 @@ $('#linkClose').onclick = () => $('#linkDlg').close();
 
 // ─── Applications ───────────────────────────────────────────────────────────
 async function renderApps(params) {
-  const state = params.get('state') || '', q = params.get('q') || '';
-  const rows = await api('GET', `/admin/api/applications?state=${encodeURIComponent(state)}&q=${encodeURIComponent(q)}&user=${encodeURIComponent(params.get('user') || '')}`);
+  const state = params.get('state') || '';
   const opts = ['', 'NEEDS_YOU', 'FAILED', 'STUCK', 'PREPARED', 'SUBMITTED', 'SKIPPED', 'SAVED', 'APPLIED'];
   return `<h1>Applications</h1><p class="sub">Every user's applications. Open one for its full history and error.</p>
     <div class="toolbar"><select id="as">${opts.map(o => `<option value="${o}" ${o === state ? 'selected' : ''}>${o ? PRETTY[o] : 'All states'}</option>`).join('')}</select>
-      <input type="search" id="aq" placeholder="Company or job title" value="${esc(q)}"><span class="muted">${rows.length}${rows.length === 300 ? '+' : ''} shown</span></div>
-    <div class="tablewrap"><table><thead><tr><th>Job</th><th>User</th><th>State</th><th>Problem</th><th>Tries</th><th>Updated</th></tr></thead><tbody>
+      <input type="search" id="aq" placeholder="Company or job title" value="${esc(params.get('q') || '')}"><span class="muted" id="appsCount"></span></div>
+    <div id="appsList"><div class="loading">Loading…</div></div>`;
+}
+renderApps.after = (params) => {
+  const user = params.get('user') || '';
+  liveSearch([$('#as'), $('#aq')], () => `#/applications?state=${encodeURIComponent($('#as').value)}&q=${encodeURIComponent($('#aq').value)}${user ? '&user=' + encodeURIComponent(user) : ''}`, async () => {
+    const mine = ++searchSeq;
+    const rows = await api('GET', `/admin/api/applications?state=${encodeURIComponent($('#as').value)}&q=${encodeURIComponent($('#aq').value)}&user=${encodeURIComponent(user)}`).catch(e => { toast(e.message, true); return null; });
+    if (!rows || mine !== searchSeq || !$('#appsList')) return;
+    $('#appsCount').textContent = `${rows.length}${rows.length === 300 ? '+' : ''} shown`;
+    $('#appsList').innerHTML = `<div class="tablewrap"><table><thead><tr><th>Job</th><th>User</th><th>State</th><th>Problem</th><th>Tries</th><th>Updated</th></tr></thead><tbody>
     ${rows.map(a => `<tr class="click" data-href="#/applications/${a.id}"><td><b>${esc(a.company || '–')}</b><div class="muted small">${esc(a.title || '')}</div></td>
       <td class="small">${esc(a.email || a.user_id)}</td><td>${badge(appState(a))}${a.source === 'auto' ? ' <span class="muted small">auto</span>' : ''}</td>
       <td class="small">${esc(a.reason || '')}</td><td>${a.attempts ?? 0}</td><td>${ago(a.updated_at)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No applications match.</td></tr>'}
     </tbody></table></div>`;
-}
-renderApps.after = () => {
-  const go = () => location.hash = `#/applications?state=${encodeURIComponent($('#as').value)}&q=${encodeURIComponent($('#aq').value)}`;
-  $('#as').onchange = go; let t; $('#aq').oninput = () => { clearTimeout(t); t = setTimeout(go, 350); };
+  });
 };
 
 let currentApp = null;
@@ -355,34 +376,43 @@ renderApp.after = () => {
 
 // ─── Companies & jobs ───────────────────────────────────────────────────────
 async function renderCompanies(params) {
-  const q = params.get('q') || '', jq = params.get('job') || '';
-  const [cos, jobs] = await Promise.all([q ? api('GET', '/admin/api/companies?q=' + encodeURIComponent(q)) : [], jq ? api('GET', '/admin/api/jobs/find?q=' + encodeURIComponent(jq)) : []]);
   return `<h1>Companies &amp; jobs</h1><p class="sub">When a user says a job is missing, wrong, or still shows after it closed.</p>
     <div class="grid two">
-      <div><div class="toolbar"><input type="search" id="cq" placeholder="Company name or board slug" value="${esc(q)}"></div>
-        ${q ? `<div class="tablewrap"><table><thead><tr><th>Company</th><th>Status</th><th>Open jobs</th><th>Last scan</th><th></th></tr></thead><tbody>
-        ${cos.map(c => `<tr><td><b>${esc(c.name)}</b><div class="muted small">${esc(c.ats)} · ${esc(c.slug)}</div></td>
-          <td>${c.active ? '<span class="badge ok">On</span>' : '<span class="badge">Off</span>'}${c.scan_errors ? ` <span class="badge bad">${c.scan_errors} errors</span>` : ''}</td>
-          <td>${c.active_jobs}</td><td>${ago(c.last_scan)}</td>
-          <td><div class="actions">${c.active ? `<button class="btn" data-cact="rescan" data-id="${c.id}">Scan now</button><button class="btn" data-cact="deactivate" data-id="${c.id}">Turn off</button>` : `<button class="btn" data-cact="activate" data-id="${c.id}">Turn on</button>`}
-            ${c.scan_errors ? `<button class="btn" data-cact="clear-errors" data-id="${c.id}">Clear errors</button>` : ''}</div></td></tr>`).join('') || '<tr><td colspan="5" class="empty">No companies match.</td></tr>'}
-        </tbody></table></div>` : '<div class="card empty">Search a company to scan it now, turn it on or off, or clear its errors.</div>'}</div>
-      <div><div class="toolbar"><input type="search" id="jq" placeholder="Job ID or exact posting URL" value="${esc(jq)}"></div>
-        ${jq ? (jobs.map(j => `<div class="card" style="margin-bottom:10px"><b>${esc(j.title)}</b><div class="muted">${esc(j.company)} · ${esc(j.location || '')}</div>
-          <dl style="margin:10px 0"><dt>Status</dt><dd>${j.active ? '<span class="badge ok">Open</span>' : `<span class="badge">Closed ${when(j.closed_at)}</span>`}</dd>
-          <dt>Last seen on board</dt><dd>${ago(j.last_seen)} · missed ${j.missed_scans} scans</dd><dt>Found</dt><dd>${when(j.discovered)}</dd><dt>Job ID</dt><dd class="mono">${j.id}</dd></dl>
-          <div class="actions">${j.active ? `<button class="btn" data-jact="close" data-id="${j.id}">Close job</button>` : `<button class="btn" data-jact="reopen" data-id="${j.id}">Reopen job</button>`}
-            <a class="btn" href="${esc(j.url)}" target="_blank" rel="noopener">Posting ↗</a></div></div>`).join('') || '<div class="card empty">No job with that ID or URL.</div>')
-          : '<div class="card empty">Find a job to close it or bring it back.</div>'}</div>
+      <div><div class="toolbar"><input type="search" id="cq" placeholder="Company name or board slug" value="${esc(params.get('q') || '')}"></div><div id="coList"></div></div>
+      <div><div class="toolbar"><input type="search" id="jq" placeholder="Job ID or exact posting URL" value="${esc(params.get('job') || '')}"></div><div id="jobList"></div></div>
     </div>`;
 }
-renderCompanies.after = (params) => {
-  const go = () => location.hash = `#/companies?q=${encodeURIComponent($('#cq').value)}&job=${encodeURIComponent($('#jq').value)}`;
-  for (const id of ['#cq', '#jq']) { let t; $(id).oninput = () => { clearTimeout(t); t = setTimeout(go, 450); }; }
-  $$('[data-cact]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/companies/${b.dataset.id}/action`, { action: b.dataset.cact }),
-    { confirm: b.dataset.cact === 'deactivate' ? ['Turn off this company?', 'It stops being scanned. Its open jobs stay until they would normally close.', 'Turn off'] : null }));
-  $$('[data-jact]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/jobs/${b.dataset.id}/action`, { action: b.dataset.jact }),
-    { confirm: b.dataset.jact === 'close' ? ['Close this job?', "It stops showing to users. If it's still on the company's board, the next scan reopens it.", 'Close job'] : null }));
+let coSeq = 0, jobSeq = 0;
+renderCompanies.after = () => {
+  const hashFor = () => `#/companies?q=${encodeURIComponent($('#cq').value)}&job=${encodeURIComponent($('#jq').value)}`;
+  liveSearch([$('#cq')], hashFor, async () => {
+    const q = $('#cq').value.trim(), mine = ++coSeq;
+    if (!q) { $('#coList').innerHTML = '<div class="card empty">Search a company to scan it now, turn it on or off, or clear its errors.</div>'; return; }
+    const cos = await api('GET', '/admin/api/companies?q=' + encodeURIComponent(q)).catch(e => { toast(e.message, true); return null; });
+    if (!cos || mine !== coSeq || !$('#coList')) return;
+    $('#coList').innerHTML = `<div class="tablewrap"><table><thead><tr><th>Company</th><th>Status</th><th class="num">Open jobs</th><th>Last scan</th><th></th></tr></thead><tbody>
+      ${cos.map(c => `<tr><td><b>${esc(c.name)}</b><div class="muted small">${esc(c.ats)} · ${esc(c.slug)}</div></td>
+        <td>${c.active ? '<span class="badge ok">On</span>' : '<span class="badge">Off</span>'}${c.scan_errors ? ` <span class="badge bad">${c.scan_errors} errors</span>` : ''}</td>
+        <td class="num">${c.active_jobs}</td><td>${ago(c.last_scan)}</td>
+        <td><div class="actions">${c.active ? `<button class="btn" data-cact="rescan" data-id="${c.id}">Scan now</button><button class="btn" data-cact="deactivate" data-id="${c.id}">Turn off</button>` : `<button class="btn" data-cact="activate" data-id="${c.id}">Turn on</button>`}
+          ${c.scan_errors ? `<button class="btn" data-cact="clear-errors" data-id="${c.id}">Clear errors</button>` : ''}</div></td></tr>`).join('') || '<tr><td colspan="5" class="empty">No companies match.</td></tr>'}
+      </tbody></table></div>`;
+    $$('#coList [data-cact]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/companies/${b.dataset.id}/action`, { action: b.dataset.cact }),
+      { confirm: b.dataset.cact === 'deactivate' ? ['Turn off this company?', 'It stops being scanned. Its open jobs stay until they would normally close.', 'Turn off'] : null }));
+  });
+  liveSearch([$('#jq')], hashFor, async () => {
+    const q = $('#jq').value.trim(), mine = ++jobSeq;
+    if (!q) { $('#jobList').innerHTML = '<div class="card empty">Find a job to close it or bring it back.</div>'; return; }
+    const jobs = await api('GET', '/admin/api/jobs/find?q=' + encodeURIComponent(q)).catch(e => { toast(e.message, true); return null; });
+    if (!jobs || mine !== jobSeq || !$('#jobList')) return;
+    $('#jobList').innerHTML = jobs.map(j => `<div class="card" style="margin-bottom:10px"><b>${esc(j.title)}</b><div class="muted">${esc(j.company)} · ${esc(j.location || '')}</div>
+        <dl style="margin:10px 0"><dt>Status</dt><dd>${j.active ? '<span class="badge ok">Open</span>' : `<span class="badge">Closed ${when(j.closed_at)}</span>`}</dd>
+        <dt>Last seen on board</dt><dd>${ago(j.last_seen)} · missed ${j.missed_scans} scans</dd><dt>Found</dt><dd>${when(j.discovered)}</dd><dt>Job ID</dt><dd class="mono">${j.id}</dd></dl>
+        <div class="actions">${j.active ? `<button class="btn" data-jact="close" data-id="${j.id}">Close job</button>` : `<button class="btn" data-jact="reopen" data-id="${j.id}">Reopen job</button>`}
+          <a class="btn" href="${esc(j.url)}" target="_blank" rel="noopener">Posting ↗</a></div></div>`).join('') || '<div class="card empty">No job with that ID or URL.</div>';
+    $$('#jobList [data-jact]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/jobs/${b.dataset.id}/action`, { action: b.dataset.jact }),
+      { confirm: b.dataset.jact === 'close' ? ['Close this job?', "It stops showing to users. If it's still on the company's board, the next scan reopens it.", 'Close job'] : null }));
+  });
 };
 
 // ─── Scans ──────────────────────────────────────────────────────────────────
