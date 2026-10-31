@@ -10,7 +10,7 @@
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { query } from './lib/db.mjs';
+import { query, slowQuery } from './lib/db.mjs';
 import { getScanStatus, reapStaleRuns } from './lib/scan-status.mjs';
 import { reapStuckApplications } from './autoapply/engine.mjs';
 import { startScan, stopScans } from './lib/scan-control.mjs';
@@ -457,6 +457,7 @@ app.get('/api/jobs', async (req, res) => {
 
 // ─── Scan stats API ─────────────────────────────────────────────────────────
 // Returns scan history + per-ATS job discovery data for the dashboard.
+const byHourCache = { rows: [], at: 0, busy: null };
 app.get('/api/scan-stats', async (req, res) => {
   try {
     await reapStaleRuns().catch(() => {});
@@ -471,16 +472,18 @@ app.get('/api/scan-stats', async (req, res) => {
        LIMIT 30
     `);
 
-    // Jobs discovered per ATS per hour, last 48h (jobs.ats + the discovered index: fast, no join)
-    const { rows: byHour } = await query(`
-      SELECT ats, DATE_TRUNC('hour', discovered) AS hour, COUNT(*) AS jobs_found
-        FROM jobs
-       WHERE discovered > NOW() - INTERVAL '48 hours'
-       GROUP BY ats, hour
-       ORDER BY hour ASC
-    `);
-
-    res.json({ runs, byHour });
+    // Jobs found per platform per hour, last 48h: computed in the background (it passes the pool's 30 s limit
+    // while a scan loads the database) and cached for 10 min, so the runs table never waits on it
+    if (Date.now() - byHourCache.at > 600_000 && !byHourCache.busy) {
+      byHourCache.busy = slowQuery(`
+        SELECT ats, DATE_TRUNC('hour', discovered) AS hour, COUNT(*) AS jobs_found
+          FROM jobs WHERE discovered > NOW() - INTERVAL '48 hours'
+         GROUP BY ats, hour ORDER BY hour ASC`)
+        .then(rows => Object.assign(byHourCache, { rows, at: Date.now() }))
+        .catch(e => console.error('[scan-stats] jobs per hour:', e.message))
+        .finally(() => { byHourCache.busy = null; });
+    }
+    res.json({ runs, byHour: byHourCache.rows, byHourAt: byHourCache.at || null });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

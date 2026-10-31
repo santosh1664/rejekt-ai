@@ -453,7 +453,7 @@ renderScans.after = () => {
     try { data = await api('GET', '/api/scan-stats'); } catch (e) { $('#scanRuns').innerHTML = `<div class="empty">Couldn't load scan runs (${esc(e.message)}).</div>`; return; }
     scanRuns = data.runs; renderCards();
     const byHour = data.byHour;
-    if (!byHour.length) $('#scanChart').innerHTML = '<div class="empty">No jobs found in the last 48 hours yet.</div>';
+    if (!byHour.length) $('#scanChart').innerHTML = `<div class="empty">${data.byHourAt ? 'No jobs found in the last 48 hours yet.' : 'Counting jobs per hour… this takes a minute while a scan is running.'}</div>`;
     else {
       const hours = {}, platforms = new Set();
       for (const r of byHour) { (hours[r.hour] ||= {})[r.ats] = +r.jobs_found; platforms.add(r.ats); }
