@@ -81,6 +81,12 @@ h2 { font-size: clamp(32px, 4vw, 46px); line-height: 1.05; letter-spacing: -0.03
 .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .feature { border: 1px solid var(--line); border-radius: var(--r); padding: 30px; background: var(--surface); }
 .feature .ic { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; background: var(--brand-soft); color: var(--ink); margin-bottom: 20px; }
+.ba { display: grid; gap: 8px; margin-top: 18px; font-size: 14px; color: var(--ink-2); }
+.ba > div { padding: 11px 13px; border-radius: 11px; background: var(--surface-2); border: 1px solid var(--line-2); }
+.ba > div:first-child { color: var(--muted); }
+.ba-l { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 3px; }
+.ba-l.after { color: var(--ok); }
+.ba mark { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ink); padding: 0 3px; border-radius: 4px; }
 .feature h3 { font-size: 20px; letter-spacing: -0.015em; margin: 0 0 8px; } .feature p { margin: 0; color: var(--ink-2); }
 .logos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; } .logos span { font-size: 13px; padding: 4px 11px; border-radius: 99px; background: var(--surface-2); color: var(--ink-2); font-weight: 500; }
 
@@ -150,6 +156,9 @@ details p { margin: 12px 0 0; color: var(--ink-2); }
 .mk-doc h6 { margin: 0; font-size: 16px; } .mk-doc .role { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
 .mk-doc .sec { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 10px 0 4px; }
 .mk-doc ul { margin: 0; padding-left: 16px; } .mk-doc li { margin-bottom: 4px; }
+.mk-resume { font-size: 12.5px; line-height: 1.5; overflow: hidden; } .mk-resume .sec { margin-top: 9px; }
+.mk-resume .mk-job { margin-top: 4px; } .mk-resume .mk-job span { float: right; color: var(--muted); font-size: 11.5px; }
+.mk-resume ul { margin: 3px 0 0; } .mk-resume li { margin-bottom: 2px; }
 .mk-doc mark { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ink); padding: 0 3px; border-radius: 4px; }
 .mk-list div { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line-2); } .mk-list div:last-child { border: 0; }
 .mk-toggle { width: 36px; height: 20px; border-radius: 99px; background: var(--ok); position: relative; display: inline-block; }
@@ -264,6 +273,10 @@ footer .wrap { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
           <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></div>
           <h3>A resume made for each job</h3>
           <p>Every application gets its own version of your resume, with each change highlighted, so you always know exactly what was sent.</p>
+          <div class="ba">
+            <div><span class="ba-l">Before</span>Worked on backend services and helped improve deployments.</div>
+            <div><span class="ba-l after">For this job</span>Led migration of <mark>12 Go microservices</mark> to <mark>Kubernetes</mark>, cutting deploy time <mark>by 60%</mark>.</div>
+          </div>
         </div>
         <div class="feature">
           <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg></div>
@@ -367,14 +380,25 @@ const SCREENS = {
     ${row('#C2417A', 'O', 'Senior Go Engineer', 'Orbit Logistics · Remote, Canada', '<span class="sc">87</span><span class="mk-btn">Save</span>')}
     ${row('#1F8A8A', 'T', 'Backend Engineer, Infrastructure', 'Tidal Energy · Denver, CO', '<span class="sc">84</span><span class="mk-btn">Save</span>')}` },
   resume: { side: 'applied', html: `<h5>Tailored for Northwind Labs <span class="mk-chip on">12 changes</span></h5>
-    <div class="mk-two"><div class="mk-doc"><h6>Alex Morgan</h6><div class="role">Senior Software Engineer</div>
-      <div class="sec">Experience</div><ul>
+    <div class="mk-two"><div class="mk-doc mk-resume"><h6>Alex Morgan</h6><div class="role">Senior Software Engineer · Seattle, WA · alex@email.com</div>
+      <div class="sec">Summary</div><div>Backend engineer with 8 years building <mark>distributed systems in Go</mark> and running them on <mark>Kubernetes</mark> at scale.</div>
+      <div class="sec">Experience</div>
+      <div class="mk-job"><b>Senior Software Engineer</b> · Cobalt Cloud <span>2021 – now</span></div><ul>
         <li>Led migration of <mark>12 Go microservices</mark> to <mark>Kubernetes</mark>, cutting deploy time <mark>by 60%</mark>.</li>
-        <li>Designed an <mark>event-driven</mark> billing pipeline handling <mark>40M events a day</mark>.</li>
+        <li>Designed an <mark>event-driven</mark> billing pipeline on <mark>Kafka</mark> handling <mark>40M events a day</mark>.</li>
         <li>Mentored 4 engineers and ran the team's <mark>on-call and incident reviews</mark>.</li></ul>
-      <div class="sec">Skills</div><div>Go, <mark>Kubernetes</mark>, PostgreSQL, <mark>Kafka</mark>, AWS, Terraform</div></div>
-      <div class="mk-card"><b>What changed</b><div class="mk-list" style="margin-top:8px"><div><span>Keywords added</span><b>6</b></div><div><span>Bullets reworded</span><b>4</b></div>
-        <div><span>Skills reordered</span><b>2</b></div><div><span>Match before → after</span><b>71 → 94</b></div></div></div></div>` },
+      <div class="mk-job"><b>Software Engineer</b> · Pine Analytics <span>2017 – 2021</span></div><ul>
+        <li>Built REST and <mark>gRPC</mark> APIs serving 3M requests a day with 99.95% uptime.</li>
+        <li>Cut PostgreSQL query time 70% with indexing and caching.</li></ul>
+      <div class="sec">Skills</div><div>Go, <mark>Kubernetes</mark>, <mark>Kafka</mark>, gRPC, PostgreSQL, AWS, Terraform</div>
+      <div class="sec">Education</div><div>B.S. Computer Science · University of Washington</div></div>
+      <div style="display:grid;gap:10px;align-content:start">
+        <div class="mk-card"><div class="l">Match for this job</div><div class="n">71 → 94</div></div>
+        <div class="mk-card"><b>What changed</b><div class="mk-list" style="margin-top:8px"><div><span>Keywords added</span><b>6</b></div><div><span>Bullets reworded</span><b>4</b></div>
+          <div><span>Skills reordered</span><b>2</b></div><div><span>Summary rewritten</span><b>1</b></div></div></div>
+        <div class="mk-card"><b>Keywords from the job</b><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+          <span class="mk-chip on">Go</span><span class="mk-chip on">Kubernetes</span><span class="mk-chip on">Kafka</span><span class="mk-chip on">gRPC</span><span class="mk-chip on">on-call</span><span class="mk-chip">Rust</span></div></div>
+      </div></div>` },
   auto: { side: 'auto', html: `<h5>Auto-apply <span class="mk-toggle" aria-label="On"></span></h5>
     <div class="mk-kpis"><div class="mk-card"><div class="n">8</div><div class="l">Sent today</div></div><div class="mk-card"><div class="n">25</div><div class="l">Daily limit</div></div>
       <div class="mk-card"><div class="n">2</div><div class="l">Per company / 30 days</div></div><div class="mk-card"><div class="n">2</div><div class="l">Waiting on you</div></div></div>
