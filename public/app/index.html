@@ -2109,7 +2109,7 @@ async function renderReview() {
   const go = k => `#/review/${reviewIds[(i + k + n) % n]}`;
   const ask = (d.missing || []).filter(m => m.type !== 'file').length;
   const nr = a.applyState === 'NEEDS_REVIEW', co = esc(a.job?.company || '');
-  const blank = !nr && !(d.missing || []).length;
+  const blank = !nr && !(d.missing || []).length && !d.assisted;   // assisted: the person applies on the site, nothing to start here
   $('#view').dataset.review = 1;
   $('#view').innerHTML = `
     <div class="rv-head">
@@ -2122,11 +2122,20 @@ async function renderReview() {
     <div class="rv-grid">
       <aside class="rv-side">
         <div class="who"><i>${nr ? '✎' : '!'}</i><div><b>${nr ? 'Review before submit' : 'Needs your input'}</b><small>${nr ? 'Waiting for your approval' : blank ? 'Not started yet' : 'Waiting for your answers'}</small></div></div>
-        <p>${nr ? `Check what we filled in for <b>${co}</b>, and edit anything before we submit.` : ask ? `We filled what we could for <b>${co}</b>. Add the missing details, then we send it.` : blank ? `We haven't filled the <b>${co}</b> form yet. Start applying and we'll fill it from your profile.` : esc(d.reason || '')}</p>
+        ${d.assisted ? `<p>${esc(d.reason || '')}</p><div style="display:grid;gap:8px;margin:4px 0 12px">
+          <a class="btn primary" href="${esc(d.jobUrl || a.job?.url || '#')}" target="_blank" rel="noopener">${I.ext(14)} Open the application</a>
+          <button class="btn" id="markApplied" type="button">I've applied</button></div>` : ''}
+        <p${d.assisted ? ' hidden' : ''}>${nr ? `Check what we filled in for <b>${co}</b>, and edit anything before we submit.` : ask ? `We filled what we could for <b>${co}</b>. Add the missing details, then we send it.` : blank ? `We haven't filled the <b>${co}</b> form yet. Start applying and we'll fill it from your profile.` : esc(d.reason || '')}</p>
         <p class="note">🔒 The resume file can't be changed here. Everything else is editable.</p></aside>
       <div class="rv-main">${blank ? `<div class="rv-empty"><b>Nothing to review yet</b>Press <b style="display:inline">Start applying</b> and we'll fill the form, then show you every answer here.</div>` : ''}${queueItemHTML(a)}</div></div>`;
   if (blank) { const r = $('#view [data-retry]'); if (r) r.textContent = 'Start applying'; }
   bindQueueItem($('#view .qitem'));
+  $('#markApplied')?.addEventListener('click', async () => {
+    await api('PATCH', `/users/${USER}/applications/${a.id}`, { status: 'APPLIED' });
+    toast(`Marked as applied at ${a.job?.company || 'the company'}.`);
+    reviewIds = reviewIds.filter(x => x !== a.id);
+    location.hash = reviewIds.length ? `#/review/${reviewIds[i % reviewIds.length]}` : '#/dashboard';
+  });
 }
 
 // ═══ Profile ════════════════════════════════════════════════════════════════

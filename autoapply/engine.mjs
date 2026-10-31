@@ -36,14 +36,21 @@ import { fillApplication } from './form-fill.mjs';
 import { fillWorkday, workdayAuth } from './workday-fill.mjs';
 import { ensureOnForm } from './account-create.mjs';
 
-export const FILLABLE_ATS = ['greenhouse', 'lever', 'ashby', 'workday', 'rippling', 'recruitee', 'pinpoint', 'teamtailor', 'breezy'];
+export const FILLABLE_ATS = ['greenhouse', 'lever', 'ashby', 'workday', 'rippling', 'recruitee', 'pinpoint', 'teamtailor', 'breezy', 'workable'];
 // Platforms whose "it was sent" page we've seen recognised on a real submission. On the others the form fills
 // (scripts/probe-autoapply.mjs) but every application waits for a person's Send, even in lanes that skip review,
 // so a confirmation page we don't recognise can't turn into an unattended "no confirmation" or a double send.
 // Add a platform here once its first approved applications come back Submitted.
 export const SUBMIT_VERIFIED_ATS = ['greenhouse', 'lever', 'ashby', 'workday'];
-// Not here: bamboohr (reCAPTCHA on every form), workable (blocks our IP), smartrecruiters (form doesn't load headless),
-// oraclecloud (account + emailed code, like Workday but not built)
+// Assisted: these sites stop automated applications, so Rejekt.ai prepares the application (tailored resume,
+// answers) and the person sends it on the company's site from Needs you. We never solve CAPTCHAs or get around
+// bot checks. bamboohr: visible reCAPTCHA on every form; smartrecruiters: "Access is temporarily restricted"
+// bot check; oraclecloud: email-first multi-step flow, not automated yet.
+export const ASSISTED_ATS = {
+  bamboohr: "BambooHR asks you to confirm you're not a robot",
+  smartrecruiters: 'SmartRecruiters blocks automated applications',
+  oraclecloud: "This company's Oracle careers site needs you to apply yourself",
+};
 const MAX_ATTEMPTS = 3;
 
 // ─── Settings and lanes ──────────────────────────────────────────────────────
@@ -166,11 +173,12 @@ export function applyUrlFor({ url, ats, slug, rawId }) {
   }
   // These forms are reached from the posting itself: on the page behind its Apply button, or at a fixed sub-path
   const base = url && url.replace(/[?#].*$/, '').replace(/\/+$/, '');
-  if (base && (which === 'bamboohr' || which === 'teamtailor')) return base;
+  if (base && which === 'teamtailor') return base;   // (BambooHR's form is on the posting too, but behind a reCAPTCHA: assisted)
   if (base && which === 'breezy') return `${base}/apply`;
   if (base && which === 'pinpoint') return `${base}/applications/new`;
   if (base && which === 'rippling') return `${base}/apply`;
   if (base && which === 'recruitee') return `${base}/c/new`;
+  if (base && which === 'workable') return `${base}/apply/`;   // the posting's APPLICATION tab
   // Test boards and plain HTML forms served from the developer's own machine.
   if (url && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//.test(url) && process.env.AUTO_APPLY_ALLOW_LOCAL === '1') return url;
   return null;
@@ -242,7 +250,7 @@ export async function planRun(userId, { dryRun = false, laneIds = null } = {}) {
       const { rows: jr } = await query(
         `SELECT j.url, j.ats, c.slug, j.raw->>'id' AS raw_id FROM jobs j LEFT JOIN companies c ON c.id = j.company_id WHERE j.id = $1`, [job.jobId]);
       const formUrl = jr[0] ? applyUrlFor({ url: jr[0].url, ats: jr[0].ats, slug: jr[0].slug, rawId: jr[0].raw_id }) : null;
-      if (!formUrl) { skip(`can't fill ${jr[0]?.ats || 'this'} forms yet`, job); continue; }
+      if (!formUrl && !ASSISTED_ATS[jr[0]?.ats]) { skip(`can't fill ${jr[0]?.ats || 'this'} forms yet`, job); continue; }
       const co = String(job.company || '').toLowerCase();
       if ((companyCount.get(co) || 0) >= settings.perCompanyCap30d) { skip('company cap (30 days)', job); continue; }
       if (capLeft <= 0) { skip('daily cap reached', job); continue; }
@@ -328,7 +336,13 @@ export async function submitApplication(userId, appId, { approve = false, browse
   if (!app.tailored_resume) { const p = await prepareApplication(userId, appId); if (p.error) return p; return submitApplication(userId, appId, { approve, browser }); }
   const detail = app.apply_detail || {};
   const formUrl = (app.job_snapshot?.ats === 'workday' ? null : detail.formUrl) || (app.job_snapshot?.url && applyUrlFor({ url: app.job_snapshot.url, ats: app.job_snapshot.ats }));
-  if (!formUrl) { await setApplyState(appId, userId, 'NEEDS_YOU', { ...detail, reason: "This form can't be filled automatically. Apply on the company's site." }); return { outcome: 'NEEDS_YOU' }; }
+  if (!formUrl) {
+    const why = ASSISTED_ATS[app.job_snapshot?.ats];
+    await setApplyState(appId, userId, 'NEEDS_YOU', { ...detail, assisted: !!why, jobUrl: app.job_snapshot?.url || null,
+      reason: why ? `${why}, so this one is yours to send: your tailored resume is ready. Open the job, apply on the company's site, then mark it applied.`
+                  : "This form can't be filled automatically. Apply on the company's site." });
+    return { outcome: 'NEEDS_YOU' };
+  }
 
   browser ||= await getBrowser();
   if (!browser) {
