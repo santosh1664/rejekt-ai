@@ -140,7 +140,7 @@ async function fillOne(page, field, ans, files) {
   if (field.combobox && ans.value?.option) {
     await loc.click();
     const list = await listboxFor(page, loc);
-    await list.locator('[role="option"]').filter({ hasText: exactText(ans.value.option.label) }).first().click();
+    await list.locator(OPTION).filter({ hasText: exactText(ans.value.option.label) }).first().click();
     return true;
   }
   if (field.tag === 'select') {
@@ -155,16 +155,31 @@ async function fillOne(page, field, ans, files) {
   }
   if (ans.value === null) return false;
   if (!field.combobox) { await loc.fill(String(ans.value)); return true; }
-  const typed = String(ans.value).split(',')[0].trim();
-  await loc.fill(typed);
-  await page.waitForTimeout(900);
+  // Search-as-you-type dropdowns (react-select: Greenhouse's Country and Location): fill() sets the text without
+  // the key events that open the menu, so type it; then take the visible option that matches the most of the answer.
+  const [typed, ...rest] = String(ans.value).split(',').map(t => t.trim()).filter(Boolean);
+  await loc.click().catch(() => {});
+  await loc.fill('');
+  await loc.pressSequentially(typed, { delay: 30 });
+  await page.waitForTimeout(1500);
   const list = await listboxFor(page, loc);
-  const option = list.locator('[role="option"]').filter({ hasText: typed }).first();
-  if (await option.count()) { await option.click(); return true; }
-  await loc.press('Escape').catch(() => {});
-  return false;
+  const options = list.locator(OPTION).filter({ hasText: typed });
+  const texts = (await options.allInnerTexts()).slice(0, 10);
+  if (!texts.length) { await loc.press('Escape').catch(() => {}); return false; }
+  const score = t => rest.filter(r => t.toLowerCase().includes(r.toLowerCase()) || t.toLowerCase().includes(STATE_NAMES[r.toUpperCase()] || '\u0000')).length;
+  const best = texts.reduce((b, t, i) => (score(t) > score(texts[b]) ? i : b), 0);
+  await options.nth(best).click();
+  return true;
 }
 
+// Only options actually shown: a page can carry hidden option lists (Greenhouse's phone country picker has 244)
+const OPTION = '[role="option"]:visible';
+const STATE_NAMES = { AL: 'alabama', AK: 'alaska', AZ: 'arizona', AR: 'arkansas', CA: 'california', CO: 'colorado', CT: 'connecticut', DE: 'delaware',
+  FL: 'florida', GA: 'georgia', HI: 'hawaii', ID: 'idaho', IL: 'illinois', IN: 'indiana', IA: 'iowa', KS: 'kansas', KY: 'kentucky', LA: 'louisiana',
+  ME: 'maine', MD: 'maryland', MA: 'massachusetts', MI: 'michigan', MN: 'minnesota', MS: 'mississippi', MO: 'missouri', MT: 'montana', NE: 'nebraska',
+  NV: 'nevada', NH: 'new hampshire', NJ: 'new jersey', NM: 'new mexico', NY: 'new york', NC: 'north carolina', ND: 'north dakota', OH: 'ohio',
+  OK: 'oklahoma', OR: 'oregon', PA: 'pennsylvania', RI: 'rhode island', SC: 'south carolina', SD: 'south dakota', TN: 'tennessee', TX: 'texas',
+  UT: 'utah', VT: 'vermont', VA: 'virginia', WA: 'washington', WV: 'west virginia', WI: 'wisconsin', WY: 'wyoming', DC: 'district of columbia' };
 const exactText = t => new RegExp(`^\\s*${String(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i');
 
 async function listboxFor(page, loc) {
@@ -178,7 +193,7 @@ async function openCombobox(page, field) {
     await loc.click({ timeout: 3000 });
     await page.waitForTimeout(350);
     const list = await listboxFor(page, loc);
-    const labels = (await list.locator('[role="option"]').allInnerTexts()).map(t => t.trim()).filter(Boolean);
+    const labels = (await list.locator(OPTION).allInnerTexts()).map(t => t.trim()).filter(Boolean);
     await loc.press('Escape').catch(() => {});
     if (!labels.length || labels.length > 40 || /no options/i.test(labels[0])) return null;
     return labels.map(l => ({ label: l, value: l }));
