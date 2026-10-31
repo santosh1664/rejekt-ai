@@ -54,7 +54,7 @@ const RULES = [
   ['coverLetterFile', (l, f) => f.type === 'file' && /cover/.test(l)],
   ['otherFile', (l, f) => f.type === 'file'],
   ['coverLetterText', l => /cover letter/.test(l)],
-  ['consent', (l, f) => f.type === 'checkbox' && !f.group && /\b(agree|acknowledge|consent|privacy|terms|certify|attest|confirm that)\b/.test(l)],
+  ['consent', (l, f) => f.type === 'checkbox' && !f.group && /\b(agree|acknowledge|consent|privacy|terms|certify|attest|confirm that)\b|\b(allow|permit|authori[sz]e) us to (process|store|use|keep)\b|process(ing)? (of )?(my|your) (personal )?(data|information)/.test(l)],
   ['hispanic', l => /hispanic|latin[oax]/.test(l) && !/race/.test(l)],
   ['ethnicity', l => /\brace\b|ethnic/.test(l)],
   ['gender', l => /\bgender\b|\bsex\b/.test(l) && !/orientation|transgender/.test(l)],
@@ -98,6 +98,7 @@ const RULES = [
   ['state', l => /^(state|province|state province|state or province|region|state region)$/.test(l)],
   ['address', l => /^(street )?address( line 1)?$|street address/.test(l)],
   ['zip', l => /postal|zip/.test(l)],
+  ['city', l => /^(city|town|city town|town city|city or town)$/.test(l)],   // a bare City field wants "Austin", not "Austin, TX, United States"
   ['location', l => /^(current )?location|\bcity\b|where (are you|do you) (currently )?(located|based|live)|address/.test(l)],
   ['fullName', l => /^(full |legal )?name\b|your name/.test(l)],
 ];

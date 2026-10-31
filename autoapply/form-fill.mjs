@@ -28,9 +28,15 @@ function scanForm() {
     if (el.id) { const l = document.querySelector(`label[for="${CSS.escape(el.id)}"]`); if (l && textOf(l).trim()) return [textOf(l), l]; }
     const wrap = el.closest('label'); if (wrap && textOf(wrap).trim()) return [textOf(wrap), wrap];
     if (el.getAttribute('aria-label')) return [el.getAttribute('aria-label'), null];
+    // No proper label: the nearest label-like text BEFORE the field, in widening blocks. (Taking the first one in
+    // the block labelled Breezy's resume/name/email fields with the first custom question below them.)
     let n = el.parentElement;
     for (let i = 0; i < 6 && n; i++, n = n.parentElement) {
-      const l = [...n.querySelectorAll('label, legend, [class*="label" i], [class*="question" i]')].find(x => !x.contains(el) && textOf(x).trim());
+      const near = [...n.querySelectorAll('label, legend, h1, h2, h3, h4, h5, h6, [class*="label" i], [class*="question" i]')]   // Breezy: <h3>question</h3><textarea>
+        .filter(x => !x.contains(el) && textOf(x).trim());
+      const before = near.filter(x => x.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+      // a checkbox's text sits after it ("☐ I agree…"), anything else's before it
+      const l = /checkbox|radio/.test(el.type) ? near.find(x => !before.includes(x)) || before[before.length - 1] : before[before.length - 1];
       if (l) return [textOf(l), l];
     }
     return [el.placeholder || el.name || '', null];
@@ -119,6 +125,7 @@ function findChallenge() {
   return widget ? 'CAPTCHA' : null;
 }
 
+const APPLY_TEXT = /^\s*(apply( now| for this (job|position|role)| to (this )?(job|position))?|i.?m interested|skicka ansökan|ansök( nu)?|jetzt bewerben|bewerben|postuler|solliciteer( nu)?)\s*$/i;
 const SUCCESS_TEXT = /thank you for (applying|your (application|interest|submission))|thanks for applying|application (has been |was )?(submitted|received)|we.?ve received your application|successfully (applied|submitted)/i;
 const SUCCESS_URL = /confirm|thank|success|submitted|\/thanks\b/i;
 
@@ -157,23 +164,31 @@ async function fillOne(page, field, ans, files) {
   if (!field.combobox) { await loc.fill(String(ans.value)); return true; }
   // Search-as-you-type dropdowns (react-select: Greenhouse's Country and Location): fill() sets the text without
   // the key events that open the menu, so type it; then take the visible option that matches the most of the answer.
-  const [typed, ...rest] = String(ans.value).split(',').map(t => t.trim()).filter(Boolean);
-  await loc.click().catch(() => {});
-  await loc.fill('');
-  await loc.pressSequentially(typed, { delay: 30 });
-  await page.waitForTimeout(1500);
-  const list = await listboxFor(page, loc);
-  const options = list.locator(OPTION).filter({ hasText: typed });
-  const texts = (await options.allInnerTexts()).slice(0, 10);
-  if (!texts.length) { await loc.press('Escape').catch(() => {}); return false; }
-  const score = t => rest.filter(r => t.toLowerCase().includes(r.toLowerCase()) || t.toLowerCase().includes(STATE_NAMES[r.toUpperCase()] || '\u0000')).length;
-  const best = texts.reduce((b, t, i) => (score(t) > score(texts[b]) ? i : b), 0);
-  await options.nth(best).click();
-  return true;
+  const [first, ...rest] = String(ans.value).split(',').map(t => t.trim()).filter(Boolean);
+  // a state code ("TX") is listed by name ("Texas") in most of these dropdowns
+  for (const typed of [first, STATE_NAMES[first.toUpperCase()]].filter(Boolean)) {
+    await loc.click().catch(() => {});
+    await loc.fill('');
+    await loc.pressSequentially(typed, { delay: 30 });
+    await page.waitForTimeout(1500);
+    const list = await listboxFor(page, loc);
+    const options = list.locator(OPTION).filter({ hasText: new RegExp(typed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') });
+    const texts = (await options.allInnerTexts()).map(t => t.trim()).slice(0, 10);
+    if (!texts.length) continue;
+    // the exact option wins ("United States", not "United States Minor Outlying Islands"); else the one matching most of the answer
+    const exact = texts.findIndex(t => t.toLowerCase() === typed.toLowerCase());
+    const score = t => rest.filter(r => t.toLowerCase().includes(r.toLowerCase()) || t.toLowerCase().includes(STATE_NAMES[r.toUpperCase()] || '\u0000')).length;
+    const best = exact >= 0 ? exact : texts.reduce((b, t, i) => (score(t) > score(texts[b]) ? i : b), 0);
+    await options.nth(best).click();
+    return true;
+  }
+  await loc.press('Escape').catch(() => {});
+  return false;
 }
 
 // Only options actually shown: a page can carry hidden option lists (Greenhouse's phone country picker has 244)
-const OPTION = '[role="option"]:visible';
+// (older react-select, e.g. Pinpoint, marks options only with the class react-select__option)
+const OPTION = '[role="option"]:visible, [class*="select__option"]:visible';
 const STATE_NAMES = { AL: 'alabama', AK: 'alaska', AZ: 'arizona', AR: 'arkansas', CA: 'california', CO: 'colorado', CT: 'connecticut', DE: 'delaware',
   FL: 'florida', GA: 'georgia', HI: 'hawaii', ID: 'idaho', IL: 'illinois', IN: 'indiana', IA: 'iowa', KS: 'kansas', KY: 'kentucky', LA: 'louisiana',
   ME: 'maine', MD: 'maryland', MA: 'massachusetts', MI: 'michigan', MN: 'minnesota', MS: 'mississippi', MO: 'missouri', MT: 'montana', NE: 'nebraska',
@@ -223,10 +238,14 @@ export async function fillApplication(page, url, book, files, opts = {}) {
   if (!opts.alreadyOnPage) {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
     await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
-    const applyBtn = page.locator('a, button').filter({ hasText: /^\s*apply( for this job| now)?\s*$/i }).first();
-    if (await applyBtn.count() && !(await page.locator('input[type=file]').count())) {
+    // The form can sit behind an Apply button on the posting. Click it unless an email field already shows
+    // (BambooHR's posting carries a hidden file input, so "no file input yet" never clicked there).
+    const applyBtn = page.locator('a:visible, button:visible').filter({ hasText: APPLY_TEXT }).first();
+    if (await applyBtn.count() && !(await page.locator('input[type=email]:visible, input[name*="email" i]:visible, input[id*="email" i]:visible').count())) {
       await applyBtn.click().catch(() => {});
       await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+      // in-page forms (BambooHR, Teamtailor) draw a moment after the click, after the network is already quiet
+      await page.locator('input[type=email]:visible, input[name*="email" i]:visible, input[type=file]').first().waitFor({ timeout: 8000 }).catch(() => {});
     }
   }
   let challenge = await page.evaluate(findChallenge);
@@ -236,7 +255,18 @@ export async function fillApplication(page, url, book, files, opts = {}) {
     return { outcome: 'FAILED', filled: [], missing: [], reason: 'No application form found on the page' };
   }
   const filled = []; const missing = [];
-  for (const field of fields) {
+  for (let i = 0; i < fields.length; i++) {
+    let field = fields[i];
+    // The form redrew part of itself (Pinpoint rebuilds Street/City/State/Zip after Country): scan again and
+    // re-attach the fields still to fill to the new elements, by label and kind, in order.
+    if (!(await page.locator(`[data-aa-id="${field.id}"]`).count())) {
+      const fresh = await page.evaluate(scanForm), used = new Set();
+      for (let j = i; j < fields.length; j++) {
+        const m = fresh.find(x => !used.has(x.id) && x.label === fields[j].label && x.type === fields[j].type && x.tag === fields[j].tag);
+        if (m) { used.add(m.id); fields[j] = { ...m, options: fields[j].options ?? m.options }; }
+      }
+      field = fields[i];
+    }
     if (field.combobox && !field.options) {
       const options = await openCombobox(page, field);
       if (options) { field.options = options; field.tag = 'select'; field.dropdown = true; }

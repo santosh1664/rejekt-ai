@@ -36,7 +36,14 @@ import { fillApplication } from './form-fill.mjs';
 import { fillWorkday, workdayAuth } from './workday-fill.mjs';
 import { ensureOnForm } from './account-create.mjs';
 
-export const FILLABLE_ATS = ['greenhouse', 'lever', 'ashby', 'workday'];
+export const FILLABLE_ATS = ['greenhouse', 'lever', 'ashby', 'workday', 'rippling', 'recruitee', 'pinpoint', 'teamtailor', 'breezy'];
+// Platforms whose "it was sent" page we've seen recognised on a real submission. On the others the form fills
+// (scripts/probe-autoapply.mjs) but every application waits for a person's Send, even in lanes that skip review,
+// so a confirmation page we don't recognise can't turn into an unattended "no confirmation" or a double send.
+// Add a platform here once its first approved applications come back Submitted.
+export const SUBMIT_VERIFIED_ATS = ['greenhouse', 'lever', 'ashby', 'workday'];
+// Not here: bamboohr (reCAPTCHA on every form), workable (blocks our IP), smartrecruiters (form doesn't load headless),
+// oraclecloud (account + emailed code, like Workday but not built)
 const MAX_ATTEMPTS = 3;
 
 // ─── Settings and lanes ──────────────────────────────────────────────────────
@@ -157,6 +164,13 @@ export function applyUrlFor({ url, ats, slug, rawId }) {
     }
     return url || null;   // the job page: its Apply button leads into the account step
   }
+  // These forms are reached from the posting itself: on the page behind its Apply button, or at a fixed sub-path
+  const base = url && url.replace(/[?#].*$/, '').replace(/\/+$/, '');
+  if (base && (which === 'bamboohr' || which === 'teamtailor')) return base;
+  if (base && which === 'breezy') return `${base}/apply`;
+  if (base && which === 'pinpoint') return `${base}/applications/new`;
+  if (base && which === 'rippling') return `${base}/apply`;
+  if (base && which === 'recruitee') return `${base}/c/new`;
   // Test boards and plain HTML forms served from the developer's own machine.
   if (url && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//.test(url) && process.env.AUTO_APPLY_ALLOW_LOCAL === '1') return url;
   return null;
@@ -334,7 +348,8 @@ export async function submitApplication(userId, appId, { approve = false, browse
     : null;
   const settings = await getSettings(userId);
   const tailored = app.tailored_resume;
-  const send = approve || app.review_before_submit === false;
+  const ats = app.job_snapshot?.ats || detectAts(app.job_snapshot?.url || '')?.ats;
+  const send = approve || (app.review_before_submit === false && SUBMIT_VERIFIED_ATS.includes(ats));
   const book = buildAnswerBook(rp?.sections || tailored.sections, app.job_snapshot || {}, { coverLetter: app.cover_letter || '', overrides: app.answers?.overrides || {} });
 
   const dir = await mkdtemp(join(tmpdir(), 'autoapply-'));
