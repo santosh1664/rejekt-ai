@@ -15,6 +15,7 @@ import { query, startScanRun, finishScanRun, batchTouchCompanies } from '../lib/
 import { createPool }                          from '../lib/pool.mjs';
 import { ATS_CONCURRENCY }                     from '../lib/pool.mjs';
 import { processCompany }                      from './worker.mjs';
+import { loadWorkableFeed }                    from './workable-feed.mjs';
 import { markClosedJobs }                      from '../freshness/checker.mjs';
 import { matchNewJobs }                        from '../matching/matcher.mjs';
 import fs from 'node:fs';
@@ -50,7 +51,8 @@ export async function runScan(opts = {}) {
   }
 
   // Load companies
-  let sql    = `SELECT id, name, ats, slug, meta FROM companies WHERE active = TRUE`;
+  // Workable feed-only companies have no board of their own; they get their jobs from the feed below
+  let sql    = `SELECT id, name, ats, slug, meta FROM companies WHERE active = TRUE AND NOT (ats = 'workable' AND meta ? 'feed')`;
   const params = [];
   if (opts.ats) {
     params.push(opts.ats.toLowerCase());
@@ -127,8 +129,9 @@ export async function runScan(opts = {}) {
     let leftForNext = 0;
 
     // Dispatch all companies into their ATS pool concurrently
-    const tasks = companies.map((company) => {
-      const pool = pools[company.ats] || defaultPool;
+    const dispatch = (company, opts) => {
+      // jobs already in hand (Workable feed) need no HTTP, so they don't take a slot in the ATS's rate-limited pool
+      const pool = (!opts.prefetchedJobs && pools[company.ats]) || defaultPool;
       return pool(async () => {
         if (Date.now() > deadline) { leftForNext++; return null; }
         // Wrap processCompany in a per-company timeout so a single hung worker
@@ -175,7 +178,16 @@ export async function runScan(opts = {}) {
 
         return result;
       });
-    });
+    };
+    const tasks = companies.map((company) => dispatch(company, opts));
+
+    // Workable's full feed: one download adds the Workable companies we don't scan one by one
+    const skipped = (process.env.SKIP_ATS || '').toLowerCase().split(',').includes('workable');
+    if (!opts.dryRun && !opts.company && !skipped && (!opts.ats || opts.ats.toLowerCase() === 'workable')) {
+      tasks.push(loadWorkableFeed({ verbose: opts.verbose })
+        .then(list => Promise.all(list.map(({ company, jobs }) => dispatch(company, { ...opts, prefetchedJobs: jobs }))))
+        .catch(err => console.error(`  ⚠️  Workable feed skipped this run: ${err.message}`)));
+    }
 
     await Promise.all(tasks);
     if (leftForNext) console.error(`\n⏱   Time budget reached: ${leftForNext} companies left for the next run`);
