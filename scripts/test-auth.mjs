@@ -31,6 +31,11 @@ try {
     assert.equal((await req('/admin')).status, 302);
     assert.notEqual((await req('/scan-log')).status, 200);
   });
+  await check('landing page is public; invite requests are validated', async () => {
+    const r = await req('/'); assert.equal(r.status, 200); assert.match(await r.text(), /Get rejected less/);
+    assert.equal((await req('/auth/request-invite', { method: 'POST', body: { email: 'not-an-email' } })).status, 400);
+    assert.equal((await req('/auth/request-invite', { method: 'POST', body: { email: EMAIL, note: 'backend' } })).status, 200);
+  });
   await check('login page and logo are public', async () => {
     assert.equal((await req('/login')).status, 200); assert.equal((await req('/brand/rejekt-logo.png')).status, 200);
   });
@@ -84,6 +89,9 @@ try {
     const evil = await req('/auth/login', { method: 'POST', body: { email: EMAIL, password: PASS, next: '//evil.example' } });
     assert.equal((await evil.json()).redirect, process.env.APP_URL || '/app/');
   });
+  await check('logged in: the landing page sends you to the dashboard', async () => {
+    const r = await req('/', { cookie }); assert.equal(r.status, 302); assert.equal(r.headers.get('location'), process.env.APP_URL || '/app/');
+  });
   await check('logged in: /login goes straight to the dashboard', async () => {
     const r = await req('/login', { cookie }); assert.equal(r.status, 302); assert.equal(r.headers.get('location'), process.env.APP_URL || '/app/');
   });
@@ -111,5 +119,6 @@ try {
 } finally {
   await query(`DELETE FROM users WHERE email = $1`, [EMAIL]);
   await query(`DELETE FROM invites WHERE email = $1`, [EMAIL]);
+  await query(`DELETE FROM invite_requests WHERE email = $1`, [EMAIL]);
   await closePool();
 }

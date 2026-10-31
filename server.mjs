@@ -99,6 +99,15 @@ app.post('/auth/reset', authJson, async (req, res) => {
   const r = await auth.finishReset(req.body?.token, req.body?.password);
   res.status(r.error ? 400 : 200).json(r);
 });
+// Landing page "Request an invite" → admin portal, Invites
+app.post('/auth/request-invite', authJson, async (req, res) => {
+  if (auth.tooManyAttempts(`invite-request:${ip(req)}`, 5, 60 * 60_000)) return res.status(429).json({ error: 'Too many requests. Try again later.' });
+  const email = auth.normEmail(req.body?.email);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) return res.status(400).json({ error: 'Enter a valid email address.' });
+  await query(`INSERT INTO invite_requests (email, note) VALUES ($1, $2) ON CONFLICT (email) DO UPDATE SET note = COALESCE(EXCLUDED.note, invite_requests.note)`,
+    [email, String(req.body?.note || '').trim().slice(0, 300) || null]);
+  res.json({ ok: true });
+});
 app.get('/auth/me', (req, res) => req.user ? res.json(req.user) : res.status(401).json({ error: 'Not logged in' }));
 
 // Login pages: one file, the path picks the form. Logged in already → straight to the dashboard.
@@ -107,8 +116,15 @@ app.get(['/login', '/signup', '/forgot', '/reset'], (req, res) => {
   res.sendFile(join(__dirname, 'public', 'login.html'));
 });
 
+// The landing page: logged out on the main site; logged in → your dashboard (admins → the portal)
+app.get('/', (req, res, next) => {
+  if (appHost && req.get('host') === appHost) return next();          // dashboard.rejekt.ai/ is the dashboard
+  if (req.user) return res.redirect(afterLogin(null, req.user));
+  res.sendFile(join(__dirname, 'public', 'landing.html'));
+});
+
 // Everything else needs a session; scan controls need an admin.
-const PUBLIC = /^\/(brand\/|favicon|login\.html$)/;
+const PUBLIC = /^\/(brand\/|favicon|login\.html$|landing\.html$)/;
 const ADMIN  = /^\/(admin|api\/scan-)/;
 app.use((req, res, next) => {
   if (PUBLIC.test(req.path) || req.path === '/v1/health') return next();

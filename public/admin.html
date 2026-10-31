@@ -479,8 +479,13 @@ renderScans.after = () => {
 
 // ─── Invites ────────────────────────────────────────────────────────────────
 async function renderInvites() {
-  const rows = await api('GET', '/admin/api/invites');
+  const { invites: rows, requests } = await api('GET', '/admin/api/invites');
   return `<h1>Invites</h1><p class="sub">Sign-up is invite-only. Invite an email, then they create their account at /signup.</p>
+    ${requests.length ? `<h2>Requests from the landing page (${requests.length})</h2>
+    <div class="tablewrap" style="margin-bottom:22px"><table><thead><tr><th>Email</th><th>Looking for</th><th>Asked</th><th></th></tr></thead><tbody>
+    ${requests.map(r => `<tr><td>${esc(r.email)}</td><td class="small">${esc(r.note || '–')}</td><td>${ago(r.created_at)}</td>
+      <td><div class="actions"><button class="btn primary" data-reqinvite="${esc(r.email)}">Invite</button><button class="btn" data-reqdismiss="${esc(r.email)}">Dismiss</button></div></td></tr>`).join('')}
+    </tbody></table></div><h2>Invites</h2>` : ''}
     <form class="card toolbar" id="invForm" style="margin-bottom:14px">
       <input type="email" id="invEmail" placeholder="email@company.com" required style="min-width:240px">
       <input id="invUser" placeholder="Existing user ID (optional)" style="min-width:250px" class="mono">
@@ -495,6 +500,8 @@ async function renderInvites() {
 }
 renderInvites.after = () => {
   $('#invForm').onsubmit = (e) => { e.preventDefault(); act(e.submitter, () => api('POST', '/admin/api/invites', { email: $('#invEmail').value, user_id: $('#invUser').value.trim() || null, is_admin: $('#invAdmin').checked })); };
+  $$('[data-reqinvite]').forEach(b => b.onclick = () => act(b, () => api('POST', '/admin/api/invites', { email: b.dataset.reqinvite })));
+  $$('[data-reqdismiss]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/invite-requests/${encodeURIComponent(b.dataset.reqdismiss)}/dismiss`)));
   $$('[data-revoke]').forEach(b => b.onclick = () => act(b, () => api('DELETE', '/admin/api/invites/' + encodeURIComponent(b.dataset.revoke)), { confirm: ['Revoke this invite?', `${b.dataset.revoke} won't be able to sign up.`, 'Revoke'] }));
 };
 

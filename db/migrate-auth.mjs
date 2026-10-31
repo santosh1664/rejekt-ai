@@ -62,4 +62,14 @@ await query(`
 await query(`CREATE INDEX IF NOT EXISTS idx_admin_audit_created ON admin_audit(created_at DESC)`);
 console.log('✓ admin: users.disabled_at, sessions.impersonator_id, admin_audit');
 
+// Landing page "Request an invite" (public/landing.html); shown in the admin portal under Invites
+await query(`
+  CREATE TABLE IF NOT EXISTS invite_requests (
+    email      TEXT PRIMARY KEY,                     -- lowercase
+    note       TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    handled_at TIMESTAMPTZ
+  )`);
+console.log('✓ invite_requests');
+
 await closePool();

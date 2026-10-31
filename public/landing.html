@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rejekt.ai · Get rejected less</title>
+<meta name="description" content="Rejekt.ai checks 41,000+ company career pages every 4 hours, matches new openings to your profile, tailors your resume for each one, and applies on the rules you set." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M8 22h16M8 16h10M8 10h13' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" />
+<style>
+:root {
+  --paper: #FFFFFF; --surface: #FFFFFF; --surface-2: #F6F6F5; --ink: #111111; --ink-2: #3B3B3B; --muted: #6A6A6A;
+  --line: #E4E4E2; --line-2: #EFEFED; --brand: #17382B; --brand-ink: #FFFFFF; --brand-soft: #EAF1EC;
+  --ok: #2A8057; --ok-soft: #F2FAF5; --warn: #92650A; --warn-soft: #FFFAEB; --info: #3D5FCB; --info-soft: #F4F8FF;
+  --max: 1120px; --r: 16px;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --paper: #0E0E0E; --surface: #161616; --surface-2: #1A1A1A; --ink: #F2F2F2; --ink-2: #CFCFCF; --muted: #9A9A9A;
+  --line: #2A2A2A; --line-2: #222222; --brand: #F2F2F2; --brand-ink: #111111; --brand-soft: #222222;
+  --ok: #6FD3A0; --ok-soft: #14261D; --warn: #E9C46A; --warn-soft: #2E2812; --info: #9DB6F5; --info-soft: #172036; } }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+section { scroll-margin-top: 80px; }   /* anchors land below the sticky header */
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 'Schibsted Grotesk', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+.logo { height: 26px; display: block; } .logo-dark { display: none; }
+@media (prefers-color-scheme: dark) { .logo-light { display: none; } .logo-dark { display: block; } }
+
+/* nav */
+header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid transparent; transition: border-color .2s; }
+header.scrolled { border-bottom-color: var(--line); }
+header .wrap { display: flex; align-items: center; gap: 28px; height: 68px; }
+header nav { display: flex; gap: 24px; margin-left: auto; }
+header nav a { text-decoration: none; color: var(--ink-2); font-weight: 500; font-size: 15px; } header nav a:hover { color: var(--ink); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 600; font-size: 15px; padding: 11px 18px; border-radius: 11px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; cursor: pointer; white-space: nowrap; transition: transform .15s, background .15s; }
+.btn:hover { background: var(--surface-2); } .btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--brand); color: var(--brand-ink); border-color: transparent; } .btn.primary:hover { opacity: .92; background: var(--brand); }
+.btn.lg { padding: 14px 22px; font-size: 16px; border-radius: 12px; }
+header .actions { display: flex; gap: 10px; }
+
+/* hero */
+.hero { padding: 88px 0 72px; }
+.hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--ok); background: var(--ok-soft); padding: 5px 12px; border-radius: 99px; margin-bottom: 22px; }
+.eyebrow::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 var(--ok); animation: pulse 2.2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 50%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+h1 { font-size: clamp(44px, 6.4vw, 76px); line-height: .98; letter-spacing: -0.045em; font-weight: 800; margin: 0 0 22px; }
+.lede { font-size: 19px; color: var(--ink-2); max-width: 520px; margin: 0 0 32px; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.fine { color: var(--muted); font-size: 14px; margin-top: 16px; }
+
+/* product preview */
+.preview { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 30px 60px -30px rgb(0 0 0 / .25), 0 2px 6px rgb(0 0 0 / .04); padding: 18px; position: relative; }
+.preview .bar { display: flex; gap: 6px; margin-bottom: 14px; } .preview .bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.preview h4 { margin: 0 0 12px; font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.job { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--line-2); border-radius: 13px; margin-bottom: 9px; background: var(--paper); }
+.job .mark { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 15px; }
+.job b { display: block; font-size: 15px; line-height: 1.3; } .job span { font-size: 13px; color: var(--muted); }
+.score { font-weight: 800; font-size: 22px; letter-spacing: -0.03em; text-align: right; line-height: 1; } .score small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0; margin-top: 3px; }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 99px; margin-left: 6px; vertical-align: 1px; }
+.pill.new { background: var(--info-soft); color: var(--info); } .pill.sent { background: var(--ok-soft); color: var(--ok); } .pill.you { background: var(--warn-soft); color: var(--warn); }
+.diff { margin-top: 12px; padding: 14px; border-radius: 13px; background: var(--surface-2); font-size: 14px; color: var(--ink-2); }
+.diff .t { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+.diff mark { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ink); padding: 0 3px; border-radius: 4px; }
+.diff del { color: var(--muted); }
+
+/* stats */
+.stats { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+.stat { padding: 30px 24px; border-left: 1px solid var(--line); } .stat:first-child { border-left: 0; padding-left: 0; }
+.stat .n { font-size: 34px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; } .stat .l { color: var(--muted); font-size: 14px; }
+
+/* sections */
+section.block { padding: 104px 0; }
+.kicker { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; }
+h2 { font-size: clamp(32px, 4vw, 46px); line-height: 1.05; letter-spacing: -0.035em; margin: 0 0 18px; font-weight: 800; max-width: 680px; }
+.intro { color: var(--ink-2); font-size: 18px; max-width: 600px; margin: 0 0 52px; }
+.features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.feature { border: 1px solid var(--line); border-radius: var(--r); padding: 30px; background: var(--surface); }
+.feature .ic { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; background: var(--brand-soft); color: var(--ink); margin-bottom: 20px; }
+.feature h3 { font-size: 20px; letter-spacing: -0.015em; margin: 0 0 8px; } .feature p { margin: 0; color: var(--ink-2); }
+.logos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; } .logos span { font-size: 13px; padding: 4px 11px; border-radius: 99px; background: var(--surface-2); color: var(--ink-2); font-weight: 500; }
+
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; counter-reset: s; }
+.step { padding: 30px; border-radius: var(--r); background: var(--surface-2); counter-increment: s; }
+.step::before { content: counter(s); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--brand); color: var(--brand-ink); font-weight: 700; margin-bottom: 20px; }
+.step h3 { margin: 0 0 8px; font-size: 19px; letter-spacing: -0.015em; } .step p { margin: 0; color: var(--ink-2); }
+
+/* always the brand green: in dark mode var(--brand) is near-white and this panel outshone the invite form */
+.control { --brand-ink: #FFFFFF; background: #17382B; color: var(--brand-ink); border-radius: 26px; padding: 64px; display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; }
+.control .kicker { color: color-mix(in srgb, var(--brand-ink) 65%, transparent); } .control h2 { color: var(--brand-ink); }
+.control p { color: color-mix(in srgb, var(--brand-ink) 78%, transparent); margin: 0; font-size: 17px; }
+.control ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.control li { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; border-radius: 13px; background: color-mix(in srgb, var(--brand-ink) 8%, transparent); }
+.control li svg { flex: none; margin-top: 3px; } .control li b { display: block; } .control li span { color: color-mix(in srgb, var(--brand-ink) 72%, transparent); font-size: 15px; }
+
+.faq { display: grid; grid-template-columns: 1fr 1.6fr; gap: 56px; }
+details { border-bottom: 1px solid var(--line); padding: 20px 0; } details:first-child { border-top: 1px solid var(--line); }
+summary { cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: '+'; font-size: 22px; line-height: 1; color: var(--muted); transition: transform .2s; } details[open] summary::after { transform: rotate(45deg); }
+details p { margin: 12px 0 0; color: var(--ink-2); }
+
+.invite { text-align: center; padding: 96px 0 112px; }
+.invite h2 { margin: 0 auto 14px; } .invite .intro { margin: 0 auto 32px; }
+.invite form { display: flex; gap: 10px; max-width: 520px; margin: 0 auto; flex-wrap: wrap; }
+.invite input { flex: 1; min-width: 220px; font: inherit; padding: 13px 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); }
+.invite input:focus { outline: 2px solid var(--brand); outline-offset: 1px; border-color: transparent; }
+.invite .note { width: 100%; }
+.msg { margin: 16px auto 0; max-width: 520px; padding: 11px 14px; border-radius: 11px; font-size: 15px; }
+.msg.ok { background: var(--ok-soft); color: var(--ok); } .msg.bad { background: #FFF5F3; color: #B84A3E; }
+
+footer { border-top: 1px solid var(--line); padding: 36px 0; color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; } footer nav { display: flex; gap: 22px; margin-left: auto; } footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 900px) {
+  header nav { display: none; } header .actions { margin-left: auto; }
+  .hero { padding: 56px 0 48px; } .hero .wrap, .control, .faq { grid-template-columns: 1fr; } .control { padding: 36px 26px; }
+  .stats .wrap { grid-template-columns: repeat(2, 1fr); } .stat:nth-child(3) { border-left: 0; padding-left: 0; } .stat { border-top: 1px solid var(--line); } .stat:nth-child(-n+2) { border-top: 0; }
+  .features, .steps { grid-template-columns: 1fr; } section.block { padding: 72px 0; }
+}
+@media (max-width: 520px) { header .actions .btn:not(.primary) { display: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .eyebrow::before { animation: none; } }
+</style>
+</head>
+<body>
+<header id="top">
+  <div class="wrap">
+    <a href="/" aria-label="Rejekt.ai home"><img class="logo logo-light" src="/brand/rejekt-logo.png" alt="Rejekt.ai"><img class="logo logo-dark" src="/brand/rejekt-logo-dark.png" alt=""></a>
+    <nav aria-label="Sections"><a href="#how">How it works</a><a href="#control">Control</a><a href="#faq">FAQ</a></nav>
+    <div class="actions"><a class="btn" href="/login">Log in</a><a class="btn primary" href="#invite">Request an invite</a></div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow">Scanning 41,000+ career pages, every 4 hours</div>
+        <h1>Get rejected less.</h1>
+        <p class="lede">Rejekt.ai checks 41,000+ company career pages every 4 hours, matches new openings to your profile, tailors your resume for each one, and applies on the rules you set.</p>
+        <div class="cta"><a class="btn primary lg" href="#invite">Request an invite</a><a class="btn lg" href="#how">See how it works</a></div>
+        <p class="fine">Invite-only while we open up gradually. Already have an account? <a href="/login">Log in</a>.</p>
+      </div>
+      <div class="preview" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i></div>
+        <h4>Your top matches today</h4>
+        <div class="job"><div class="mark" style="background:#3D5FCB">N</div><div><b>Senior Backend Engineer <span class="pill new">2h ago</span></b><span>Northwind Labs · Remote, US</span></div><div class="score">94<small>match</small></div></div>
+        <div class="job"><div class="mark" style="background:#2A8057">H</div><div><b>Platform Engineer <span class="pill sent">Sent</span></b><span>Harbor Health · Austin, TX</span></div><div class="score">89<small>match</small></div></div>
+        <div class="job"><div class="mark" style="background:#B5651D">Q</div><div><b>Software Engineer II <span class="pill you">Needs you</span></b><span>Quill Robotics · Boston, MA</span></div><div class="score">86<small>match</small></div></div>
+        <div class="diff"><div class="t">What changed in your resume</div>Led migration of <del>services</del> <mark>12 Go microservices</mark> to <mark>Kubernetes</mark>, cutting deploy time <mark>by 60%</mark>.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="wrap">
+      <div class="stat"><div class="n">41,000+</div><div class="l">company career pages</div></div>
+      <div class="stat"><div class="n">13</div><div class="l">hiring platforms, read directly</div></div>
+      <div class="stat"><div class="n">Every 4 h</div><div class="l">new jobs picked up</div></div>
+      <div class="stat"><div class="n">Per job</div><div class="l">resume tailored to each posting</div></div>
+    </div>
+  </div>
+
+  <section class="block" id="features">
+    <div class="wrap">
+      <div class="kicker">What it does</div>
+      <h2>The whole search, from new posting to sent application.</h2>
+      <p class="intro">No more refreshing job boards and rewriting the same resume. Rejekt.ai does the repetitive part and shows you everything it did.</p>
+      <div class="features">
+        <div class="feature">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
+          <h3>Jobs straight from the source</h3>
+          <p>We read company career pages directly, so you see roles before they spread to job boards, and closed ones drop out on their own.</p>
+          <div class="logos"><span>Greenhouse</span><span>Lever</span><span>Ashby</span><span>Workday</span><span>Workable</span><span>SmartRecruiters</span><span>+7 more</span></div>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></div>
+          <h3>A resume made for each job</h3>
+          <p>Every application gets its own version of your resume, with each change highlighted, so you always know exactly what was sent.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg></div>
+          <h3>Applies on your rules</h3>
+          <p>Set a daily limit, cap applications per company, and choose which kinds of roles wait for your OK before anything is sent.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></div>
+          <h3>Every application in one place</h3>
+          <p>See what was sent, what's waiting on you, and what came back, on one board you can sort by dragging.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="how" style="padding-top:0">
+    <div class="wrap">
+      <div class="kicker">How it works</div>
+      <h2>Set it up once. Check in when it suits you.</h2>
+      <p class="intro">Change any of it whenever you like.</p>
+      <div class="steps">
+        <div class="step"><h3>Set up your profile</h3><p>Upload your resume, then pick the roles, locations and work authorization you want matched.</p></div>
+        <div class="step"><h3>Review your matches</h3><p>New openings arrive ranked by how well they fit you. Save the good ones, skip the rest.</p></div>
+        <div class="step"><h3>Let it apply</h3><p>Rejekt.ai tailors your resume and fills the form. Anything it can't answer waits for you in Needs you.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="control" style="padding-top:0">
+    <div class="wrap">
+      <div class="control">
+        <div>
+          <div class="kicker">You stay in control</div>
+          <h2>Nothing goes out that you haven't allowed.</h2>
+          <p>Auto-apply is off until you turn it on, and you decide how far it goes.</p>
+        </div>
+        <ul>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg><div><b>Review before sending</b><span>Require your OK for any kind of role, or for all of them.</span></div></li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg><div><b>Limits that protect your name</b><span>Daily caps and a per-company limit, so no employer gets flooded.</span></div></li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg><div><b>Asks instead of guessing</b><span>CAPTCHAs, verification codes and unusual questions come to you. It never works around them.</span></div></li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg><div><b>One switch to pause</b><span>Stop all applying at any time. Everything already sent stays tracked.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="faq" style="padding-top:0">
+    <div class="wrap faq">
+      <div><div class="kicker">FAQ</div><h2>Questions, answered.</h2></div>
+      <div>
+        <details><summary>Which job sites does it cover?</summary><p>Company career pages on Greenhouse, Lever, Ashby, Workday, Workable, SmartRecruiters, BambooHR, Oracle Cloud, Recruitee, Teamtailor, Breezy, Rippling and Pinpoint, about 41,000 companies in all.</p></details>
+        <details><summary>Will it apply to jobs without asking me?</summary><p>Only if you turn auto-apply on. You can require your review for any kind of role, and set daily and per-company limits.</p></details>
+        <details><summary>How fresh are the jobs?</summary><p>Every career page is checked every 4 hours. When a job disappears from the company's page, it drops out of your matches.</p></details>
+        <details><summary>Which countries are covered?</summary><p>Jobs in the US, Canada, the EU and Australia, including remote roles open to those locations.</p></details>
+        <details><summary>What happens when a form asks something it doesn't know?</summary><p>It stops and puts the application in Needs you, with the exact question. Answer once and it remembers for next time.</p></details>
+        <details><summary>Why is it invite-only?</summary><p>We're letting people in gradually so every application is done right. Request an invite below and we'll get in touch when there's a spot.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="invite" id="invite">
+    <div class="wrap">
+      <div class="kicker">Get started</div>
+      <h2>Request an invite.</h2>
+      <p class="intro">Leave your email and the roles you're after. We'll get in touch as soon as there's a spot.</p>
+      <form id="inviteForm" novalidate>
+        <label class="sr-only" for="iEmail">Email</label><input id="iEmail" type="email" autocomplete="email" placeholder="you@email.com" required>
+        <button class="btn primary lg" type="submit">Request an invite</button>
+        <label class="sr-only" for="iNote">Roles you're looking for (optional)</label><input class="note" id="iNote" maxlength="300" placeholder="Roles you want (optional), e.g. backend, remote">
+      </form>
+      <div class="msg" id="iMsg" role="status" hidden></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img class="logo logo-light" src="/brand/rejekt-logo.png" alt="Rejekt.ai" style="height:20px"><img class="logo logo-dark" src="/brand/rejekt-logo-dark.png" alt="" style="height:20px">
+    <span>© <span id="yr"></span> Rejekt.ai</span>
+    <nav aria-label="Footer"><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="/login">Log in</a><a href="/signup">Sign up with an invite</a></nav>
+  </div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+const header = document.getElementById('top');
+addEventListener('scroll', () => header.classList.toggle('scrolled', scrollY > 8), { passive: true });
+
+const form = document.getElementById('inviteForm'), msg = document.getElementById('iMsg');
+const show = (text, kind) => { msg.textContent = text; msg.className = 'msg ' + kind; msg.hidden = false; };
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('iEmail');
+  if (!email.checkValidity()) return show('Enter a valid email address.', 'bad');
+  const btn = form.querySelector('button'); btn.disabled = true;
+  try {
+    const res = await fetch('/auth/request-invite', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value, note: document.getElementById('iNote').value }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return show(data.error || 'Something went wrong. Try again.', 'bad');
+    form.hidden = true; show("You're on the list. We'll get in touch at this email as soon as there's a spot.", 'ok');
+  } catch { show("Couldn't reach the server. Check your connection and try again.", 'bad'); }
+  finally { btn.disabled = false; }
+});
+</script>
+</body>
+</html>

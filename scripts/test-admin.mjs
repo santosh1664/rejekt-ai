@@ -105,6 +105,15 @@ try {
     const { rows: [j] } = await query(`SELECT id FROM jobs WHERE active LIMIT 1`);
     const f = await call('/admin/api/jobs/find?q=' + j.id, { cookie: A }); assert.equal(f.data[0].id, String(j.id));
   });
+  await check('landing-page invite requests show in Invites; inviting handles them', async () => {
+    const email = `request-test-${stamp}@example.com`;
+    await fetch(BASE + '/auth/request-invite', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, note: 'data roles' }) });
+    let { data } = await call('/admin/api/invites', { cookie: A });
+    assert.equal(data.requests.find(r => r.email === email)?.note, 'data roles');
+    assert.equal((await call('/admin/api/invites', { method: 'POST', cookie: A, body: { email } })).status, 200);
+    ({ data } = await call('/admin/api/invites', { cookie: A }));
+    assert.ok(!data.requests.some(r => r.email === email)); assert.ok(data.invites.some(i => i.email === email));
+  });
   await check('invite create + revoke', async () => {
     const email = `invite-test-${stamp}@example.com`;
     assert.equal((await call('/admin/api/invites', { method: 'POST', cookie: A, body: { email } })).status, 200);
@@ -124,5 +133,6 @@ try {
   await query(`DELETE FROM auto_apply_settings WHERE user_id IN (SELECT id FROM users WHERE email = ANY($1))`, [[ADMIN, USER]]);
   await query(`DELETE FROM users WHERE email = ANY($1)`, [[ADMIN, USER]]);
   await query(`DELETE FROM invites WHERE email LIKE '%-test-${stamp}@example.com'`);
+  await query(`DELETE FROM invite_requests WHERE email LIKE '%-test-${stamp}@example.com'`);
   await closePool();
 }
