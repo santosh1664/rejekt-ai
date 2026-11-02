@@ -1020,7 +1020,7 @@ function bindSearch(onChange) {
   });
   $$('[data-pill]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openFilterMenu(b.dataset.pill, b.parentElement, onChange); }));
 }
-function closeMenus() { $$('.pill .menu').forEach(m => m.remove()); }
+function closeMenus() { $$('.pill .menu').forEach(m => { m.remove(); m.onClose?.(); }); }
 document.addEventListener('click', e => { if (!e.target.closest('.menu')) closeMenus(); });
 async function savePrefs(patch) { await api('PUT', `/users/${USER}/profile/preferences`, patch); Object.assign(state.profile, patch); }
 async function saveProfileField(patch) { const p = { ...state.profile, ...patch }; await api('PUT', `/users/${USER}/profile`, profileBody(p)); Object.assign(state.profile, patch); }
@@ -1030,10 +1030,11 @@ function profileBody(p) {
   return Object.fromEntries(keys.map(k => [k, p?.[k] ?? (/preferred_|excluded_|allowed_/.test(k) ? [] : null)]));
 }
 function openFilterMenu(key, host, onChange) {
-  closeMenus();
+  // switching straight to another filter: drop the open menu quietly and refresh when this one closes instead
+  const carried = $$('.pill .menu').some(x => x.dirty?.()); $$('.pill .menu').forEach(x => x.remove());
   const p = state.profile; const m = document.createElement('div'); m.className = 'menu'; m.setAttribute('role', 'dialog');
   const opts = (list, sel, type = 'checkbox') => list.map(([v, l]) => `<label class="opt"><input type="${type}" name="o" value="${v}" ${sel.includes(v) ? 'checked' : ''}/> ${l}</label>`).join('');
-  const foot = `<div class="foot"><button class="btn sm quiet" data-act="clear" type="button">Clear</button><button class="btn sm primary" data-act="apply" type="button">Apply</button></div>`;
+  const foot = `<div class="foot"><span class="muted" style="font-size:12px;margin-right:auto">Saves as you pick</span><button class="btn sm quiet" data-act="clear" type="button">Clear</button><button class="btn sm primary" data-act="apply" type="button">Done</button></div>`;
   if (key === 'date') m.innerHTML = opts(DATE_OPTS.map(([v, l]) => [String(v), l]), [String(state.posted)], 'radio') + foot;
   if (key === 'workplace') m.innerHTML = opts(WORKPLACES, p.remote_only ? ['REMOTE'] : (p.preferred_workplace_types || [])) + `<p>Remote on its own hides everything else. Picking several ranks them instead.</p>` + foot;
   if (key === 'employment') m.innerHTML = opts(EMPLOYMENT, p.preferred_employment_types || []) + foot;
@@ -1044,9 +1045,20 @@ function openFilterMenu(key, host, onChange) {
   if (key === 'clearance') m.innerHTML = `<label class="opt"><input type="checkbox" ${p.exclude_clearance_jobs ? 'checked' : ''}/> Hide jobs that require a security clearance</label>` + foot;
   host.appendChild(m);
   m.querySelector('input')?.focus();
-  m.addEventListener('click', async e => {
+  // Every pick saves at once; the jobs list refreshes when the menu closes (Done, Enter, Esc or a click outside).
+  let saved = carried, saving = Promise.resolve();
+  m.dirty = () => saved;
+  m.onClose = () => { if (saved) saving.then(onChange); };
+  const done = () => { saved = true; closeMenus(); };
+  m.addEventListener('change', () => { if (key === 'date') save(false).then(done); else save(false); });
+  m.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(false).then(done); } });
+  m.addEventListener('click', e => {
     const act = e.target.closest('[data-act]')?.dataset.act; if (!act) return;
-    const clear = act === 'clear'; const vals = $$('input[type=checkbox]:checked', m).map(i => i.value);
+    (act === 'clear' ? save(true) : saving).then(done);
+  });
+  function save(clear) { saved = true; return (saving = saving.then(() => write(clear))); }
+  async function write(clear) {
+    const vals = $$('input[type=checkbox]:checked', m).map(i => i.value);
     try {
       if (key === 'date') { state.posted = clear ? 30 : Number(m.querySelector('input:checked')?.value ?? 30); store.set('posted', state.posted); }
       if (key === 'workplace') { const v = clear ? [] : vals; await savePrefs({ remote_only: v.length === 1 && v[0] === 'REMOTE', preferred_workplace_types: v }); }
@@ -1056,9 +1068,8 @@ function openFilterMenu(key, host, onChange) {
       if (key === 'salary') { const n = m.querySelector('input').value; await savePrefs({ min_salary: clear || n === '' ? null : Number(n), salary_is_hard_constraint: !clear && n !== '' }); }
       if (key === 'visa') await saveProfileField({ needs_sponsorship: !clear && m.querySelector('input').checked });
       if (key === 'clearance') await savePrefs({ exclude_clearance_jobs: !clear && m.querySelector('input').checked });
-      closeMenus(); onChange();
     } catch (err) { toast(err.message); }
-  });
+  }
 }
 /** Highlights the searched words in already-escaped text, like Tsenta's job details. */
 function markTerms(html) {
