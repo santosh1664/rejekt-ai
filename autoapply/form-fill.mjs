@@ -56,7 +56,7 @@ function scanForm() {
     return [el.name || '', null];
   }
   const starred = t => /[*✱](\s|$)/.test(t);
-  const fields = []; let n = 0; const groups = new Map();
+  const fields = []; let n = 0; const groups = new Map(), blocks = new Map();
   const score = f => f.querySelectorAll('input[type=file]').length * 100 + f.querySelectorAll('input, select, textarea').length;
   const form = [...document.forms].filter(f => score(f) >= 3).sort((a, b) => score(b) - score(a))[0] || document;
   for (const el of form.querySelectorAll('input, select, textarea')) {
@@ -64,9 +64,16 @@ function scanForm() {
     if (['hidden', 'submit', 'button', 'image', 'reset', 'search'].includes(type)) continue;
     if (type !== 'file' && !visible(el)) continue;
     if (el.closest('[aria-hidden="true"]') && type !== 'file') continue;
-    const sameName = el.name ? [...form.querySelectorAll(`input[type="${type}"][name="${CSS.escape(el.name)}"]`)] : [el];
+    let sameName = el.name ? [...form.querySelectorAll(`input[type="${type}"][name="${CSS.escape(el.name)}"]`)] : [el];
+    // Ashby names every checkbox of one question differently (GCP, AWS, AZURE): the question's own block is the group
+    let blockKey = null;
+    if (type === 'checkbox' && sameName.length === 1) {
+      const blk = el.closest('fieldset, [role="group"], [class*="field-entry" i], [class*="fieldEntry"]');
+      const boxes = blk ? [...blk.querySelectorAll('input[type="checkbox"]')].filter(visible) : [];
+      if (boxes.length > 1) { sameName = boxes; if (!blocks.has(blk)) blocks.set(blk, blocks.size); blockKey = blocks.get(blk); }
+    }
     if (type === 'radio' || (type === 'checkbox' && sameName.length > 1)) {
-      const key = `${type}:${el.name}`;
+      const key = blockKey !== null ? `box:${blockKey}` : `${type}:${el.name}`;
       let g = groups.get(key);
       if (!g) {
         const [q, qEl] = questionOf(el, sameName);
@@ -159,10 +166,13 @@ async function fillOne(page, field, ans, files) {
     return true;
   }
   if (field.group) {
-    const opt = ans.value?.option; if (!opt) return false;
-    const target = page.locator(`[data-aa-id="${opt.id}"]`);
-    if (field.type === 'buttons') await target.click();
-    else await target.check({ force: true });
+    const picks = ans.value?.options || (ans.value?.option ? [ans.value.option] : []);   // a checkbox group can take several
+    if (!picks.length) return false;
+    for (const opt of picks) {
+      const target = page.locator(`[data-aa-id="${opt.id}"]`);
+      if (field.type === 'buttons') await target.click();
+      else await target.check({ force: true });
+    }
     return true;
   }
   if (field.combobox && ans.value?.option) {
@@ -239,6 +249,17 @@ async function openCombobox(page, field) {
 async function tryLLMFill(page, field, book, llmCtx, files) {
   if (['resumeFile', 'coverLetterFile', 'otherFile'].includes(field.type) || field.type === 'file') return { ok: false };
   if (field.type === 'checkbox' && !field.group) return { ok: false };
+  // "What cloud services have you built in?" (GCP / AWS / Azure): tick every option the resume itself mentions;
+  // none mentioned: leave it for the person
+  if (field.type === 'checkbox' && field.group && field.options?.length) {
+    const have = JSON.stringify(llmCtx?.resumeSections || {}).toLowerCase();
+    const mentioned = field.options.filter(o => { const t = o.label.toLowerCase().trim(); return t.length >= 2 && new RegExp(`(^|[^a-z0-9])${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`).test(have); });
+    if (mentioned.length) {
+      try { const ok = await fillOne(page, field, { key: 'llm', value: { options: mentioned }, source: 'profile' }, files); return { ok, value: mentioned.map(o => o.label).join(', ') }; }
+      catch { return { ok: false }; }
+    }
+    return { ok: false };   // nothing here is on the resume and there is no "none" box: ticking one would claim experience, so it goes to "Needs you"
+  }
   const isChoice = field.tag === 'select' || field.type === 'radio' || field.type === 'buttons' || (field.type === 'checkbox' && field.group);
   if (isChoice && field.options?.length) {
     const chosenLabel = await llmChoose(field.label, field.options, llmCtx).catch(() => null);
@@ -276,6 +297,8 @@ export async function fillApplication(page, url, book, files, opts = {}) {
   if (!fields.some(f => f.type === 'file') && !fields.some(f => /e-?mail/i.test(f.label))) {
     return { outcome: 'FAILED', filled: [], missing: [], reason: 'No application form found on the page' };
   }
+  const step = (text, data) => opts.onStep?.(text, data), shot = label => opts.onShot?.(page, label);   // the admin's view of the attempt
+  step('Opened the form', { fields: fields.length });
   const filled = []; const missing = [];
   for (let i = 0; i < fields.length; i++) {
     let field = fields[i];
@@ -309,6 +332,7 @@ export async function fillApplication(page, url, book, files, opts = {}) {
     }
   }
   if (opts.screenshotPath) await page.screenshot({ path: opts.screenshotPath, fullPage: true }).catch(() => {});
+  step(`Filled ${filled.length} of ${fields.length} fields`, { missing: missing.map(m => m.label) });
   if (missing.length) return { outcome: 'NEEDS_YOU', filled, missing, reason: `${missing.length} required question${missing.length === 1 ? '' : 's'} need${missing.length === 1 ? 's' : ''} your answer` };
   if (!opts.submit) return { outcome: 'FILLED', filled, missing };
   const submit = page.locator('button[type=submit], input[type=submit], button').filter({ hasText: /submit/i }).first();
@@ -326,6 +350,7 @@ export async function fillApplication(page, url, book, files, opts = {}) {
   await target.scrollIntoViewIfNeeded().catch(() => {});
   await dismissCookieBanner(page);   // banners often sit over the bottom of the page, where Submit is
   const before = page.url();
+  await shot('Before submitting'); step('Clicking Submit');
   try {
     await Promise.all([page.waitForNavigation({ timeout: 15_000 }).catch(() => {}), target.click({ timeout: 10_000 })]);
   } catch (err) {
@@ -335,15 +360,17 @@ export async function fillApplication(page, url, book, files, opts = {}) {
         : "The Submit button never became clickable. Open the application and send it yourself." };
   }
   await page.waitForTimeout(1500);
-  challenge = await page.evaluate(findChallenge);
-  if (challenge) return { outcome: 'NEEDS_YOU', filled, missing, reason: `${challenge} appeared after submitting; finish it in the browser` };
   const body = await page.locator('body').innerText().catch(() => '');
+  // what the page looked like after Submit, for the admin: a screenshot, the fields it marks invalid, and its text
+  const done = async res => { await shot('After submitting'); return { ...res, page: { url: page.url(), invalid: await invalidFields(page), text: body.replace(/\s+/g, ' ').trim().slice(0, 400) } }; };
+  challenge = await page.evaluate(findChallenge);
+  if (challenge) return done({ outcome: 'NEEDS_YOU', filled, missing, reason: `${challenge} appeared after submitting; finish it in the browser` });
   const m = body.match(SUCCESS_TEXT);
-  if (m || (page.url() !== before && SUCCESS_URL.test(page.url()))) return { outcome: 'SUBMITTED', filled, missing, confirmation: m ? m[0] : page.url() };
+  if (m || (page.url() !== before && SUCCESS_URL.test(page.url()))) return done({ outcome: 'SUBMITTED', filled, missing, confirmation: m ? m[0] : page.url() });
   const errors = await page.locator('[aria-invalid="true"], [role="alert"], .error, .field-error, .error-message').allInnerTexts().catch(() => []);
   const errText = errors.map(t => t.trim()).filter(Boolean).slice(0, 5);
-  if (errText.length) return { outcome: 'NEEDS_YOU', filled, missing, reason: `The form reported: ${errText.join(' · ')}` };
-  return { outcome: 'FAILED', filled, missing, reason: `Submitted, but no confirmation appeared. It may or may not have gone through, so check the company's email or portal before trying again. The page said: ${body.replace(/\s+/g, ' ').trim().slice(0, 160)}` };
+  if (errText.length) return done({ outcome: 'NEEDS_YOU', filled, missing, reason: `The form reported: ${errText.join(' · ')}` });
+  return done({ outcome: 'FAILED', filled, missing, reason: `Submitted, but no confirmation appeared. It may or may not have gone through, so check the company's email or portal before trying again. The page said: ${body.replace(/\s+/g, ' ').trim().slice(0, 160)}` });
 }
 
 export { scanForm, findChallenge };

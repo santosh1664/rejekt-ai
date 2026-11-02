@@ -30,7 +30,7 @@ import { tailorForJob, TAILOR_MODES } from '../lib/resume-tailor.mjs';
 import { atsScore } from '../lib/ats-score.mjs';
 import { renderResumeHTML, renderResumePDF, getBrowser, resumeFileName } from '../lib/resume-render.mjs';
 import { writeCoverLetter } from '../lib/cover-letter.mjs';
-import { trackApplication, updateApplication, setApplyState, recordEvent } from '../lib/applications.mjs';
+import { trackApplication, updateApplication, setApplyState, recordEvent, saveShot } from '../lib/applications.mjs';
 import { recordRewrite, loadStyleExamples, loadBulletBank } from '../lib/rewrites.mjs';
 import { buildAnswerBook } from './answers.mjs';
 import { fillApplication } from './form-fill.mjs';
@@ -434,6 +434,8 @@ export async function submitApplication(userId, appId, { approve = false, browse
       } else {
         result = await fillApplication(page, formUrl, book, files, {
           submit: send, acceptConsent: settings.acceptConsent, alreadyOnPage: true,
+          onStep: (text, data) => recordEvent(appId, userId, { kind: 'step', detail: { text, ...data } }).catch(() => {}),
+          onShot: async (pg, label) => { const jpeg = await pg.screenshot({ type: 'jpeg', quality: 55, fullPage: true }).catch(() => null); if (jpeg) await saveShot(appId, label, jpeg).catch(() => {}); },
           llmContext: { job: app.job_snapshot || {}, resumeSections: (tailored.sections || rp?.sections || {}) },
         });
       }
@@ -449,7 +451,7 @@ export async function submitApplication(userId, appId, { approve = false, browse
     await rm(dir, { recursive: true, force: true }).catch(() => {});
   }
 
-  const base = { formUrl, appliedWith: atsEmail, matchScore: detail.matchScore, filled: result.filled, missing: result.missing, reason: result.reason || null, at: new Date().toISOString() };
+  const base = { formUrl, appliedWith: atsEmail, matchScore: detail.matchScore, filled: result.filled, missing: result.missing, reason: result.reason || null, page: result.page || null, at: new Date().toISOString() };
   if (result.outcome === 'SUBMITTED') {
     await setApplyState(appId, userId, 'SUBMITTED', { ...base, confirmation: result.confirmation }, { submitted_at: new Date() });
     await updateApplication(userId, appId, { status: 'APPLIED' });

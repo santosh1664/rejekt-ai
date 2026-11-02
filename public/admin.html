@@ -356,36 +356,61 @@ renderApps.after = (params) => {
 };
 
 let currentApp = null;
+const IN_PROGRESS = ['QUEUED', 'PREPARED', 'SUBMITTING'];
+/** The part of an application's page that changes while it is being filled and sent */
+function appLive(a) {
+  const det = a.apply_detail || {}, pg = det.page || {};
+  const line = e => {
+    const d = e.detail || {};
+    if (e.kind === 'step') return `${esc(d.text)}${d.missing?.length ? `<div class="small muted">Couldn't answer: ${d.missing.map(esc).join(' · ')}</div>` : ''}`;
+    if (e.kind === 'resume') return `Resume tailored for this job <span class="muted small">(${esc(d.profile || '')})</span>`;
+    if (e.kind === 'status') return `${esc(e.from_status || '–')} → ${esc(e.to_status || '–')}`;
+    return `<b>${esc(e.from_status || 'start')} → ${esc(e.to_status || '–')}</b>${d.reason ? `<div class="small">${esc(d.reason)}</div>` : ''}`;
+  };
+  return `<p class="sub">${badge(appState(a))}${IN_PROGRESS.includes(a.apply_state) ? ' <span class="muted small">live: refreshing every few seconds</span>' : ''} for <a href="#/users/${a.user_id}">${esc(a.email || a.user_id)}</a> · ${a.source || 'manual'} · ${a.attempts ?? 0} tries · updated ${ago(a.updated_at)}</p>
+    <div class="grid two">
+      <div class="card"><h2>What happened</h2><dl>
+        <dt>Problem</dt><dd>${esc(det.reason || '–')}</dd>
+        ${pg.text ? `<dt>The page said</dt><dd class="small">${esc(pg.text)}</dd>` : ''}
+        ${pg.invalid?.length ? `<dt>Fields the form marked invalid</dt><dd>${pg.invalid.map(esc).join('<br>')}</dd>` : ''}
+        <dt>Missing answers</dt><dd>${(det.missing || []).map(m => esc(m.label || m.name || m)).join('<br>') || '–'}</dd>
+        <dt>Match score</dt><dd>${det.matchScore ?? '–'}</dd>
+        <dt>Submitted</dt><dd>${when(a.submitted_at)}</dd><dt>Created</dt><dd>${when(a.created_at)}</dd>
+      </dl>
+      <details style="margin-top:10px"><summary><b>Fields filled (${(det.filled || []).length})</b></summary>
+        <table class="small"><tbody>${(det.filled || []).map(f => `<tr><td>${esc(f.label)}</td><td>${esc(String(f.value ?? ''))}</td><td class="muted">${esc(f.source || '')}</td></tr>`).join('')}</tbody></table></details></div>
+      <div class="card"><h2>History</h2><div class="timeline">
+        ${a.events.map(e => `<div>${line(e)} <span class="muted small">${when(e.created_at)}</span></div>`).join('') || '<span class="muted">No events.</span>'}</div></div>
+    </div>
+    <div class="card" style="margin-top:14px"><h2>Screenshots of the form</h2>
+      ${(a.shots || []).length ? `<div style="display:flex;gap:12px;flex-wrap:wrap">${a.shots.map(s => `<a href="/admin/api/applications/${a.id}/shots/${s.id}" target="_blank" rel="noopener" style="width:200px;text-decoration:none">
+        <img src="/admin/api/applications/${a.id}/shots/${s.id}" alt="${esc(s.label || '')}" loading="lazy" style="width:200px;height:260px;object-fit:cover;object-position:top;border:1px solid var(--line);border-radius:8px"><div class="small">${esc(s.label || '')}<span class="muted"> · ${when(s.created_at)}</span></div></a>`).join('')}</div>`
+        : '<span class="muted">None yet. A screenshot is saved before and after each Submit.</span>'}</div>`;
+}
 async function renderApp(id) {
   const a = await api('GET', '/admin/api/applications/' + id); currentApp = a;
   const det = a.apply_detail || {};
   const waiting = ['NEEDS_YOU', 'PREPARED', 'FAILED'].includes(a.apply_state);
   return `<a class="back" href="javascript:history.back()">← Back</a>
     <h1>${esc(a.job?.company || 'Application')} · ${esc(a.job?.title || '')}</h1>
-    <p class="sub">${badge(appState(a))} for <a href="#/users/${a.user_id}">${esc(a.email || a.user_id)}</a> · ${a.source || 'manual'} · ${a.attempts ?? 0} tries · updated ${ago(a.updated_at)}</p>
-    <div class="card" style="margin-bottom:14px"><h2>Fix it</h2><div class="actions">
+    <div id="appLive">${appLive(a)}</div>
+    <div class="card" style="margin:14px 0"><h2>Fix it</h2><div class="actions">
       ${waiting ? '<button class="btn" id="skipApp">Skip it</button>' : ''}
       <a class="btn primary" href="#/users/${a.user_id}">Open the user to retry or answer</a>
       ${a.job?.url ? `<a class="btn" href="${esc(a.job.url)}" target="_blank" rel="noopener">Job posting ↗</a>` : ''}
       ${det.formUrl ? `<a class="btn" href="${esc(det.formUrl)}" target="_blank" rel="noopener">Application form ↗</a>` : ''}
     </div><p class="muted small" style="margin:10px 0 0">Retrying or answering questions sends a real application, so it's done from the user's own dashboard (Open as user).</p></div>
-    <div class="grid two">
-      <div class="card"><h2>What happened</h2><dl>
-        <dt>Problem</dt><dd>${esc(det.reason || '–')}</dd>
-        <dt>Missing answers</dt><dd>${(det.missing || []).map(m => esc(m.label || m.name || m)).join('<br>') || '–'}</dd>
-        <dt>Fields filled</dt><dd>${(det.filled || []).length}</dd>
-        <dt>Match score</dt><dd>${det.matchScore ?? '–'}</dd>
-        <dt>Submitted</dt><dd>${when(a.submitted_at)}</dd><dt>Created</dt><dd>${when(a.created_at)}</dd>
-      </dl></div>
-      <div class="card"><h2>History</h2><div class="timeline">
-        ${a.events.map(e => `<div><b>${esc(e.kind === 'status' ? `${e.from_status || '–'} → ${e.to_status || '–'}` : e.kind)}</b> <span class="muted small">${when(e.created_at)}</span>
-          ${e.detail?.reason ? `<div class="small">${esc(e.detail.reason)}</div>` : ''}</div>`).join('') || '<span class="muted">No events.</span>'}</div></div>
-    </div>
-    <details class="card" style="margin-top:14px"><summary><b>Raw details</b></summary><pre>${esc(JSON.stringify({ apply_detail: a.apply_detail, answers: a.answers, job: a.job }, null, 2))}</pre></details>`;
+    <details class="card"><summary><b>Raw details</b></summary><pre>${esc(JSON.stringify({ apply_detail: a.apply_detail, answers: a.answers, job: a.job }, null, 2))}</pre></details>`;
 }
 renderApp.after = () => {
   const b = $('#skipApp'); if (b) b.onclick = () => act(b, () => api('POST', `/admin/api/applications/${currentApp.id}/action`, { action: 'skip' }),
     { confirm: ['Skip this application?', "It stops waiting on the user and won't be sent.", 'Skip'] });
+  // while it's being filled or sent, follow it live (until it stops, or you leave the page)
+  if (IN_PROGRESS.includes(currentApp.apply_state)) pollers.push(setInterval(async () => {
+    const a = await api('GET', '/admin/api/applications/' + currentApp.id).catch(() => null);
+    const host = $('#appLive'); if (!a || !host) return;
+    currentApp = a; host.innerHTML = appLive(a);
+  }, 4000));
 };
 
 // ─── Companies & jobs ───────────────────────────────────────────────────────
