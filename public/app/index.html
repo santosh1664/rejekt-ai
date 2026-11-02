@@ -2694,6 +2694,17 @@ function renderResumeTab() {
         paper.style.transform = `scale(${scale})`; paper.style.height = `${h * scale}px`; paper.style.width = `${816}px`;
         paper.style.marginLeft = `${Math.max(0, (canvas.clientWidth - 24 - 816 * scale) / 2)}px`;
         const content = doc.getElementById('content'); const pages = $('#rzPages');
+        // where each printed page ends: Letter with 0.5in margins holds 10in (960px) of resume per page
+        if (content) {
+          doc.querySelectorAll('.rj-pb').forEach(el => el.remove());
+          const top = content.getBoundingClientRect().top + doc.defaultView.scrollY;
+          for (let k = 1; k * 960 < content.scrollHeight - 2; k++) {
+            const pb = doc.createElement('div'); pb.className = 'rj-pb'; pb.setAttribute('aria-hidden', 'true'); pb.contentEditable = 'false';
+            pb.style.cssText = `position:absolute;left:0;right:0;top:${top + k * 960}px;border-top:1px dashed rgba(91,100,112,.45);pointer-events:none;z-index:5`;
+            pb.innerHTML = `<span style="position:absolute;right:10px;top:-11px;font:600 11px system-ui,sans-serif;color:#5B6470;background:#EEF1F4;border:1px solid #D5DAE0;border-radius:99px;padding:2px 9px">Page ${k + 1}</span>`;
+            doc.body.appendChild(pb);
+          }
+        }
         if (content && pages) {
           const over = content.scrollHeight > 960 + 2;
           pages.className = `rz-pages${over && z.mode !== 'edit' ? ' over' : ''}`;
