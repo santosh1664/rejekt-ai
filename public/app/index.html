@@ -1345,7 +1345,7 @@ function jobDetailHTML(data, jobId, inDrawer) {
     </div>
     <div class="jd-body">
       <section class="jd-sec hidden" id="tailorSec"></section>
-      ${m ? `<section class="jd-sec"><h4>Why it matches</h4>
+      ${m && !ME?.impersonator ? '' : m ? `<section class="jd-sec"><h4>Why it matches <span class="tag">Admin view</span></h4>
         <div class="why">${score(s, { big: true })}<div class="parts">${parts}</div></div>
         <ul class="reasons">${(fromFeed?.whyMatched || m.whyMatched).map(r => `<li>${esc(humanize(r))}</li>`).join('')}</ul>
         ${m.missingRequiredSkills?.length ? `<p style="font-size:14px;margin:10px 0 0">Missing required skills: ${m.missingRequiredSkills.map(x => `<span class="tag miss">${esc(x)}</span>`).join(' ')}</p>` : ''}
