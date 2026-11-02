@@ -2195,12 +2195,7 @@ async function renderProfile() {
     <div id="tabBody"></div>`;
 
   $('#rpSelect').addEventListener('change', e => { store.set('rpId', e.target.value); renderProfile(); });
-  $('#rpNew').addEventListener('click', async () => {
-    const name = prompt('Name the new profile, for example "Java Full Stack". It starts as a copy of this one.');
-    if (!name) return;
-    const { data } = await api('POST', `/users/${USER}/resume-profiles`, { name, copyFrom: rp.id });
-    store.set('rpId', data.id); toast(`Created "${data.name}".`); renderProfile();
-  });
+  $('#rpNew').addEventListener('click', () => newProfileDialog(rp));
   $('#rpDefault')?.addEventListener('click', async () => { await api('POST', `/users/${USER}/resume-profiles/${rp.id}/set-default`); state.profile = null; state.profileSkills = null; state.feed = null; toast(`"${rp.name}" is now your default. Job matches use it.`); renderProfile(); });
   $('#rpRename').addEventListener('click', async () => { const name = prompt('Rename this profile', rp.name); if (name && name !== rp.name) { await patchRP({ name }, 'Renamed.'); renderProfile(); } });
   $('#rpDelete')?.addEventListener('click', async () => {
@@ -2736,6 +2731,49 @@ function renderResumeTab() {
   }
   paint();
 }
+// New profile: a name, and what it starts from (a resume read into it, a copy of the current one, or blank).
+// It used to be a bare name prompt that silently copied the current profile, so it looked like nothing happened.
+function newProfileDialog(current) {
+  document.getElementById('npDlg')?.remove();
+  document.body.insertAdjacentHTML('beforeend', `<dialog id="npDlg" style="border:1px solid var(--line);border-radius:16px;padding:0;max-width:460px;width:92vw;background:var(--surface);color:var(--ink)">
+    <form method="dialog" id="npForm" style="padding:22px;display:grid;gap:14px">
+      <h2 style="margin:0;font-size:18px">New profile</h2>
+      <p class="muted" style="margin:-6px 0 0;font-size:13.5px">One profile per kind of role you apply for, each with its own resume.</p>
+      <label class="field">Profile name<input name="name" required maxlength="80" placeholder="e.g. Java Full Stack"></label>
+      <fieldset style="border:0;padding:0;margin:0;display:grid;gap:8px"><legend style="font-weight:600;font-size:14px;margin-bottom:6px">Start from</legend>
+        <label class="check"><input type="radio" name="from" value="upload" checked> Upload a resume <span class="muted">(read into the profile)</span></label>
+        <input type="file" name="file" accept=".pdf,.doc,.docx,.txt" style="margin-left:26px">
+        <label class="check"><input type="radio" name="from" value="copy"> Copy "${esc(current.name)}"</label>
+        <label class="check"><input type="radio" name="from" value="blank"> Start blank</label></fieldset>
+      <p class="muted" id="npMsg" style="margin:0;font-size:13px" role="status"></p>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn primary" id="npGo" value="go">Create profile</button></div>
+    </form></dialog>`);
+  const dlg = document.getElementById('npDlg'), f = document.getElementById('npForm');
+  f.file.addEventListener('change', () => { f.from.value = 'upload'; if (!f.name.value && f.file.files[0]) f.name.value = f.file.files[0].name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').slice(0, 80); });
+  f.addEventListener('submit', async e => {
+    if (e.submitter?.value !== 'go') return;
+    e.preventDefault();
+    const from = f.from.value, file = f.file.files[0], msg = document.getElementById('npMsg'), go = document.getElementById('npGo');
+    if (!f.name.value.trim()) { f.name.focus(); return; }
+    if (from === 'upload' && !file) { msg.textContent = 'Choose a resume file, or pick another way to start.'; return; }
+    go.disabled = true;
+    try {
+      let text = null;
+      if (from === 'upload') { msg.textContent = 'Reading your resume…'; text = await parseResumeFile(file); }
+      msg.textContent = 'Creating the profile…';
+      const { data } = await api('POST', `/users/${USER}/resume-profiles`, { name: f.name.value.trim(), ...(from === 'copy' ? { copyFrom: current.id } : {}) });
+      if (text) {
+        const { data: imp } = await api('POST', `/users/${USER}/resume-profiles/${data.id}/import-resume`, { text, filename: file.name, mode: 'replace' });
+        const x = imp.extracted || {};
+        toast(`Created "${data.name}" from your resume: ${x.experience ?? 0} roles, ${x.education ?? 0} schools, ${x.skills ?? 0} skills. Check the details.`);
+      } else toast(from === 'copy' ? `Created "${data.name}" as a copy of "${current.name}".` : `Created "${data.name}". Add your details or upload a resume.`);
+      dlg.close(); store.set('rpId', data.id); renderProfile();
+    } catch (err) { msg.textContent = err.message; go.disabled = false; }
+  });
+  dlg.addEventListener('close', () => dlg.remove());
+  dlg.showModal(); f.name.focus();
+}
+
 async function parseResumeFile(file) {
   const fd = new FormData(); fd.append('resume', file);
   const r = await fetch('/api/parse-resume', { method: 'POST', body: fd }); const parsed = await r.json();
