@@ -146,6 +146,7 @@ function sendApp(req, res) {
                              impersonator: req.user.impersonator_email || null }).replace(/</g, '\\u003c');
   const html = readFileSync(join(__dirname, 'public', 'app', 'index.html'), 'utf8')
     .replace('<script>', `<script>window.RJ_USER = ${me};</script>\n<script>`);
+  res.set('Cache-Control', 'no-store');   // always the current dashboard on reload or back/forward, never a stale copy
   res.type('html').send(html);
 }
 // dashboard.rejekt.ai/ is the dashboard itself; on the login site / goes to it
