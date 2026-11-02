@@ -379,7 +379,8 @@ app.get('/api/jobs', async (req, res) => {
     // ── Posted within N days ──────────────────────────────────────────────────
     if (postedWithin) {
       params.push(postedWithin);
-      conditions.push(`(posted_at >= NOW() - ($${params.length} * interval '1 day') OR discovered >= NOW() - ($${params.length} * interval '1 day'))`);
+      // posting date when known, else when we found it (see matching/recommend.mjs)
+      conditions.push(`(posted_at >= NOW() - ($${params.length} * interval '1 day') OR (posted_at IS NULL AND discovered >= NOW() - ($${params.length} * interval '1 day')))`);
     }
 
     params.push(pageSize, offset);

@@ -147,7 +147,9 @@ function buildCandidateFilters(userId, ctx, options) {
   }
   if (options.postedWithinDays) {
     params.push(Number(options.postedWithinDays));
-    conditions.push(`(j.posted_at >= NOW() - ($${params.length} * interval '1 day') OR j.discovered >= NOW() - ($${params.length} * interval '1 day'))`);
+    // the posting date when the board gives one, else when we found it (what the card shows). "posted OR found
+    // recently" let a job posted 12 days ago through a 24-hour filter just because a new company brought it in today
+    conditions.push(`(j.posted_at >= NOW() - ($${params.length} * interval '1 day') OR (j.posted_at IS NULL AND j.discovered >= NOW() - ($${params.length} * interval '1 day')))`);
     note('postedWithinDays', `Date posted: last ${Number(options.postedWithinDays)} days`);
   }
   // A title/title_description INCLUDE search looks across every job, not
