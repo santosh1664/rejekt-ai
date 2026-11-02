@@ -23,6 +23,8 @@
     "test:job-sourcing": "node scripts/test-job-sourcing.mjs",
     "test:profiles": "node scripts/test-profiles.mjs",
     "test:auto-apply": "node scripts/test-auto-apply.mjs",
+    "test:auto-apply-limits": "node --env-file=.env.local scripts/test-auto-apply-limits.mjs",
+    "test:cover-letter": "node scripts/test-cover-letter.mjs",
     "autoapply": "node --env-file=.env.local autoapply/run.mjs",
     "smoke:providers": "node scripts/smoke-new-providers.mjs",
     "match": "node --env-file=.env.local matching/matcher.mjs --verbose",

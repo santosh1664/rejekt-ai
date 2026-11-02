@@ -28,7 +28,8 @@ import { normalizeSkillName } from '../lib/skills.mjs';
 import { getResumeProfile, getDefaultResumeProfile, deriveMatchingFields, updateResumeProfile, normalizeQuestion } from '../lib/resume-profiles.mjs';
 import { tailorForJob, TAILOR_MODES } from '../lib/resume-tailor.mjs';
 import { atsScore } from '../lib/ats-score.mjs';
-import { renderResumeHTML, renderResumePDF, renderCoverLetter, getBrowser, resumeFileName } from '../lib/resume-render.mjs';
+import { renderResumeHTML, renderResumePDF, getBrowser, resumeFileName } from '../lib/resume-render.mjs';
+import { writeCoverLetter } from '../lib/cover-letter.mjs';
 import { trackApplication, updateApplication, setApplyState, recordEvent } from '../lib/applications.mjs';
 import { recordRewrite, loadStyleExamples, loadBulletBank } from '../lib/rewrites.mjs';
 import { buildAnswerBook } from './answers.mjs';
@@ -55,13 +56,33 @@ const MAX_ATTEMPTS = 3;
 
 // ─── Settings and lanes ──────────────────────────────────────────────────────
 
+// Plan limits for now: one place to change them.
+export const MONTHLY_CAP = 1500, MAX_DAILY_CAP = 50, MAX_LANES = 3;
+
+/** The person's current 30-ish-day cycle: from the day-of-month they joined (e.g. Nov 19) to the same day next month (Dec 19). */
+export function cycleWindow(joinedAt, now = new Date()) {
+  const day = new Date(joinedAt).getUTCDate();
+  const at = (y, m) => new Date(Date.UTC(y, m, Math.min(day, new Date(Date.UTC(y, m + 1, 0)).getUTCDate())));
+  let y = now.getUTCFullYear(), m = now.getUTCMonth();
+  if (at(y, m) > now) m--;
+  return { startsAt: at(y, m), resetsAt: at(y, m + 1) };
+}
+
+async function monthlyUsage(userId) {
+  const { rows: [u] } = await query(`SELECT created_at FROM users WHERE id = $1`, [userId]);
+  const w = cycleWindow(u?.created_at || new Date());
+  const { rows: [c] } = await query(
+    `SELECT COUNT(*)::int AS n FROM applications WHERE user_id = $1 AND apply_state IS NOT NULL AND apply_state <> 'SKIPPED' AND created_at >= $2`, [userId, w.startsAt]);
+  return { cap: MONTHLY_CAP, used: c.n, ...w };
+}
+
 const SETTINGS_DEFAULTS = { enabled: false, dailyCap: 25, perCompanyCap30d: 3, acceptConsent: false, reviewBeforeSubmit: true };
 
 export async function getSettings(userId) {
   const { rows } = await query(`SELECT * FROM auto_apply_settings WHERE user_id = $1`, [userId]);
   const r = rows[0];
   const settings = r ? { enabled: r.enabled, dailyCap: r.daily_cap, perCompanyCap30d: r.per_company_cap_30d, acceptConsent: r.accept_consent, reviewBeforeSubmit: r.review_before_submit, updatedAt: r.updated_at } : { ...SETTINGS_DEFAULTS, updatedAt: null };
-  return { exists: !!r, ...settings, lanes: await listLanes(userId) };
+  return { exists: !!r, ...settings, dailyCap: Math.min(settings.dailyCap, MAX_DAILY_CAP), maxDailyCap: MAX_DAILY_CAP, maxLanes: MAX_LANES, monthly: await monthlyUsage(userId), lanes: await listLanes(userId) };
 }
 
 export async function saveSettings(userId, patch = {}) {
@@ -69,7 +90,7 @@ export async function saveSettings(userId, patch = {}) {
   const clampInt = (v, lo, hi, d) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; };
   const next = {
     enabled: patch.enabled === undefined ? cur.enabled : !!patch.enabled,
-    dailyCap: patch.dailyCap === undefined ? cur.dailyCap : clampInt(patch.dailyCap, 1, 100, cur.dailyCap),
+    dailyCap: patch.dailyCap === undefined ? cur.dailyCap : clampInt(patch.dailyCap, 1, MAX_DAILY_CAP, cur.dailyCap),
     perCompanyCap30d: patch.perCompanyCap30d === undefined ? cur.perCompanyCap30d : clampInt(patch.perCompanyCap30d, 1, 20, cur.perCompanyCap30d),
     acceptConsent: patch.acceptConsent === undefined ? cur.acceptConsent : !!patch.acceptConsent,
     reviewBeforeSubmit: patch.reviewBeforeSubmit === undefined ? cur.reviewBeforeSubmit !== false : !!patch.reviewBeforeSubmit,
@@ -126,7 +147,7 @@ export async function saveLane(userId, laneId, input = {}) {
     if (!cur) return null;
   } else {
     const { rows } = await query(`SELECT COUNT(*)::int AS n FROM auto_apply_lanes WHERE user_id = $1`, [userId]);
-    if (rows[0].n >= 5) return { error: 'You can have up to 5 lanes' };
+    if (rows[0].n >= MAX_LANES) return { error: `You can have up to ${MAX_LANES} lanes` };
   }
   const v = laneValues(input, cur);
   if (v.resumeProfileId && !(await getResumeProfile(userId, v.resumeProfileId))) return { error: 'Resume profile not found' };
@@ -220,7 +241,10 @@ export async function planRun(userId, { dryRun = false, laneIds = null } = {}) {
   const settings = await getSettings(userId);
   const lanes = settings.lanes.filter(l => l.enabled && (!laneIds || laneIds.includes(l.id)));
   const used = await capsUsed(userId);
-  let capLeft = Math.max(0, settings.dailyCap - used.today);
+  const monthly = settings.monthly;
+  const dailyLeft = Math.max(0, settings.dailyCap - used.today), monthlyLeft = Math.max(0, monthly.cap - monthly.used);
+  let capLeft = Math.min(dailyLeft, monthlyLeft);
+  const capReason = monthlyLeft < dailyLeft ? 'monthly cap reached' : 'daily cap reached';
   const { rows: tracked } = await query(`SELECT job_id FROM applications WHERE user_id = $1 AND job_id IS NOT NULL`, [userId]);
   const taken = new Set(tracked.map(r => String(r.job_id)));
   const companyCount = new Map(used.perCompany);
@@ -254,7 +278,7 @@ export async function planRun(userId, { dryRun = false, laneIds = null } = {}) {
       if (!formUrl && !ASSISTED_ATS[jr[0]?.ats]) { skip(`can't fill ${jr[0]?.ats || 'this'} forms yet`, job); continue; }
       const co = String(job.company || '').toLowerCase();
       if ((companyCount.get(co) || 0) >= settings.perCompanyCap30d) { skip('company cap (30 days)', job); continue; }
-      if (capLeft <= 0) { skip('daily cap reached', job); continue; }
+      if (capLeft <= 0) { skip(capReason, job); continue; }
 
       capLeft--; taken.add(String(job.jobId)); companyCount.set(co, (companyCount.get(co) || 0) + 1);
       report.picked.push({ jobId: job.jobId, title: job.title, company: job.company, matchScore: job.matchScore, formUrl });
@@ -312,7 +336,10 @@ export async function prepareApplication(userId, appId, { mode = null, track = f
   // ATS scan of the finished resume against this posting, next to the untailored resume's score.
   const scan = atsScore(tailored.sections, job, { original: rp.sections });
   tailored.report.ats = { score: scan.score, before: atsScore(rp.sections, job, { original: rp.sections }).score, parts: scan.parts, missing: scan.missing, gaps: scan.gaps, issues: scan.issues };
-  const coverLetter = renderCoverLetter(rp.coverLetter, job);
+  // A letter written for this job from the profile (the profile's own template only sets the tone, and is the fallback).
+  const cover = await writeCoverLetter(tailored.sections, job, { template: rp.coverLetter });
+  const coverLetter = cover.letter;
+  tailored.report.coverLetter = { source: cover.source, model: cover.model || null, rejected: cover.rejected || null };
   await query(
     `UPDATE applications SET tailored_resume = $2, cover_letter = $3, resume_profile_id = $4, updated_at = NOW() WHERE id = $1`,
     [appId, { sections: tailored.sections, sectionOrder: tailored.sectionOrder, report: tailored.report, profileName: rp.name }, coverLetter || null, rp.id]);
@@ -493,6 +520,8 @@ export function startApply(userId, appId, { approve = false } = {}) {
     let app = await loadApp(appId);
     if (!app || app.user_id !== userId) return;
     await query(`UPDATE applications SET attempts = 0 WHERE id = $1`, [appId]);
+    const m = await monthlyUsage(userId);
+    if (m.used > m.cap) return stop(`You've used all ${m.cap} applications for this cycle. It resets on ${m.resetsAt.toISOString().slice(0, 10)}.`);
     if (!approve || !app.tailored_resume) {
       if (app.apply_state !== 'QUEUED') await setApplyState(appId, userId, 'QUEUED', app.apply_detail || {});   // the Apply button already queued it
       const p = await prepareApplication(userId, appId, { track: true });

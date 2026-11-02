@@ -62,6 +62,7 @@ import { fetchAll as pinpoint }        from '../providers/pinpoint.mjs';
 import { fetchAll as rippling }        from '../providers/rippling.mjs';
 import { fetchAll as teamtailor }      from '../providers/teamtailor.mjs';
 import { fetchAll as oraclecloud }     from '../providers/oraclecloud.mjs';
+import { fetchAll as dover }           from '../providers/dover.mjs';
 
 export const PROVIDERS = {
   greenhouse,
@@ -79,6 +80,7 @@ export const PROVIDERS = {
   rippling,
   teamtailor,
   oraclecloud,
+  dover,
   // Jobs added by pasting a link on any other site (lib/job-import.mjs). Never scanned: the company row is inactive.
   manual: async () => [],
 };

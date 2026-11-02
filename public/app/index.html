@@ -764,7 +764,6 @@ details.earlier>summary{cursor:pointer;font-size:13px;color:var(--ink-2);margin:
       <a class="theme-btn" href="#/settings" data-route="settings" style="text-decoration:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</a>
       <button class="theme-btn" id="themeBtn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg><span>Switch theme</span></button>
       <button class="theme-btn" id="logoutBtn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Log out</span></button>
-      <div class="legal-links"><a href="/terms" target="_blank">Terms</a> · <a href="/privacy" target="_blank">Privacy</a> · <a href="/ai" target="_blank">AI</a></div>
     </div>
   </aside>
   <main id="view" tabindex="-1"></main>
@@ -1918,16 +1917,17 @@ async function renderAutoApply() {
     ${!profiles.length ? `<div class="notice info">Set up a resume profile first: auto-apply sends it. <a href="#/profile">Go to Profile</a></div>` : ''}
     <div class="aa">
       <div style="display:grid;gap:22px">
-        <section class="panel"><div class="panel-head"><h2>Lanes</h2><span class="spacer"></span><button class="btn sm" id="addLane" type="button" ${aa.lanes.length >= 5 ? 'disabled' : ''}>Add lane</button></div>
-          <div class="panel-body" style="padding-top:4px"><p class="muted" style="margin:10px 0 0;font-size:13px">A lane is one kind of role, applied to with one resume profile.</p>
+        <section class="panel"><div class="panel-head"><h2>Lanes</h2><span class="spacer"></span><button class="btn sm" id="addLane" type="button" ${aa.lanes.length >= (aa.maxLanes || 3) ? 'disabled' : ''}>Add lane</button></div>
+          <div class="panel-body" style="padding-top:4px"><p class="muted" style="margin:10px 0 0;font-size:13px">A lane is one kind of role, applied to with one resume profile. You can have up to ${aa.maxLanes || 3}.</p>
           <div id="lanes">${aa.lanes.map(l => laneHTML(l, profiles)).join('') || '<p style="margin:12px 0 0">No lanes yet. Add one to start.</p>'}</div></div></section>
       </div>
       <div style="display:grid;gap:22px">
         <section class="panel"><div class="panel-head"><h2>Next run</h2><span class="spacer"></span><button class="btn sm" id="aaPreview" type="button">Preview</button><button class="btn sm primary" id="aaRun" type="button" ${aa.running ? 'disabled' : ''}>${aa.running ? 'Running…' : 'Run now'}</button></div>
           <div class="panel-body" id="aaPlan"><p class="muted" style="margin:0">${lastRun ? `Last run ${ago(lastRun.startedAt)}.` : 'Not run yet.'} Preview shows which jobs the next run would pick, without sending anything.</p></div></section>
         <section class="panel"><div class="panel-head"><h2>Limits</h2></div><form class="panel-body" id="aaLimits" style="display:grid;gap:12px">
-          <div class="form-grid"><label class="field">Applications per day<input type="number" name="dailyCap" min="1" max="100" value="${aa.dailyCap}"></label>
+          <div class="form-grid"><label class="field">Applications per day<input type="number" name="dailyCap" min="1" max="${aa.maxDailyCap || 50}" value="${aa.dailyCap}"></label>
             <label class="field">Per company in 30 days<input type="number" name="perCompanyCap30d" min="1" max="20" value="${aa.perCompanyCap30d}"></label></div>
+          ${aa.monthly ? `<p class="muted" style="margin:0;font-size:13px">${aa.monthly.used} of ${aa.monthly.cap} applications used this month. Resets ${new Date(aa.monthly.resetsAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}.</p>` : ''}
           <label class="check"><input type="checkbox" name="acceptConsent" ${aa.acceptConsent ? 'checked' : ''}> Tick required "I agree" boxes, such as privacy notices</label>
           <label class="check"><input type="checkbox" name="reviewBeforeSubmit" ${aa.reviewBeforeSubmit !== false ? 'checked' : ''}> Review before sending when I press Apply on a job (off: Apply fills and sends it)</label>
           <p class="muted" style="margin:0;font-size:13px">Forms that show a CAPTCHA, or ask something your profile doesn't answer, are never guessed. They come back to you under "Needs you" on the dashboard. It fills ${aa.fillableAts.map(pretty).join(', ')} forms; other jobs are skipped.</p>
@@ -2786,8 +2786,8 @@ async function parseResumeFile(file) {
 }
 function renderLetterTab() {
   const rp = state.rp;
-  $('#tabBody').innerHTML = `<section class="sec"><div class="sec-head"><div><h2>Cover letter template</h2><p>Write {company} and {title} where the job's details should go. Each profile keeps its own template.</p></div></div>
-    <textarea id="letter" rows="16" style="max-width:76ch" aria-label="Cover letter template">${esc(rp.coverLetter || '')}</textarea>
+  $('#tabBody').innerHTML = `<section class="sec"><div class="sec-head"><div><h2>Cover letter</h2><p>When a form takes a cover letter, Rejekt.ai writes a new one for that job from this profile, using only what your resume shows. Add a sample in your own voice to set the tone. It's also used as-is, with {company} and {title} filled in, if the letter can't be written.</p></div></div>
+    <textarea id="letter" rows="16" style="max-width:76ch" aria-label="Sample cover letter">${esc(rp.coverLetter || '')}</textarea>
     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn primary" id="saveLetter" type="button">Save template</button><button class="btn quiet" id="starter" type="button">Start from a draft</button></div></section>`;
   $('#saveLetter').addEventListener('click', async () => { await patchRP({ coverLetter: $('#letter').value }, 'Template saved.'); });
   $('#starter').addEventListener('click', () => {
