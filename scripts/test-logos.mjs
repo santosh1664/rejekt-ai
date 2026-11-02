@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { keyOf, sniff } from '../lib/logos.mjs';
+assert.equal(keyOf('Citigroup Inc.'), 'citigroup');
+assert.equal(keyOf('The Home Depot'), 'home depot');
+assert.equal(keyOf('AT&T'), 'at and t');
+assert.equal(keyOf('  '), '');
+assert.equal(keyOf("Domino's"), 'dominos');
+assert.equal(sniff(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0, 0, 0, 0, 0, 0, 0, 0])), 'image/png');
+assert.equal(sniff(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>')), 'image/svg+xml');
+assert.equal(sniff(Buffer.from('<!doctype html><html>not an image</html>'.repeat(5))), null);
+console.log('ok');

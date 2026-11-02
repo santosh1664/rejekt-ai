@@ -19,6 +19,7 @@ import { extractResumeSections } from './lib/resume-extract.mjs';
 import { router as apiRouter } from './api/server.mjs';
 import { readFileSync } from 'fs';
 import * as auth from './lib/auth.mjs';
+import { getLogo } from './lib/logos.mjs';
 import { router as adminRouter } from './lib/admin.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -160,6 +161,13 @@ app.use('/admin/api', adminRouter);
 // Dashboard (public/app) talks to the REST API (api/server.mjs) on the same
 // origin under /v1 — e.g. GET /v1/users/:id/recommendations. Express strips
 // the /v1 prefix before handing the request to the API's own router.
+// Company and school logos for the app (lib/logos.mjs). 404 means "none found": the app keeps the initial.
+app.get('/v1/logo', async (req, res) => {
+  const logo = await getLogo(String(req.query.kind || ''), String(req.query.name || '').slice(0, 160)).catch(() => null);
+  res.set('Cache-Control', `private, max-age=${logo ? 604800 : 86400}`);
+  if (!logo) return res.status(404).end();
+  res.type(logo.contentType).send(logo.image);
+});
 app.use('/v1', (req, res) => { apiRouter(req, res); });
 app.get(['/app', '/app/{*rest}'], (req, res, next) => {
   if (/\.[a-z0-9]+$/i.test(req.path)) return next(); // real files fall through to static
