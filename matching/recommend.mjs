@@ -27,7 +27,7 @@ import {
   keywordSearchWarnings, summarizeKeywordSearch,
 } from './keyword-search.mjs';
 
-const CANDIDATE_POOL_SIZE = 600; // reduced from 2000 — 3 DB queries × 2000 rows was the main latency source
+const CANDIDATE_POOL_SIZE = 1500; // was 600/2000: with the date index and the country rule in SQL, 1500 costs ~1s cold
 
 export async function loadUserContext(userId) {
   const { rows: profileRows } = await query(
@@ -126,6 +126,14 @@ function buildCandidateFilters(userId, ctx, options) {
     params.push(ctx.preferences.excludedRoleFamilies);
     conditions.push(`NOT (j.role_family = ANY($${params.length}::text[]))`);
     note('excludedRoleFamilies', `Hidden role categories: ${ctx.preferences.excludedRoleFamilies.join(', ')}`);
+  }
+  if (ctx.preferences.allowedCountries?.length) {
+    // same rule as evaluateEligibility's country check, in SQL: the pool is only the newest few hundred rows, so a
+    // check that ran afterwards threw most of them away (a Europe-only profile kept ~90 jobs out of 270k)
+    params.push(ctx.preferences.allowedCountries);
+    const rel = `l.job_id = j.id AND l.country_code IS NOT NULL AND l.is_remote_restriction = (j.workplace_type = 'REMOTE')`;
+    conditions.push(`(NOT EXISTS (SELECT 1 FROM job_locations l WHERE ${rel}) OR EXISTS (SELECT 1 FROM job_locations l WHERE ${rel} AND l.country_code = ANY($${params.length}::text[])))`);
+    note('allowedCountries', `Countries: ${ctx.preferences.allowedCountries.join(', ')}`);
   }
   if (ctx.preferences.excludeClearanceJobs) {
     conditions.push(`j.clearance_type = 'NONE'`);
