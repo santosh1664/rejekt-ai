@@ -275,6 +275,35 @@ async function tryLLMFill(page, field, book, llmCtx, files) {
   catch { return { ok: false }; }
 }
 
+// Greenhouse emails a security code to the applicant before it accepts Submit: eight boxes (security-input-0…7)
+// under "enter the 8-character code to confirm you're a human". The code is in the applicant's own inbox.
+const CODE_BOXES = 'input[id^="security-input"]:visible, input[aria-label*="security code" i]:visible';
+async function securityCodeBoxes(page) {
+  const named = page.locator(CODE_BOXES);
+  if (await named.count().catch(() => 0) >= 4) return named;
+  const text = await page.locator('body').innerText().catch(() => '');
+  if (!/security code|verification code was sent/i.test(text)) return null;
+  const singles = page.locator('input[maxlength="1"]:visible');
+  return (await singles.count().catch(() => 0)) >= 6 ? singles : null;
+}
+/**
+ * If the form is asking for the emailed code: read it (opts.readCode, from the applicant's linked Gmail) and type it in.
+ * Returns null when there is no code step, { ok: true } once typed, or { ok: false, reason } to hand back to the person.
+ */
+async function enterSecurityCode(page, opts, since, step) {
+  const boxes = await securityCodeBoxes(page);
+  if (!boxes) return null;
+  step('The form asked for the security code it emailed');
+  const got = opts.readCode ? await opts.readCode({ since }) : { reason: "Reading the applicant's email isn't set up" };
+  if (!got?.code) return { ok: false, reason: got?.reason || "The form emailed a security code that couldn't be read. Open the application, enter the code from your email and send it." };
+  step('Read the security code from the inbox');
+  const n = await boxes.count();
+  if (n >= got.code.length) { for (let i = 0; i < got.code.length; i++) await boxes.nth(i).fill(got.code[i]); }
+  else await boxes.first().fill(got.code);
+  await page.waitForTimeout(800);
+  return { ok: true };
+}
+
 export async function fillApplication(page, url, book, files, opts = {}) {
   const timeout = opts.timeoutMs ?? 30_000;
   if (!opts.alreadyOnPage) {
@@ -340,6 +369,9 @@ export async function fillApplication(page, url, book, files, opts = {}) {
   if (!(await target.count())) return { outcome: 'FAILED', filled, missing, reason: 'No submit button found' };
   // A disabled Submit means the form hasn't accepted every answer. Clicking it only waited 30 s and failed with
   // "locator.click: Timeout" (Workable keeps it disabled until every field validates).
+  const startedAt = Date.now();
+  const early = await enterSecurityCode(page, opts, startedAt - 60_000, step);
+  if (early && !early.ok) return { outcome: 'NEEDS_YOU', filled, missing, reason: early.reason };
   const usable = async () => (await target.isEnabled().catch(() => false)) && (await target.getAttribute('aria-disabled').catch(() => null)) !== 'true';
   if (!(await usable())) { await page.waitForTimeout(3000); }
   if (!(await usable())) {
@@ -360,6 +392,17 @@ export async function fillApplication(page, url, book, files, opts = {}) {
         : "The Submit button never became clickable. Open the application and send it yourself." };
   }
   await page.waitForTimeout(1500);
+  if (!early) {
+    // Submit was accepted as a first step and the form now wants the emailed code: type it and send again
+    const late = await enterSecurityCode(page, opts, startedAt - 30_000, step);
+    if (late && !late.ok) { await shot('Waiting for the security code'); return { outcome: 'NEEDS_YOU', filled, missing, reason: late.reason }; }
+    if (late?.ok) {
+      const again = page.locator('button[type=submit], input[type=submit], button').filter({ hasText: /submit/i }).first();
+      await shot('Before submitting with the code'); step('Clicking Submit with the code');
+      await Promise.all([page.waitForNavigation({ timeout: 15_000 }).catch(() => {}), again.click({ timeout: 10_000 }).catch(() => {})]);
+      await page.waitForTimeout(2000);
+    }
+  }
   const body = await page.locator('body').innerText().catch(() => '');
   // what the page looked like after Submit, for the admin: a screenshot, the fields it marks invalid, and its text
   const done = async res => { await shot('After submitting'); return { ...res, page: { url: page.url(), invalid: await invalidFields(page), text: body.replace(/\s+/g, ' ').trim().slice(0, 400) } }; };

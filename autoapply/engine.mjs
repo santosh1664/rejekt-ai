@@ -30,6 +30,7 @@ import { tailorForJob, TAILOR_MODES } from '../lib/resume-tailor.mjs';
 import { atsScore } from '../lib/ats-score.mjs';
 import { renderResumeHTML, renderResumePDF, getBrowser, resumeFileName } from '../lib/resume-render.mjs';
 import { writeCoverLetter } from '../lib/cover-letter.mjs';
+import { getGmailStatus, waitForOTP, extractSecurityCode } from '../lib/gmail.mjs';
 import { trackApplication, updateApplication, setApplyState, recordEvent, saveShot } from '../lib/applications.mjs';
 import { recordRewrite, loadStyleExamples, loadBulletBank } from '../lib/rewrites.mjs';
 import { buildAnswerBook } from './answers.mjs';
@@ -435,6 +436,14 @@ export async function submitApplication(userId, appId, { approve = false, browse
         result = await fillApplication(page, formUrl, book, files, {
           submit: send, acceptConsent: settings.acceptConsent, alreadyOnPage: true,
           onStep: (text, data) => recordEvent(appId, userId, { kind: 'step', detail: { text, ...data } }).catch(() => {}),
+          // Greenhouse emails a security code before it takes Submit: read it from the person's linked Gmail
+          readCode: async ({ since }) => {
+            const g = await getGmailStatus(userId).catch(() => ({ connected: false }));
+            if (!g.connected) return { reason: `The form emailed a security code to ${atsEmail || 'the applicant'}. Link Gmail in Settings so it can be read automatically, or open the application and enter it yourself.` };
+            if (atsEmail && g.email && g.email.toLowerCase() !== atsEmail.toLowerCase()) return { reason: `The security code went to ${atsEmail}, but the linked Gmail is ${g.email}. Open the application and enter the code yourself.` };
+            const code = await waitForOTP(userId, { from: 'greenhouse-mail.io', extract: extractSecurityCode, after: new Date(since), maxAgeMinutes: 15, maxWaitMs: 90_000, pollIntervalMs: 4_000 });
+            return code ? { code } : { reason: `The security code email from the company's form didn't arrive within 90 seconds. Open the application and send it yourself.` };
+          },
           onShot: async (pg, label) => { const jpeg = await pg.screenshot({ type: 'jpeg', quality: 55, fullPage: true }).catch(() => null); if (jpeg) await saveShot(appId, label, jpeg).catch(() => {}); },
           llmContext: { job: app.job_snapshot || {}, resumeSections: (tailored.sections || rp?.sections || {}) },
         });
