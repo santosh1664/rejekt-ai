@@ -380,12 +380,6 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 .rz-editbar { flex-basis: 100%; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border-radius: var(--r-md); background: var(--cobalt-soft); color: var(--cobalt); font-size: 13.5px; }
 .rz-editbar .spacer { flex: 1; }
 .rz-original { width: 816px; min-height: 1056px; margin: 0 auto; padding: 48px 58px; background: #fff; color: #111; font: 12.5px/1.55 Arial, sans-serif; white-space: pre-wrap; border-radius: 4px; box-shadow: 0 1px 3px rgba(16,26,51,.12); }
-.rz-examples > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
-.rz-examples > summary::-webkit-details-marker { display: none; }
-.rz-examples > summary h2 { font-size: 17px; font-weight: 600; }
-.rz-examples > summary::after { content: '▾'; margin-left: auto; color: var(--muted); }
-.rz-examples[open] > summary::after { content: '▴'; }
-.rz-examples[open] > summary { margin-bottom: 14px; }
 @media (max-width: 860px) {
   .rz-tools { position: static; }
   .rz-menu { width: min(290px, calc(100vw - 48px)); }
@@ -597,7 +591,7 @@ label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; or
 
 /* ═══ Design v2: white, black actions, pale status tints ═══════════════════════ */
 .page-head h1 { font-family: var(--head); font-weight: 900; font-size: 54px; line-height: .92; letter-spacing: 0; text-transform: uppercase; }
-.panel-head h2, .sec-head h2, .rz-examples > summary h2 { font-family: var(--head); text-transform: uppercase; font-weight: 800; font-size: 26px; letter-spacing: .01em; }
+.panel-head h2, .sec-head h2 { font-family: var(--head); text-transform: uppercase; font-weight: 800; font-size: 26px; letter-spacing: .01em; }
 .hero-card h1 { font-family: var(--head); font-weight: 900; font-size: 40px; text-transform: uppercase; line-height: 1; }
 .btn, .btn.sm { border-radius: 999px; }
 .btn.primary { box-shadow: none; }
@@ -2540,20 +2534,7 @@ function renderResumeTab() {
       ${editing ? '<div class="rz-editbar" role="status"><span>Click any text on the page to change it. Enter adds a bullet, ⋮⋮ drags it, × deletes it.</span><span class="spacer"></span><b>Not saved yet</b></div>' : ''}
     </div>
 
-    <div class="rz-canvas" id="rzCanvas"><div class="rz-paper" id="rzPaper"><iframe id="rzFrame" title="${editing ? 'Resume editor' : 'Resume preview'}"></iframe></div><p class="rz-pages" id="rzPages"></p></div>`}
-    <details class="sec rz-examples" style="margin-top:18px" ${state.rzExamplesOpen ? 'open' : ''} id="examplesSec">
-      <summary><h2>Teach "Match the job" how you tailor</h2><span class="muted" style="font-size:13px">Optional</span></summary>
-      <p class="muted" style="margin:0 0 12px;font-size:13px">Add a resume and the version you tailored for one job. "Match the job" learns your style from these and reuses bullets you wrote.</p>
-      <form id="exampleForm" class="example-form" style="display:grid;gap:10px;max-width:640px">
-        <label>Original resume <input type="file" name="original" accept=".pdf,.doc,.docx,.txt" required/></label>
-        <label>Tailored resume <input type="file" name="tailored" accept=".pdf,.doc,.docx,.txt" required/></label>
-        <div style="display:flex;gap:10px;flex-wrap:wrap"><label style="flex:1">Job title <input name="jobTitle" maxlength="200"/></label><label style="flex:1">Company <input name="company" maxlength="200"/></label></div>
-        <label>Job posting <span class="muted">(optional, needed for training)</span><textarea name="jobDescription" rows="5"></textarea></label>
-        <div><button class="btn primary" type="submit">Save example</button></div>
-      </form>
-      <div id="exampleResult"></div>
-      <ul id="exampleList" class="example-list" style="list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px"></ul>
-    </details>`;
+    <div class="rz-canvas" id="rzCanvas"><div class="rz-paper" id="rzPaper"><iframe id="rzFrame" title="${editing ? 'Resume editor' : 'Resume preview'}"></iframe></div><p class="rz-pages" id="rzPages"></p></div>`}`;
 
   // ── Wiring ──
   const rerender = () => renderResumeTab();
@@ -2648,7 +2629,6 @@ function renderResumeTab() {
     drop.addEventListener('dragleave', () => drop.classList.remove('over'));
     drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); e.dataTransfer.files[0] && handle(e.dataTransfer.files[0]); });
   }
-  setupTailoringExamples();
   if (z.view === 'original') return;
 
   // ── The page itself ──
@@ -2790,32 +2770,6 @@ async function parseResumeFile(file) {
   const r = await fetch('/api/parse-resume', { method: 'POST', body: fd }); const parsed = await r.json();
   if (!r.ok) throw new Error(parsed.error || `${file.name} couldn't be read`);
   return parsed.text;
-}
-function setupTailoringExamples() {
-  const list = async () => {
-    const { data } = await api('GET', `/users/${USER}/resume-examples`);
-    const ex = data?.examples || [];
-    $('#exampleList').innerHTML = ex.length ? ex.map(x => `<li style="display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 12px">
-        <span><b>${esc(x.jobTitle || 'Untitled role')}</b>${x.company ? ` at ${esc(x.company)}` : ''}<br><span class="muted">${x.bullets.original} bullets became ${x.bullets.tailored}${x.hasPosting ? '' : '. No posting, so it isn\'t used for training'}</span></span>
-        <button class="btn" type="button" data-del="${x.id}">Remove</button></li>`).join('') : '<li class="muted">No examples yet.</li>';
-  };
-  $('#exampleList').addEventListener('click', async e => {
-    const id = e.target.closest('[data-del]')?.dataset.del; if (!id) return;
-    await api('DELETE', `/users/${USER}/resume-examples/${id}`); toast('Example removed'); list();
-  });
-  $('#exampleForm').addEventListener('submit', async e => {
-    e.preventDefault(); const f = e.target; const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
-    $('#exampleResult').innerHTML = '<div class="notice info">Reading both resumes…</div>';
-    try {
-      const [original, tailored] = await Promise.all([parseResumeFile(f.original.files[0]), parseResumeFile(f.tailored.files[0])]);
-      const { data, error } = await api('POST', `/users/${USER}/resume-examples`, { original, tailored, jobTitle: f.jobTitle.value, company: f.company.value, jobDescription: f.jobDescription.value });
-      if (error || !data?.id) throw new Error(error || data?.error || 'The example couldn\'t be saved');
-      $('#exampleResult').innerHTML = `<div class="notice info">Saved. ${data.bullets.original} bullets in the original, ${data.bullets.tailored} in the tailored version.</div>`;
-      f.reset(); list();
-    } catch (err) { $('#exampleResult').innerHTML = `<div class="notice bad">${esc(err.message)}</div>`; }
-    finally { btn.disabled = false; }
-  });
-  list();
 }
 function renderLetterTab() {
   const rp = state.rp;
