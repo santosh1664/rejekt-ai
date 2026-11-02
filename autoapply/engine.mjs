@@ -55,12 +55,12 @@ const MAX_ATTEMPTS = 3;
 
 // ─── Settings and lanes ──────────────────────────────────────────────────────
 
-const SETTINGS_DEFAULTS = { enabled: false, dailyCap: 25, perCompanyCap30d: 3, acceptConsent: false };
+const SETTINGS_DEFAULTS = { enabled: false, dailyCap: 25, perCompanyCap30d: 3, acceptConsent: false, reviewBeforeSubmit: true };
 
 export async function getSettings(userId) {
   const { rows } = await query(`SELECT * FROM auto_apply_settings WHERE user_id = $1`, [userId]);
   const r = rows[0];
-  const settings = r ? { enabled: r.enabled, dailyCap: r.daily_cap, perCompanyCap30d: r.per_company_cap_30d, acceptConsent: r.accept_consent, updatedAt: r.updated_at } : { ...SETTINGS_DEFAULTS, updatedAt: null };
+  const settings = r ? { enabled: r.enabled, dailyCap: r.daily_cap, perCompanyCap30d: r.per_company_cap_30d, acceptConsent: r.accept_consent, reviewBeforeSubmit: r.review_before_submit, updatedAt: r.updated_at } : { ...SETTINGS_DEFAULTS, updatedAt: null };
   return { exists: !!r, ...settings, lanes: await listLanes(userId) };
 }
 
@@ -72,11 +72,12 @@ export async function saveSettings(userId, patch = {}) {
     dailyCap: patch.dailyCap === undefined ? cur.dailyCap : clampInt(patch.dailyCap, 1, 100, cur.dailyCap),
     perCompanyCap30d: patch.perCompanyCap30d === undefined ? cur.perCompanyCap30d : clampInt(patch.perCompanyCap30d, 1, 20, cur.perCompanyCap30d),
     acceptConsent: patch.acceptConsent === undefined ? cur.acceptConsent : !!patch.acceptConsent,
+    reviewBeforeSubmit: patch.reviewBeforeSubmit === undefined ? cur.reviewBeforeSubmit !== false : !!patch.reviewBeforeSubmit,
   };
   await query(
-    `INSERT INTO auto_apply_settings (user_id, enabled, daily_cap, per_company_cap_30d, accept_consent) VALUES ($1, $2, $3, $4, $5)
-     ON CONFLICT (user_id) DO UPDATE SET enabled = $2, daily_cap = $3, per_company_cap_30d = $4, accept_consent = $5, updated_at = NOW()`,
-    [userId, next.enabled, next.dailyCap, next.perCompanyCap30d, next.acceptConsent]);
+    `INSERT INTO auto_apply_settings (user_id, enabled, daily_cap, per_company_cap_30d, accept_consent, review_before_submit) VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (user_id) DO UPDATE SET enabled = $2, daily_cap = $3, per_company_cap_30d = $4, accept_consent = $5, review_before_submit = $6, updated_at = NOW()`,
+    [userId, next.enabled, next.dailyCap, next.perCompanyCap30d, next.acceptConsent, next.reviewBeforeSubmit]);
   return getSettings(userId);
 }
 
@@ -363,7 +364,9 @@ export async function submitApplication(userId, appId, { approve = false, browse
   const settings = await getSettings(userId);
   const tailored = app.tailored_resume;
   const ats = app.job_snapshot?.ats || detectAts(app.job_snapshot?.url || '')?.ats;
-  const send = approve || (app.review_before_submit === false && SUBMIT_VERIFIED_ATS.includes(ats));
+  // review first: a lane's own setting, or for the Apply button (no lane) the account's "Review before sending"
+  const reviewFirst = app.lane_id ? app.review_before_submit !== false : settings.reviewBeforeSubmit !== false;
+  const send = approve || (!reviewFirst && SUBMIT_VERIFIED_ATS.includes(ats));
   const book = buildAnswerBook(rp?.sections || tailored.sections, app.job_snapshot || {}, { coverLetter: app.cover_letter || '', overrides: app.answers?.overrides || {} });
 
   const dir = await mkdtemp(join(tmpdir(), 'autoapply-'));
@@ -408,7 +411,11 @@ export async function submitApplication(userId, appId, { approve = false, browse
       }
     }
   } catch (err) {
-    result = { outcome: 'FAILED', filled: [], missing: [], reason: err.message.split('\n')[0] };
+    // a step that waited on the page and gave up (e.g. "locator.click: Timeout 30000ms exceeded"): say what it means
+    const msg = err.message.split('\n')[0];
+    result = { outcome: 'FAILED', filled: [], missing: [], reason: /Timeout \d+ms exceeded/.test(msg)
+      ? "The application page didn't respond as expected (a button never became clickable). Nothing was sent. Try again, or open the application and send it yourself."
+      : msg };
   } finally {
     await page.close().catch(() => {});
     await rm(dir, { recursive: true, force: true }).catch(() => {});
@@ -486,7 +493,7 @@ export function startApply(userId, appId, { approve = false } = {}) {
     if (!app || app.user_id !== userId) return;
     await query(`UPDATE applications SET attempts = 0 WHERE id = $1`, [appId]);
     if (!approve || !app.tailored_resume) {
-      await setApplyState(appId, userId, 'QUEUED', app.apply_detail || {});
+      if (app.apply_state !== 'QUEUED') await setApplyState(appId, userId, 'QUEUED', app.apply_detail || {});   // the Apply button already queued it
       const p = await prepareApplication(userId, appId, { track: true });
       if (p.error) return stop(p.error);
     }

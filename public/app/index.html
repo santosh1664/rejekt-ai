@@ -1922,6 +1922,7 @@ async function renderAutoApply() {
           <div class="form-grid"><label class="field">Applications per day<input type="number" name="dailyCap" min="1" max="100" value="${aa.dailyCap}"></label>
             <label class="field">Per company in 30 days<input type="number" name="perCompanyCap30d" min="1" max="20" value="${aa.perCompanyCap30d}"></label></div>
           <label class="check"><input type="checkbox" name="acceptConsent" ${aa.acceptConsent ? 'checked' : ''}> Tick required "I agree" boxes, such as privacy notices</label>
+          <label class="check"><input type="checkbox" name="reviewBeforeSubmit" ${aa.reviewBeforeSubmit !== false ? 'checked' : ''}> Review before sending when I press Apply on a job (off: Apply fills and sends it)</label>
           <p class="muted" style="margin:0;font-size:13px">Forms that show a CAPTCHA, or ask something your profile doesn't answer, are never guessed. They come back to you under "Needs you" on the dashboard. It fills ${aa.fillableAts.map(pretty).join(', ')} forms; other jobs are skipped.</p>
           <div><button class="btn sm" type="submit">Save limits</button></div></form></section>
       </div>
@@ -1935,7 +1936,7 @@ async function renderAutoApply() {
   });
   $('#aaLimits').addEventListener('submit', async e => {
     e.preventDefault(); const f = e.target;
-    await api('PUT', `/users/${USER}/auto-apply`, { dailyCap: f.dailyCap.value, perCompanyCap30d: f.perCompanyCap30d.value, acceptConsent: f.acceptConsent.checked });
+    await api('PUT', `/users/${USER}/auto-apply`, { dailyCap: f.dailyCap.value, perCompanyCap30d: f.perCompanyCap30d.value, acceptConsent: f.acceptConsent.checked, reviewBeforeSubmit: f.reviewBeforeSubmit.checked });
     toast('Limits saved.');
   });
   $('#addLane').addEventListener('click', async () => {

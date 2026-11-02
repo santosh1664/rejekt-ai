@@ -97,7 +97,7 @@ import {
 } from '../lib/resume-profiles.mjs';
 import { extractResumeSections, mergeExtracted } from '../lib/resume-extract.mjs';
 import {
-  APPLICATION_STATUSES, APPLY_STATES, trackApplication, updateApplication, listApplications, getApplication, deleteApplication,
+  APPLICATION_STATUSES, APPLY_STATES, trackApplication, updateApplication, listApplications, getApplication, deleteApplication, setApplyState,
 } from '../lib/applications.mjs';
 import {
   getSettings as getAutoApplySettings, saveSettings as saveAutoApplySettings, saveLane, deleteLane, planRun, runForUser,
@@ -709,6 +709,8 @@ async function handleApplicationAction(req, res, userId, appId, action, method, 
     // The Apply button / Try again: tailor, fill, stop at review. All on the server.
     const app = await getApplication(userId, appId);
     if (!app) return json(res, 404, { error: 'Not found' });
+    // queued before answering, so the page that reloads right after the click already shows it In flight
+    await setApplyState(String(appId), userId, 'QUEUED', app.applyDetail || {});
     startApply(userId, appId, { approve: false });
     return json(res, 202, { started: true });
   }

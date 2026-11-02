@@ -125,6 +125,27 @@ function findChallenge() {
   return widget ? 'CAPTCHA' : null;
 }
 
+// Cookie banners cover fields and the Submit button. Choose the privacy-preserving option (reject / only necessary),
+// else close the banner; never accept tracking on the person's behalf.
+const COOKIE_SCOPE = '[class*="cookie" i]:visible, [id*="cookie" i]:visible, [class*="consent" i]:visible, [id*="consent" i]:visible, [aria-label*="cookie" i]:visible';
+const COOKIE_NO = /^\s*(reject( all)?( cookies)?|decline( all)?( cookies)?|deny( all)?|refuse( all)?|(use |allow )?(only )?(strictly )?(necessary|essential)( cookies)?( only)?|continue without accepting|close|×|✕)\s*$/i;
+async function dismissCookieBanner(page) {
+  const scope = page.locator(COOKIE_SCOPE);
+  if (!(await scope.count().catch(() => 0))) return;
+  const btn = scope.locator('button:visible, a:visible, [role="button"]:visible').filter({ hasText: COOKIE_NO }).first();
+  const close = scope.locator('button[aria-label*="close" i]:visible, button[aria-label*="dismiss" i]:visible').first();
+  const target = (await btn.count()) ? btn : (await close.count()) ? close : null;
+  if (target) { await target.click({ timeout: 3000 }).catch(() => {}); await page.waitForTimeout(400); }
+}
+
+// labels of the fields the form itself marks invalid (aria-invalid, or a visible field error)
+function invalidFields(page) {
+  return page.evaluate(() => {
+    const label = el => { const id = el.id && document.querySelector(`label[for="${CSS.escape(el.id)}"]`); return (id?.innerText || el.getAttribute('aria-label') || el.name || '').replace(/\s+/g, ' ').trim().slice(0, 60); };
+    return [...new Set([...document.querySelectorAll('[aria-invalid="true"]')].map(label).filter(Boolean))].slice(0, 5);
+  }).catch(() => []);
+}
+
 const APPLY_TEXT = /^\s*(apply( now| for this (job|position|role)| to (this )?(job|position))?|i.?m interested|skicka ansökan|ansök( nu)?|jetzt bewerben|bewerben|postuler|solliciteer( nu)?)\s*$/i;
 const SUCCESS_TEXT = /thank you for (applying|your (application|interest|submission))|thanks for applying|application (has been |was )?(submitted|received)|we.?ve received your application|successfully (applied|submitted)/i;
 const SUCCESS_URL = /confirm|thank|success|submitted|\/thanks\b/i;
@@ -248,6 +269,7 @@ export async function fillApplication(page, url, book, files, opts = {}) {
       await page.locator('input[type=email]:visible, input[name*="email" i]:visible, input[type=file]').first().waitFor({ timeout: 8000 }).catch(() => {});
     }
   }
+  await dismissCookieBanner(page);
   let challenge = await page.evaluate(findChallenge);
   if (challenge) return { outcome: 'NEEDS_YOU', filled: [], missing: [], reason: `${challenge} on the form` };
   const fields = await page.evaluate(scanForm);
@@ -292,8 +314,26 @@ export async function fillApplication(page, url, book, files, opts = {}) {
   const submit = page.locator('button[type=submit], input[type=submit], button').filter({ hasText: /submit/i }).first();
   const target = (await submit.count()) ? submit : page.locator('button[type=submit], input[type=submit]').first();
   if (!(await target.count())) return { outcome: 'FAILED', filled, missing, reason: 'No submit button found' };
+  // A disabled Submit means the form hasn't accepted every answer. Clicking it only waited 30 s and failed with
+  // "locator.click: Timeout" (Workable keeps it disabled until every field validates).
+  const usable = async () => (await target.isEnabled().catch(() => false)) && (await target.getAttribute('aria-disabled').catch(() => null)) !== 'true';
+  if (!(await usable())) { await page.waitForTimeout(3000); }
+  if (!(await usable())) {
+    const bad = await invalidFields(page);
+    return { outcome: 'NEEDS_YOU', filled, missing,
+      reason: `The form kept its Submit button disabled, so it didn't accept every answer${bad.length ? ` (check: ${bad.join(', ')})` : ''}. Open the application to finish it.` };
+  }
+  await target.scrollIntoViewIfNeeded().catch(() => {});
+  await dismissCookieBanner(page);   // banners often sit over the bottom of the page, where Submit is
   const before = page.url();
-  await Promise.all([page.waitForNavigation({ timeout: 15_000 }).catch(() => {}), target.click()]);
+  try {
+    await Promise.all([page.waitForNavigation({ timeout: 15_000 }).catch(() => {}), target.click({ timeout: 10_000 })]);
+  } catch (err) {
+    // the click didn't happen, so nothing was sent: safe to hand back
+    return { outcome: 'NEEDS_YOU', filled, missing,
+      reason: /intercepts pointer events/.test(err.message) ? 'Something on the page covered the Submit button. Open the application and send it yourself.'
+        : "The Submit button never became clickable. Open the application and send it yourself." };
+  }
   await page.waitForTimeout(1500);
   challenge = await page.evaluate(findChallenge);
   if (challenge) return { outcome: 'NEEDS_YOU', filled, missing, reason: `${challenge} appeared after submitting; finish it in the browser` };

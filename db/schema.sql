@@ -681,6 +681,8 @@ CREATE TABLE IF NOT EXISTS auto_apply_settings (
   updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE auto_apply_settings ADD COLUMN IF NOT EXISTS accept_consent BOOLEAN NOT NULL DEFAULT FALSE;
+-- Applying from the Jobs tab (no lane): stop for review before sending (lanes have their own review_before_submit)
+ALTER TABLE auto_apply_settings ADD COLUMN IF NOT EXISTS review_before_submit BOOLEAN NOT NULL DEFAULT TRUE;
 
 -- A lane = one kind of role, one resume profile, its own rules.
 CREATE TABLE IF NOT EXISTS auto_apply_lanes (
