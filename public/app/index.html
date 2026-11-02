@@ -2394,6 +2394,7 @@ function openSkillsEditor() {
 }
 const WORKAUTH_KEYS = ['authorizedToWork', 'needsSponsorship', 'workCountry'];   // answered per country in renderWorkAuth
 const WA_COUNTRIES = ['United States', 'Canada', 'United Kingdom', 'India', 'Germany', 'Ireland', 'Netherlands', 'France', 'Australia', 'Singapore', 'Israel', 'Mexico', 'Spain', 'Poland', 'Switzerland', 'Sweden', 'Japan', 'Brazil', 'Italy', 'Portugal'];
+const WA_BASIS = ['Citizen', 'Permanent resident', 'Temporary work authorization', 'Not currently authorized', 'Other'];
 const ynSelect = (name, v) => `<select name="${name}"><option value="">Not answered</option><option value="true" ${v === true ? 'selected' : ''}>Yes</option><option value="false" ${v === false ? 'selected' : ''}>No</option></select>`;
 function renderWorkAuth() {
   const host = $('#workAuthBody'); if (!host) return;
@@ -2404,9 +2405,9 @@ function renderWorkAuth() {
       ${rows.length ? rows.map((r, i) => `<div class="wa-row" data-i="${i}">
         <div class="wa-head"><b>${esc(r.country)}</b><span class="spacer"></span><button class="btn sm quiet danger" type="button" data-rm="${i}" aria-label="Remove ${esc(r.country)}">Remove</button></div>
         <div class="form-grid">
-          <label class="field">Authorized to work in ${esc(r.country)}?${ynSelect('authorized', r.authorized)}</label>
-          <label class="field">Need visa sponsorship?${ynSelect('needsSponsorship', r.needsSponsorship)}</label>
-          <label class="field">Visa or status <small>optional, for example F-1 OPT or Citizen</small><input name="status" value="${esc(r.status || '')}"></label>
+          <label class="field">Are you legally authorized to work in ${esc(r.country)}?${ynSelect('authorized', r.authorized)}</label>
+          <label class="field">Will you now or in the future require employer sponsorship in ${esc(r.country)}?${ynSelect('needsSponsorship', r.needsSponsorship)}</label>
+          <label class="field">Authorization basis<select name="status"><option value="">Select a status</option>${[...new Set([...WA_BASIS, r.status].filter(Boolean))].map(o => `<option ${r.status === o ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></label>
         </div></div>`).join('') : '<p class="muted" style="margin:0 0 12px">No countries yet. Add the countries you would work in.</p>'}
       <div class="wa-add"><select id="waPick" aria-label="Country to add"><option value="">Add a country…</option>${left.map(c => `<option>${esc(c)}</option>`).join('')}<option value="__other">Other…</option></select>
         <span class="spacer"></span><button class="btn primary" type="submit">Save work authorization</button></div></form>`;
@@ -2457,16 +2458,33 @@ function renderContacts() {
 }
 function renderDefaults() {
   const fields = state.fields || {}; const ad = state.rp.sections.applicationDefaults || {};
-  const GROUPS = [['authorization', 'Visa and citizenship', 'Your visa details. Yes/No sponsorship answers come from Work authorization above.'], ['logistics', 'Availability', ''], ['background', 'Background questions', ''], ['eeo', 'Voluntary self-identification', 'Optional. Employers use these only for equal-opportunity reporting, and "Prefer not to say" is always fine.']];
+  const GROUPS = [['authorization', 'Citizenship', 'Select every country where you hold citizenship. Visa and sponsorship answers come from Work authorization above.'], ['logistics', 'Availability', ''], ['background', 'Background questions', ''], ['eeo', 'Voluntary self-identification', 'Optional. Employers use these only for equal-opportunity reporting, and "Prefer not to say" is always fine.']];
   const input = (key, f) => {
     const v = ad[key];
     if (f.type === 'bool') return `<label class="field">${f.label}<select name="${key}"><option value="">Not answered</option><option value="true" ${v === true ? 'selected' : ''}>Yes</option><option value="false" ${v === false ? 'selected' : ''}>No</option></select></label>`;
     if (f.type === 'select') return `<label class="field">${f.label}<select name="${key}"><option value="">Not answered</option>${f.options.map(o => `<option ${v === o ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></label>`;
+    if (key === 'citizenship') return `<div class="field wide" id="citField">${f.label}<input type="hidden" name="citizenship" value="${esc(v || '')}"/><div class="chips" id="citChips" style="margin:6px 0"></div>
+      <select id="citPick" aria-label="Add a country of citizenship"><option value="">Add a country…</option>${WA_COUNTRIES.map(c => `<option>${esc(c)}</option>`).join('')}<option value="__other">Other…</option></select></div>`;
     if (f.type === 'date') return `<label class="field">${f.label}<input type="date" name="${key}" value="${esc(v || '')}"/></label>`;
     return `<label class="field">${f.label}${f.hint ? ` <small>${esc(f.hint)}</small>` : ''}<input type="text" name="${key}" value="${esc(v || '')}"/></label>`;
   };
   $('#defaultsBody').innerHTML = `<form id="adForm">${GROUPS.map(([g, title, hint]) => `<div class="ad-group"><h3>${title}</h3>${hint ? `<p class="hint">${hint}</p>` : ''}<div class="form-grid" style="margin-top:${hint ? 0 : 10}px">${Object.entries(fields).filter(([k, f]) => f.group === g && !WORKAUTH_KEYS.includes(k)).map(([k, f]) => input(k, f)).join('')}</div></div>`).join('')}
     <div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="btn primary" type="submit">Save answers</button></div></form>`;
+  const cit = $('#adForm [name=citizenship]');
+  if (cit) {
+    const draw = () => {
+      const list = cit.value.split(',').map(x => x.trim()).filter(Boolean);
+      $('#citChips').innerHTML = list.map((c, i) => `<span class="chip-r"><button type="button" tabindex="-1">${esc(c)}</button><button type="button" data-rm="${i}" aria-label="Remove ${esc(c)}">×</button></span>`).join('') || '<span class="muted" style="font-size:13px">None added</span>';
+      $$('#citChips [data-rm]').forEach(b => b.addEventListener('click', () => { list.splice(+b.dataset.rm, 1); cit.value = list.join(', '); draw(); }));
+    };
+    $('#citPick').addEventListener('change', e => {
+      let c = e.target.value; e.target.value = ''; if (c === '__other') c = (prompt('Country name') || '').trim();
+      const list = cit.value.split(',').map(x => x.trim()).filter(Boolean);
+      if (c && !list.some(x => x.toLowerCase() === c.toLowerCase())) { list.push(c); cit.value = list.join(', '); }
+      draw();
+    });
+    draw();
+  }
   $('#adForm').addEventListener('submit', async e => {
     e.preventDefault();
     const out = {};

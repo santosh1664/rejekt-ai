@@ -27,7 +27,7 @@ export function buildAnswerBook(sections, job = {}, { coverLetter = '', override
     graduationYear: (latestEdu.endDate || '').slice(0, 4), gpa: latestEdu.gpa || '',
     coverLetterText: coverLetter,
     authorizedToWork: ad.authorizedToWork, needsSponsorship: ad.needsSponsorship,
-    visaStatus: [ad.workPermit, ad.workPermitStatus && ad.workPermitStatus !== 'Not applicable' ? ad.workPermitStatus : ''].filter(Boolean).join(', ') || ad.authorizationBasis || '',
+    visaStatus: (s.workAuth?.find(r => r.country === (ad.workCountry || 'United States')) || s.workAuth?.[0])?.status || [ad.workPermit, ad.workPermitStatus && ad.workPermitStatus !== 'Not applicable' ? ad.workPermitStatus : ''].filter(Boolean).join(', ') || ad.authorizationBasis || '',
     citizenship: ad.citizenship || '',
     canRelocate: ad.canRelocate, inPersonOk: ad.inPersonOk, startImmediately: ad.startImmediately,
     noticePeriod: ad.noticePeriod || (ad.startImmediately ? 'Immediately' : ''),
@@ -35,7 +35,8 @@ export function buildAnswerBook(sections, job = {}, { coverLetter = '', override
     priorEmployee: ad.priorEmployee ?? false,   // never worked at the employer unless the profile says so
     govClearance: ad.govClearance, govTies: ad.govTies,
     // "U.S. worker" (citizen, national, permanent resident, refugee, asylee): never true on a visa
-    usPerson: /^(us|u\.s\.?|usa|united states|american)\b/i.test(ad.citizenship || '') || /green card|permanent resident|refugee|asyl/i.test(ad.workPermit || ''),
+    usPerson: /(^|,\s*)(us|u\.s\.?|usa|united states|american)\b/i.test(ad.citizenship || '') || /green card|permanent resident|refugee|asyl/i.test(ad.workPermit || '')
+      || (s.workAuth || []).some(r => /^(united states|us|usa)$/i.test(r.country) && /^(citizen|permanent resident)/i.test(r.status || '')),
     over18: ad.over18, referralSource: ad.referralSource || 'LinkedIn',   // most listings here come from job boards
     hasTransport: ad.hasTransport, needsAccommodations: ad.needsAccommodations,
     gender: ad.gender || '', ethnicity: ad.ethnicity || '', veteran: ad.veteran || '', disability: ad.disability || '',

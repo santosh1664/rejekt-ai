@@ -59,11 +59,11 @@ function extractionTests() {
 function modelTests() {
   check('normalizeMonth formats', normalizeMonth('Aug 2023') === '2023-08' && normalizeMonth('2023-8-15') === '2023-08' && normalizeMonth('8/2023') === '2023-08' && normalizeMonth('Present') === '');
   const n = normalizeSections({ bogus: 1, experience: [{ company: 'A', title: 'Dev', current: 'true', endDate: '2020-01', bullets: ['x', '', 'y'] }, {}], skills: ['Java', 'java', 'Go'],
-    applicationDefaults: { needsSponsorship: 'yes', gender: 'Not an option', workPermit: 'F-1 OPT', unknownField: 'x' } });
+    applicationDefaults: { needsSponsorship: 'yes', gender: 'Not an option', citizenship: 'India, United States', unknownField: 'x' } });
   check('normalize: drops unknown keys and empty entries', !('bogus' in n) && n.experience.length === 1 && n.experience[0].bullets.length === 2);
   check('normalize: current role clears end date', n.experience[0].current === true && n.experience[0].endDate === '');
   check('normalize: flat skills → one deduped group', n.skills.length === 1 && n.skills[0].items.join() === 'Java,Go');
-  check('normalize: application defaults validated (bools, select options, unknown dropped)', n.applicationDefaults.needsSponsorship === true && !('gender' in n.applicationDefaults) && n.applicationDefaults.workPermit === 'F-1 OPT' && !('unknownField' in n.applicationDefaults));
+  check('normalize: application defaults validated (bools, select options, unknown dropped)', n.applicationDefaults.needsSponsorship === true && !('gender' in n.applicationDefaults) && n.applicationDefaults.citizenship === 'India, United States' && !('unknownField' in n.applicationDefaults));
   check('normalize partial: only sent keys', Object.keys(normalizeSections({ summary: 'x' }, { partial: true })).join() === 'summary');
 
   const now = new Date(Date.UTC(2026, 9, 1));
@@ -80,9 +80,9 @@ function modelTests() {
   const c = completeness(a, { hasResume: true });
   check('completeness checklist from a full resume (no work-auth answers yet)', c.percent === 90 && c.items.find(i => i.key === 'authorization').done === false, c);
   check('completeness of empty profile', completeness({}).percent === 0);
-  const d = deriveMatchingFields({ ...a, applicationDefaults: { needsSponsorship: true, authorizationBasis: 'Temporary work authorization', workPermit: 'F-1 OPT' } });
+  const d = deriveMatchingFields({ ...a, applicationDefaults: { needsSponsorship: true }, workAuth: [{ country: 'United States', authorized: true, needsSponsorship: true, status: 'Temporary work authorization' }] });
   check('derived matching fields', d.profile.current_title === 'Software Engineer' && d.profile.highest_education_level === 'MASTERS' && d.profile.needs_sponsorship === true
-    && d.profile.work_authorization === 'Temporary work authorization · F-1 OPT' && d.skills.includes('Kubernetes') && d.profile.total_experience_years > 3, d);
+    && d.profile.work_authorization === 'Temporary work authorization' && d.skills.includes('Kubernetes') && d.profile.total_experience_years > 3, d);
 }
 
 async function apiTests() {
@@ -117,7 +117,7 @@ async function apiTests() {
     r = await call('GET', `/users/${USER}/skills`);
     check('API: skills synced into user_skills', r.body.length >= 10 && r.body.some(s => s.normalized_name === 'kubernetes'), r.body.length);
 
-    r = await call('PATCH', `/users/${USER}/resume-profiles/${first}`, { sections: { applicationDefaults: { authorizedToWork: true, needsSponsorship: true, workPermit: 'F-1 OPT' } }, coverLetter: 'Dear team,' });
+    r = await call('PATCH', `/users/${USER}/resume-profiles/${first}`, { sections: { applicationDefaults: { authorizedToWork: true, needsSponsorship: true, citizenship: 'India' } }, coverLetter: 'Dear team,' });
     check('API: PATCH replaces only the sent section; completeness reaches 100%', r.body.sections.experience.length === 2 && r.body.sections.applicationDefaults.needsSponsorship === true && r.body.coverLetter === 'Dear team,' && r.body.completeness.percent === 100, r.body.completeness);
     r = await call('GET', `/users/${USER}/profile`);
     check('API: sponsorship answer reaches matching', r.body.needs_sponsorship === true);
@@ -144,7 +144,7 @@ async function apiTests() {
     r = await call('GET', `/users/${USER}/resume-profiles/not-a-uuid`);
     check('API: bad id → 404', r.status === 404);
     r = await call('GET', `/profile/fields`);
-    check('API: field definitions for forms', r.body.workPermit?.label === 'Work permit or visa' && r.body.gender.options.includes('Prefer not to say'));
+    check('API: field definitions for forms', r.body.citizenship?.label === 'Countries of citizenship' && !r.body.workPermit && r.body.gender.options.includes('Prefer not to say'));
   } finally {
     server.kill();
     await cleanup();
