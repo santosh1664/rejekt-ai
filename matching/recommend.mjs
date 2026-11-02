@@ -156,7 +156,9 @@ function buildCandidateFilters(userId, ctx, options) {
   // just the role families near the profile — that's what lets a Java
   // profile search "react" and actually find React jobs. Exclude-only or
   // description-scope searches keep the normal profile narrowing.
-  const keywordWidensPool = ks?.include?.length > 0 && ks.scope !== 'description';
+  // Only a Titles search widens: description matches stay among the profile's role families (as Tsenta's "all"),
+  // or "software engineer" in a description pulls in Head of Customer Deployments.
+  const keywordWidensPool = ks?.include?.length > 0 && ks.scope === 'title';
   const families = keywordWidensPool ? [] : relevantRoleFamilies(ctx.targetRoles);
   if (families.length) {
     params.push(families);

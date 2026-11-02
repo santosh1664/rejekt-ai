@@ -1060,12 +1060,16 @@ function openFilterMenu(key, host, onChange) {
     } catch (err) { toast(err.message); }
   });
 }
+/** Highlights the searched words in already-escaped text, like Tsenta's job details. */
+function markTerms(html) {
+  const terms = String(state.search.include || '').split('|').map(t => esc(t.trim())).filter(t => t.length > 1);
+  if (!terms.length) return html;
+  return html.replace(new RegExp(`(${terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi'), '<mark>$1</mark>');
+}
 function searchMetaHTML(feed) {
   // one quiet line; the search box and "Hide jobs mentioning" already show the terms
-  const ks = feed?.keywordSearch, wide = feed?.searchWarnings?.length;
-  if (!ks && !wide) return '';
-  return `<div class="search-meta">${ks ? `<button class="btn sm quiet" id="clearSearch" type="button">Clear search</button>` : ''}
-    ${wide ? `<span class="sm-note">Hidden words are also checked in descriptions, so many good jobs drop out.</span><button class="btn sm" id="titlesOnly" type="button">Hide by title only</button>` : ''}</div>`;
+  if (!feed?.keywordSearch) return '';
+  return `<div class="search-meta"><button class="btn sm quiet" id="clearSearch" type="button">Clear search</button></div>`;
 }
 function zeroHTML(feed) {
   const r = feed.zeroResultReason;
@@ -1344,7 +1348,7 @@ function jobDetailHTML(data, jobId, inDrawer) {
       ${openings ? `<section class="jd-sec"><h4>${openings.length} openings for this role</h4><div class="openings">${openings.map(o => `<div><span>${esc(o.locationText || 'Location not stated')}${o.current ? ' <span class="tag cobalt">Viewing</span>' : ''}</span>${o.current ? '' : `<button class="btn sm quiet" data-sib="${o.jobId}">Open</button>`}</div>`).join('')}</div></section>` : ''}
       ${req.length ? `<section class="jd-sec"><h4>Required skills</h4><div class="chips">${req.map(chip).join('')}</div></section>` : ''}
       ${other.length ? `<section class="jd-sec"><h4>${req.length ? 'Also mentioned' : 'Skills mentioned'}</h4><div class="chips">${other.map(chip).join('')}</div></section>` : ''}
-      <section class="jd-sec"><h4>Description</h4><div class="desc">${esc(j.description || 'No description was captured for this posting.')}</div></section>
+      <section class="jd-sec"><h4>Description</h4><div class="desc">${markTerms(esc(j.description || 'No description was captured for this posting.'))}</div></section>
     </div>`;
 }
 function bindDetail(host, data, jobId) {
@@ -1422,7 +1426,6 @@ async function renderDashboard() {
   const drawTop = feed => {
     $('#searchMeta').innerHTML = searchMetaHTML(feed);
     $('#clearSearch')?.addEventListener('click', () => { state.search = { include: '', exclude: '', scope: state.search.scope }; refresh(); });
-    $('#titlesOnly')?.addEventListener('click', () => { $('#scope').value = 'title'; $('#searchForm').requestSubmit(); });
     $('#top').innerHTML = feed.jobs.length ? feed.jobs.slice(0, 5).map(topCardHTML).join('') : zeroHTML(feed);
   };
   const drawSearch = () => { $('#dashSearch').innerHTML = searchHTML(); bindSearch(refresh); };
@@ -1560,7 +1563,6 @@ async function renderJobs() {
   const draw = feed => {
     $('#searchMeta').innerHTML = searchMetaHTML(feed);
     $('#clearSearch')?.addEventListener('click', () => { state.search = { include: '', exclude: '', scope: state.search.scope }; renderJobs(); });
-    $('#titlesOnly')?.addEventListener('click', () => { $('#scope').value = 'title'; $('#searchForm').requestSubmit(); });
     $('#jobsLine').textContent = feed.total ? `${feed.total} jobs, best fit first.` : 'Ranked by how well they fit your profile.';
     $('#list').innerHTML = linkCardHTML() + (feed.jobs.length ? feed.jobs.map(jobCardHTML).join('') + (feed.nextCursor ? `<div class="more" id="sentinel"><span class="muted">Loading more jobs…</span></div>` : '') : zeroHTML(feed));
     watch.disconnect(); if ($('#sentinel')) watch.observe($('#sentinel'));

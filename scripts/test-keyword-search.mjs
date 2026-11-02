@@ -81,8 +81,11 @@ function unitTests() {
     const { conditions } = buildKeywordSql(normalizeKeywordSearch({ exclude: 'senior|staff' }), params);
     check('title-scope exclude is NOT(literal title) only', conditions.length === 1 && /^NOT \(/.test(conditions[0]) && !/canonical_role|search_vector/.test(conditions[0]), conditions[0]);
   }
-  check('description-scope exclude produces an over-hiding warning',
-    keywordSearchWarnings(normalizeKeywordSearch({ exclude: 'senior', scope: 'title_description' })).length === 1);
+  {
+    const params = [];
+    const { conditions } = buildKeywordSql(normalizeKeywordSearch({ exclude: 'senior', scope: 'title_description' }), params);
+    check('exclude is title-only in every scope', !/search_vector/.test(conditions[0]) && keywordSearchWarnings(normalizeKeywordSearch({ exclude: 'senior', scope: 'title_description' })).length === 0, conditions[0]);
+  }
 
   {
     const ks = normalizeKeywordSearch({ include: 'GenAI engineer|software engineer' });
