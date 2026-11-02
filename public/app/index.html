@@ -1338,7 +1338,7 @@ function jobDetailHTML(data, jobId, inDrawer) {
       <div class="jd-actions">
         <button class="btn primary" data-dapply>Apply</button>
         <button class="btn" data-dsave>${I.save(15)} ${status ? 'In your tracker' : 'Save'}</button>
-        <button class="btn" data-tailor aria-expanded="false">Tailor resume</button>
+        ${ME?.impersonator ? `<button class="btn" data-tailor aria-expanded="false" title="Admin view">Tailor resume</button>` : ''}
         <a class="btn quiet" href="${esc(j.url)}" target="_blank" rel="noopener">${I.ext(15)} View posting</a>
         <button class="btn quiet" data-hide>Not interested</button>
       </div>
@@ -1368,7 +1368,7 @@ function bindDetail(host, data, jobId) {
   host.querySelector('[data-hide]').addEventListener('click', async () => { await api('POST', `/users/${USER}/jobs/${jobId}/interactions`, { interaction_type: 'HIDE' }); removeRow(jobId); closeDrawer(); toast('Hidden. You won\'t see this job again.'); });
   host.querySelector('[data-dsave]').addEventListener('click', async () => { await api('POST', `/users/${USER}/applications`, { jobId, status: data.application?.status || 'SAVED' }); toast('Saved to your tracker.'); loadApps(); });
   host.querySelector('[data-dapply]').addEventListener('click', () => { applyTo({ jobId, url: data.job.url }); closeDrawer(); });
-  host.querySelector('[data-tailor]').addEventListener('click', e => openTailor(host, data, jobId, e.currentTarget));
+  host.querySelector('[data-tailor]')?.addEventListener('click', e => openTailor(host, data, jobId, e.currentTarget));
 }
 function closeDrawer(silent) {
   $('#drawer').classList.remove('open'); $('#scrim').classList.remove('open'); $('#drawer').setAttribute('aria-hidden', 'true');
@@ -1716,7 +1716,7 @@ async function openApplication(appId) {
       <div class="jd-actions">
         ${j.jobId && !j.removed ? `<button class="btn" data-job="${j.jobId}">Job details and match</button>` : ''}
         ${j.url ? `<a class="btn quiet" href="${esc(j.url)}" target="_blank" rel="noopener">${I.ext(15)} View posting</a>` : ''}
-        ${a.hasTailoredResume ? `<a class="btn quiet" href="${resumeUrl(a.id, true, true)}" download>Download resume</a>` : `<button class="btn quiet" data-tailor-app>Tailor resume</button>`}
+        ${a.hasTailoredResume ? `<a class="btn quiet" href="${resumeUrl(a.id, true, true)}" download>Download resume</a>` : (ME?.impersonator ? `<button class="btn quiet" data-tailor-app title="Admin view">Tailor resume</button>` : '')}
         <label class="move">Status <select id="appStatus">${STATUSES.map(([v, l]) => `<option value="${v}" ${v === a.status ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       </div>
       ${j.removed && a.source !== 'tsenta' ? `<div class="notice warn" style="margin-bottom:0">The posting has been taken down. What you applied to is kept below.</div>` : ''}
