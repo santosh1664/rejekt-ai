@@ -149,7 +149,7 @@ function buildCandidateFilters(userId, ctx, options) {
     params.push(Number(options.postedWithinDays));
     // the posting date when the board gives one, else when we found it (what the card shows). "posted OR found
     // recently" let a job posted 12 days ago through a 24-hour filter just because a new company brought it in today
-    conditions.push(`(j.posted_at >= NOW() - ($${params.length} * interval '1 day') OR (j.posted_at IS NULL AND j.discovered >= NOW() - ($${params.length} * interval '1 day')))`);
+    conditions.push(`COALESCE(j.posted_at, j.discovered) >= NOW() - ($${params.length} * interval '1 day')`); // same test as one expression so idx_jobs_ready_family_date serves it
     note('postedWithinDays', `Date posted: last ${Number(options.postedWithinDays)} days`);
   }
   // A title/title_description INCLUDE search looks across every job, not
@@ -200,7 +200,7 @@ async function fetchCandidates(filters) {
 
 // The candidate query is the heaviest one in the app. Reuse it for 5 min, and when the DB is too busy
 // to answer (vacuum, scan writes) serve the last result for up to 24h instead of an error page.
-const candidateIds = cached(async (_k, sql, params) => (await query(sql, params)).rows.map(r => r.id), { ttl: 300_000, maxAge: 24 * 3600_000, max: 100 });
+const candidateIds = cached(async (_k, sql, params) => (await query(sql, params)).rows.map(r => r.id), { ttl: 300_000, maxAge: 24 * 3600_000, max: 100, name: 'candidates' });
 
 /**
  * @param {string} userId

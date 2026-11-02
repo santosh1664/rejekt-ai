@@ -764,3 +764,6 @@ CREATE TABLE IF NOT EXISTS user_gmail_tokens (
 -- Stores the default password users want to use when auto-apply creates
 -- an account on their behalf on an ATS platform.
 ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS ats_password TEXT;
+
+-- Date-posted filters (3 days, week...): one expression so the planner can range-scan it per role family
+CREATE INDEX IF NOT EXISTS idx_jobs_ready_family_date ON jobs(role_family, (COALESCE(posted_at, discovered)) DESC) WHERE active AND status = 'READY';
