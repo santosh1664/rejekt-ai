@@ -28,7 +28,7 @@ import { normalizeSkillName } from '../lib/skills.mjs';
 import { getResumeProfile, getDefaultResumeProfile, deriveMatchingFields, updateResumeProfile, normalizeQuestion } from '../lib/resume-profiles.mjs';
 import { tailorForJob, TAILOR_MODES } from '../lib/resume-tailor.mjs';
 import { atsScore } from '../lib/ats-score.mjs';
-import { renderResumeHTML, renderResumePDF, renderCoverLetter, getBrowser } from '../lib/resume-render.mjs';
+import { renderResumeHTML, renderResumePDF, renderCoverLetter, getBrowser, resumeFileName } from '../lib/resume-render.mjs';
 import { trackApplication, updateApplication, setApplyState, recordEvent } from '../lib/applications.mjs';
 import { recordRewrite, loadStyleExamples, loadBulletBank } from '../lib/rewrites.mjs';
 import { buildAnswerBook } from './answers.mjs';
@@ -370,8 +370,9 @@ export async function submitApplication(userId, appId, { approve = false, browse
   const book = buildAnswerBook(rp?.sections || tailored.sections, app.job_snapshot || {}, { coverLetter: app.cover_letter || '', overrides: app.answers?.overrides || {} });
 
   const dir = await mkdtemp(join(tmpdir(), 'autoapply-'));
-  const name = (rp?.sections?.personal?.fullName || 'Resume').replace(/[^A-Za-z0-9]+/g, '_');
-  const files = { resume: join(dir, `${name}_Resume.pdf`), coverLetter: null };
+  // the file the employer receives: Name_Role.pdf (e.g. Durgasantosh_G_Senior_Data_Engineer.pdf)
+  const fullName = rp?.sections?.personal?.fullName || tailored.sections?.personal?.fullName;
+  const files = { resume: join(dir, resumeFileName(fullName, app.job_snapshot?.title)), coverLetter: null };
   const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });   // Workday hides footer buttons behind its sticky bar on short windows
   await setApplyState(appId, userId, 'SUBMITTING', detail, { attempts: (app.attempts || 0) + 1 });
   let result;
@@ -379,7 +380,7 @@ export async function submitApplication(userId, appId, { approve = false, browse
     const pdf = await renderResumePDF(renderResumeHTML(tailored.sections, { sectionOrder: tailored.sectionOrder, layout: rp?.layout }));
     await writeFile(files.resume, pdf);
     if (app.cover_letter) {
-      files.coverLetter = join(dir, `${name}_Cover_Letter.pdf`);
+      files.coverLetter = join(dir, resumeFileName(fullName, app.job_snapshot?.title, 'Cover_Letter'));
       const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
       const letterHtml = `<!doctype html><meta charset=utf-8><body style="font:11pt/1.5 Arial;max-width:6.5in;margin:0 auto;white-space:pre-wrap">${esc(app.cover_letter)}</body>`;
       await writeFile(files.coverLetter, await renderResumePDF(letterHtml));

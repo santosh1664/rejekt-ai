@@ -103,7 +103,7 @@ import {
   getSettings as getAutoApplySettings, saveSettings as saveAutoApplySettings, saveLane, deleteLane, planRun, runForUser,
   prepareApplication, submitApplication, startApply, answerApplication, skipApplication, recentRuns, applyStateCounts, FILLABLE_ATS,
 } from '../autoapply/engine.mjs';
-import { renderResumeHTML, renderResumePDF } from '../lib/resume-render.mjs';
+import { renderResumeHTML, renderResumePDF, resumeFileName } from '../lib/resume-render.mjs';
 import { normalizeLayout } from '../lib/resume-layout.mjs';
 import { assessFeedRelevance } from '../matching/relevance.mjs';
 import { searchApplied } from '../lib/applied-search.mjs';
@@ -683,7 +683,7 @@ async function handleApplicationAction(req, res, userId, appId, action, method, 
     if (q.format === 'pdf' && !changes) {
       const pdf = await renderResumePDF(html);
       if (pdf) {
-        const fname = `${(sections.personal?.fullName || 'Resume').replace(/[^A-Za-z0-9]+/g, '_')}_${(app.job?.company || 'Resume').replace(/[^A-Za-z0-9]+/g, '_')}.pdf`;
+        const fname = resumeFileName(app.job?.company, app.job?.title);   // downloading an application's resume: Company_Role.pdf
         res.writeHead(200, { 'Content-Type': 'application/pdf', 'Content-Length': pdf.length, 'Content-Disposition': `${q.download === '1' ? 'attachment' : 'inline'}; filename="${fname}"` });
         return res.end(pdf);
       }
@@ -727,13 +727,12 @@ async function handleApplicationAction(req, res, userId, appId, action, method, 
 // ─── Resume profiles (docs/profile.md) ───────────────────────────────────────
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-async function sendResume(res, sections, { layout, editable = false, pdf = false, name = '', sectionOrder = null, title = null } = {}) {
+async function sendResume(res, sections, { layout, editable = false, pdf = false, filename = 'Resume.pdf', sectionOrder = null, title = null } = {}) {
   const html = renderResumeHTML(sections, { layout, editable, sectionOrder, title });
   if (pdf) {
     const buf = await renderResumePDF(html);
     if (buf) {
-      const fname = `${(name || 'Resume').replace(/[^A-Za-z0-9]+/g, '_')}_Resume.pdf`;
-      res.writeHead(200, { 'Content-Type': 'application/pdf', 'Content-Length': buf.length, 'Content-Disposition': `attachment; filename="${fname}"` });
+      res.writeHead(200, { 'Content-Type': 'application/pdf', 'Content-Length': buf.length, 'Content-Disposition': `attachment; filename="${filename}"` });
       return res.end(buf);
     }
   }
@@ -765,7 +764,7 @@ async function handleResumeProfiles(req, res, userId, method, profileId, action,
       const p = await getResumeProfile(userId, profileId);
       if (!p) return json(res, 404, { error: 'Not found' });
       const q = Object.fromEntries(new URL(req.url, 'http://x').searchParams);
-      return sendResume(res, p.sections, { layout: p.layout, editable: q.edit === '1', pdf: q.format === 'pdf', name: p.sections.personal?.fullName });
+      return sendResume(res, p.sections, { layout: p.layout, editable: q.edit === '1', pdf: q.format === 'pdf', filename: resumeFileName(p.sections.personal?.fullName, p.name) });   // profile download: Name_ProfileRole.pdf
     } else if (action === 'original' && method === 'GET') {
       // The resume file exactly as uploaded.
       const f = await getResumeFile(userId, profileId);
