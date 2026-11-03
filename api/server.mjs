@@ -714,6 +714,15 @@ async function handleApplicationAction(req, res, userId, appId, action, method, 
     startApply(userId, appId, { approve: false });
     return json(res, 202, { started: true });
   }
+  if (action === 'finish' && method === 'POST') {
+    // "Finish it here": a visible browser with the form filled; the person solves any check and clicks Submit.
+    // Needs a screen, so it only works when this server runs on the person's own computer.
+    if (process.env.NODE_ENV === 'production' && process.env.AUTO_APPLY_ALLOW_HANDOFF !== '1') return json(res, 409, { error: 'This server has no screen. Use "Apply on site" instead.' });
+    const app = await getApplication(userId, appId);
+    if (!app) return json(res, 404, { error: 'Not found' });
+    submitApplication(userId, String(appId), { handoff: true }).catch(err => console.error('finish failed:', err));
+    return json(res, 202, { started: true });
+  }
   if (action === 'submit' && method === 'POST') {
     // Fill (and send, when approved) now, in the background.
     const app = await getApplication(userId, appId);

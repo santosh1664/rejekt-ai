@@ -27,6 +27,7 @@
     "test:cover-letter": "node scripts/test-cover-letter.mjs",
     "test:checkbox-group": "node scripts/test-checkbox-group.mjs",
     "test:security-code": "node scripts/test-security-code.mjs",
+    "test:handoff": "node scripts/test-handoff.mjs",
     "autoapply": "node --env-file=.env.local autoapply/run.mjs",
     "smoke:providers": "node scripts/smoke-new-providers.mjs",
     "match": "node --env-file=.env.local matching/matcher.mjs --verbose",

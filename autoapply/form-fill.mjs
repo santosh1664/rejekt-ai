@@ -321,7 +321,7 @@ export async function fillApplication(page, url, book, files, opts = {}) {
   }
   await dismissCookieBanner(page);
   let challenge = await page.evaluate(findChallenge);
-  if (challenge) return { outcome: 'NEEDS_YOU', filled: [], missing: [], reason: `${challenge} on the form. We never solve these: open the posting and finish it yourself (your answers are saved here). Check the company's page before starting a new application.` };
+  if (challenge && !opts.handoff) return { outcome: 'NEEDS_YOU', filled: [], missing: [], reason: `${challenge} on the form. We never solve these: open the posting and finish it yourself (your answers are saved here). Check the company's page before starting a new application.` };
   const fields = await page.evaluate(scanForm);
   if (!fields.some(f => f.type === 'file') && !fields.some(f => /e-?mail/i.test(f.label))) {
     return { outcome: 'FAILED', filled: [], missing: [], reason: 'No application form found on the page' };
@@ -363,6 +363,19 @@ export async function fillApplication(page, url, book, files, opts = {}) {
   if (opts.screenshotPath) await page.screenshot({ path: opts.screenshotPath, fullPage: true }).catch(() => {});
   step(`Filled ${filled.length} of ${fields.length} fields`, { missing: missing.map(m => m.label) });
   if (missing.length) return { outcome: 'NEEDS_YOU', filled, missing, reason: `${missing.length} required question${missing.length === 1 ? '' : 's'} need${missing.length === 1 ? 's' : ''} your answer` };
+  if (opts.handoff) {
+    // The person is looking at this window: they solve any check and click Submit themselves. We only watch for the confirmation.
+    await shot('Waiting for you'); step('Filled the form. Waiting for you to complete any check and click Submit');
+    const before = page.url(), until = Date.now() + 15 * 60_000;
+    while (Date.now() < until) {
+      if (page.isClosed()) return { outcome: 'NEEDS_YOU', filled, missing, reason: 'The window was closed before the application was sent.' };
+      const text = await page.locator('body').innerText().catch(() => '');
+      const m = text.match(SUCCESS_TEXT);
+      if (m || (page.url() !== before && SUCCESS_URL.test(page.url()))) { await shot('After submitting'); return { outcome: 'SUBMITTED', filled, missing, confirmation: m ? m[0] : page.url() }; }
+      await page.waitForTimeout(2000).catch(() => {});
+    }
+    return { outcome: 'NEEDS_YOU', filled, missing, reason: 'Waited 15 minutes and saw no confirmation. Check the company\'s page before trying again.' };
+  }
   if (!opts.submit) return { outcome: 'FILLED', filled, missing };
   const submit = page.locator('button[type=submit], input[type=submit], button').filter({ hasText: /submit/i }).first();
   const target = (await submit.count()) ? submit : page.locator('button[type=submit], input[type=submit]').first();

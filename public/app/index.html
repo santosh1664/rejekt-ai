@@ -2097,6 +2097,7 @@ function queueItemHTML(a) {
       ${a.applyState === 'NEEDS_REVIEW' ? `<button class="btn sm primary" data-approve type="button">Submit application</button>` : ''}
       ${a.applyState === 'NEEDS_YOU' && askable.length ? `<button class="btn sm primary" data-answer type="button" disabled>Answer ${askable.length} required field${askable.length === 1 ? '' : 's'}</button>` : ''}
       ${a.applyState === 'FAILED' || (a.applyState === 'NEEDS_YOU' && !askable.length) ? `<button class="btn sm ${a.applyState === 'FAILED' ? 'primary' : ''}" data-retry type="button">Try again</button>` : ''}
+      ${a.applyState === 'NEEDS_YOU' && /CAPTCHA|reCAPTCHA|hCaptcha|Cloudflare check/.test(d.reason || '') ? `<button class="btn sm primary" data-finish type="button" title="Opens a window with the form filled. You complete the check and click Submit.">Finish it here</button>` : ''}
       ${a.hasTailoredResume ? `<a class="btn sm" href="${resumeUrl(a.id)}" target="_blank" rel="noopener">Resume</a>` : ''}
       ${d.formUrl || a.job?.url ? `<a class="btn sm quiet" href="${esc(d.formUrl || a.job.url)}" target="_blank" rel="noopener">${I.ext(14)} Apply on site</a>` : ''}
       <button class="btn sm quiet" data-details type="button">Details</button>
@@ -2108,6 +2109,7 @@ function bindQueueItem(el) {
   const id = el.dataset.app;
   el.querySelector('[data-skip]').addEventListener('click', async () => { await api('POST', `/users/${USER}/applications/${id}/skip`); toast('Skipped.'); refreshApplications(); });
   el.querySelector('[data-details]').addEventListener('click', () => { if (['NEEDS_YOU', 'NEEDS_REVIEW'].includes(el.dataset.state) && !el.closest('#view[data-review]')) location.hash = `#/review/${id}`; else openApplication(id); });
+  el.querySelector('[data-finish]')?.addEventListener('click', async e => { e.target.disabled = true; try { await api('POST', `/users/${USER}/applications/${id}/finish`, {}); toast('A window is opening. Complete the check there and click Submit.'); } catch (err) { toast(err.message); e.target.disabled = false; } });
   el.querySelector('[data-retry]')?.addEventListener('click', async e => { e.target.disabled = true; try { await api('POST', `/users/${USER}/applications/${id}/apply`, {}); toast('Trying again…'); } catch (err) { toast(err.message); } refreshApplications(); });
   el.querySelector('[data-approve]')?.addEventListener('click', async e => {
     e.target.disabled = true;

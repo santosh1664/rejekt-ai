@@ -28,7 +28,7 @@ import { normalizeSkillName } from '../lib/skills.mjs';
 import { getResumeProfile, getDefaultResumeProfile, deriveMatchingFields, updateResumeProfile, normalizeQuestion } from '../lib/resume-profiles.mjs';
 import { tailorForJob, TAILOR_MODES } from '../lib/resume-tailor.mjs';
 import { atsScore } from '../lib/ats-score.mjs';
-import { renderResumeHTML, renderResumePDF, getBrowser, resumeFileName } from '../lib/resume-render.mjs';
+import { renderResumeHTML, renderResumePDF, getBrowser, launchHeaded, resumeFileName } from '../lib/resume-render.mjs';
 import { writeCoverLetter } from '../lib/cover-letter.mjs';
 import { getGmailStatus, waitForOTP, extractSecurityCode } from '../lib/gmail.mjs';
 import { trackApplication, updateApplication, setApplyState, recordEvent, saveShot } from '../lib/applications.mjs';
@@ -360,10 +360,10 @@ export async function prepareApplication(userId, appId, { mode = null, track = f
  * Fill (and, unless the lane reviews first, send) one prepared application.
  * approve: the person approved it after review, so it's sent.
  */
-export async function submitApplication(userId, appId, { approve = false, browser = null } = {}) {
+export async function submitApplication(userId, appId, { approve = false, browser = null, handoff = false } = {}) {
   const app = await loadApp(appId);
   if (!app || app.user_id !== userId) return { error: 'Not found', code: 404 };
-  if (!app.tailored_resume) { const p = await prepareApplication(userId, appId); if (p.error) return p; return submitApplication(userId, appId, { approve, browser }); }
+  if (!app.tailored_resume) { const p = await prepareApplication(userId, appId); if (p.error) return p; return submitApplication(userId, appId, { approve, browser, handoff }); }
   const detail = app.apply_detail || {};
   const formUrl = (app.job_snapshot?.ats === 'workday' ? null : detail.formUrl) || (app.job_snapshot?.url && applyUrlFor({ url: app.job_snapshot.url, ats: app.job_snapshot.ats }));
   if (!formUrl) {
@@ -374,7 +374,8 @@ export async function submitApplication(userId, appId, { approve = false, browse
     return { outcome: 'NEEDS_YOU' };
   }
 
-  browser ||= await getBrowser();
+  const ownBrowser = handoff && !browser ? await launchHeaded() : null;   // a visible window the person works in; closed when done
+  browser ||= ownBrowser || await getBrowser();
   if (!browser) {
     await setApplyState(appId, userId, app.apply_state || 'PREPARED', { ...detail, reason: 'No browser available: install Chrome, or set CHROME_PATH' });
     return { error: 'No browser available', code: 503 };
@@ -435,7 +436,7 @@ export async function submitApplication(userId, appId, { approve = false, browse
         });
       } else {
         result = await fillApplication(page, formUrl, book, files, {
-          submit: send, acceptConsent: settings.acceptConsent, alreadyOnPage: true,
+          submit: send, handoff, acceptConsent: settings.acceptConsent, alreadyOnPage: true,
           onStep: (text, data) => recordEvent(appId, userId, { kind: 'step', detail: { text, ...data } }).catch(() => {}),
           // Greenhouse emails a security code before it takes Submit: read it from the person's linked Gmail
           readCode: async ({ since }) => {
@@ -458,6 +459,7 @@ export async function submitApplication(userId, appId, { approve = false, browse
       : msg };
   } finally {
     await page.close().catch(() => {});
+    await ownBrowser?.close().catch(() => {});
     await rm(dir, { recursive: true, force: true }).catch(() => {});
   }
 
