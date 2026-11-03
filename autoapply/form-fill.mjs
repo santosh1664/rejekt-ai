@@ -171,7 +171,7 @@ async function fillOne(page, field, ans, files) {
     for (const opt of picks) {
       const target = page.locator(`[data-aa-id="${opt.id}"]`);
       if (field.type === 'buttons') await target.click();
-      else await target.check({ force: true });
+      else await target.check({ force: true, timeout: 5000 }).catch(() => page.getByLabel(opt.label, { exact: true }).first().check({ force: true }));   // the page re-rendered and dropped our tag: find it by its label
     }
     return true;
   }
