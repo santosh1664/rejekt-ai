@@ -27,6 +27,8 @@ import {
   keywordSearchWarnings, summarizeKeywordSearch,
 } from './keyword-search.mjs';
 
+import { isGenericCanonicalRole } from '../lib/role-taxonomy.mjs';
+
 const CANDIDATE_POOL_SIZE = 1500; // was 600/2000: with the date index and the country rule in SQL, 1500 costs ~1s cold
 
 export async function loadUserContext(userId) {
@@ -182,7 +184,7 @@ function buildCandidateFilters(userId, ctx, options) {
   return { conditions, params, activeFilters, appliedFilters, semanticRoles: keyword.semanticRoles };
 }
 
-async function fetchCandidates(filters) {
+async function fetchCandidates(filters, targetRoles = []) {
   const { conditions, params } = filters;
 
   // DISTINCT ON (fingerprint) — found via live-data review: a company
@@ -193,17 +195,31 @@ async function fetchCandidates(filters) {
   // fingerprint (never meant to dedupe concurrent live duplicates), fixed
   // here rather than in the scanner since it only matters for what gets
   // shown, not what gets stored.
-  const sql = `
+  const query1 = (extra, extraParams, size) => {
+    const ps = [...params, ...extraParams];
+    const cond = [...conditions, ...extra.map(e => e(params.length))];
+    const sql = `
     SELECT id FROM (
       SELECT DISTINCT ON (fingerprint) id, discovered FROM (
         SELECT j.id, j.fingerprint, j.discovered
-          FROM jobs j WHERE ${conditions.join(' AND ')}
-         ORDER BY j.discovered DESC LIMIT ${CANDIDATE_POOL_SIZE * 3}
+          FROM jobs j WHERE ${cond.join(' AND ')}
+         ORDER BY j.discovered DESC LIMIT ${size * 3}
       ) newest
        ORDER BY fingerprint, discovered DESC
-    ) deduped ORDER BY discovered DESC LIMIT ${CANDIDATE_POOL_SIZE}`;
-  // ponytail: dedupe runs over the newest 3x pool, not every match — sorting ~1M rows by fingerprint timed out at 30s; raise the multiplier if dupes ever starve the pool
-  return candidateIds(JSON.stringify([sql, params]), sql, params);
+    ) deduped ORDER BY discovered DESC LIMIT ${size}`;
+    // ponytail: dedupe runs over the newest 3x pool, not every match — sorting ~1M rows by fingerprint timed out at 30s; raise the multiplier if dupes ever starve the pool
+    return candidateIds(JSON.stringify([sql, ps]), sql, ps);
+  };
+  // Several specific target roles (data analyst + data engineer ...): one slice per role, plus one for the
+  // profile's general pool, so the newest postings of the busiest role can't fill the whole pool and hide the rest.
+  const roles = [...new Set(targetRoles.map(t => t.canonicalRole).filter(r => r && !isGenericCanonicalRole(r)))];
+  if (roles.length < 2) return query1([], [], CANDIDATE_POOL_SIZE);
+  const size = Math.max(100, Math.floor(CANDIDATE_POOL_SIZE / (roles.length + 1)));
+  const slices = await Promise.all([
+    query1([], [], size),
+    ...roles.map(r => query1([n => `j.canonical_role = $${n + 1}`], [r], size)),
+  ]);
+  return [...new Set(slices.flat())];
 }
 
 // The candidate query is the heaviest one in the app. Reuse it for 5 min, and when the DB is too busy
@@ -233,11 +249,12 @@ export async function generateRecommendations(userId, options = {}) {
     for (const [k, v] of Object.entries(o.profile || {})) if (v !== null && v !== undefined && v !== '') ctx.profile[k] = v;
     if (o.userSkillNames?.length) ctx.userSkillNames = o.userSkillNames;
   }
+  if (options.targetRoles) ctx.targetRoles = options.targetRoles; // lanes / what-if runs score against another set of roles
   // What-if runs (matching/relevance.mjs) relax one preference without saving it.
   if (options.preferencesOverride) Object.assign(ctx.preferences, options.preferencesOverride);
   const ks = options.keywordSearch?.active ? options.keywordSearch : null;
   const filters = buildCandidateFilters(userId, ctx, { ...options, keywordSearch: ks });
-  const candidateIds = await fetchCandidates(filters);
+  const candidateIds = await fetchCandidates(filters, options.keywordSearch?.include?.length ? [] : ctx.targetRoles);
   const contracts = await buildJobContracts(candidateIds);
 
   const scored = [];
