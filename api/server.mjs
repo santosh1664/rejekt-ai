@@ -1108,7 +1108,7 @@ export async function router(req, res) {
       if (method === 'PATCH') return await handleUpdateApplication(req, res, m[1], +m[2], await parseBody(req));
       if (method === 'DELETE') return await handleDeleteApplication(req, res, m[1], +m[2]);
     }
-    if ((m = path.match(/^\/users\/([^/]+)\/applications\/(\d+)\/(tailor|resume|changes|answers|approve|skip|submit|apply)$/)))
+    if ((m = path.match(/^\/users\/([^/]+)\/applications\/(\d+)\/(tailor|resume|changes|answers|approve|skip|submit|apply|finish)$/)))
       return await handleApplicationAction(req, res, m[1], +m[2], m[3], method, ['POST', 'PATCH', 'PUT'].includes(method) ? await parseBody(req) : null, q);
     if ((m = path.match(/^\/users\/([^/]+)\/applied$/)) && method === 'GET') return await handleApplied(req, res, m[1], q);
     if ((m = path.match(/^\/users\/([^/]+)\/imports\/tsenta$/))) return await handleTsentaImport(req, res, m[1], method);
