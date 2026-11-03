@@ -69,11 +69,12 @@ export function cycleWindow(joinedAt, now = new Date()) {
   return { startsAt: at(y, m), resetsAt: at(y, m + 1) };
 }
 
+// Only what was actually sent (or is being sent) uses the monthly 1500: a CAPTCHA stop, a failure or a skip is given back, as Tsenta refunds those.
 async function monthlyUsage(userId) {
   const { rows: [u] } = await query(`SELECT created_at FROM users WHERE id = $1`, [userId]);
   const w = cycleWindow(u?.created_at || new Date());
   const { rows: [c] } = await query(
-    `SELECT COUNT(*)::int AS n FROM applications WHERE user_id = $1 AND apply_state IS NOT NULL AND apply_state <> 'SKIPPED' AND created_at >= $2`, [userId, w.startsAt]);
+    `SELECT COUNT(*)::int AS n FROM applications WHERE user_id = $1 AND apply_state IS NOT NULL AND apply_state NOT IN ('SKIPPED','FAILED','NEEDS_YOU') AND created_at >= $2`, [userId, w.startsAt]);
   return { cap: MONTHLY_CAP, used: c.n, ...w };
 }
 

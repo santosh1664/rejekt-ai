@@ -321,7 +321,7 @@ export async function fillApplication(page, url, book, files, opts = {}) {
   }
   await dismissCookieBanner(page);
   let challenge = await page.evaluate(findChallenge);
-  if (challenge) return { outcome: 'NEEDS_YOU', filled: [], missing: [], reason: `${challenge} on the form` };
+  if (challenge) return { outcome: 'NEEDS_YOU', filled: [], missing: [], reason: `${challenge} on the form. We never solve these: open the posting and finish it yourself (your answers are saved here). Check the company's page before starting a new application.` };
   const fields = await page.evaluate(scanForm);
   if (!fields.some(f => f.type === 'file') && !fields.some(f => /e-?mail/i.test(f.label))) {
     return { outcome: 'FAILED', filled: [], missing: [], reason: 'No application form found on the page' };
@@ -407,7 +407,7 @@ export async function fillApplication(page, url, book, files, opts = {}) {
   // what the page looked like after Submit, for the admin: a screenshot, the fields it marks invalid, and its text
   const done = async res => { await shot('After submitting'); return { ...res, page: { url: page.url(), invalid: await invalidFields(page), text: body.replace(/\s+/g, ' ').trim().slice(0, 400) } }; };
   challenge = await page.evaluate(findChallenge);
-  if (challenge) return done({ outcome: 'NEEDS_YOU', filled, missing, reason: `${challenge} appeared after submitting; finish it in the browser` });
+  if (challenge) return done({ outcome: 'NEEDS_YOU', filled, missing, reason: `${challenge} appeared after submitting. We never solve these: open the posting, complete the check and send it yourself. It may already be received, so check before applying again.` });
   const m = body.match(SUCCESS_TEXT);
   if (m || (page.url() !== before && SUCCESS_URL.test(page.url()))) return done({ outcome: 'SUBMITTED', filled, missing, confirmation: m ? m[0] : page.url() });
   const errors = await page.locator('[aria-invalid="true"], [role="alert"], .error, .field-error, .error-message').allInnerTexts().catch(() => []);
