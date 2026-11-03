@@ -1238,6 +1238,8 @@ function _applyStatus(jobId, appId, cardFoot, rowEl) {
         if (s === 'SUBMITTED') removeRow(jobId);
         if (s === 'NEEDS_REVIEW') toast('Form filled. Review and submit it under Applications → Needs you.');
         if (s === 'FAILED') toast(data.applyDetail?.reason || 'That application failed.');
+        if (s === 'SUBMITTED') toast('Applied. It\'s under Applications → Submitted.');
+        if (s === 'SKIPPED') toast('Skipped. See Applications.');
         loadApps();
       }
     } catch { /* network blip, keep polling */ }
@@ -1255,6 +1257,7 @@ async function applyTo(job, { cardFoot = null, rowEl = null } = {}) {
 
   // Start live status badge
   _applyStatus(job.jobId, appId, cardFoot, rowEl);
+  removeRow(job.jobId); toast('Applying. Follow it under Applications → In flight.');   // it leaves the feed now and moves to In flight, then Submitted / Failed / Skipped
 
   // The server tailors, fills the form and stops for your review; the badge just follows its state.
   api('POST', `/users/${USER}/applications/${appId}/apply`, {})
