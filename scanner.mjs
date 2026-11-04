@@ -40,6 +40,7 @@ const { values: flags } = parseArgs({
     'dry-run':        { type: 'boolean', default: false },
     verbose:          { type: 'boolean', default: false },
     'skip-freshness': { type: 'boolean', default: false },
+    quick:            { type: 'boolean', default: false },   // new jobs only on newest-first boards; no closing
     'skip-validation':{ type: 'boolean', default: false },
     threshold:        { type: 'string'  },   // integer, parsed below
     index:            { type: 'string'  },   // CC index name
@@ -230,6 +231,7 @@ ATS values: greenhouse | ashby | lever | workday | bamboohr | workable | smartre
         dryRun,
         verbose,
         skipFreshness,
+        quick:         flags.quick,
         shard:         flags.shard,
         minAgeHours:   flags['min-age-hours'] ? +flags['min-age-hours'] : 0,
       });
@@ -255,7 +257,9 @@ ATS values: greenhouse | ashby | lever | workday | bamboohr | workable | smartre
   }
 }
 
-main().catch((err) => {
+// Exit explicitly: requests orphaned by the per-company timeout (e.g. Workable's rate-limit queue
+// during a 429 block) otherwise keep the process alive until the 3h watchdog kills it.
+main().then(() => process.exit(0), (err) => {
   console.error('\n💥 Fatal error:', err.message);
   if (verbose) console.error(err.stack);
   process.exit(1);

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Log in · Rejekt.ai</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M8 22h16M8 16h10M8 10h13' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" />
+<style>
+:root { --paper: #FFFFFF; --surface-2: #F6F6F5; --ink: #111111; --muted: #6A6A6A; --line: #DEDEDC; --cobalt: #17382B; --cobalt-ink: #FFFFFF;
+  --bad: #B84A3E; --bad-soft: #FFF5F3; --ok: #2A8057; --ok-soft: #F2FAF5; }
+@media (prefers-color-scheme: dark) { :root { --paper: #0E0E0E; --surface-2: #1E1E1E; --ink: #F2F2F2; --muted: #9A9A9A; --line: #2C2C2C;
+  --cobalt: #F2F2F2; --cobalt-ink: #111111; --bad: #F2948A; --bad-soft: #2E1A17; --ok: #6FD3A0; --ok-soft: #14261D; } }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--paper); color: var(--ink);
+  font: 15px/1.5 'Schibsted Grotesk', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+main { width: 100%; max-width: 380px; }
+.logo { height: 30px; display: block; margin: 0 0 32px; }
+.logo-dark { display: none; } @media (prefers-color-scheme: dark) { .logo-light { display: none; } .logo-dark { display: block; } }
+h1 { font-size: 24px; letter-spacing: -0.015em; margin: 0 0 6px; }
+p.sub { color: var(--muted); margin: 0 0 24px; }
+form { display: grid; gap: 14px; }
+label { display: grid; gap: 6px; font-weight: 500; font-size: 14px; }
+input { font: inherit; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); }
+input:focus { outline: 2px solid var(--cobalt); outline-offset: 1px; border-color: transparent; }
+button { font: inherit; font-weight: 600; padding: 12px; border: 0; border-radius: 10px; background: var(--cobalt); color: var(--cobalt-ink); cursor: pointer; margin-top: 4px; }
+button[disabled] { opacity: .6; cursor: progress; }
+.msg { padding: 10px 12px; border-radius: 10px; font-size: 14px; }
+.msg.bad { background: var(--bad-soft); color: var(--bad); }
+.msg.ok { background: var(--ok-soft); color: var(--ok); }
+.links { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; font-size: 14px; }
+a { color: var(--ink); }
+.hint { color: var(--muted); font-size: 13px; font-weight: 400; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <img class="logo logo-light" src="/brand/rejekt-logo.png" alt="Rejekt.ai"><img class="logo logo-dark" src="/brand/rejekt-logo-dark.png" alt="Rejekt.ai">
+  <h1 id="title"></h1>
+  <p class="sub" id="sub"></p>
+  <div class="msg" id="msg" role="alert" hidden></div>
+  <form id="form" novalidate>
+    <label id="emailRow">Email <input id="email" type="email" autocomplete="email" required></label>
+    <label id="passRow">Password <input id="password" type="password" required>
+      <span class="hint" id="passHint" hidden>At least 10 characters.</span></label>
+    <button id="submit" type="submit"></button>
+    <p class="hint" id="agree" hidden>By creating an account you agree to our <a href="/terms" target="_blank">Terms of Service</a> and confirm you've read our <a href="/privacy" target="_blank">Privacy Policy</a> and <a href="/ai" target="_blank">AI disclosure</a>.</p>
+  </form>
+  <div class="links" id="links"></div>
+</main>
+<script>
+const MODES = {
+  '/login':  { title: 'Log in', sub: 'Welcome back.', button: 'Log in', email: true, pass: 'current-password', url: '/auth/login',
+               links: '<a href="/forgot">Forgot password?</a><a href="/signup">Have an invite? Sign up</a>' },
+  '/signup': { title: 'Create your account', sub: 'Sign-up is invite-only for now. Use the email you were invited with.', button: 'Create account',
+               email: true, pass: 'new-password', url: '/auth/signup', links: '<a href="/login">Already have an account? Log in</a>' },
+  '/forgot': { title: 'Reset your password', sub: "Enter your email and we'll send you a link to set a new password.", button: 'Send reset link',
+               email: true, url: '/auth/forgot', links: '<a href="/login">Back to log in</a>' },
+  '/reset':  { title: 'Set a new password', sub: 'Choose a new password for your account.', button: 'Save password',
+               pass: 'new-password', url: '/auth/reset', links: '<a href="/login">Back to log in</a>' },
+};
+const mode = MODES[location.pathname] || MODES['/login'];
+const params = new URLSearchParams(location.search);
+const $ = (id) => document.getElementById(id);
+document.title = `${mode.title} · Rejekt.ai`;
+$('title').textContent = mode.title; $('sub').textContent = mode.sub; $('submit').textContent = mode.button; $('links').innerHTML = mode.links;
+$('emailRow').hidden = !mode.email; $('agree').hidden = location.pathname !== '/signup'; $('email').required = !!mode.email;
+$('passRow').hidden = !mode.pass; $('password').required = !!mode.pass;
+if (mode.pass) { $('password').autocomplete = mode.pass; $('passHint').hidden = mode.pass !== 'new-password'; }
+// keep where the user was headed when moving between log in and sign up
+if (params.get('next')) for (const a of $('links').querySelectorAll('a')) a.href += '?next=' + encodeURIComponent(params.get('next'));
+if (params.get('email') && mode.email) $('email').value = params.get('email');   // from the invite email's link
+(mode.email && !$('email').value ? $('email') : $('password')).focus();
+
+function show(text, kind = 'bad') { const m = $('msg'); m.textContent = text; m.className = 'msg ' + kind; m.hidden = !text; }
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!$('form').reportValidity()) return;
+  show(''); $('submit').disabled = true;
+  try {
+    const body = { email: $('email').value, password: $('password').value, next: params.get('next'), token: params.get('token') };
+    const res = await fetch(mode.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return show(data.error || 'Something went wrong. Try again.');
+    if (data.redirect) return location.assign(data.redirect);
+    if (location.pathname === '/forgot') { show('If that email has an account, a reset link is on its way. It works for 1 hour.', 'ok'); $('form').hidden = true; }
+    if (location.pathname === '/reset') { show('Password saved. You can log in now.', 'ok'); $('form').hidden = true; }
+  } catch { show("Couldn't reach the server. Check your connection and try again."); }
+  finally { $('submit').disabled = false; }
+});
+</script>
+</body>
+</html>

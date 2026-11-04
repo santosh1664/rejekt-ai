@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rejekt.ai · Get rejected less</title>
+<meta name="description" content="Fresh jobs from 50,000+ companies every 6 hours. Rejekt.ai tailors your resume for each one and applies for you. Spend your time on interviews, not applications." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M8 22h16M8 16h10M8 10h13' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" />
+<style>
+:root {
+  --paper: #FFFFFF; --surface: #FFFFFF; --surface-2: #F6F6F5; --ink: #111111; --ink-2: #3B3B3B; --muted: #6A6A6A;
+  --line: #E4E4E2; --line-2: #EFEFED; --brand: #17382B; --brand-ink: #FFFFFF; --brand-soft: #EAF1EC;
+  --ok: #2A8057; --ok-soft: #F2FAF5; --warn: #92650A; --warn-soft: #FFFAEB; --info: #3D5FCB; --info-soft: #F4F8FF;
+  --max: 1120px; --r: 16px;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --paper: #0E0E0E; --surface: #161616; --surface-2: #1A1A1A; --ink: #F2F2F2; --ink-2: #CFCFCF; --muted: #9A9A9A;
+  --line: #2A2A2A; --line-2: #222222; --brand: #F2F2F2; --brand-ink: #111111; --brand-soft: #222222;
+  --ok: #6FD3A0; --ok-soft: #14261D; --warn: #E9C46A; --warn-soft: #2E2812; --info: #9DB6F5; --info-soft: #172036; } }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+section { scroll-margin-top: 80px; }   /* anchors land below the sticky header */
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 'Schibsted Grotesk', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+.logo { height: 26px; display: block; } .logo-dark { display: none; }
+@media (prefers-color-scheme: dark) { .logo-light { display: none; } .logo-dark { display: block; } }
+
+/* nav */
+header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid transparent; transition: border-color .2s; }
+header.scrolled { border-bottom-color: var(--line); }
+header .wrap { display: flex; align-items: center; gap: 28px; height: 68px; }
+header nav { display: flex; gap: 24px; margin-left: auto; }
+header nav a { text-decoration: none; color: var(--ink-2); font-weight: 500; font-size: 15px; } header nav a:hover { color: var(--ink); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-weight: 600; font-size: 15px; padding: 11px 18px; border-radius: 11px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; cursor: pointer; white-space: nowrap; transition: transform .15s, background .15s; }
+.btn:hover { background: var(--surface-2); } .btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--brand); color: var(--brand-ink); border-color: transparent; } .btn.primary:hover { opacity: .92; background: var(--brand); }
+.btn.lg { padding: 14px 22px; font-size: 16px; border-radius: 12px; }
+header .actions { display: flex; gap: 10px; }
+
+/* hero */
+.hero { padding: 88px 0 72px; }
+.hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--ok); background: var(--ok-soft); padding: 5px 12px; border-radius: 99px; margin-bottom: 22px; }
+.eyebrow::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 var(--ok); animation: pulse 2.2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 50%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+h1 { font-size: clamp(44px, 6.4vw, 76px); line-height: .98; letter-spacing: -0.045em; font-weight: 800; margin: 0 0 22px; }
+.lede { font-size: 19px; color: var(--ink-2); max-width: 520px; margin: 0 0 32px; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.fine { color: var(--muted); font-size: 14px; margin-top: 16px; }
+
+/* product preview */
+.preview { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 30px 60px -30px rgb(0 0 0 / .25), 0 2px 6px rgb(0 0 0 / .04); padding: 18px; position: relative; }
+.preview .bar { display: flex; gap: 6px; margin-bottom: 14px; } .preview .bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.preview h4 { margin: 0 0 12px; font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.job { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--line-2); border-radius: 13px; margin-bottom: 9px; background: var(--paper); }
+.job .mark { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 15px; }
+.job b { display: block; font-size: 15px; line-height: 1.3; } .job span { font-size: 13px; color: var(--muted); }
+.score { font-weight: 800; font-size: 22px; letter-spacing: -0.03em; text-align: right; line-height: 1; } .score small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0; margin-top: 3px; }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 99px; margin-left: 6px; vertical-align: 1px; }
+.pill.new { background: var(--info-soft); color: var(--info); } .pill.sent { background: var(--ok-soft); color: var(--ok); } .pill.you { background: var(--warn-soft); color: var(--warn); }
+.diff { margin-top: 12px; padding: 14px; border-radius: 13px; background: var(--surface-2); font-size: 14px; color: var(--ink-2); }
+.diff .t { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+.diff mark { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ink); padding: 0 3px; border-radius: 4px; }
+.diff del { color: var(--muted); }
+
+/* stats */
+.stats { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+.stat { padding: 30px 24px; border-left: 1px solid var(--line); } .stat:first-child { border-left: 0; padding-left: 0; }
+.stat .n { font-size: 34px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; } .stat .l { color: var(--muted); font-size: 14px; }
+
+/* sections */
+section.block { padding: 104px 0; }
+.kicker { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; }
+h2 { font-size: clamp(32px, 4vw, 46px); line-height: 1.05; letter-spacing: -0.035em; margin: 0 0 18px; font-weight: 800; max-width: 680px; }
+.intro { color: var(--ink-2); font-size: 18px; max-width: 600px; margin: 0 0 52px; }
+.features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.feature { border: 1px solid var(--line); border-radius: var(--r); padding: 30px; background: var(--surface); }
+.feature .ic { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; background: var(--brand-soft); color: var(--ink); margin-bottom: 20px; }
+.ba { display: grid; gap: 8px; margin-top: 18px; font-size: 14px; color: var(--ink-2); }
+.ba > div { padding: 11px 13px; border-radius: 11px; background: var(--surface-2); border: 1px solid var(--line-2); }
+.ba > div:first-child { color: var(--muted); }
+.ba-l { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 3px; }
+.ba-l.after { color: var(--ok); }
+.ba mark { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ink); padding: 0 3px; border-radius: 4px; }
+.feature h3 { font-size: 20px; letter-spacing: -0.015em; margin: 0 0 8px; } .feature p { margin: 0; color: var(--ink-2); }
+.logos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; } .logos span { font-size: 13px; padding: 4px 11px; border-radius: 99px; background: var(--surface-2); color: var(--ink-2); font-weight: 500; }
+
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; counter-reset: s; }
+.step { padding: 30px; border-radius: var(--r); background: var(--surface-2); counter-increment: s; }
+.step::before { content: counter(s); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--brand); color: var(--brand-ink); font-weight: 700; margin-bottom: 20px; }
+.step h3 { margin: 0 0 8px; font-size: 19px; letter-spacing: -0.015em; } .step p { margin: 0; color: var(--ink-2); }
+
+/* always the brand green: in dark mode var(--brand) is near-white and this panel outshone the invite form */
+.control { --brand-ink: #FFFFFF; background: #17382B; color: var(--brand-ink); border-radius: 26px; padding: 64px; display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; }
+.control .kicker { color: color-mix(in srgb, var(--brand-ink) 65%, transparent); } .control h2 { color: var(--brand-ink); }
+.control p { color: color-mix(in srgb, var(--brand-ink) 78%, transparent); margin: 0; font-size: 17px; }
+.control ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.control li { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; border-radius: 13px; background: color-mix(in srgb, var(--brand-ink) 8%, transparent); }
+.control li svg { flex: none; margin-top: 3px; } .control li b { display: block; } .control li span { color: color-mix(in srgb, var(--brand-ink) 72%, transparent); font-size: 15px; }
+
+.faq { display: grid; grid-template-columns: 1fr 1.6fr; gap: 56px; }
+details { border-bottom: 1px solid var(--line); padding: 20px 0; } details:first-child { border-top: 1px solid var(--line); }
+summary { cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: '+'; font-size: 22px; line-height: 1; color: var(--muted); transition: transform .2s; } details[open] summary::after { transform: rotate(45deg); }
+details p { margin: 12px 0 0; color: var(--ink-2); }
+
+.invite { text-align: center; padding: 96px 0 112px; }
+.invite h2 { margin: 0 auto 14px; } .invite .intro { margin: 0 auto 32px; }
+.invite form { display: flex; gap: 10px; max-width: 520px; margin: 0 auto; flex-wrap: wrap; }
+.invite input { flex: 1; min-width: 220px; font: inherit; padding: 13px 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); }
+.invite input:focus { outline: 2px solid var(--brand); outline-offset: 1px; border-color: transparent; }
+.invite .note { width: 100%; }
+.msg { margin: 16px auto 0; max-width: 520px; padding: 11px 14px; border-radius: 11px; font-size: 15px; }
+.msg.ok { background: var(--ok-soft); color: var(--ok); } .msg.bad { background: #FFF5F3; color: #B84A3E; }
+
+
+/* product showcase: the app's tabs, drawn live (same idea as Project Astra's LandingProduct) */
+.showcase { padding: 104px 0 24px; }
+.showcase .head { text-align: center; } .showcase h2, .showcase .intro { margin-left: auto; margin-right: auto; }
+.frame { border: 1px solid var(--line); border-radius: 20px; background: var(--surface); overflow: hidden; box-shadow: 0 40px 80px -40px rgb(0 0 0 / .35); }
+.frame-top { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.frame-top .dots { display: flex; gap: 6px; } .frame-top .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.frame-top .url { flex: 1; max-width: 340px; margin: 0 auto; text-align: center; font-size: 12px; color: var(--muted); background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; }
+.tabs { display: flex; gap: 2px; padding: 0 12px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.tabs button { font: inherit; font-size: 14px; font-weight: 600; color: var(--muted); background: none; border: 0; border-bottom: 2px solid transparent; padding: 12px 14px; cursor: pointer; white-space: nowrap; margin-bottom: -1px; }
+.tabs button:hover { color: var(--ink); } .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.mk { display: grid; grid-template-columns: 170px 1fr; height: 470px; font-size: 13px; }
+.mk-side { border-right: 1px solid var(--line); padding: 14px 10px; display: flex; flex-direction: column; gap: 2px; background: var(--paper); }
+.mk-side .brand { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; padding: 2px 10px 14px; } .mk-side .brand b { color: #3D7BF7; }
+.mk-side span { padding: 7px 10px; border-radius: 8px; color: var(--muted); font-weight: 500; }
+.mk-side span.on { background: var(--brand-soft); color: var(--ink); font-weight: 600; }
+.mk-screen { padding: 20px 22px; overflow: hidden; animation: mkIn .25s ease; }
+@keyframes mkIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.mk-screen h5 { margin: 0 0 14px; font-size: 18px; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
+.mk-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+.mk-card { border: 1px solid var(--line-2); border-radius: 12px; padding: 12px 14px; background: var(--paper); }
+.mk-card .n { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; } .mk-card .l { color: var(--muted); font-size: 12px; }
+.mk-row { display: grid; grid-template-columns: 30px 1fr auto auto; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 11px; margin-bottom: 7px; background: var(--paper); }
+.mk-row .mark { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 12px; }
+.mk-row b { display: block; font-size: 13px; } .mk-row small { color: var(--muted); font-size: 12px; }
+.mk-row .sc { font-weight: 800; font-size: 17px; letter-spacing: -0.02em; }
+.mk-btn { font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); white-space: nowrap; }
+.mk-btn.dark { background: var(--brand); color: var(--brand-ink); border-color: transparent; }
+.mk-search { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+.mk-search .box { flex: 1; min-width: 200px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; color: var(--ink-2); background: var(--paper); }
+.mk-chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line-2); }
+.mk-chip.on { background: var(--brand-soft); color: var(--ink); }
+.mk-two { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; }
+.mk-doc { border: 1px solid var(--line-2); border-radius: 12px; padding: 18px 20px; background: var(--paper); line-height: 1.55; }
+.mk-doc h6 { margin: 0; font-size: 16px; } .mk-doc .role { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+.mk-doc .sec { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 10px 0 4px; }
+.mk-doc ul { margin: 0; padding-left: 16px; } .mk-doc li { margin-bottom: 4px; }
+.mk-resume { font-size: 12.5px; line-height: 1.5; overflow: hidden; } .mk-resume .sec { margin-top: 9px; }
+.mk-resume .mk-job { margin-top: 4px; } .mk-resume .mk-job span { float: right; color: var(--muted); font-size: 11.5px; }
+.mk-resume ul { margin: 3px 0 0; } .mk-resume li { margin-bottom: 2px; }
+.mk-doc mark { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ink); padding: 0 3px; border-radius: 4px; }
+.mk-list div { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--line-2); } .mk-list div:last-child { border: 0; }
+.mk-toggle { width: 36px; height: 20px; border-radius: 99px; background: var(--ok); position: relative; display: inline-block; }
+.mk-toggle::after { content: ''; position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+.mk-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.mk-col { background: var(--surface-2); border-radius: 12px; padding: 10px; min-height: 360px; }
+.mk-col h6 { margin: 2px 4px 10px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: flex; justify-content: space-between; }
+.mk-col .c { background: var(--paper); border: 1px solid var(--line-2); border-radius: 10px; padding: 9px 10px; margin-bottom: 7px; }
+.mk-col .c b { display: block; font-size: 12.5px; } .mk-col .c small { color: var(--muted); font-size: 11.5px; }
+.mk-col .c.lift { transform: rotate(-2deg) translateY(-2px); box-shadow: 0 10px 20px -10px rgb(0 0 0 / .4); }
+.mk-table { width: 100%; border-collapse: collapse; } .mk-table td, .mk-table th { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line-2); }
+.mk-table th { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.feature-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 26px; }
+.feature-chips span { font-size: 13px; padding: 6px 13px; border-radius: 99px; border: 1px solid var(--line); color: var(--ink-2); }
+@media (max-width: 900px) { .mk { grid-template-columns: 1fr; height: auto; } .mk-side { display: none; } .mk-kpis { grid-template-columns: repeat(2, 1fr); } .mk-two, .mk-board { grid-template-columns: 1fr; } .mk-col { min-height: 0; } }
+
+footer { border-top: 1px solid var(--line); padding: 36px 0; color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; } footer nav { display: flex; gap: 22px; margin-left: auto; } footer a { text-decoration: none; } footer a:hover { color: var(--ink); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 900px) {
+  header nav { display: none; } header .actions { margin-left: auto; }
+  .hero { padding: 56px 0 48px; } .hero .wrap, .control, .faq { grid-template-columns: 1fr; } .control { padding: 36px 26px; }
+  .stats .wrap { grid-template-columns: repeat(2, 1fr); } .stat:nth-child(3) { border-left: 0; padding-left: 0; } .stat { border-top: 1px solid var(--line); } .stat:nth-child(-n+2) { border-top: 0; }
+  .features, .steps { grid-template-columns: 1fr; } section.block { padding: 72px 0; }
+}
+@media (max-width: 520px) { header .actions .btn:not(.primary) { display: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .eyebrow::before { animation: none; } }
+</style>
+</head>
+<body>
+<header id="top">
+  <div class="wrap">
+    <a href="/" aria-label="Rejekt.ai home"><img class="logo logo-light" src="/brand/rejekt-logo.png" alt="Rejekt.ai"><img class="logo logo-dark" src="/brand/rejekt-logo-dark.png" alt=""></a>
+    <nav aria-label="Sections"><a href="#product">Product</a><a href="#how">How it works</a><a href="#control">Control</a><a href="#faq">FAQ</a></nav>
+    <div class="actions"><a class="btn" href="/login">Log in</a><a class="btn" href="/signup">Sign up</a><a class="btn primary" href="#invite">Request an invite</a></div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow">Fresh jobs from 50,000+ companies, every 6 hours</div>
+        <h1>Get rejected less.</h1>
+        <p class="lede">Rejekt.ai brings you fresh jobs from 50,000+ companies every 6 hours, tailors your resume for each one, and applies for you. Spend your time on interviews, not applications.</p>
+        <div class="cta"><a class="btn primary lg" href="#invite">Request an invite</a><a class="btn lg" href="#how">See how it works</a></div>
+        <p class="fine">Invite-only while we open up gradually. Already have an account? <a href="/login">Log in</a>.</p>
+      </div>
+      <div class="preview" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i></div>
+        <h4>Your top matches today</h4>
+        <div class="job"><div class="mark" style="background:#3D5FCB">N</div><div><b>Senior Backend Engineer <span class="pill new">2h ago</span></b><span>Northwind Labs · Remote, US</span></div><div class="score">94<small>match</small></div></div>
+        <div class="job"><div class="mark" style="background:#2A8057">H</div><div><b>Platform Engineer <span class="pill sent">Sent</span></b><span>Harbor Health · Austin, TX</span></div><div class="score">89<small>match</small></div></div>
+        <div class="job"><div class="mark" style="background:#B5651D">Q</div><div><b>Software Engineer II <span class="pill you">Needs you</span></b><span>Quill Robotics · Boston, MA</span></div><div class="score">86<small>match</small></div></div>
+        <div class="diff"><div class="t">What changed in your resume</div>Led migration of <del>services</del> <mark>12 Go microservices</mark> to <mark>Kubernetes</mark>, cutting deploy time <mark>by 60%</mark>.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="wrap">
+      <div class="stat"><div class="n">50,000+</div><div class="l">companies hiring</div></div>
+      <div class="stat"><div class="n">Every 6 h</div><div class="l">fresh jobs, matched to you</div></div>
+      <div class="stat"><div class="n">Per job</div><div class="l">resume tailored to each posting</div></div>
+      <div class="stat"><div class="n">Hands-free</div><div class="l">applications, on your rules</div></div>
+    </div>
+  </div>
+
+
+  <section class="showcase" id="product">
+    <div class="wrap">
+      <div class="head">
+        <div class="kicker">Product</div>
+        <h2>Everything in one place.</h2>
+        <p class="intro">Find jobs, tailor your resume, apply and track every application, all from one dashboard.</p>
+      </div>
+      <div class="frame">
+        <div class="frame-top"><div class="dots"><i></i><i></i><i></i></div><div class="url">dashboard.rejekt.ai</div></div>
+        <div class="tabs" role="tablist" aria-label="Product tour">
+          <button role="tab" aria-selected="true" data-tab="dashboard">Dashboard</button>
+          <button role="tab" aria-selected="false" data-tab="jobs">Jobs</button>
+          <button role="tab" aria-selected="false" data-tab="resume">Tailored resume</button>
+          <button role="tab" aria-selected="false" data-tab="auto">Auto-apply</button>
+          <button role="tab" aria-selected="false" data-tab="tracker">Tracker</button>
+          <button role="tab" aria-selected="false" data-tab="applied">Applied</button>
+        </div>
+        <div class="mk">
+          <div class="mk-side" aria-hidden="true"><div class="brand">rejekt<b>.ai</b></div>
+            <span data-side="dashboard">Dashboard</span><span data-side="jobs">Jobs</span><span data-side="tracker">Tracker</span>
+            <span data-side="applied">Applied</span><span data-side="auto">Auto-apply</span><span data-side="profile">Profile</span></div>
+          <div class="mk-screen" id="mkScreen" role="tabpanel" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="feature-chips"><span>Smart job matching</span><span>Resume tailoring</span><span>See what changed</span><span>Auto-apply</span><span>Needs-you inbox</span><span>Drag-and-drop tracker</span></div>
+    </div>
+  </section>
+
+  <section class="block" id="features">
+    <div class="wrap">
+      <div class="kicker">What it does</div>
+      <h2>The whole search, from new posting to sent application.</h2>
+      <p class="intro">No more refreshing job boards and rewriting the same resume. Rejekt.ai does the repetitive part and shows you everything it did.</p>
+      <div class="features">
+        <div class="feature">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
+          <h3>Jobs from 50,000+ companies</h3>
+          <p>Fresh openings every 6 hours, from startups to the Fortune 500, matched to your skills, location and work authorization. Closed roles disappear on their own.</p>
+          <div class="logos"><span>Engineering</span><span>Product</span><span>Design</span><span>Data</span><span>Operations</span><span>Sales</span><span>and more</span></div>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></div>
+          <h3>A resume made for each job</h3>
+          <p>Every application gets its own version of your resume, with each change highlighted, so you always know exactly what was sent.</p>
+          <div class="ba">
+            <div><span class="ba-l">Before</span>Worked on backend services and helped improve deployments.</div>
+            <div><span class="ba-l after">For this job</span>Led migration of <mark>12 Go microservices</mark> to <mark>Kubernetes</mark>, cutting deploy time <mark>by 60%</mark>.</div>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg></div>
+          <h3>Auto-apply, on your rules</h3>
+          <p>Turn it on and Rejekt.ai fills and sends applications for you. Set a daily limit, cap it per company, and choose which roles wait for your OK.</p>
+        </div>
+        <div class="feature">
+          <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></div>
+          <h3>Every application in one place</h3>
+          <p>See what was sent, what's waiting on you, and what came back, on one board you can sort by dragging.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="how" style="padding-top:0">
+    <div class="wrap">
+      <div class="kicker">How it works</div>
+      <h2>Set it up once. Check in when it suits you.</h2>
+      <p class="intro">Change any of it whenever you like.</p>
+      <div class="steps">
+        <div class="step"><h3>Set up your profile</h3><p>Upload your resume, then pick the roles, locations and work authorization you want matched.</p></div>
+        <div class="step"><h3>Review your matches</h3><p>New openings arrive ranked by how well they fit you. Save the good ones, skip the rest.</p></div>
+        <div class="step"><h3>Let it apply</h3><p>Rejekt.ai tailors your resume and fills the form. Anything it can't answer waits for you in Needs you.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="control" style="padding-top:0">
+    <div class="wrap">
+      <div class="control">
+        <div>
+          <div class="kicker">You stay in control</div>
+          <h2>Nothing goes out that you haven't allowed.</h2>
+          <p>Auto-apply is off until you turn it on, and you decide how far it goes.</p>
+        </div>
+        <ul>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg><div><b>Review before sending</b><span>Require your OK for any kind of role, or for all of them.</span></div></li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg><div><b>Limits that protect your name</b><span>Daily caps and a per-company limit, so no employer gets flooded.</span></div></li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg><div><b>Asks instead of guessing</b><span>CAPTCHAs, verification codes and unusual questions come to you. It never works around them.</span></div></li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg><div><b>One switch to pause</b><span>Stop all applying at any time. Everything already sent stays tracked.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="faq" style="padding-top:0">
+    <div class="wrap faq">
+      <div><div class="kicker">FAQ</div><h2>Questions, answered.</h2></div>
+      <div>
+        <details><summary>What kinds of jobs can I find?</summary><p>Roles in engineering, product, design, data, operations, sales and more, at 50,000+ companies, from early-stage startups to the largest employers.</p></details>
+        <details><summary>Will it apply to jobs without asking me?</summary><p>Only if you turn auto-apply on. You can require your review for any kind of role, and set daily and per-company limits.</p></details>
+        <details><summary>How often do new jobs show up?</summary><p>Every 6 hours. New openings land in your matches as soon as we find them, and roles that close drop out on their own.</p></details>
+        <details><summary>Which countries are covered?</summary><p>Jobs in the US, Canada, the EU and Australia, including remote roles open to those locations.</p></details>
+        <details><summary>What happens when a form asks something it doesn't know?</summary><p>It stops and puts the application in Needs you, with the exact question. Answer once and it remembers for next time.</p></details>
+        <details><summary>Why is it invite-only?</summary><p>We're letting people in gradually so every application is done right. Request an invite below and we'll get in touch when there's a spot.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="invite" id="invite">
+    <div class="wrap">
+      <div class="kicker">Get started</div>
+      <h2>Request an invite.</h2>
+      <p class="intro">Leave your email and the roles you're after. We'll get in touch as soon as there's a spot.</p>
+      <form id="inviteForm" novalidate>
+        <label class="sr-only" for="iEmail">Email</label><input id="iEmail" type="email" autocomplete="email" placeholder="you@email.com" required>
+        <button class="btn primary lg" type="submit">Request an invite</button>
+        <label class="sr-only" for="iNote">Roles you're looking for (optional)</label><input class="note" id="iNote" maxlength="300" placeholder="Roles you want (optional), e.g. backend, remote">
+      </form>
+      <p class="fine" style="margin-top:14px">We'll only use your email to get in touch about your invite. See our <a href="/privacy">Privacy Policy</a>.</p>
+      <div class="msg" id="iMsg" role="status" hidden></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img class="logo logo-light" src="/brand/rejekt-logo.png" alt="Rejekt.ai" style="height:20px"><img class="logo logo-dark" src="/brand/rejekt-logo-dark.png" alt="" style="height:20px">
+    <span>© <span id="yr"></span> Rejekt.ai</span>
+    <nav aria-label="Footer"><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="/login">Log in</a><a href="/signup">Sign up</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/ai">AI disclosure</a></nav>
+  </div>
+</footer>
+
+<script>
+
+// Product tour: each tab is a drawn copy of that screen (made-up companies, no real data)
+const row = (c, mark, title, sub, right) => `<div class="mk-row"><div class="mark" style="background:${c}">${mark}</div><div><b>${title}</b><small>${sub}</small></div>${right}</div>`;
+const SCREENS = {
+  dashboard: { side: 'dashboard', html: `<h5>Your dashboard</h5>
+    <div class="mk-kpis"><div class="mk-card"><div class="n">48</div><div class="l">New matches today</div></div><div class="mk-card"><div class="n">23</div><div class="l">Applications sent</div></div>
+      <div class="mk-card"><div class="n">3</div><div class="l">Interviews</div></div><div class="mk-card"><div class="n">2</div><div class="l">Need you</div></div></div>
+    ${row('#3D5FCB', 'N', 'Senior Backend Engineer', 'Northwind Labs · Remote, US · 2h ago', '<span class="sc">94</span><span class="mk-btn dark">Apply</span>')}
+    ${row('#2A8057', 'H', 'Platform Engineer', 'Harbor Health · Austin, TX · 5h ago', '<span class="sc">89</span><span class="mk-btn dark">Apply</span>')}
+    ${row('#B5651D', 'Q', 'Software Engineer II', 'Quill Robotics · Boston, MA · today', '<span class="sc">86</span><span class="mk-btn dark">Apply</span>')}
+    ${row('#7A5C2E', 'L', 'Backend Developer', 'Lumen Finance · New York, NY · today', '<span class="sc">83</span><span class="mk-btn dark">Apply</span>')}` },
+  jobs: { side: 'jobs', html: `<h5>Jobs</h5>
+    <div class="mk-search"><div class="box">backend engineer, go, kubernetes</div><span class="mk-chip on">Remote</span><span class="mk-chip on">Senior</span><span class="mk-chip">Posted this week</span><span class="mk-chip">Sponsors visas</span></div>
+    ${row('#3D5FCB', 'N', 'Senior Backend Engineer', 'Northwind Labs · Remote, US · $165k–$195k', '<span class="sc">94</span><span class="mk-btn">Save</span>')}
+    ${row('#6B4FB3', 'V', 'Staff Software Engineer, Payments', 'Vela Commerce · Remote, US · $190k–$230k', '<span class="sc">91</span><span class="mk-btn">Save</span>')}
+    ${row('#2A8057', 'H', 'Platform Engineer', 'Harbor Health · Austin, TX · $150k–$180k', '<span class="sc">89</span><span class="mk-btn">Save</span>')}
+    ${row('#C2417A', 'O', 'Senior Go Engineer', 'Orbit Logistics · Remote, Canada', '<span class="sc">87</span><span class="mk-btn">Save</span>')}
+    ${row('#1F8A8A', 'T', 'Backend Engineer, Infrastructure', 'Tidal Energy · Denver, CO', '<span class="sc">84</span><span class="mk-btn">Save</span>')}` },
+  resume: { side: 'applied', html: `<h5>Tailored for Northwind Labs <span class="mk-chip on">12 changes</span></h5>
+    <div class="mk-two"><div class="mk-doc mk-resume"><h6>Alex Morgan</h6><div class="role">Senior Software Engineer · Seattle, WA · alex@email.com</div>
+      <div class="sec">Summary</div><div>Backend engineer with 8 years building <mark>distributed systems in Go</mark> and running them on <mark>Kubernetes</mark> at scale.</div>
+      <div class="sec">Experience</div>
+      <div class="mk-job"><b>Senior Software Engineer</b> · Cobalt Cloud <span>2021 – now</span></div><ul>
+        <li>Led migration of <mark>12 Go microservices</mark> to <mark>Kubernetes</mark>, cutting deploy time <mark>by 60%</mark>.</li>
+        <li>Designed an <mark>event-driven</mark> billing pipeline on <mark>Kafka</mark> handling <mark>40M events a day</mark>.</li>
+        <li>Mentored 4 engineers and ran the team's <mark>on-call and incident reviews</mark>.</li></ul>
+      <div class="mk-job"><b>Software Engineer</b> · Pine Analytics <span>2017 – 2021</span></div><ul>
+        <li>Built REST and <mark>gRPC</mark> APIs serving 3M requests a day with 99.95% uptime.</li>
+        <li>Cut PostgreSQL query time 70% with indexing and caching.</li></ul>
+      <div class="sec">Skills</div><div>Go, <mark>Kubernetes</mark>, <mark>Kafka</mark>, gRPC, PostgreSQL, AWS, Terraform</div>
+      <div class="sec">Education</div><div>B.S. Computer Science · University of Washington</div></div>
+      <div style="display:grid;gap:10px;align-content:start">
+        <div class="mk-card"><div class="l">Match for this job</div><div class="n">71 → 94</div></div>
+        <div class="mk-card"><b>What changed</b><div class="mk-list" style="margin-top:8px"><div><span>Keywords added</span><b>6</b></div><div><span>Bullets reworded</span><b>4</b></div>
+          <div><span>Skills reordered</span><b>2</b></div><div><span>Summary rewritten</span><b>1</b></div></div></div>
+        <div class="mk-card"><b>Keywords from the job</b><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+          <span class="mk-chip on">Go</span><span class="mk-chip on">Kubernetes</span><span class="mk-chip on">Kafka</span><span class="mk-chip on">gRPC</span><span class="mk-chip on">on-call</span><span class="mk-chip">Rust</span></div></div>
+      </div></div>` },
+  auto: { side: 'auto', html: `<h5>Auto-apply <span class="mk-toggle" aria-label="On"></span></h5>
+    <div class="mk-kpis"><div class="mk-card"><div class="n">8</div><div class="l">Sent today</div></div><div class="mk-card"><div class="n">25</div><div class="l">Daily limit</div></div>
+      <div class="mk-card"><div class="n">2</div><div class="l">Per company / 30 days</div></div><div class="mk-card"><div class="n">2</div><div class="l">Waiting on you</div></div></div>
+    <div class="mk-two"><div><div class="mk-card" style="margin-bottom:8px"><b>Backend · Remote US</b><div class="l" style="color:var(--muted);font-size:12px">Match 80+ · posted this week · sends automatically</div></div>
+      <div class="mk-card"><b>Staff roles · any location</b><div class="l" style="color:var(--muted);font-size:12px">Match 85+ · waits for your OK before sending</div></div></div>
+      <div class="mk-card"><b>Today</b><div class="mk-list" style="margin-top:8px"><div><span>Northwind Labs</span><span class="pill sent">Sent</span></div><div><span>Harbor Health</span><span class="pill sent">Sent</span></div>
+        <div><span>Quill Robotics</span><span class="pill you">Needs you</span></div><div><span>Vela Commerce</span><span class="pill new">Ready</span></div></div></div></div>` },
+  tracker: { side: 'tracker', html: `<h5>Tracker</h5><div class="mk-board">
+    <div class="mk-col"><h6>Saved <span>4</span></h6><div class="c"><b>Orbit Logistics</b><small>Senior Go Engineer</small></div><div class="c"><b>Tidal Energy</b><small>Backend Engineer</small></div></div>
+    <div class="mk-col"><h6>Applied <span>23</span></h6><div class="c"><b>Northwind Labs</b><small>Senior Backend Engineer</small></div><div class="c lift"><b>Harbor Health</b><small>Platform Engineer</small></div><div class="c"><b>Vela Commerce</b><small>Staff Engineer, Payments</small></div></div>
+    <div class="mk-col"><h6>Interview <span>3</span></h6><div class="c"><b>Lumen Finance</b><small>Backend Developer</small></div><div class="c"><b>Pine Analytics</b><small>Data Platform Engineer</small></div></div>
+    <div class="mk-col"><h6>Offer <span>1</span></h6><div class="c"><b>Cobalt Cloud</b><small>Senior Engineer</small></div></div></div>` },
+  applied: { side: 'applied', html: `<h5>Applied</h5><table class="mk-table"><thead><tr><th>Company</th><th>Role</th><th>Sent</th><th>Status</th></tr></thead><tbody>
+    <tr><td><b>Northwind Labs</b></td><td>Senior Backend Engineer</td><td>Today</td><td><span class="pill sent">Sent</span></td></tr>
+    <tr><td><b>Harbor Health</b></td><td>Platform Engineer</td><td>Today</td><td><span class="pill sent">Sent</span></td></tr>
+    <tr><td><b>Lumen Finance</b></td><td>Backend Developer</td><td>3 days ago</td><td><span class="pill new">Interview</span></td></tr>
+    <tr><td><b>Pine Analytics</b></td><td>Data Platform Engineer</td><td>5 days ago</td><td><span class="pill new">Interview</span></td></tr>
+    <tr><td><b>Cobalt Cloud</b></td><td>Senior Engineer</td><td>2 weeks ago</td><td><span class="pill sent">Offer</span></td></tr>
+    <tr><td><b>Quill Robotics</b></td><td>Software Engineer II</td><td>–</td><td><span class="pill you">Needs you</span></td></tr></tbody></table>` },
+};
+const tabs = [...document.querySelectorAll('.tabs [role=tab]')], screen = document.getElementById('mkScreen');
+function showTab(name) {
+  tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+  document.querySelectorAll('.mk-side [data-side]').forEach(s => s.classList.toggle('on', s.dataset.side === SCREENS[name].side));
+  screen.innerHTML = SCREENS[name].html;
+}
+// cycles through the tabs until someone picks one (not with reduced motion)
+let auto = matchMedia('(prefers-reduced-motion: reduce)').matches ? null : setInterval(() => {
+  const i = tabs.findIndex(t => t.getAttribute('aria-selected') === 'true');
+  showTab(tabs[(i + 1) % tabs.length].dataset.tab);
+}, 5000);
+tabs.forEach(t => t.addEventListener('click', () => { clearInterval(auto); auto = null; showTab(t.dataset.tab); }));
+document.querySelector('.frame').addEventListener('mouseenter', () => { clearInterval(auto); auto = null; }, { once: true });
+showTab('dashboard');
+
+document.getElementById('yr').textContent = new Date().getFullYear();
+const header = document.getElementById('top');
+addEventListener('scroll', () => header.classList.toggle('scrolled', scrollY > 8), { passive: true });
+
+const form = document.getElementById('inviteForm'), msg = document.getElementById('iMsg');
+const show = (text, kind) => { msg.textContent = text; msg.className = 'msg ' + kind; msg.hidden = false; };
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('iEmail');
+  if (!email.checkValidity()) return show('Enter a valid email address.', 'bad');
+  const btn = form.querySelector('button'); btn.disabled = true;
+  try {
+    const res = await fetch('/auth/request-invite', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value, note: document.getElementById('iNote').value }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return show(data.error || 'Something went wrong. Try again.', 'bad');
+    form.hidden = true; show("You're on the list. We'll get in touch at this email as soon as there's a spot.", 'ok');
+  } catch { show("Couldn't reach the server. Check your connection and try again.", 'bad'); }
+  finally { btn.disabled = false; }
+});
+</script>
+</body>
+</html>

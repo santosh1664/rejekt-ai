@@ -12,14 +12,15 @@
  * company.meta = { host, site }   (preferred when present)
  *
  * Large tenants list thousands of reqs, so pages are fetched newest-first
- * and capped (ORACLE_MAX_PAGES, default 40 → 1,000 jobs). The list carries a
+ * and capped (ORACLE_MAX_JOBS, default 1,000). The list carries a
  * short description only; PostedDate is date-only.
  */
 import { fetchJSON, normalizeLocation, sleep, INTER_REQUEST_DELAY_MS } from '../lib/http.mjs';
 
 export const ATS = 'oraclecloud';
-const PAGE_SIZE = 25;
-const MAX_PAGES = parseInt(process.env.ORACLE_MAX_PAGES || '40', 10);
+// The API serves up to 200 per page in about the time it takes for 25 (1.6s vs 1.1s, measured), so 8x fewer requests.
+const PAGE_SIZE = 200;
+const MAX_PAGES = Math.ceil(parseInt(process.env.ORACLE_MAX_JOBS || '1000', 10) / PAGE_SIZE);
 
 export function oracleTarget(company) {
   const [slugHost, slugSite] = String(company.slug || '').split('/');
@@ -43,11 +44,14 @@ export async function fetchAll(company, opts = {}) {
     const block = data?.items?.[0];
     const reqs = block?.requisitionList || [];
     if (page === 0) total = block?.TotalJobsCount ?? reqs.length;
-    for (const r of reqs) if (!seen.has(r.Id)) seen.set(r.Id, normalize(r, company, host, site));
+    let fresh = 0;
+    for (const r of reqs) if (!seen.has(r.Id)) { const job = normalize(r, company, host, site); seen.set(r.Id, job); if (opts.isNew?.(job)) fresh++; }
     if (reqs.length < PAGE_SIZE) break;
+    if (opts.isNew && !fresh) break;   // newest first: a page with nothing new means the rest is known too
     await sleep(INTER_REQUEST_DELAY_MS);
   }
-  return [...seen.values()];
+  // Stopped at ORACLE_MAX_JOBS or early (quick): the jobs past it weren't seen, which doesn't mean they're gone
+  return Object.assign([...seen.values()], { truncated: seen.size < total && Number.isFinite(total) });
 }
 
 function normalize(r, company, host, site) {

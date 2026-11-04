@@ -151,7 +151,8 @@ export function buildKeywordSql(ks, params, alias = 'j') {
     return `(${alias}.normalized_title LIKE ANY(${literal}) OR ${alias}.title ILIKE ANY(${raw}))`;
   };
   const fullText = terms => {
-    const parts = terms.map(t => { params.push(t); return `websearch_to_tsquery('english', $${params.length})`; });
+    // the words next to each other, in order: "software engineer" no longer matches a lab manager whose posting says "software" and "engineer" apart
+    const parts = terms.map(t => { params.push(t); return `phraseto_tsquery('english', $${params.length})`; });
     return `(${parts.join(' || ')})`;
   };
   const skillMatch = terms => {
@@ -193,12 +194,9 @@ export function buildKeywordSql(ks, params, alias = 'j') {
   }
 
   if (ks.exclude.length) {
-    // Excludes are literal only — never semantically expanded. Hiding every
-    // ML job because someone excluded "AI engineer" would be surprising.
-    const clauses = [];
-    if (ks.scope !== 'description') clauses.push(titleLiteral(ks.exclude));
-    if (ks.scope !== 'title') clauses.push(`${alias}.search_vector @@ ${fullText(ks.exclude)}`);
-    conditions.push(`NOT (${clauses.join(' OR ')})`);
+    // Excludes are literal and title-only, whatever the scope (as Tsenta does): "senior" sits in almost
+    // every description ("work with senior engineers"), so checking descriptions hid most good jobs.
+    conditions.push(`NOT ${titleLiteral(ks.exclude)}`);
   }
 
   return { conditions, semanticRoles };
@@ -206,11 +204,7 @@ export function buildKeywordSql(ks, params, alias = 'j') {
 
 /** Warnings worth surfacing to the caller about how a search will behave. */
 export function keywordSearchWarnings(ks) {
-  const warnings = [];
-  if (ks.exclude.length && ks.scope !== 'title') {
-    warnings.push(`Exclude terms in "${ks.scope}" scope hide every job whose description mentions them (e.g. "senior" appears in most descriptions). Use scope "title" to exclude by title only.`);
-  }
-  return warnings;
+  return [];   // hidden words are title-only now, so the "hides too much" warning no longer applies
 }
 
 /**

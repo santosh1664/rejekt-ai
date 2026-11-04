@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin · Rejekt.ai</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M8 22h16M8 16h10M8 10h13' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+<style>
+:root {
+  --paper: #FFFFFF; --surface: #FFFFFF; --surface-2: #F6F6F5; --ink: #111111; --ink-2: #3B3B3B; --muted: #6A6A6A;
+  --line: #DEDEDC; --line-2: #EBEBE9; --cobalt: #17382B; --cobalt-ink: #FFFFFF; --cobalt-soft: #EAF1EC;
+  --ok: #2A8057; --ok-soft: #F2FAF5; --warn: #92650A; --warn-soft: #FFFAEB; --bad: #B84A3E; --bad-soft: #FFF5F3; --info: #3D5FCB; --info-soft: #F4F8FF;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --paper: #0E0E0E; --surface: #161616; --surface-2: #1E1E1E; --ink: #F2F2F2; --ink-2: #CFCFCF; --muted: #9A9A9A;
+  --line: #2C2C2C; --line-2: #232323; --cobalt: #F2F2F2; --cobalt-ink: #111111; --cobalt-soft: #262626;
+  --ok: #6FD3A0; --ok-soft: #14261D; --warn: #E9C46A; --warn-soft: #2E2812; --bad: #F2948A; --bad-soft: #2E1A17; --info: #9DB6F5; --info-soft: #172036; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface-2); color: var(--ink); font: 14px/1.5 'Schibsted Grotesk', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+nav { background: var(--surface); border-right: 1px solid var(--line); padding: 20px 14px; display: flex; flex-direction: column; gap: 2px; position: sticky; top: 0; height: 100vh; }
+nav .logo { height: 20px; width: auto; align-self: flex-start; margin: 0 8px 4px; } nav .tag { margin: 0 8px 18px; font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.logo-dark { display: none; } @media (prefers-color-scheme: dark) { .logo-light { display: none; } .logo-dark { display: block; } }
+nav a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; text-decoration: none; color: var(--ink-2); font-weight: 500; }
+nav a:hover { background: var(--surface-2); } nav a[aria-current="page"] { background: var(--cobalt-soft); color: var(--ink); font-weight: 600; }
+nav a .count { margin-left: auto; font-size: 12px; background: var(--bad-soft); color: var(--bad); border-radius: 99px; padding: 0 7px; font-weight: 600; }
+nav .foot { margin-top: auto; display: grid; gap: 2px; border-top: 1px solid var(--line-2); padding-top: 10px; }
+nav .who { padding: 4px 10px; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+main { padding: 28px 32px 60px; max-width: 1240px; width: 100%; }
+h1 { font-size: 22px; letter-spacing: -0.015em; margin: 0 0 4px; } h2 { font-size: 15px; margin: 0 0 12px; }
+.sub { color: var(--muted); margin: 0 0 22px; }
+.grid { display: grid; gap: 14px; } .kpis { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); margin-bottom: 18px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+.kpi { min-width: 0; } .kpi .n { font-size: clamp(20px, 1.9vw, 26px); font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; } .kpi .l { color: var(--muted); font-size: 13px; }
+.kpi .s { font-size: 12px; color: var(--muted); }
+.two { grid-template-columns: 1.4fr 1fr; align-items: start; } @media (max-width: 1000px) { .two { grid-template-columns: 1fr; } }
+table { width: 100%; border-collapse: collapse; } th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+tr.click { cursor: pointer; } tr.click:hover td { background: var(--surface-2); }
+.tablewrap { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: auto; }
+.tablewrap table td:first-child, .tablewrap table th:first-child { padding-left: 16px; }
+.muted { color: var(--muted); } .mono { font-family: var(--mono); font-size: 12px; } .small { font-size: 12px; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.badge.ok { background: var(--ok-soft); color: var(--ok); } .badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.bad { background: var(--bad-soft); color: var(--bad); } .badge.info { background: var(--info-soft); color: var(--info); }
+.btn { font: inherit; font-weight: 600; font-size: 13px; padding: 7px 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
+.btn:hover { background: var(--surface-2); } .btn.primary { background: var(--cobalt); color: var(--cobalt-ink); border-color: transparent; }
+.btn.danger { color: var(--bad); border-color: var(--bad-soft); } .btn[disabled] { opacity: .55; cursor: progress; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+input, select { font: inherit; padding: 8px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); }
+input[type=search] { min-width: 280px; }
+.att { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line-2); } .att:last-child { border-bottom: 0; }
+.att .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; } .att .dot.bad { background: var(--bad); } .att .dot.warn { background: var(--warn); }
+.att .t { flex: 1; }
+.empty { padding: 26px; text-align: center; color: var(--muted); }
+dl { display: grid; grid-template-columns: 170px 1fr; gap: 6px 14px; margin: 0; } dt { color: var(--muted); } dd { margin: 0; overflow-wrap: anywhere; }
+pre { font-family: var(--mono); font-size: 12px; background: var(--surface-2); padding: 12px; border-radius: 10px; overflow: auto; max-height: 360px; margin: 0; white-space: pre-wrap; }
+.timeline { display: grid; gap: 8px; } .timeline div { border-left: 2px solid var(--line); padding-left: 10px; }
+.back { display: inline-block; margin-bottom: 10px; color: var(--muted); text-decoration: none; } .back:hover { color: var(--ink); }
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 10px; font-weight: 500; z-index: 100; max-width: 90vw; }
+.toast.bad { background: var(--bad); color: #fff; }
+dialog { border: 1px solid var(--line); border-radius: 14px; padding: 20px; background: var(--surface); color: var(--ink); max-width: 460px; width: 92vw; }
+dialog::backdrop { background: rgb(0 0 0 / .35); } dialog h3 { margin: 0 0 8px; font-size: 16px; } dialog p { margin: 0 0 16px; color: var(--ink-2); }
+dialog .actions { justify-content: flex-end; }
+.linkbox { display: flex; gap: 8px; margin-top: 10px; } .linkbox input { flex: 1; font-family: var(--mono); font-size: 12px; }
+.loading { color: var(--muted); padding: 30px 0; }
+@media (max-width: 760px) { .shell { grid-template-columns: 1fr; } nav { position: static; height: auto; flex-direction: row; flex-wrap: wrap; } nav .logo, nav .tag, nav .foot { display: none; } main { padding: 18px; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav aria-label="Admin">
+    <img class="logo logo-light" src="/brand/rejekt-logo.png" alt="Rejekt.ai"><img class="logo logo-dark" src="/brand/rejekt-logo-dark.png" alt="Rejekt.ai">
+    <div class="tag">Admin</div>
+    <a href="#/" data-nav="overview">Overview <span class="count" id="navAttention" hidden></span></a>
+    <a href="#/users" data-nav="users">Users</a>
+    <a href="#/applications" data-nav="applications">Applications</a>
+    <a href="#/companies" data-nav="companies">Companies &amp; jobs</a>
+    <a href="#/job-data" data-nav="jobdata">Job data</a>
+    <a href="#/scans" data-nav="scans">Scans</a>
+    <a href="#/invites" data-nav="invites">Invites</a>
+    <a href="#/system" data-nav="system">System</a>
+    <a href="#/audit" data-nav="audit">Audit log</a>
+    <div class="foot">
+      <a href="#" id="logout">Log out</a>
+      <div class="who" id="who"></div>
+    </div>
+  </nav>
+  <main id="view" tabindex="-1"><div class="loading">Loading…</div></main>
+</div>
+<dialog id="confirm"><h3 id="cTitle"></h3><p id="cText"></p><div class="actions"><button class="btn" value="no" id="cNo">Cancel</button><button class="btn primary" id="cYes">Confirm</button></div></dialog>
+<dialog id="linkDlg"><h3>Password reset link</h3><p id="linkText"></p><div class="linkbox"><input id="linkVal" readonly><button class="btn primary" id="linkCopy">Copy</button></div><div class="actions" style="margin-top:14px"><button class="btn" id="linkClose">Done</button></div></dialog>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const view = $('#view');
+
+async function api(method, path, body) {
+  const res = await fetch(path, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+  if (res.status === 401) { location.assign('/login?next=' + encodeURIComponent('/admin' + location.hash)); throw new Error('Log in again'); }
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 403) await explainNotAdmin();
+  if (!res.ok) throw new Error(data.error || data.message || `Request failed (${res.status})`);
+  return data;
+}
+function toast(msg, bad = false) {
+  $$('.toast').forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast' + (bad ? ' bad' : ''); t.setAttribute('role', 'status'); t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 4500);
+}
+function confirmBox(title, text, yes = 'Confirm', danger = false) {
+  const d = $('#confirm'); $('#cTitle').textContent = title; $('#cText').textContent = text; $('#cYes').textContent = yes;
+  $('#cYes').className = 'btn ' + (danger ? 'danger' : 'primary');
+  return new Promise(ok => {
+    const done = (v) => { d.close(); $('#cYes').onclick = $('#cNo').onclick = null; ok(v); };
+    $('#cYes').onclick = () => done(true); $('#cNo').onclick = () => done(false); d.oncancel = () => done(false);
+    d.showModal();
+  });
+}
+// Run an action button: optional confirm, disable while running, toast the result, then refresh
+async function act(btn, fn, { confirm, then } = {}) {
+  if (confirm && !(await confirmBox(...confirm))) return;
+  btn.disabled = true;
+  try { const r = await fn(); if (r?.message) toast(r.message); if (then) await then(r); else await route(); }
+  catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; }
+}
+
+// 1,441,890 → 1.44M (cards are narrow); smaller numbers stay exact
+const big = (v) => +v >= 100_000 ? new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 2 }).format(+v) : (+v).toLocaleString();
+// A 403 here usually means this browser is in "Open as user" (started in another tab: tabs share the sign-in)
+let explained = false;
+async function explainNotAdmin() {
+  if (explained) return;
+  const me = await fetch('/auth/me').then(r => r.ok ? r.json() : null).catch(() => null);
+  if (!me?.impersonator_email) return;
+  explained = true;
+  document.body.insertAdjacentHTML('afterbegin', `<div role="alert" style="position:sticky;top:0;z-index:50;display:flex;gap:14px;align-items:center;justify-content:center;padding:10px 16px;background:#F5CE78;color:#111;font-weight:500">
+    You're viewing Rejekt.ai as ${esc(me.email)} (Open as user, maybe in another tab), so the admin portal is paused.
+    <button class="btn" id="backAdmin" style="background:#111;color:#fff;border:0">Back to admin</button></div>`);
+  $('#backAdmin').onclick = async () => { const r = await fetch('/auth/return', { method: 'POST' }).then(r => r.json()).catch(() => ({})); location.assign(r.redirect || '/admin'); };
+}
+const when = (d) => d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+function ago(d) {
+  if (!d) return 'never'; const s = (Date.now() - new Date(d)) / 1000;
+  if (s < 60) return 'just now'; if (s < 3600) return `${Math.round(s / 60)} min ago`; if (s < 86400) return `${Math.round(s / 3600)} h ago`;
+  return `${Math.round(s / 86400)} d ago`;
+}
+const STATE = { SUBMITTED: 'ok', APPLIED: 'ok', NEEDS_YOU: 'warn', PREPARED: 'info', QUEUED: 'info', SUBMITTING: 'info', FAILED: 'bad', SKIPPED: '', SAVED: '', REJECTED: 'bad', STUCK: 'bad' };
+const PRETTY = { NEEDS_YOU: 'Needs you', SUBMITTED: 'Submitted', FAILED: 'Failed', PREPARED: 'Ready to send', QUEUED: 'Queued', SUBMITTING: 'Sending', SKIPPED: 'Skipped', SAVED: 'Saved', APPLIED: 'Applied', REJECTED: 'Rejected', STUCK: 'Stuck' };
+const badge = (state) => `<span class="badge ${STATE[state] ?? ''}">${esc(PRETTY[state] || state || '–')}</span>`;
+const appState = (a) => a.apply_state || a.status;
+
+// ─── Router ─────────────────────────────────────────────────────────────────
+const ROUTES = [
+  [/^\/?$/, 'overview', renderOverview], [/^\/users$/, 'users', renderUsers], [/^\/users\/([\w-]+)$/, 'users', renderUser],
+  [/^\/applications$/, 'applications', renderApps], [/^\/applications\/(\d+)$/, 'applications', renderApp],
+  [/^\/companies$/, 'companies', renderCompanies], [/^\/job-data$/, 'jobdata', renderJobData], [/^\/scans$/, 'scans', renderScans], [/^\/invites$/, 'invites', renderInvites],
+  [/^\/system$/, 'system', renderSystem], [/^\/audit$/, 'audit', renderAudit],
+];
+let seq = 0, pollers = [];   // pages that refresh themselves (Scans) register their timers here
+async function route() {
+  pollers.forEach(clearInterval); pollers = [];
+  const [path, qs] = location.hash.slice(1).split('?');
+  const params = new URLSearchParams(qs || '');
+  const hit = ROUTES.find(([re]) => re.test(path || '/')) || ROUTES[0];
+  $$('nav a[data-nav]').forEach(a => a.dataset.nav === hit[1] ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  const mine = ++seq;
+  try {
+    const html = await hit[2](...((path || '/').match(hit[0]) || []).slice(1), params);
+    if (mine !== seq) return;
+    if (html != null) view.innerHTML = html;
+    hit[2].after?.(params);
+  } catch (e) { if (mine === seq) view.innerHTML = `<div class="card"><b>Couldn't load this page.</b><p class="muted">${esc(e.message)}</p><button class="btn" onclick="route()">Try again</button></div>`; }
+}
+window.addEventListener('hashchange', () => { view.innerHTML = '<div class="loading">Loading…</div>'; route(); });
+
+// ─── Overview ───────────────────────────────────────────────────────────────
+async function renderOverview() {
+  const o = await api('GET', '/admin/api/overview');
+  const n = (st) => o.states.find(s => s.state === st)?.n || 0;
+  const nav = $('#navAttention'); nav.hidden = !o.attention.length; nav.textContent = o.attention.length;
+  const kpi = (num, label, sub = '') => `<div class="card kpi"><div class="n" title="${typeof num === 'number' ? num.toLocaleString() : num}">${typeof num === 'number' ? big(num) : num}</div><div class="l">${label}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>`;
+  return `
+    <h1>Overview</h1><p class="sub">${o.scanning ? 'A scan is running now.' : `Next scan ${o.schedule?.nextAt ? when(o.schedule.nextAt) : 'not scheduled'}.`}</p>
+    <div class="grid kpis">
+      ${kpi(o.users.total, 'Users', `${o.users.active7d} active this week${o.users.disabled ? ` · ${o.users.disabled} disabled` : ''}`)}
+      ${kpi(o.jobs?.active ?? 0, 'Open jobs', `${big(o.jobs?.total ?? 0)} ever found`)}
+      ${kpi(o.submittedToday, 'Sent in 24 h')}
+      ${kpi(n('NEEDS_YOU'), 'Waiting on users')}
+      ${kpi(n('FAILED'), 'Failed')}
+      ${kpi(o.stuck, 'Stuck')}
+      ${kpi(o.pendingInvites, 'Pending invites')}
+    </div>
+    <div class="grid two">
+      <div class="card"><h2>Needs attention</h2>
+        ${o.attention.length ? o.attention.map((a, i) => `<div class="att"><span class="dot ${a.level}"></span><span class="t">${esc(a.text)}</span>
+          ${a.fix ? `<button class="btn" data-fix="${a.fix}">${esc(a.fixLabel)}</button>` : `<a class="btn" href="${a.link}">${esc(a.fixLabel)}</a>`}</div>`).join('')
+          : '<div class="empty">Nothing needs you right now.</div>'}
+      </div>
+      <div class="card"><h2>Applications by state</h2>
+        <table><tbody>${o.states.map(s => `<tr class="click" data-href="#/applications?state=${encodeURIComponent(s.state)}"><td>${badge(s.state)}</td><td style="text-align:right">${s.n}</td></tr>`).join('') || '<tr><td class="muted">None yet</td></tr>'}</tbody></table>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px"><h2>Recent scan runs</h2>
+      <table><thead><tr><th>Run</th><th>Started</th><th class="num">Took</th><th>Status</th><th class="num">Companies</th><th class="num">Errors</th><th class="num">New jobs</th><th class="num">Closed</th></tr></thead><tbody>
+      ${o.runs.map(r => `<tr><td class="mono">#${r.id}</td><td>${when(r.started_at)}</td><td class="num">${r.finished_at ? Math.round((new Date(r.finished_at) - new Date(r.started_at)) / 60000) + ' min' : '–'}</td>
+        <td><span class="badge ${{ completed: 'ok', failed: 'bad', running: 'info' }[r.status] || ''}">${esc(r.status)}</span></td>
+        <td class="num">${(r.companies_scanned || 0).toLocaleString()}</td><td class="num">${(r.companies_errored || 0).toLocaleString()}</td><td class="num">${(r.jobs_new || 0).toLocaleString()}</td><td class="num">${(r.jobs_closed || 0).toLocaleString()}</td></tr>`).join('')}
+      </tbody></table></div>`;
+}
+renderOverview.after = () => {
+  $$('[data-fix]').forEach(b => b.onclick = () => act(b, () => b.dataset.fix === 'scan-all'
+    ? api('POST', '/api/scan-control', { action: 'start', target: 'scheduled' })
+    : api('POST', '/admin/api/overview/action', { action: b.dataset.fix }),
+    { confirm: b.dataset.fix === 'release-stuck' ? ['Release stuck applications?', 'They were interrupted mid-send. They\'ll show as failed with "Try again", so nothing is sent twice by surprise.', 'Release'] : null }));
+};
+
+// ─── Users ──────────────────────────────────────────────────────────────────
+// Search pages draw their boxes once; typing reloads only the results (redrawing the page took the focus away)
+function liveSearch(inputs, hashFor, load) {
+  let t;
+  for (const el of inputs) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
+    clearTimeout(t);
+    t = setTimeout(() => { history.replaceState(null, '', hashFor()); load(); }, el.tagName === 'SELECT' ? 0 : 300);
+  });
+  load();
+}
+let searchSeq = 0;   // a slower, older search never overwrites a newer one
+
+async function renderUsers(params) {
+  return `<h1>Users</h1><p class="sub" id="usersSub">Open one to see their data and fix things for them.</p>
+    <div class="toolbar"><input type="search" id="uq" placeholder="Search email or name" value="${esc(params.get('q') || '')}"><a class="btn" href="#/invites">Invite someone</a></div>
+    <div id="usersList"><div class="loading">Loading…</div></div>`;
+}
+renderUsers.after = () => {
+  const q = $('#uq');
+  liveSearch([q], () => '#/users' + (q.value ? '?q=' + encodeURIComponent(q.value) : ''), async () => {
+    const mine = ++searchSeq;
+    const all = await api('GET', '/admin/api/users?q=' + encodeURIComponent(q.value)).catch(e => { toast(e.message, true); return null; });
+    if (!all || mine !== searchSeq || !$('#usersList')) return;
+    const users = all.filter(u => !u.is_admin), admins = all.filter(u => u.is_admin);   // admins aren't users: listed on their own
+    $('#usersSub').textContent = `${users.length} user${users.length === 1 ? '' : 's'}. Open one to see their data and fix things for them.`;
+    $('#usersList').innerHTML = `<div class="tablewrap"><table><thead><tr><th>User</th><th>Status</th><th>Last login</th><th>Applications</th><th>Auto-apply</th><th>Gmail</th></tr></thead><tbody>
+    ${users.map(u => `<tr class="click" data-href="#/users/${u.id}">
+      <td><b>${esc(u.full_name || u.email)}</b><div class="muted small">${esc(u.email)}</div></td>
+      <td>${u.disabled_at ? '<span class="badge bad">Disabled</span>' : '<span class="badge ok">Active</span>'}</td>
+      <td>${ago(u.last_login_at)}</td>
+      <td>${u.apps}${u.needs_you ? ` · <span class="badge warn">${u.needs_you} need them</span>` : ''}${u.failed ? ` · <span class="badge bad">${u.failed} failed</span>` : ''}</td>
+      <td>${u.auto_apply ? '<span class="badge ok">On</span>' : '<span class="badge">Off</span>'}</td>
+      <td>${u.gmail ? '<span class="badge ok">Connected</span>' : '<span class="muted">–</span>'}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No users match.</td></tr>'}
+    </tbody></table></div>
+    ${admins.length ? `<h2 style="margin-top:26px">Admins</h2><div class="tablewrap"><table><thead><tr><th>Admin</th><th>Status</th><th>Last login</th></tr></thead><tbody>
+      ${admins.map(u => `<tr class="click" data-href="#/users/${u.id}"><td><b>${esc(u.email)}</b></td>
+        <td>${u.disabled_at ? '<span class="badge bad">Disabled</span>' : '<span class="badge info">Admin</span>'}</td><td>${ago(u.last_login_at)}</td></tr>`).join('')}
+    </tbody></table></div>` : ''}`;
+  });
+  q.focus(); q.setSelectionRange(q.value.length, q.value.length);
+};
+
+let currentUser = null;
+async function renderUser(id) {
+  const d = await api('GET', '/admin/api/users/' + id); currentUser = d.user;
+  const u = d.user, p = d.profile || {};
+  const btn = (action, label, cls = '') => `<button class="btn ${cls}" data-uact="${action}">${label}</button>`;
+  return `<a class="back" href="#/users">← Users</a>
+    <h1>${esc(u.full_name || u.email)} ${u.is_admin ? '<span class="badge info">Admin</span>' : ''} ${u.disabled_at ? '<span class="badge bad">Disabled</span>' : ''}</h1>
+    <p class="sub">${esc(u.email)} · joined ${when(u.created_at)} · last login ${ago(u.last_login_at)}</p>
+    <div class="card" style="margin-bottom:14px"><h2>Fix things</h2><div class="actions">
+      ${!u.is_admin && !u.disabled_at ? btn('impersonate', 'Open as user', 'primary') : ''}
+      ${btn('reset-link', 'Make password reset link')}
+      ${btn('signout', `Sign out everywhere (${u.sessions})`)}
+      ${u.auto_apply ? btn('pause-auto', 'Pause auto-apply') : btn('resume-auto', 'Turn auto-apply on')}
+      ${u.is_admin ? btn('remove-admin', 'Remove admin') : btn('make-admin', 'Make admin')}
+      ${u.disabled_at ? btn('enable', 'Enable account') : btn('disable', 'Disable account', 'danger')}
+    </div><p class="muted small" style="margin:10px 0 0">Open as user shows their dashboard exactly as they see it, for 1 hour. Anything you change there is real and is recorded in the audit log.</p></div>
+    <div class="grid two">
+      <div class="card"><h2>Profile</h2><dl>
+        <dt>Name</dt><dd>${esc(p.full_name || '–')}</dd><dt>Contact email</dt><dd>${esc(p.email || '–')}</dd><dt>Phone</dt><dd>${esc(p.phone || '–')}</dd>
+        <dt>Title</dt><dd>${esc(p.current_title || '–')}</dd><dt>Experience</dt><dd>${p.total_experience_years ?? '–'} years</dd>
+        <dt>Location</dt><dd>${esc([p.current_city, p.current_state, p.current_country].filter(Boolean).join(', ') || '–')}</dd>
+        <dt>Work authorization</dt><dd>${esc(p.work_authorization || '–')}${p.needs_sponsorship ? ' · needs sponsorship' : ''}</dd>
+        <dt>ATS password</dt><dd>${p.has_ats_password ? 'Set (hidden)' : '<span class="badge warn">Not set</span>'}</dd>
+        <dt>Gmail</dt><dd>${u.gmail ? esc(u.gmail_email || 'Connected') : '<span class="muted">Not connected</span>'}</dd>
+        <dt>User ID</dt><dd class="mono">${esc(u.id)}</dd>
+      </dl></div>
+      <div class="card"><h2>Auto-apply</h2><dl>
+        <dt>Status</dt><dd>${u.auto_apply ? '<span class="badge ok">On</span>' : '<span class="badge">Off</span>'}</dd>
+        <dt>Daily cap</dt><dd>${d.settings?.daily_cap ?? '–'}</dd><dt>Per company / 30 days</dt><dd>${d.settings?.per_company_cap_30d ?? '–'}</dd>
+        <dt>Lanes</dt><dd>${d.lanes.map(l => `${esc(l.name)} ${l.enabled ? '<span class="badge ok">on</span>' : '<span class="badge">off</span>'}`).join('<br>') || '–'}</dd>
+        <dt>Resumes</dt><dd>${d.resumes.map(r => `${esc(r.name)}${r.is_default ? ' <span class="badge">default</span>' : ''}`).join('<br>') || '<span class="badge warn">None</span>'}</dd>
+      </dl></div>
+    </div>
+    <div class="tablewrap" style="margin-top:14px"><table><thead><tr><th>Application</th><th>State</th><th>Problem</th><th>Updated</th></tr></thead><tbody>
+      ${d.applications.map(a => `<tr class="click" data-href="#/applications/${a.id}"><td><b>${esc(a.company || '–')}</b><div class="muted small">${esc(a.title || '')}</div></td>
+        <td>${badge(appState(a))}</td><td class="small">${esc(a.reason || '')}</td><td>${ago(a.updated_at)}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">No applications.</td></tr>'}
+    </tbody></table></div>
+    ${d.history.length ? `<div class="card" style="margin-top:14px"><h2>Admin actions on this account</h2><div class="timeline">
+      ${d.history.map(h => `<div><b>${esc(h.action)}</b> <span class="muted">by ${esc(h.admin_email)} · ${when(h.created_at)}</span></div>`).join('')}</div></div>` : ''}`;
+}
+const USER_CONFIRM = {
+  impersonate: (u) => ['Open as this user?', `You'll see ${u.email}'s dashboard for 1 hour. Changes you make there are real. A yellow banner lets you come back.`, 'Open as user'],
+  signout: (u) => ['Sign out everywhere?', `${u.email} will have to log in again on every device.`, 'Sign out'],
+  disable: (u) => ['Disable this account?', `${u.email} is signed out and can't log in until you enable the account again. Their data stays.`, 'Disable', true],
+  'make-admin': (u) => ['Make admin?', `${u.email} will be able to see every user and do everything in this portal.`, 'Make admin'],
+  'remove-admin': (u) => ['Remove admin?', `${u.email} loses access to this portal.`, 'Remove'],
+  'pause-auto': (u) => ['Pause auto-apply?', `No new applications will be sent for ${u.email} until it's turned back on.`, 'Pause'],
+  'resume-auto': (u) => ['Turn auto-apply on?', `Rejekt.ai will start sending applications for ${u.email} again, using their lanes and caps.`, 'Turn on'],
+};
+renderUser.after = () => {
+  $$('[data-uact]').forEach(b => b.onclick = () => {
+    const action = b.dataset.uact;
+    act(b, () => api('POST', `/admin/api/users/${currentUser.id}/action`, { action }), {
+      confirm: USER_CONFIRM[action]?.(currentUser),
+      then: async (r) => {
+        if (r.redirect) return location.assign(r.redirect);
+        if (r.link) { $('#linkText').textContent = r.message; $('#linkVal').value = r.link; $('#linkDlg').showModal(); }
+        await route();
+      },
+    });
+  });
+};
+$('#linkCopy').onclick = async () => { await navigator.clipboard.writeText($('#linkVal').value).catch(() => {}); $('#linkVal').select(); toast('Copied'); };
+$('#linkClose').onclick = () => $('#linkDlg').close();
+
+// ─── Applications ───────────────────────────────────────────────────────────
+async function renderApps(params) {
+  const state = params.get('state') || '';
+  const opts = ['', 'NEEDS_YOU', 'FAILED', 'STUCK', 'PREPARED', 'SUBMITTED', 'SKIPPED', 'SAVED', 'APPLIED'];
+  return `<h1>Applications</h1><p class="sub">Every user's applications. Open one for its full history and error.</p>
+    <div class="toolbar"><select id="as">${opts.map(o => `<option value="${o}" ${o === state ? 'selected' : ''}>${o ? PRETTY[o] : 'All states'}</option>`).join('')}</select>
+      <input type="search" id="aq" placeholder="Company or job title" value="${esc(params.get('q') || '')}"><span class="muted" id="appsCount"></span></div>
+    <div id="appsList"><div class="loading">Loading…</div></div>`;
+}
+renderApps.after = (params) => {
+  const user = params.get('user') || '';
+  liveSearch([$('#as'), $('#aq')], () => `#/applications?state=${encodeURIComponent($('#as').value)}&q=${encodeURIComponent($('#aq').value)}${user ? '&user=' + encodeURIComponent(user) : ''}`, async () => {
+    const mine = ++searchSeq;
+    const rows = await api('GET', `/admin/api/applications?state=${encodeURIComponent($('#as').value)}&q=${encodeURIComponent($('#aq').value)}&user=${encodeURIComponent(user)}`).catch(e => { toast(e.message, true); return null; });
+    if (!rows || mine !== searchSeq || !$('#appsList')) return;
+    $('#appsCount').textContent = `${rows.length}${rows.length === 300 ? '+' : ''} shown`;
+    $('#appsList').innerHTML = `<div class="tablewrap"><table><thead><tr><th>Job</th><th>User</th><th>State</th><th>Problem</th><th>Tries</th><th>Updated</th></tr></thead><tbody>
+    ${rows.map(a => `<tr class="click" data-href="#/applications/${a.id}"><td><b>${esc(a.company || '–')}</b><div class="muted small">${esc(a.title || '')}</div></td>
+      <td class="small">${esc(a.email || a.user_id)}</td><td>${badge(appState(a))}${a.source === 'auto' ? ' <span class="muted small">auto</span>' : ''}</td>
+      <td class="small">${esc(a.reason || '')}</td><td>${a.attempts ?? 0}</td><td>${ago(a.updated_at)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No applications match.</td></tr>'}
+    </tbody></table></div>`;
+  });
+};
+
+let currentApp = null;
+const IN_PROGRESS = ['QUEUED', 'PREPARED', 'SUBMITTING'];
+/** The part of an application's page that changes while it is being filled and sent */
+function appLive(a) {
+  const det = a.apply_detail || {}, pg = det.page || {};
+  const line = e => {
+    const d = e.detail || {};
+    if (e.kind === 'step') return `${esc(d.text)}${d.missing?.length ? `<div class="small muted">Couldn't answer: ${d.missing.map(esc).join(' · ')}</div>` : ''}`;
+    if (e.kind === 'resume') return `Resume tailored for this job <span class="muted small">(${esc(d.profile || '')})</span>`;
+    if (e.kind === 'status') return `${esc(e.from_status || '–')} → ${esc(e.to_status || '–')}`;
+    return `<b>${esc(e.from_status || 'start')} → ${esc(e.to_status || '–')}</b>${d.reason ? `<div class="small">${esc(d.reason)}</div>` : ''}`;
+  };
+  return `<p class="sub">${badge(appState(a))}${IN_PROGRESS.includes(a.apply_state) ? ' <span class="muted small">live: refreshing every few seconds</span>' : ''} for <a href="#/users/${a.user_id}">${esc(a.email || a.user_id)}</a> · ${a.source || 'manual'} · ${a.attempts ?? 0} tries · updated ${ago(a.updated_at)}</p>
+    <div class="grid two">
+      <div class="card"><h2>What happened</h2><dl>
+        <dt>Problem</dt><dd>${esc(det.reason || '–')}</dd>
+        ${pg.text ? `<dt>The page said</dt><dd class="small">${esc(pg.text)}</dd>` : ''}
+        ${pg.invalid?.length ? `<dt>Fields the form marked invalid</dt><dd>${pg.invalid.map(esc).join('<br>')}</dd>` : ''}
+        <dt>Missing answers</dt><dd>${(det.missing || []).map(m => esc(m.label || m.name || m)).join('<br>') || '–'}</dd>
+        <dt>Match score</dt><dd>${det.matchScore ?? '–'}</dd>
+        <dt>Submitted</dt><dd>${when(a.submitted_at)}</dd><dt>Created</dt><dd>${when(a.created_at)}</dd>
+      </dl>
+      <details style="margin-top:10px"><summary><b>Fields filled (${(det.filled || []).length})</b></summary>
+        <table class="small"><tbody>${(det.filled || []).map(f => `<tr><td>${esc(f.label)}</td><td>${esc(String(f.value ?? ''))}</td><td class="muted">${esc(f.source || '')}</td></tr>`).join('')}</tbody></table></details></div>
+      <div class="card"><h2>History</h2><div class="timeline">
+        ${a.events.map(e => `<div>${line(e)} <span class="muted small">${when(e.created_at)}</span></div>`).join('') || '<span class="muted">No events.</span>'}</div></div>
+    </div>
+    <div class="card" style="margin-top:14px"><h2>Screenshots of the form</h2>
+      ${(a.shots || []).length ? `<div style="display:flex;gap:12px;flex-wrap:wrap">${a.shots.map(s => `<a href="/admin/api/applications/${a.id}/shots/${s.id}" target="_blank" rel="noopener" style="width:200px;text-decoration:none">
+        <img src="/admin/api/applications/${a.id}/shots/${s.id}" alt="${esc(s.label || '')}" loading="lazy" style="width:200px;height:260px;object-fit:cover;object-position:top;border:1px solid var(--line);border-radius:8px"><div class="small">${esc(s.label || '')}<span class="muted"> · ${when(s.created_at)}</span></div></a>`).join('')}</div>`
+        : '<span class="muted">None yet. A screenshot is saved before and after each Submit.</span>'}</div>`;
+}
+async function renderApp(id) {
+  const a = await api('GET', '/admin/api/applications/' + id); currentApp = a;
+  const det = a.apply_detail || {};
+  const waiting = ['NEEDS_YOU', 'PREPARED', 'FAILED'].includes(a.apply_state);
+  return `<a class="back" href="javascript:history.back()">← Back</a>
+    <h1>${esc(a.job?.company || 'Application')} · ${esc(a.job?.title || '')}</h1>
+    <div id="appLive">${appLive(a)}</div>
+    <div class="card" style="margin:14px 0"><h2>Fix it</h2><div class="actions">
+      ${waiting ? '<button class="btn" id="skipApp">Skip it</button>' : ''}
+      <a class="btn primary" href="#/users/${a.user_id}">Open the user to retry or answer</a>
+      ${a.job?.url ? `<a class="btn" href="${esc(a.job.url)}" target="_blank" rel="noopener">Job posting ↗</a>` : ''}
+      ${det.formUrl ? `<a class="btn" href="${esc(det.formUrl)}" target="_blank" rel="noopener">Application form ↗</a>` : ''}
+    </div><p class="muted small" style="margin:10px 0 0">Retrying or answering questions sends a real application, so it's done from the user's own dashboard (Open as user).</p></div>
+    <details class="card"><summary><b>Raw details</b></summary><pre>${esc(JSON.stringify({ apply_detail: a.apply_detail, answers: a.answers, job: a.job }, null, 2))}</pre></details>`;
+}
+renderApp.after = () => {
+  const b = $('#skipApp'); if (b) b.onclick = () => act(b, () => api('POST', `/admin/api/applications/${currentApp.id}/action`, { action: 'skip' }),
+    { confirm: ['Skip this application?', "It stops waiting on the user and won't be sent.", 'Skip'] });
+  // while it's being filled or sent, follow it live (until it stops, or you leave the page)
+  if (IN_PROGRESS.includes(currentApp.apply_state)) pollers.push(setInterval(async () => {
+    const a = await api('GET', '/admin/api/applications/' + currentApp.id).catch(() => null);
+    const host = $('#appLive'); if (!a || !host) return;
+    currentApp = a; host.innerHTML = appLive(a);
+  }, 4000));
+};
+
+// ─── Companies & jobs ───────────────────────────────────────────────────────
+async function renderCompanies(params) {
+  return `<h1>Companies &amp; jobs</h1><p class="sub">When a user says a job is missing, wrong, or still shows after it closed.</p>
+    <div class="grid two">
+      <div><div class="toolbar"><input type="search" id="cq" placeholder="Company name or board slug" value="${esc(params.get('q') || '')}"></div><div id="coList"></div></div>
+      <div><div class="toolbar"><input type="search" id="jq" placeholder="Job ID or exact posting URL" value="${esc(params.get('job') || '')}"></div><div id="jobList"></div></div>
+    </div>`;
+}
+let coSeq = 0, jobSeq = 0;
+renderCompanies.after = () => {
+  const hashFor = () => `#/companies?q=${encodeURIComponent($('#cq').value)}&job=${encodeURIComponent($('#jq').value)}`;
+  liveSearch([$('#cq')], hashFor, async () => {
+    const q = $('#cq').value.trim(), mine = ++coSeq;
+    if (!q) { $('#coList').innerHTML = '<div class="card empty">Search a company to scan it now, turn it on or off, or clear its errors.</div>'; return; }
+    const cos = await api('GET', '/admin/api/companies?q=' + encodeURIComponent(q)).catch(e => { toast(e.message, true); return null; });
+    if (!cos || mine !== coSeq || !$('#coList')) return;
+    $('#coList').innerHTML = `<div class="tablewrap"><table><thead><tr><th>Company</th><th>Status</th><th class="num">Open jobs</th><th>Last scan</th><th></th></tr></thead><tbody>
+      ${cos.map(c => `<tr><td><b>${esc(c.name)}</b><div class="muted small">${esc(c.ats)} · ${esc(c.slug)}</div></td>
+        <td>${c.active ? '<span class="badge ok">On</span>' : '<span class="badge">Off</span>'}${c.scan_errors ? ` <span class="badge bad">${c.scan_errors} errors</span>` : ''}</td>
+        <td class="num">${c.active_jobs}</td><td>${ago(c.last_scan)}</td>
+        <td><div class="actions">${c.active ? `<button class="btn" data-cact="rescan" data-id="${c.id}">Scan now</button><button class="btn" data-cact="deactivate" data-id="${c.id}">Turn off</button>` : `<button class="btn" data-cact="activate" data-id="${c.id}">Turn on</button>`}
+          ${c.scan_errors ? `<button class="btn" data-cact="clear-errors" data-id="${c.id}">Clear errors</button>` : ''}</div></td></tr>`).join('') || '<tr><td colspan="5" class="empty">No companies match.</td></tr>'}
+      </tbody></table></div>`;
+    $$('#coList [data-cact]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/companies/${b.dataset.id}/action`, { action: b.dataset.cact }),
+      { confirm: b.dataset.cact === 'deactivate' ? ['Turn off this company?', 'It stops being scanned. Its open jobs stay until they would normally close.', 'Turn off'] : null }));
+  });
+  liveSearch([$('#jq')], hashFor, async () => {
+    const q = $('#jq').value.trim(), mine = ++jobSeq;
+    if (!q) { $('#jobList').innerHTML = '<div class="card empty">Find a job to close it or bring it back.</div>'; return; }
+    const jobs = await api('GET', '/admin/api/jobs/find?q=' + encodeURIComponent(q)).catch(e => { toast(e.message, true); return null; });
+    if (!jobs || mine !== jobSeq || !$('#jobList')) return;
+    $('#jobList').innerHTML = jobs.map(j => `<div class="card" style="margin-bottom:10px"><b>${esc(j.title)}</b><div class="muted">${esc(j.company)} · ${esc(j.location || '')}</div>
+        <dl style="margin:10px 0"><dt>Status</dt><dd>${j.active ? '<span class="badge ok">Open</span>' : `<span class="badge">Closed ${when(j.closed_at)}</span>`}</dd>
+        <dt>Last seen on board</dt><dd>${ago(j.last_seen)} · missed ${j.missed_scans} scans</dd><dt>Found</dt><dd>${when(j.discovered)}</dd><dt>Job ID</dt><dd class="mono">${j.id}</dd></dl>
+        <div class="actions">${j.active ? `<button class="btn" data-jact="close" data-id="${j.id}">Close job</button>` : `<button class="btn" data-jact="reopen" data-id="${j.id}">Reopen job</button>`}
+          <a class="btn" href="${esc(j.url)}" target="_blank" rel="noopener">Posting ↗</a></div></div>`).join('') || '<div class="card empty">No job with that ID or URL.</div>';
+    $$('#jobList [data-jact]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/jobs/${b.dataset.id}/action`, { action: b.dataset.jact }),
+      { confirm: b.dataset.jact === 'close' ? ['Close this job?', "It stops showing to users. If it's still on the company's board, the next scan reopens it.", 'Close job'] : null }));
+  });
+};
+
+// ─── Job data: open jobs by country and role ────────────────────────────────
+const regionName = new Intl.DisplayNames(['en'], { type: 'region' });
+const countryLabel = (cc) => { if (!cc) return 'Location not recognised'; try { return regionName.of(cc) || cc; } catch { return cc; } };
+const flag = (cc) => /^[A-Z]{2}$/.test(cc || '') ? String.fromCodePoint(...[...cc].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '🌐';
+const roleLabel = (r) => r ? r.replace(/_/g, ' ').toLowerCase().replace(/^./, c => c.toUpperCase()).replace(/\b(sre|ml|ai|qa|hr|it|ux|ui|devops)\b/gi, m => m.toUpperCase()) : '';
+const share = (n, of) => `<span style="display:inline-block;width:110px;height:6px;border-radius:3px;background:var(--surface-2);vertical-align:middle;margin-right:8px;overflow:hidden"><i style="display:block;height:100%;width:${of ? Math.max(1, 100 * n / of) : 0}%;background:var(--ok)"></i></span>${of ? (100 * n / of).toFixed(n / of < 0.01 ? 2 : 1) : 0}%`;
+
+async function renderJobData() {
+  return `<h1>Job data</h1><p class="sub" id="jdSub">Open jobs by country and by role.</p>
+    <div class="toolbar"><button class="btn" id="jdRefresh">Recount now</button><span class="muted small" id="jdNote"></span></div>
+    <div id="jdBody"><div class="loading">Loading…</div></div>`;
+}
+let jdCountry = '';
+renderJobData.after = () => {
+  let shownAt = null;   // redraw only when a new count arrives, so expanded rows stay open
+  const load = async () => {
+    const d = await api('GET', '/admin/api/job-data').catch(e => ({ error: e.message }));
+    if (!$('#jdBody')) return;
+    $('#jdNote').textContent = d.counting ? 'Counting now… this takes about a minute.' : d.at ? `Counted ${ago(d.at)}${d.seconds ? ` in ${d.seconds} s` : ''}. Updates every 30 minutes.` : '';
+    if (!d.matrix) { $('#jdBody').innerHTML = d.error ? `<div class="card empty">Couldn't count: ${esc(d.error)}</div>` : '<div class="card empty">Counting open jobs by country and role for the first time. This takes about a minute.</div>'; return; }
+    if (d.at !== shownAt) { shownAt = d.at; draw(d); }
+  };
+  function draw(d) {
+    const t = d.totals;
+    // countries: jobs per country (a job listed in two countries counts in both)
+    const byCountry = new Map();
+    for (const r of d.matrix) byCountry.set(r.country, (byCountry.get(r.country) || 0) + r.jobs);
+    const countries = [...byCountry].sort((a, b) => (a[0] === null) - (b[0] === null) || b[1] - a[1]);
+    const known = countries.filter(([c]) => c).length;
+    // roles: all countries from the exact per-job counts, one country from the matrix
+    const rows = jdCountry ? d.matrix.filter(r => (r.country || '') === jdCountry) : d.roles;
+    const total = rows.reduce((a, r) => a + r.jobs, 0);
+    const fams = new Map();
+    for (const r of rows) { const f = fams.get(r.family) || { jobs: 0, roles: new Map() }; f.jobs += r.jobs; if (r.role) f.roles.set(r.role, (f.roles.get(r.role) || 0) + r.jobs); fams.set(r.family, f); }
+    const famList = [...fams].sort((a, b) => (a[0] === 'OTHER') - (b[0] === 'OTHER') || b[1].jobs - a[1].jobs);
+    const kpi = (num, label, sub = '') => `<div class="card kpi"><div class="n" title="${typeof num === 'number' ? num.toLocaleString() : num}">${typeof num === 'number' ? big(num) : num}</div><div class="l">${label}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>`;
+    $('#jdSub').textContent = `${t.open_jobs.toLocaleString()} open jobs in ${known} countries.`;
+    $('#jdBody').innerHTML = `
+      <div class="grid kpis">${kpi(t.open_jobs, 'Open jobs')}${kpi(known, 'Countries')}
+        ${kpi(`${Math.round(100 * t.with_country / t.open_jobs)}%`, 'Have a recognised country', `${(t.open_jobs - t.with_country).toLocaleString()} don't`)}
+        ${kpi(`${Math.round(100 * t.with_role / t.open_jobs)}%`, 'Have a recognised role', `${(t.open_jobs - t.with_role).toLocaleString()} are "Other"`)}</div>
+      <div class="grid two">
+        <div><h2>By country</h2><div class="tablewrap"><table><thead><tr><th>Country</th><th class="num">Open jobs</th><th>Share</th></tr></thead><tbody>
+          ${countries.map(([cc, n]) => `<tr class="click" data-cc="${esc(cc || '')}"${(cc || '') === jdCountry && jdCountry ? ' style="background:var(--cobalt-soft)"' : ''}><td>${flag(cc)} &nbsp;<b>${esc(countryLabel(cc))}</b>${cc ? ` <span class="muted small">${esc(cc)}</span>` : ''}</td>
+            <td class="num">${n.toLocaleString()}</td><td class="small">${share(n, t.open_jobs)}</td></tr>`).join('')}
+        </tbody></table></div><p class="muted small">A job listed in several countries counts once in each. Click a country to see its roles.</p></div>
+        <div><h2 style="display:flex;align-items:center;gap:10px">By role <select id="jdCountry" style="margin-left:auto;font-size:13px">
+            <option value="">All countries</option>${countries.map(([cc]) => `<option value="${esc(cc || '')}" ${(cc || '') === jdCountry ? 'selected' : ''}>${esc(countryLabel(cc))}</option>`).join('')}</select></h2>
+          <div class="tablewrap"><table><thead><tr><th>Role</th><th class="num">Open jobs</th><th>Share</th></tr></thead><tbody>
+          ${famList.map(([fam, f]) => `<tr class="click" data-fam="${esc(fam)}"><td><b>${fam === 'OTHER' ? 'Other / not classified' : esc(roleLabel(fam))}</b>${f.roles.size ? ` <span class="muted small">▸ ${f.roles.size} role${f.roles.size === 1 ? '' : 's'}</span>` : ''}</td>
+              <td class="num">${f.jobs.toLocaleString()}</td><td class="small">${share(f.jobs, total)}</td></tr>
+            ${[...f.roles].sort((a, b) => b[1] - a[1]).map(([role, n]) => `<tr data-in="${esc(fam)}" hidden><td style="padding-left:30px">${esc(roleLabel(role))}</td><td class="num">${n.toLocaleString()}</td><td class="small muted">${share(n, total)}</td></tr>`).join('')}`).join('')}
+          </tbody></table></div><p class="muted small">Click a role family to see the roles in it. "Other" = titles the role classifier doesn't recognise yet.</p></div>
+      </div>`;
+    $$('#jdBody tr[data-fam]').forEach(tr => tr.onclick = () => $$(`#jdBody tr[data-in="${CSS.escape(tr.dataset.fam)}"]`).forEach(r => r.hidden = !r.hidden));
+    $$('#jdBody tr[data-cc]').forEach(tr => tr.onclick = () => { jdCountry = jdCountry === tr.dataset.cc ? '' : tr.dataset.cc; draw(d); });
+    $('#jdCountry').onchange = (e) => { jdCountry = e.target.value; draw(d); };
+  }
+  $('#jdRefresh').onclick = (e) => act(e.target, () => api('GET', '/admin/api/job-data?refresh=1').then(() => ({ message: 'Recounting… the numbers update in about a minute.' })), { then: load });
+  load();
+  pollers.push(setInterval(load, 15_000));   // picks up a finished count (and the 30-minute refresh) while the page is open
+};
+
+// ─── Scans ──────────────────────────────────────────────────────────────────
+const ATS_COLOR = { greenhouse: '#3D5FCB', ashby: '#2A8057', lever: '#92650A', smartrecruiters: '#B84A3E', workday: '#6B4FB3', bamboohr: '#4E8F2F',
+  workable: '#B5651D', breezy: '#1F8A8A', teamtailor: '#C2417A', recruitee: '#5B7DB1', oraclecloud: '#A33A2A', rippling: '#7A5C2E', pinpoint: '#3E7D5A' };
+const atsColor = (a) => ATS_COLOR[a] || '#6A6A6A';
+const span = (secs) => { const a = Math.abs(Math.round(secs)), h = Math.floor(a / 3600), m = Math.floor(a % 3600 / 60); return h ? `${h}h ${m}m` : m ? `${m}m ${a % 60}s` : `${a}s`; };
+
+// The scan log: live status every 10 s, runs + chart every 30 s, a countdown every second, while this page is open
+async function renderScans() {
+  return `<h1>Scans</h1><p class="sub" id="scanSub">Loading…</p>
+    <div class="toolbar"><button class="btn primary" id="scanAll" disabled>Scan all now</button><button class="btn danger" id="stopAll" disabled>Stop all</button></div>
+    <div class="grid kpis" id="scanCards"></div>
+    <h2>Platforms</h2><div class="tablewrap" id="scanPlatforms" style="margin-bottom:18px"><div class="loading" style="padding:16px">Loading…</div></div>
+    <h2>Jobs found per hour · last 48 hours</h2><div class="card" id="scanChart" style="margin-bottom:18px"><div class="loading">Loading…</div></div>
+    <h2>Recent scan runs</h2><div class="tablewrap" id="scanRuns"><div class="loading" style="padding:16px">Loading…</div></div>`;
+}
+let scanLive = null, scanRuns = [], scanNext = null;
+renderScans.after = () => {
+  const ctl = (action, target) => api('POST', '/api/scan-control', { action, target }).then(r => { if (r.ok === false) throw new Error(r.message); return r; });
+  const refresh = () => new Promise(ok => setTimeout(ok, 2500)).then(() => Promise.all([loadLive(), loadRuns()]));   // a new scan takes a moment to appear
+  $('#scanAll').onclick = (e) => act(e.target, () => ctl('start', 'scheduled'), { then: refresh });
+  $('#stopAll').onclick = (e) => act(e.target, () => ctl('stop', 'all'), { then: refresh,
+    confirm: ['Stop all scans?', 'Progress so far is saved. The next scheduled run starts at its usual time.', 'Stop', true] });
+  $('#scanPlatforms').onclick = (e) => {
+    const b = e.target.closest('[data-scan]'); if (!b) return;
+    const [action, ats] = b.dataset.scan.split(':');
+    act(b, () => ctl(action, ats), { then: refresh });
+  };
+
+  function tick() {
+    const el = $('#countdown'); if (!el || !scanNext) return;
+    const s = (scanNext - Date.now()) / 1000;
+    el.textContent = s > 0 ? 'in ' + span(s) : `due now (${span(-s)} late)`;
+  }
+  function renderCards() {
+    const d = scanLive; if (!d) return;
+    const sc = d.schedule, procs = d.processes || [], done = scanRuns.find(r => r.status !== 'running');
+    scanNext = sc.nextAt ? new Date(sc.nextAt) : null;
+    const card = (label, value, sub) => `<div class="card kpi"><div class="l">${label}</div><div class="n" style="font-size:20px">${value}</div><div class="s">${sub}</div></div>`;
+    $('#scanCards').innerHTML =
+      card('Open jobs', d.jobs.countedAt ? d.jobs.active.toLocaleString() : '…', d.jobs.countedAt ? `${d.jobs.total.toLocaleString()} ever found · counted ${ago(d.jobs.countedAt)}` : 'counting, takes a minute') +
+      card('Next scheduled scan', !sc.loaded ? '<span class="badge bad">Not scheduled</span>' : sc.runningNow ? '<span class="badge ok">Running now</span>' : '<span id="countdown">–</span>',
+        `${sc.nextMode === 'full' ? 'full scan (closes gone jobs)' : 'quick scan (new jobs)'} · every ${sc.intervalSecs ? span(sc.intervalSecs) : '–'}<br>last full scan ${ago(sc.lastFull)}`) +
+      card('Last finished run', done ? `<span class="badge ${done.status === 'completed' ? 'ok' : 'bad'}">${done.status === 'completed' ? 'Completed' : 'Stopped early'}</span>` : '–',
+        done ? `${ago(done.started_at)} · ${span(done.elapsed_secs || 0)}` : '') +
+      card('Scanning now', procs.length ? `<span class="badge ok">${procs.length} running</span>` : '<span class="muted">Idle</span>',
+        procs.length ? procs.map(p => `${esc(p.ats)} · ${esc(p.source)} · ${span(p.elapsedSecs)}`).join('<br>') : (d.bulk?.running ? 'bulk run going' : 'waiting for the next scan'));
+    tick();
+  }
+  async function loadLive() {
+    try { scanLive = await api('GET', '/api/scan-status'); }
+    catch (e) { $('#scanPlatforms').innerHTML = `<div class="empty">Couldn't load platform status (${esc(e.message)}). The database may be busy with a scan; retrying every 10 seconds.</div>`; return; }
+    const d = scanLive, procs = d.processes || [], all = procs.some(p => p.ats === 'all');
+    $('#scanSub').textContent = `${procs.length ? 'Scanning now.' : 'Not scanning.'} Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}.`;
+    $('#scanAll').disabled = all; $('#scanAll').textContent = all ? 'Scanning all platforms…' : 'Scan all now';
+    $('#stopAll').disabled = !procs.length;
+    renderCards();
+    $('#scanPlatforms').innerHTML = `<table><thead><tr><th>Platform</th><th>Status</th><th class="num">Companies</th><th>Scanned in last ${d.platforms[0]?.freshHours ?? ''} h</th><th class="num">Never scanned</th><th class="num">Erroring</th><th class="num">Open jobs</th><th class="num">New 1 h</th><th>Last scan</th><th></th></tr></thead><tbody>
+      ${d.platforms.map(p => {
+        const live = p.companies - (p.dead || 0), pct = live ? Math.round(100 * p.fresh / live) : 100;
+        const running = procs.some(x => x.ats === p.ats);
+        const status = p.state === 'running' && pct < 100 ? '<span class="badge info">Scanning</span>' : pct >= 90 ? '<span class="badge ok">On time</span>' : '<span class="badge warn">Behind</span>';
+        return `<tr><td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${atsColor(p.ats)};margin-right:8px"></span><b>${esc(p.ats)}</b></td>
+          <td>${status}</td><td class="num">${live.toLocaleString()}</td>
+          <td><span style="display:inline-block;width:60px;height:6px;border-radius:3px;background:var(--surface-2);vertical-align:middle;margin-right:8px;overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:${pct >= 90 ? 'var(--ok)' : 'var(--warn)'}"></i></span>${pct}%</td>
+          <td class="num">${p.waiting ? `<span class="badge warn">${p.waiting.toLocaleString()}</span>` : '<span class="muted">0</span>'}</td>
+          <td class="num">${p.erroring ? `<span class="badge bad">${p.erroring}</span>` : '<span class="muted">0</span>'}</td>
+          <td class="num">${d.jobs.countedAt ? (p.activeJobs || 0).toLocaleString() : '…'}</td><td class="num">${p.new1h ? '+' + p.new1h.toLocaleString() : '<span class="muted">0</span>'}</td>
+          <td>${ago(p.lastScan)}</td>
+          <td>${running ? `<button class="btn danger" data-scan="stop:${esc(p.ats)}">Stop</button>` : all ? '' : `<button class="btn" data-scan="start:${esc(p.ats)}">Scan</button>`}</td></tr>`; }).join('')}
+      </tbody></table>`;
+  }
+  async function loadRuns() {
+    let data;
+    try { data = await api('GET', '/api/scan-stats'); } catch (e) { $('#scanRuns').innerHTML = `<div class="empty">Couldn't load scan runs (${esc(e.message)}).</div>`; return; }
+    scanRuns = data.runs; renderCards();
+    const byHour = data.byHour;
+    if (!byHour.length) $('#scanChart').innerHTML = `<div class="empty">${data.byHourAt ? 'No jobs found in the last 48 hours yet.' : 'Counting jobs per hour… this takes a minute while a scan is running.'}</div>`;
+    else {
+      const hours = {}, platforms = new Set();
+      for (const r of byHour) { (hours[r.hour] ||= {})[r.ats] = +r.jobs_found; platforms.add(r.ats); }
+      const keys = Object.keys(hours).sort(), list = [...platforms];
+      const max = Math.max(...keys.map(h => Object.values(hours[h]).reduce((a, b) => a + b, 0)));
+      $('#scanChart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:3px;height:150px;overflow-x:auto">${keys.map(h => {
+          const d = new Date(h), total = Object.values(hours[h]).reduce((a, b) => a + b, 0);
+          return `<div style="flex:1;min-width:8px;display:flex;flex-direction:column;justify-content:flex-end;height:100%" title="${d.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric' })}: ${total.toLocaleString()} jobs">
+            ${list.filter(a => hours[h][a] > 0).map(a => `<div style="height:${Math.max(2, 120 * hours[h][a] / max)}px;background:${atsColor(a)}" title="${esc(a)}: ${hours[h][a].toLocaleString()} jobs"></div>`).join('')}
+            <div class="muted" style="font-size:10px;height:16px;text-align:center">${d.getHours() % 6 ? '' : d.toLocaleTimeString([], { hour: 'numeric' })}</div></div>`; }).join('')}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px">${list.map(a => `<span class="small"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${atsColor(a)};margin-right:5px"></span>${esc(a)}</span>`).join('')}</div>`;
+    }
+    $('#scanRuns').innerHTML = scanRuns.length ? `<table><thead><tr><th>Started</th><th class="num">Took</th><th>Result</th><th class="num">Companies</th><th class="num">New jobs</th><th class="num">Closed</th><th class="num">Errors</th></tr></thead><tbody>
+      ${scanRuns.slice(0, 15).map(r => `<tr><td>${when(r.started_at)}</td><td class="num">${r.elapsed_secs ? span(r.elapsed_secs) : '–'}</td>
+        <td><span class="badge ${{ completed: 'ok', failed: 'bad', running: 'info' }[r.status] || ''}">${r.status === 'failed' ? 'stopped early' : esc(r.status)}</span></td>
+        <td class="num">${(+r.companies_scanned || 0).toLocaleString()}</td><td class="num">+${(+r.jobs_new || 0).toLocaleString()}</td>
+        <td class="num">${(+r.jobs_closed || 0).toLocaleString()}</td><td class="num">${+r.companies_errored ? `<span class="badge bad">${(+r.companies_errored).toLocaleString()}</span>` : '<span class="muted">0</span>'}</td></tr>`).join('')}
+      </tbody></table>` : '<div class="empty">No runs yet.</div>';
+  }
+  loadLive(); loadRuns();
+  pollers.push(setInterval(loadLive, 10_000), setInterval(loadRuns, 30_000), setInterval(tick, 1000));
+};
+
+// ─── Invites ────────────────────────────────────────────────────────────────
+async function renderInvites() {
+  const { invites: rows, requests } = await api('GET', '/admin/api/invites');
+  return `<h1>Invites</h1><p class="sub">Sign-up is invite-only. Invite an email, then they create their account at /signup.</p>
+    ${requests.length ? `<h2>Requests from the landing page (${requests.length})</h2>
+    <div class="tablewrap" style="margin-bottom:22px"><table><thead><tr><th>Email</th><th>Looking for</th><th>Asked</th><th></th></tr></thead><tbody>
+    ${requests.map(r => `<tr><td>${esc(r.email)}</td><td class="small">${esc(r.note || '–')}</td><td>${ago(r.created_at)}</td>
+      <td><div class="actions"><button class="btn primary" data-reqinvite="${esc(r.email)}">Invite</button><button class="btn" data-reqdismiss="${esc(r.email)}">Dismiss</button></div></td></tr>`).join('')}
+    </tbody></table></div><h2>Invites</h2>` : ''}
+    <form class="card toolbar" id="invForm" style="margin-bottom:14px">
+      <input type="email" id="invEmail" placeholder="email@company.com" required style="min-width:240px">
+      <input id="invUser" placeholder="Existing user ID (optional)" style="min-width:250px" class="mono">
+      <label class="small"><input type="checkbox" id="invAdmin"> Admin</label>
+      <button class="btn primary" type="submit">Invite</button></form>
+    <div class="tablewrap"><table><thead><tr><th>Email</th><th>Role</th><th>Linked to</th><th>Invited</th><th>Status</th><th></th></tr></thead><tbody>
+    ${rows.map(i => `<tr><td>${esc(i.email)}</td><td>${i.is_admin ? '<span class="badge info">Admin</span>' : 'User'}</td>
+      <td class="mono">${i.user_id ? esc(i.linked_email || i.user_id.slice(0, 8) + '…') : '–'}</td><td>${when(i.created_at)}</td>
+      <td>${i.used_at ? `<span class="badge ok">Signed up ${ago(i.used_at)}</span>` : '<span class="badge warn">Waiting</span>'}</td>
+      <td>${i.used_at ? '' : `<div class="actions"><button class="btn" data-sendinv="${esc(i.email)}">Send invite email</button><button class="btn" data-revoke="${esc(i.email)}">Revoke</button></div>`}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No invites yet.</td></tr>'}
+    </tbody></table></div>`;
+}
+renderInvites.after = () => {
+  $('#invForm').onsubmit = (e) => { e.preventDefault(); act(e.submitter, () => api('POST', '/admin/api/invites', { email: $('#invEmail').value, user_id: $('#invUser').value.trim() || null, is_admin: $('#invAdmin').checked })); };
+  $$('[data-reqinvite]').forEach(b => b.onclick = () => act(b, () => api('POST', '/admin/api/invites', { email: b.dataset.reqinvite })));
+  $$('[data-reqdismiss]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/invite-requests/${encodeURIComponent(b.dataset.reqdismiss)}/dismiss`)));
+  $$('[data-sendinv]').forEach(b => b.onclick = () => act(b, () => api('POST', `/admin/api/invites/${encodeURIComponent(b.dataset.sendinv)}/send`)));
+  $$('[data-revoke]').forEach(b => b.onclick = () => act(b, () => api('DELETE', '/admin/api/invites/' + encodeURIComponent(b.dataset.revoke)), { confirm: ['Revoke this invite?', `${b.dataset.revoke} won't be able to sign up.`, 'Revoke'] }));
+};
+
+// ─── System ─────────────────────────────────────────────────────────────────
+async function renderSystem() {
+  const s = await api('GET', '/admin/api/system');
+  const yes = (v, ok = 'Set up', no = 'Not set up') => v ? `<span class="badge ok">${ok}</span>` : `<span class="badge warn">${no}</span>`;
+  return `<h1>System</h1><p class="sub">What the app runs on, and what's misconfigured.</p>
+    <div class="grid two"><div class="card"><dl>
+      <dt>Server</dt><dd>Up ${s.uptimeMin} min · Node ${esc(s.node)}</dd>
+      <dt>Database</dt><dd>${s.db.ok ? `<span class="badge ok">OK</span> ${s.db.ms} ms · ${esc(s.db.size)}` : `<span class="badge bad">Down</span> ${esc(s.db.error)}`}</dd>
+      <dt>Resume rewriting</dt><dd>${esc(s.llm.provider)} · ${esc(s.llm.model)} ${s.llm.keySet ? '' : '<span class="badge bad">API key missing</span>'}</dd>
+      <dt>Reset emails (Resend)</dt><dd>${yes(s.email.resend, 'Set up', 'Not set up: reset links only go to the server log')}</dd>
+      <dt>Gmail connect</dt><dd>${yes(s.gmailOAuth)}</dd>
+      <dt>Dashboard URL</dt><dd class="mono">${esc(s.urls.app)}</dd><dt>Login site</dt><dd class="mono">${esc(s.urls.site || 'same host')}</dd>
+      <dt>Cookie domain</dt><dd class="mono">${esc(s.urls.cookieDomain || 'this host only')}</dd>
+    </dl></div>
+    <div class="card"><h2>Recent server errors</h2>${s.errors.length ? `<pre>${esc(s.errors.join('\n'))}</pre>` : '<div class="empty">None in the server log.</div>'}</div></div>`;
+}
+
+// ─── Audit ──────────────────────────────────────────────────────────────────
+async function renderAudit() {
+  const rows = await api('GET', '/admin/api/audit');
+  return `<h1>Audit log</h1><p class="sub">Every change made from this portal.</p>
+    <div class="tablewrap"><table><thead><tr><th>When</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td>${when(r.created_at)}</td><td>${esc(r.admin_email)}</td><td><b>${esc(r.action)}</b></td>
+      <td class="small">${/^[0-9a-f-]{36}$/.test(r.target || '') ? `<a href="#/users/${r.target}">${esc(r.detail?.email || r.target.slice(0, 8) + '…')}</a>` : esc(r.target || '–')}</td>
+      <td class="mono">${esc(r.detail ? JSON.stringify(r.detail) : '')}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Nothing yet.</td></tr>'}
+    </tbody></table></div>`;
+}
+
+// rows that link somewhere
+view.addEventListener('click', (e) => { const tr = e.target.closest('tr[data-href]'); if (tr && !e.target.closest('a,button')) location.hash = tr.dataset.href; });
+$('#logout').onclick = async (e) => { e.preventDefault(); const r = await fetch('/auth/logout', { method: 'POST' }).then(r => r.json()).catch(() => ({})); location.assign(r.redirect || '/login'); };
+fetch('/auth/me').then(r => r.json()).then(me => $('#who').textContent = me.email || '').catch(() => {});
+route();
+</script>
+</body>
+</html>

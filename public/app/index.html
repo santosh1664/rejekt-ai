@@ -14,7 +14,7 @@
 :root {
   --paper: #FFFFFF; --surface: #FFFFFF; --surface-2: #F6F6F5; --ink: #111111; --ink-2: #3B3B3B; --muted: #6A6A6A;
   --line: #DEDEDC; --line-2: #EBEBE9;
-  --cobalt: #111111; --cobalt-ink: #FFFFFF; --cobalt-soft: #F0F0EE;
+  --cobalt: #17382B; --cobalt-ink: #FFFFFF; --cobalt-soft: #EAF1EC;
   --signal: #F5CE78; --signal-soft: #FFFAEB; --signal-ink: #92650A;
   --ok: #2A8057; --ok-soft: #F2FAF5; --warn: #92650A; --warn-soft: #FFFAEB; --bad: #B84A3E; --bad-soft: #FFF5F3;
   --info: #3D5FCB; --info-soft: #F4F8FF;
@@ -66,25 +66,35 @@ h1, h2, h3 { font-family: var(--display); letter-spacing: -0.015em; margin: 0; }
 .app { display: grid; grid-template-columns: var(--rail) 1fr; min-height: 100vh; }
 .rail { position: sticky; top: 0; height: 100vh; padding: 22px 16px; display: flex; flex-direction: column; gap: 6px; border-right: 1px solid var(--line); background: var(--surface); }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); padding: 4px 8px 18px; }
-.brand svg { width: 30px; height: 30px; flex: none; }
-.brand span { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+.brand img { height: 26px; width: auto; display: block; }
+/* dark-text logo on light theme, white-text logo on dark theme */
+.brand .logo-dark { display: none; }
+:root[data-theme="dark"] .brand .logo-light { display: none; } :root[data-theme="dark"] .brand .logo-dark { display: block; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .brand .logo-light { display: none; } :root:not([data-theme="light"]) .brand .logo-dark { display: block; } }
 .nav a { display: flex; align-items: center; gap: 11px; padding: 9px 10px; border-radius: var(--r-md); text-decoration: none; color: var(--ink-2); font-weight: 500; }
 .nav a svg { width: 18px; height: 18px; flex: none; opacity: .8; }
 .nav a:hover { background: var(--surface-2); }
 .nav a[aria-current="page"] { background: var(--cobalt-soft); color: var(--cobalt); }
 .nav a .count { margin-left: auto; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .rail-foot { margin-top: auto; display: grid; gap: 10px; }
+.legal-links { font-size: 12px; color: var(--muted); padding: 0 4px; } .legal-links a { color: inherit; text-decoration: none; } .legal-links a:hover { color: var(--ink); text-decoration: underline; }
+.imp-banner { position: sticky; top: 0; z-index: 60; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+  padding: 9px 16px; background: var(--signal); color: #111; font-size: 14px; font-weight: 500; }
+.imp-banner button { font: inherit; font-weight: 600; padding: 5px 12px; border-radius: 8px; border: 0; background: #111; color: #fff; cursor: pointer; }
 .rail-card { border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px; font-size: 13px; }
 .rail-card b { display: block; font-size: 13px; }
 .bar { height: 6px; border-radius: 6px; background: var(--line-2); overflow: hidden; margin-top: 8px; }
 .bar > i { display: block; height: 100%; background: var(--cobalt); border-radius: 6px; }
 .theme-btn { display: flex; align-items: center; gap: 10px; border: 0; background: none; color: var(--muted); padding: 8px 10px; border-radius: var(--r-md); font-size: 13px; }
-.theme-btn:hover { background: var(--surface-2); color: var(--ink); }
+.theme-btn:hover, .theme-btn[aria-current] { background: var(--surface-2); color: var(--ink); }
 main { min-width: 0; padding: 28px 32px 60px; }
 .page-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
 .page-head h1 { font-size: 30px; font-weight: 700; line-height: 1.1; }
 .page-head p { margin: 6px 0 0; color: var(--ink-2); }
 .page-head .spacer { flex: 1; }
+/* Page names stay for screen readers; the nav already shows which tab you're on. */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.page-head h1.sr-only + p { margin-top: 0; }
 
 /* ═══ Controls ══════════════════════════════════════════════════════════════ */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 8px 14px; font-weight: 600; font-size: 14px; text-decoration: none; white-space: nowrap; }
@@ -105,7 +115,7 @@ input:not([type]), input[type=text], input[type=url], input[type=email], input[t
 input:focus, select:focus, textarea:focus { border-color: var(--cobalt); box-shadow: 0 0 0 3px var(--cobalt-soft); }
 textarea { resize: vertical; line-height: 1.5; }
 label.field { display: grid; gap: 5px; font-size: 13px; color: var(--ink-2); font-weight: 500; align-content: start; }
-label.field small { color: var(--muted); font-weight: 400; }
+label.field small { color: var(--muted); font-weight: 400; font-size: 11.5px; order: 1; }   /* hint sits under the input so labels and inputs line up */
 .check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
 .check input { width: 16px; height: 16px; accent-color: var(--cobalt); }
 .tag { display: inline-flex; align-items: center; gap: 5px; border-radius: 6px; padding: 2px 8px; font-size: 12.5px; font-weight: 500; background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line-2); }
@@ -159,7 +169,8 @@ label.field small { color: var(--muted); font-weight: 400; }
 .menu .opt input { accent-color: var(--cobalt); }
 .menu .foot { display: flex; justify-content: space-between; border-top: 1px solid var(--line-2); margin-top: 6px; padding-top: 8px; }
 .menu p { font-size: 12.5px; color: var(--muted); margin: 6px 8px; }
-.search-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.search-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; font-size: 13.5px; color: var(--muted); }
+.search-meta .sm-note { margin-left: 4px; padding-left: 12px; border-left: 1px solid var(--line); color: var(--warn); }
 .addlink { display: flex; gap: 8px; align-items: center; margin-top: 14px; padding: 8px 10px 8px 14px; border: 1px dashed var(--line); border-radius: var(--r-md); background: var(--surface-2); font-size: 13.5px; color: var(--ink-2); }
 .addlink label { white-space: nowrap; }
 .addlink input { flex: 1; }
@@ -179,6 +190,7 @@ label.field small { color: var(--muted); font-weight: 400; }
 .row.compact { grid-template-columns: 64px minmax(0, 1fr) auto; padding: 12px 16px; }
 .row.compact h3 { font-size: 16px; }
 .row.leaving { opacity: 0; transform: translateX(12px); transition: opacity .18s, transform .18s; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin: 12px 0; }
 .more { display: flex; justify-content: center; padding: 16px; border-top: 1px solid var(--line-2); }
 
 /* ═══ Jobs: two-pane ════════════════════════════════════════════════════════ */
@@ -218,6 +230,22 @@ label.field small { color: var(--muted); font-weight: 400; }
 .drawer.open { transform: none; }
 
 /* ═══ Dashboard ═════════════════════════════════════════════════════════════ */
+.tm-head { display: flex; align-items: center; margin: 0 0 10px; }
+.tm-head h2 { font-size: 15px; font-weight: 600; flex: 1; }
+.tcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-bottom: 26px; }
+.tcards .empty { grid-column: 1 / -1; }
+.tcard { background: var(--surface); border: 1px solid var(--line-2); border-radius: 16px; padding: 6px; cursor: pointer; }
+.tcard:hover { border-color: var(--line); }
+.tcard .tc-top { position: relative; background: var(--tint); color: #111; border-radius: 12px; padding: 14px 16px; min-height: 160px; }
+.tcard .tc-top small { display: block; font-size: 12px; opacity: .65; }
+.tcard .tc-top h3 { font-size: 15.5px; font-weight: 600; line-height: 1.3; margin-top: 4px; padding-right: 46px; }
+.tcard .ring { position: absolute; top: 10px; right: 10px; width: 46px; height: 46px; }
+.tcard .ring text { font: 700 12px var(--text); fill: #111; }
+.tcard .tc-foot { display: flex; align-items: center; gap: 8px; padding: 10px 8px 6px; font-size: 13px; color: var(--muted); }
+.tcard .tc-foot .co { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; gap: 7px; align-items: center; }
+.tcard .av { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--cobalt); color: var(--cobalt-ink); font-size: 10px; font-weight: 700; display: grid; place-items: center; }
+.searchbar { border-radius: 999px; padding: 4px 6px 4px 16px; }
+
 .dash { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 22px; align-items: start; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); }
 .panel-head { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--line-2); }
@@ -246,8 +274,8 @@ label.field small { color: var(--muted); font-weight: 400; }
 .checklist li::before { content: ''; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--line); flex: none; }
 
 /* ═══ Tracker ═══════════════════════════════════════════════════════════════ */
-.board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 10px; }
-.col { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: var(--r-md); padding: 12px; min-height: 420px; }
+.board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 10px; align-items: start; }
+.col { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: var(--r-md); padding: 12px; min-height: 160px; max-height: calc(100vh - 210px); overflow-y: auto; }
 .col.drop { background: var(--cobalt-soft); }
 .col h3 { font-size: 15px; display: flex; justify-content: space-between; margin: 0 2px 12px; }
 .col h3 span { color: var(--muted); font-family: var(--text); font-weight: 500; }
@@ -256,7 +284,6 @@ label.field small { color: var(--muted); font-weight: 400; }
 .tcard b { display: block; font-size: 14px; line-height: 1.3; }
 .tcard .c { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
 .tcard .d { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--muted); }
-.tcard select { width: auto; padding: 3px 6px; font-size: 12px; border-radius: 7px; }
 
 /* ═══ Profile ═══════════════════════════════════════════════════════════════ */
 .switcher { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -264,11 +291,6 @@ label.field small { color: var(--muted); font-weight: 400; }
 .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin: 0 0 22px; overflow-x: auto; }
 .tabs button { border: 0; background: none; padding: 10px 14px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--cobalt); }
-.profile { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; align-items: start; }
-.toc { position: sticky; top: 20px; display: grid; gap: 2px; font-size: 14px; }
-.toc a { display: flex; justify-content: space-between; gap: 8px; text-decoration: none; color: var(--ink-2); padding: 6px 10px; border-radius: 8px; }
-.toc a:hover { background: var(--surface); }
-.toc a span { color: var(--muted); font-size: 12.5px; }
 .sec { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px 22px; margin-bottom: 16px; scroll-margin-top: 20px; }
 .sec-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
 .sec-head h2 { font-size: 19px; font-weight: 600; }
@@ -297,7 +319,7 @@ label.field small { color: var(--muted); font-weight: 400; }
 .entry:hover .tools, .entry:focus-within .tools { opacity: 1; }
 .tools .icon-btn { width: 28px; height: 28px; }
 .tools .icon-btn svg { width: 14px; height: 14px; }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px 14px; align-items: end; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px 14px; align-items: start; }
 .form-grid .wide { grid-column: 1 / -1; }
 .editor { border: 1px solid var(--cobalt); border-radius: var(--r-md); padding: 16px; margin: 4px 0 16px; background: var(--surface-2); }
 .editor .acts { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
@@ -353,12 +375,6 @@ label.field small { color: var(--muted); font-weight: 400; }
 .rz-editbar { flex-basis: 100%; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border-radius: var(--r-md); background: var(--cobalt-soft); color: var(--cobalt); font-size: 13.5px; }
 .rz-editbar .spacer { flex: 1; }
 .rz-original { width: 816px; min-height: 1056px; margin: 0 auto; padding: 48px 58px; background: #fff; color: #111; font: 12.5px/1.55 Arial, sans-serif; white-space: pre-wrap; border-radius: 4px; box-shadow: 0 1px 3px rgba(16,26,51,.12); }
-.rz-examples > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
-.rz-examples > summary::-webkit-details-marker { display: none; }
-.rz-examples > summary h2 { font-size: 17px; font-weight: 600; }
-.rz-examples > summary::after { content: '▾'; margin-left: auto; color: var(--muted); }
-.rz-examples[open] > summary::after { content: '▴'; }
-.rz-examples[open] > summary { margin-bottom: 14px; }
 @media (max-width: 860px) {
   .rz-tools { position: static; }
   .rz-menu { width: min(290px, calc(100vw - 48px)); }
@@ -373,7 +389,7 @@ label.field small { color: var(--muted); font-weight: 400; }
 .switch input:checked + .track { background: var(--cobalt); }
 .switch input:checked + .track::after { transform: translateX(18px); }
 .switch input:focus-visible + .track { outline: 2px solid var(--cobalt); outline-offset: 2px; }
-.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 22px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 22px; }
 .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 14px; }
 .stat b { display: block; font-family: var(--display); font-size: 26px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .stat span { font-size: 13px; color: var(--muted); }
@@ -418,8 +434,6 @@ label.field small { color: var(--muted); font-weight: 400; }
 .added-list { margin: 8px 0 0; padding-left: 18px; font-size: 14px; display: grid; gap: 6px; }
 .added-list small { display: block; color: var(--muted); font-size: 12px; }
 /* Applied */
-.import-box { display: flex; gap: 16px; align-items: center; background: var(--signal-soft); color: var(--signal-ink); border-radius: var(--r-lg); padding: 16px 18px; margin-bottom: 18px; }
-.import-box b { font-size: 15px; } .import-box p { margin: 4px 0 0; font-size: 14px; } .import-box > div { flex: 1; }
 .ap-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 6px; }
 .ap-controls .spacer { flex: 1; }
 .ap-controls select { width: auto; font-size: 13.5px; padding: 7px 10px; }
@@ -433,14 +447,15 @@ label.field small { color: var(--muted); font-weight: 400; }
 .ap-line { margin: 6px 0 12px; font-size: 14px; color: var(--ink-2); min-height: 1.4em; }
 .ap-list { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
 .ap-list:empty { display: none; }
-.ap-row, .ap-co { display: flex; gap: 14px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line-2); padding: 14px 18px; align-items: flex-start; cursor: pointer; color: inherit; }
+.ap-row, .ap-co { font-family: var(--text); display: flex; gap: 14px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line-2); padding: 14px 18px; align-items: flex-start; cursor: pointer; color: inherit; }
 .ap-row:first-child, .ap-co:first-child { border-top: 0; }
 .ap-row:hover, .ap-co:hover { background: var(--surface-2); }
 .ap-date { width: 64px; flex: none; font-size: 13px; color: var(--muted); padding-top: 2px; font-variant-numeric: tabular-nums; }
 .ap-main, .co-main { flex: 1; min-width: 0; display: grid; gap: 4px; }
 .ap-main h3, .co-main h3 { font-family: var(--display); font-size: 16px; font-weight: 600; margin: 0; }
-.ap-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13.5px; color: var(--muted); }
+.ap-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13.5px; color: var(--muted); }
 .ap-meta b { color: var(--ink-2); font-weight: 600; }
+.ap-meta span::before { content: '·'; margin-right: 10px; opacity: .6; }
 .ap-hits { display: flex; gap: 5px; flex-wrap: wrap; }
 .snip { margin: 2px 0 0; font-size: 13.5px; color: var(--ink-2); line-height: 1.5; }
 .snip mark { background: var(--signal-soft); color: var(--signal-ink); border-radius: 3px; padding: 0 2px; }
@@ -451,12 +466,78 @@ label.field small { color: var(--muted); font-weight: 400; }
 .co-n b { font-family: var(--display); font-size: 22px; color: var(--ink); line-height: 1.1; }
 .co-when { display: grid; justify-items: end; gap: 6px; font-size: 13px; }
 #apMore { margin: 14px 0 0; }
-.model-panel { margin-top: 22px; }
 .jd-actions .move { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); margin-left: auto; }
 .jd-actions .move select { width: auto; padding: 6px 8px; font-size: 13px; }
 .cov { display: flex; align-items: baseline; gap: 8px; margin: 12px 0 6px; }
 .cov b { font-family: var(--display); font-size: 26px; font-weight: 700; }
 .tcard .aa-badge { margin-top: 8px; }
+
+
+
+/* ═══ Tsenta-style dashboard ════════════════════════════════════════════════ */
+/* Horizontal top-match strip */
+.top-strip { display: flex; gap: 14px; overflow-x: auto; padding: 4px 0 10px; margin: 0 0 24px; scrollbar-width: none; }
+.top-strip::-webkit-scrollbar { display: none; }
+.top-strip .tcard { flex: 1 0 250px; display: flex; flex-direction: column; }
+.top-strip .tcard .tc-top { min-height: 150px; flex: 1; }
+.top-strip .tcard .tc-meta { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; padding-right: 50px; font-size: 11px; white-space: nowrap; }
+.top-strip .tcard .tc-top h3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.top-strip .tcard .tc-top small { font-size: 11px; letter-spacing: .02em; text-transform: uppercase; opacity: .6; }
+.top-strip .tcard .tc-top h3 { font-size: 16px; margin-top: 4px; }
+.top-strip .tcard .tc-foot { padding: 8px 8px 4px; }
+.top-strip .tcard .tc-foot .co { font-size: 12px; }
+/* Pass button on top cards */
+.top-strip .tcard .tc-foot .btn-pass { background: none; border: none; font-size: 13px; color: var(--muted); cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+.top-strip .tcard .tc-foot .btn-pass:hover { background: var(--surface-2); color: var(--ink); }
+/* All-applications table */
+.all-apps { margin-top: 8px; }
+.all-apps-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.all-apps-head h2 { font-size: 17px; font-weight: 600; margin: 0; }
+.all-apps-head .spacer { flex: 1; }
+.app-tabs { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; overflow-x: auto; }
+.app-tab { background: none; border: none; font-size: 13.5px; font-weight: 500; color: var(--muted); padding: 5px 12px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
+.app-tab[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+.app-tab .n { font-size: 12px; margin-left: 3px; opacity: .8; }
+.app-search-co { padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; background: var(--surface); color: var(--ink); width: 180px; flex-shrink: 0; }
+.app-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+.app-table thead th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line-2); }
+.app-table tbody tr { border-top: 1px solid var(--line-2); cursor: pointer; transition: background .1s; }
+.app-table tbody tr:first-child { border-top: 0; }
+.app-table tbody tr:hover { background: var(--surface-2); }
+.app-table td { padding: 11px 14px; font-size: 13.5px; vertical-align: middle; }
+.app-table .co-cell { display: flex; gap: 10px; align-items: center; }
+.app-table .co-av { width: 34px; height: 34px; border-radius: 8px; background: var(--cobalt); color: var(--cobalt-ink); font-size: 14px; font-weight: 700; display: grid; place-items: center; flex: none; text-transform: uppercase; }
+.app-table .co-av img { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; }
+.app-table .co-info b { display: block; font-size: 14px; font-weight: 600; line-height: 1.2; }
+.app-table .co-info span { font-size: 12.5px; color: var(--muted); }
+.app-table .res-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; }
+.app-table .res-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex: none; }
+.app-table .res-badge.none::before { background: var(--muted); }
+.app-table .res-badge.skip::before { background: var(--muted); }
+.status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.status-dot::before { content: ''; width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.status-dot.ok::before { background: var(--ok); }
+.status-dot.warn::before { background: var(--signal); }
+.status-dot.bad::before { background: var(--bad); }
+.status-dot.muted::before { background: var(--muted); }
+.app-table .time-col { color: var(--muted); font-size: 13px; white-space: nowrap; }
+/* job card (Browse) — add Save/Details row */
+.jc-acts { display: flex; gap: 8px; padding: 8px 12px 2px; border-top: 1px solid var(--line-2); }
+.jc-acts .btn { font-size: 12.5px; padding: 5px 10px; }
+
+/* ═══ Inline auto-apply status on job cards ════════════════════════════════ */
+.jc-foot .apply-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; white-space: nowrap; flex: 1; }
+.jc-foot .apply-status.queued  { background: var(--cobalt-soft); color: var(--cobalt); }
+.jc-foot .apply-status.working { background: var(--signal-soft); color: var(--signal-ink); }
+.jc-foot .apply-status.done    { background: var(--ok-soft);     color: var(--ok); }
+.jc-foot .apply-status.failed  { background: var(--bad-soft);    color: var(--bad); }
+.jc-foot .apply-status .spin   { display: inline-block; width: 10px; height: 10px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.row .apply-status { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; margin-left: 6px; }
+.row .apply-status.queued  { background: var(--cobalt-soft); color: var(--cobalt); }
+.row .apply-status.working { background: var(--signal-soft); color: var(--signal-ink); }
+.row .apply-status.done    { background: var(--ok-soft);     color: var(--ok); }
+.row .apply-status.failed  { background: var(--bad-soft);    color: var(--bad); }
 
 /* ═══ Responsive ════════════════════════════════════════════════════════════ */
 @media (max-width: 1180px) {
@@ -473,7 +554,6 @@ label.field small { color: var(--muted); font-weight: 400; }
   .ap-date { width: 100%; order: -1; padding: 0; }
   .ap-side { max-width: none; width: 100%; justify-content: flex-start; }
   .ap-co { flex-wrap: wrap; } .co-when { justify-items: start; }
-  .import-box { flex-direction: column; align-items: flex-start; }
   .ap-controls .spacer { display: none; }
   .jd-actions .move { margin-left: 0; }
   .nav { display: flex; width: 100%; justify-content: space-around; }
@@ -484,8 +564,7 @@ label.field small { color: var(--muted); font-weight: 400; }
   .row, .row.compact { grid-template-columns: 58px minmax(0, 1fr); gap: 12px; padding: 14px; }
   .row .acts { grid-column: 2; }
   .score b { font-size: 25px; }
-  .profile { grid-template-columns: 1fr; }
-  .toc { display: none; }
+  .pf-cols { grid-template-columns: 1fr; }
   .hero-card { grid-template-columns: auto 1fr; }
   .pct { grid-column: 1 / -1; text-align: left; }
   .facts { grid-template-columns: 1fr; }
@@ -505,10 +584,8 @@ label.field small { color: var(--muted); font-weight: 400; }
 }
 
 /* ═══ Design v2: white, black actions, pale status tints ═══════════════════════ */
-.brand svg { color: var(--ink); }
-.brand span { font-family: var(--head); text-transform: uppercase; font-weight: 800; font-size: 24px; letter-spacing: .04em; }
 .page-head h1 { font-family: var(--head); font-weight: 900; font-size: 54px; line-height: .92; letter-spacing: 0; text-transform: uppercase; }
-.panel-head h2, .sec-head h2, .rz-examples > summary h2 { font-family: var(--head); text-transform: uppercase; font-weight: 800; font-size: 26px; letter-spacing: .01em; }
+.panel-head h2, .sec-head h2 { font-family: var(--head); text-transform: uppercase; font-weight: 800; font-size: 26px; letter-spacing: .01em; }
 .hero-card h1 { font-family: var(--head); font-weight: 900; font-size: 40px; text-transform: uppercase; line-height: 1; }
 .btn, .btn.sm { border-radius: 999px; }
 .btn.primary { box-shadow: none; }
@@ -524,7 +601,7 @@ label.field small { color: var(--muted); font-weight: 400; }
 .score.tier-weak .meter i.on { background: var(--meter-off); filter: brightness(.9); }
 .stat b, .cov b { font-family: var(--head); font-weight: 800; font-size: 38px; letter-spacing: 0; }
 .pct b { font-family: var(--head); font-weight: 900; font-size: 42px; letter-spacing: 0; }
-.row .fit, .ap-meta, .search-meta, .rz-pages, .events small { font-family: var(--mono); font-size: 12.5px; }
+.row .fit, .rz-pages, .events small { font-family: var(--mono); font-size: 12.5px; }
 .tag { font-family: var(--mono); font-size: 12px; border-radius: 999px; padding: 3px 10px; }
 .tag.hit { background: var(--ok-soft); color: var(--ok); border-color: var(--ok-bd); }
 .tag.miss { background: var(--bad-soft); color: var(--bad); border: 1px dashed var(--bad-mid); }
@@ -540,7 +617,6 @@ label.field small { color: var(--muted); font-weight: 400; }
 .badge.review { background: var(--warn-soft); color: var(--warn); border-color: var(--warn-bd); }
 .badge.sent { border-color: var(--ok-bd); }
 .badge.wait { background: var(--info-soft); color: var(--info); border-color: var(--info-bd); }
-.import-box { background: var(--info-soft); color: var(--info); border: 1px solid var(--info-bd); }
 .snip mark { background: var(--warn-soft); color: var(--warn); }
 .have.yes { border-color: var(--ok-bd); }
 .have[data-dl] { cursor: pointer; }
@@ -553,26 +629,168 @@ label.field small { color: var(--muted); font-weight: 400; }
 /* a long job title must not widen a column */
 .dash > *, .aa > *, .jobs > * { min-width: 0; }
 .dash > div, .aa > div { grid-template-columns: minmax(0, 1fr); }
+
+/* ═══ Tsenta-style shell + job cards ════════════════════════════════════════ */
+@media (min-width: 861px) {
+  .app { display: block; padding: 10px; }
+  .rail { height: auto; flex-direction: row; align-items: center; gap: 4px; padding: 8px 14px; border: 1px solid var(--line-2); border-radius: 20px; top: 10px; z-index: 40; }
+  .brand { padding: 0 14px 0 4px; }
+  .nav { display: flex; gap: 2px; }
+  .nav a { padding: 8px 14px; border-radius: 12px; font-size: 14.5px; }
+  .nav a svg { display: none; }
+  .nav a[aria-current="page"] { background: var(--cobalt-soft); color: var(--cobalt); }
+  .rail-foot { margin: 0 0 0 auto; display: flex; align-items: center; }
+  .rail-card { display: none !important; }
+  main { padding: 22px 22px 60px; }
+}
+.jobs { display: block; }
+.jobs .detail { display: none; }
+.jgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; }
+.jgrid .empty, .jgrid .more { grid-column: 1 / -1; }
+.jc { background: var(--surface); border: 1px solid var(--line-2); border-radius: 18px; padding: 6px; display: flex; flex-direction: column; cursor: pointer; }
+.jc:hover { box-shadow: 0 6px 20px #0001; }
+.jc .jc-top { position: relative; background: var(--tint); color: #111; border-radius: 14px 14px 0 0; padding: 16px 16px 10px; min-height: 190px; display: flex; flex-direction: column; gap: 8px; }
+.jc .jc-meta { font-size: 13px; opacity: .8; padding-right: 64px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.jc .jc-meta .rm { background: #2A805722; color: #1d6b45; border-radius: 6px; padding: 1px 7px; }
+.jc h3 { font-size: 21px; font-weight: 500; line-height: 1.2; margin-top: auto; }
+.jc .skills { display: flex; gap: 5px; overflow: hidden; max-height: 26px; flex-wrap: wrap; }
+.jc .skills span { background: #0000000f; border-radius: 999px; padding: 2px 10px; font-size: 12.5px; white-space: nowrap; }
+.jc .ring { position: absolute; top: 12px; right: 12px; width: 54px; height: 54px; }
+.jc .ring text { font: 700 12.5px var(--text); fill: #111; } .jc .ring .m { font: 500 9.5px var(--text); opacity: .6; }
+.jc .jc-bar { display: grid; grid-template-columns: 1fr 1fr; background: var(--tint); border-top: 1px solid #0000000d; border-radius: 0 0 14px 14px; filter: brightness(.97); }
+.jc .jc-bar button { border: 0; background: none; padding: 11px; font-size: 13.5px; color: #111; }
+.jc .jc-bar button:hover { background: #0000000d; }
+.jc .jc-foot { display: flex; align-items: center; gap: 8px; padding: 12px 10px 8px; }
+.jc .jc-foot .co { flex: 1; min-width: 0; display: flex; gap: 9px; align-items: center; font-weight: 600; font-size: 14.5px; line-height: 1.2; }
+.jc .jc-foot .co .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jc .av { flex: none; width: 30px; height: 30px; border-radius: 8px; background: var(--cobalt); color: var(--cobalt-ink); font-weight: 700; display: grid; place-items: center; }
+.jc .btn { border-radius: 999px; }
+.jc.link { cursor: pointer; }
+.jc.link .jc-top { --tint: #D6F5E3; }
+
+.modal-scrim { position: fixed; inset: 0; background: #0006; backdrop-filter: blur(4px); z-index: 90; display: grid; place-items: center; padding: 16px; }
+.modal { position: relative; background: var(--surface); border-radius: 18px; padding: 24px; width: min(480px, 100%); display: grid; gap: 10px; }
+.modal h2 { font-size: 21px; font-weight: 600; }
+.modal label { font-size: 13.5px; font-weight: 600; margin-top: 6px; }
+.modal label .muted { font-weight: 400; }
+.modal textarea { resize: vertical; }
+.lm-hint { background: #D6F5E3; color: #111; border-radius: 12px; padding: 14px; font-size: 14px; }
+.lm-row { display: flex; gap: 8px; } .lm-row input { flex: 1; min-width: 0; }
+.lm-ats { font-size: 13.5px; min-height: 20px; }
+.jc.link h3 { margin-top: 6px; }
+#view[data-review] .qitem .top{display:none}
+.sent-card{display:flex;flex-direction:column;gap:2px;background:var(--ok-bg,#eef7ee);border-radius:12px;padding:12px 14px;margin-bottom:16px}
+.sent-card span{font-size:13px;color:var(--ink-2)}
+.kv{margin:0;display:grid;gap:0}
+.kv div{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;padding:8px 0;border-bottom:1px solid var(--line,#ecece7)}
+.kv dt{font-size:13px;color:var(--ink-2)} .kv dd{margin:0;font-size:14px}
+.kv .tag{font-size:10px;padding:0 6px;margin-left:4px;vertical-align:1px}
+details.earlier>summary{cursor:pointer;font-size:13px;color:var(--ink-2);margin:6px 0}
+.score-line{display:flex;align-items:baseline;gap:8px} .score-line b{font-size:22px} .score-line span{font-size:13px;color:var(--ink-2)}
+.wa-row{border:1px solid var(--line,#e6e6e1);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.wa-head{display:flex;align-items:center;margin-bottom:8px}
+.wa-add{display:flex;align-items:center;gap:10px;margin-top:6px}
+.wa-head .spacer,.wa-add .spacer{flex:1}
+#waPick{max-width:240px}
+.ct-list{display:grid;gap:10px;margin-bottom:12px}
+.ct-row{display:grid;grid-template-columns:1.2fr 1.2fr 1.4fr 1fr auto;gap:10px;align-items:end;border:1px solid var(--line,#e6e6e1);border-radius:12px;padding:12px 14px}
+@media (max-width:860px){.ct-row{grid-template-columns:1fr 1fr}}
+/* Review page (Tsenta-style): header bar, side panel, centered form, sticky action bar */
+.rv-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 4px 0 14px; border-bottom: 1px solid var(--line-2); }
+.rv-head .logo { width: 38px; height: 38px; border-radius: 10px; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-weight: 700; flex: none; }
+.rv-head h1 { margin: 0; font-size: 17px; font-weight: 600; } .rv-head .muted { font-size: 13px; }
+.rv-nav { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 999px; padding: 2px 6px; font-size: 13px; }
+.rv-nav a { padding: 4px 8px; border-radius: 999px; color: var(--ink); text-decoration: none; } .rv-nav a:hover { background: var(--surface-2); }
+.rv-grid { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: calc(100vh - 190px); }
+.rv-side { border-right: 1px solid var(--line-2); padding: 22px 22px 22px 0; }
+.rv-side .who { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+.rv-side .who i { width: 40px; height: 40px; border-radius: 50%; background: #fbefc9; display: grid; place-items: center; font-style: normal; font-size: 18px; flex: none; }
+.rv-side .who b { display: block; font-size: 15px; } .rv-side .who small { color: var(--muted); font-size: 12.5px; }
+.rv-side p { font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+.rv-side .note { font-size: 12.5px; color: var(--muted); background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 12px; }
+.rv-main { padding: 22px 0 0 28px; }
+.rv-main .qitem { max-width: 760px; margin: 0 auto; padding: 0; border: 0; display: flex; flex-direction: column; min-height: 100%; }
+.rv-main .qitem .top, .rv-main .qitem [data-details], .rv-main .why-stop { display: none; }
+.rv-main .qform { background: none; padding: 0; gap: 18px; }
+.rv-main .qform .field { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.rv-main .qform .field em { text-transform: none; letter-spacing: 0; }
+.rv-main .qform input, .rv-main .qform select, .rv-main .qform textarea { font-size: 15px; padding: 11px 14px; border-radius: 10px; margin-top: 6px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+.rv-main .qitem .acts { position: sticky; bottom: 0; margin-top: auto; padding: 14px 0; background: var(--paper); border-top: 1px solid var(--line-2); justify-content: flex-end; flex-direction: row-reverse; }
+.rv-main .qitem .acts .btn.primary, .rv-main .qitem .acts [data-retry] { background: var(--ink); color: var(--paper); border-color: var(--ink); padding: 9px 18px; }
+.rv-empty { border: 1px dashed var(--line); border-radius: 14px; padding: 28px; text-align: center; color: var(--ink-2); margin-bottom: 20px; }
+.rv-empty b { display: block; font-size: 16px; color: var(--ink); margin-bottom: 6px; }
+@media (max-width: 820px) { .rv-grid { grid-template-columns: 1fr; } .rv-side { border-right: 0; padding-right: 0; } .rv-main { padding-left: 0; } }
+/* Sent application page */
+.sp-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line-2); margin: -6px 0 16px; }
+.sp-tabs a { padding: 8px 12px; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.sp-tabs a[aria-current="page"] { color: var(--ink); border-color: var(--ink); }
+.sp-body { max-width: 820px; margin: 0 auto; }
+.sp-card { display: flex; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-bottom: 22px; font-size: 14.5px; }
+.sp-card span { color: var(--muted); }
+.sp-group { margin-bottom: 26px; }
+.sp-group h3 { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; font-weight: 600; padding-bottom: 10px; border-bottom: 1px solid var(--line-2); margin: 0 0 16px; }
+.sp-group h3 small { font-size: 12px; color: var(--muted); font-weight: 400; }
+.sp-field { margin-bottom: 16px; }
+.sp-field label { display: block; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px; }
+.sp-val { background: var(--surface-2); border-radius: 10px; padding: 11px 14px; font-size: 15px; white-space: pre-wrap; }
+.sp-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.sp-pdf { width: 100%; height: calc(100vh - 230px); min-height: 520px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.sp-job h3 { font-size: 20px; margin: 0; } .sp-job .muted { margin: 4px 0 18px; }
+.sp-job .desc { white-space: pre-wrap; font-size: 15px; line-height: 1.65; }
+
+/* ═══ Profile details: header card, then two columns (like Tsenta's) ═════════════ */
+.pf-hero { padding: 22px 26px; }
+.pf-name { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pf .hero-card h1 { font-family: var(--display); text-transform: none; font-weight: 700; font-size: 24px; letter-spacing: -0.01em; line-height: 1.2; }
+.pf-hero-r { display: flex; align-items: center; gap: 18px; }
+.pf .pct b { font-family: var(--display); font-size: 22px; letter-spacing: -0.02em; }
+.pf-hero .checklist { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; }
+.pf-hero > p { margin: 14px 0 0; }
+.pf-label { display: flex; align-items: center; gap: 14px; margin: 26px 2px 14px; font-size: 14px; color: var(--ink-2); font-weight: 500; }
+.pf-label i { flex: 1; height: 1px; background: var(--line); }
+.pf-cols { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.pf .sec { margin-bottom: 20px; padding: 22px 24px; }
+.pf .sec-head { align-items: center; gap: 12px; }
+.pf .sec-head h2 { font-family: var(--display); text-transform: none; font-weight: 600; font-size: 18px; letter-spacing: 0; }
+.pf .sec-head p { margin: 1px 0 0; font-size: 13px; color: var(--muted); }
+.sec-ic { width: 36px; height: 36px; border-radius: 10px; background: var(--cobalt-soft); color: var(--cobalt); display: grid; place-items: center; flex: none; }
+.sec-ic:empty { display: none; }
+.pf-sub { font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 2px 0 8px; }
+.entry .meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.entry .more { background: none; border: 0; padding: 0; margin: 4px 0 0 18px; font: inherit; font-size: 12.5px; color: var(--muted); font-style: italic; cursor: pointer; }
+.entry .more:hover { color: var(--ink); text-decoration: underline; }
+.skillrow { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; padding: 8px 0; align-items: start; }
+.sk-l { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-top: 4px; }
+.pf .tag { font-family: var(--font, inherit); border-radius: 999px; }
+
+/* Logos: the image covers the initial; with no logo the initial stays */
+.jc .av, .tcard .av, .rv-head .logo, .ent-logo { position: relative; overflow: hidden; }
+img.lg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; padding: 2px; border-radius: inherit; }
+.tcard .av img.lg { padding: 1px; }
+.entry.has-lg { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; align-items: start; }
+.ent-logo { width: 44px; height: 44px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line-2); color: var(--ink-2); font-weight: 700; display: grid; place-items: center; }
+.ent-logo img.lg { padding: 4px; }
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="rail" aria-label="Main navigation">
     <a class="brand" href="#/dashboard" aria-label="Rejekt.ai home">
-      <svg viewBox="0 0 30 30" fill="none" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="6" stroke="currentColor" stroke-width="2"/><path d="M7 21h16M7 15h10M7 9h13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-      <span>Rejekt.ai</span>
+      <img class="logo-light" src="/brand/rejekt-logo.png" alt="Rejekt.ai"><img class="logo-dark" src="/brand/rejekt-logo-dark.png" alt="Rejekt.ai">
     </a>
     <nav class="nav" id="nav">
       <a href="#/dashboard" data-route="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Dashboard</a>
       <a href="#/jobs" data-route="jobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Jobs</a>
       <a href="#/tracker" data-route="tracker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/></svg>Tracker<span class="count" id="appliedCount"></span></a>
       <a href="#/applied" data-route="applied"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/><path d="M15 3v3M9 3v3"/></svg>Applied</a>
-      <a href="#/auto-apply" data-route="auto-apply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Auto-apply<span class="count" id="needsCount"></span></a>
+      <a href="#/auto-apply" data-route="auto-apply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Auto-apply</a>
       <a href="#/profile" data-route="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profile</a>
     </nav>
     <div class="rail-foot">
       <a class="rail-card" id="railProfile" href="#/profile" style="text-decoration:none;color:inherit;display:none"></a>
+      <a class="theme-btn" href="#/settings" data-route="settings" style="text-decoration:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</a>
       <button class="theme-btn" id="themeBtn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg><span>Switch theme</span></button>
+      <button class="theme-btn" id="logoutBtn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Log out</span></button>
     </div>
   </aside>
   <main id="view" tabindex="-1"></main>
@@ -587,21 +805,35 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('jd.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('jd.' + k, JSON.stringify(v)); } catch {} },
 };
-let USER = store.get('userId', null);
-if (!USER) { USER = crypto.randomUUID ? crypto.randomUUID() : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c => (c ^ Math.random() * 16 >> c / 4).toString(16)); store.set('userId', USER); }
+// The server writes the logged-in user into the page (server.mjs sendApp)
+const ME = window.RJ_USER;
+if (!ME) location.assign('/login?next=' + encodeURIComponent(location.pathname + location.hash));
+const USER = ME?.id;
+const toLogin = () => location.assign('/login?next=' + encodeURIComponent(location.pathname + location.hash));
 
 const state = {
   profile: null, profileSkills: null, apps: { counts: {}, applications: [] },
   search: store.get('search', { include: '', exclude: '', scope: 'title' }), saved: null, posted: store.get('posted', 30),
   feed: null, cursor: null, selected: null,
-  resumeProfiles: [], rp: null, fields: null, profileTab: 'details',
+  resumeProfiles: [], rp: null, fields: null, profileTab: 'details', routeSeq: 0, routeChain: Promise.resolve(),
 };
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+/** A company's or school's logo laid over its initial. No logo found (404): the img removes itself and the initial shows. */
+const logoImg = (name, kind = 'company') => name ? `<img class="lg" src="/v1/logo?kind=${kind}&name=${encodeURIComponent(name)}" alt="" loading="lazy" decoding="async">` : '';
+document.addEventListener('error', e => { if (e.target.classList?.contains('lg')) e.target.remove(); }, true);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 async function api(method, path, body) {
-  const res = await fetch(API + path, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+  // Reads retry through a busy database (5xx) or a dropped connection; writes never repeat.
+  let res;
+  for (let attempt = 0; ; attempt++) {
+    try { res = await fetch(API + path, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined }); }
+    catch (e) { if (method !== 'GET' || attempt >= 2) throw e; res = null; }
+    if (res && (res.status < 500 || method !== 'GET' || attempt >= 2)) break;
+    await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
+  }
+  if (res.status === 401) { toLogin(); throw new Error('Your session ended. Log in again.'); }
   let data = null; try { data = await res.json(); } catch {}
   if (!res.ok && res.status !== 422) throw Object.assign(new Error(data?.error || data?.errors?.join(', ') || `Request failed (${res.status})`), { status: res.status, data });
   return { status: res.status, data };
@@ -656,8 +888,7 @@ async function loadApps() {
   state.apps = data;
   const c = data.counts; const active = (c.APPLIED || 0) + (c.INTERVIEWING || 0) + (c.OFFER || 0);
   $('#appliedCount').textContent = active ? String(active) : '';
-  const needs = data.applications.filter(a => a.applyState === 'NEEDS_YOU' || a.applyState === 'NEEDS_REVIEW').length;
-  $('#needsCount').textContent = needs ? String(needs) : '';
+  if ($('#appTbody')) drawDashApps(); // refresh dashboard table if visible
 }
 async function loadRailProfile() {
   try {
@@ -687,21 +918,33 @@ async function loadFeed({ append = false, limit = 25 } = {}) {
 }
 
 // ═══ Router ═════════════════════════════════════════════════════════════════
-const ROUTES = { dashboard: renderDashboard, jobs: renderJobs, browse: renderJobs, tracker: renderTracker, applied: renderApplied, 'auto-apply': renderAutoApply, profile: renderProfile };
+const ROUTES = { dashboard: renderDashboard, jobs: renderJobs, browse: renderJobs, tracker: renderTracker, applied: renderApplied, 'auto-apply': renderAutoApply, review: renderReview, sent: renderSent, profile: renderProfile, settings: renderSettings };
 async function route() {
   const name = location.hash.replace(/^#\/?/, '').split(/[/?]/)[0] || 'dashboard';
   const view = ROUTES[name] ? name : 'dashboard';
-  const navKey = view === 'browse' ? 'jobs' : view;
-  $$('#nav a').forEach(a => { if (a.dataset.route === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  const navKey = view === 'browse' ? 'jobs' : view === 'review' ? 'dashboard' : view === 'sent' ? 'applied' : view;
+  $$('#nav a, .rail-foot [data-route]').forEach(a => { if (a.dataset.route === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   closeDrawer(true);
   state.selected = null;
+  const mine = ++state.routeSeq;
+  // Renders run one at a time and a superseded one never starts. A slow page (the dashboard waiting on
+  // job matches) only holds the next one for a moment: its late updates target its own elements, and
+  // anything it throws after you left is ignored below.
+  const prev = state.routeChain;
+  let done; state.routeChain = new Promise(r => done = r);
+  await Promise.race([prev, new Promise(r => setTimeout(r, 600))]);
+  if (mine !== state.routeSeq) return done();
   try {
     if (!state.profile && view !== 'profile') await loadProfile();
-    if (!state.profile && view !== 'profile') { location.hash = '#/profile'; return; }
+    if (!state.profile && view !== 'profile') { location.hash = '#/profile'; return done(); }
+    delete $('#view').dataset.review;
     await ROUTES[view]();
   } catch (e) {
-    $('#view').innerHTML = `<div class="notice bad">This page couldn't load: ${esc(e.message)}. Check that the server is running and the database is migrated (npm run migrate).</div>`;
+    if (mine !== state.routeSeq) return done();   // a page you already left failed late: not this page's problem
+    $('#view').innerHTML = `<div class="notice bad">This page couldn't load: ${esc(e.message)}. The server may be busy, so this is usually temporary. <button class="btn" id="retryRoute" type="button">Try again</button></div>`;
+    $('#retryRoute')?.addEventListener('click', route);
   }
+  done();
   loadRailProfile(); loadApps().catch(() => {});
   const jm = location.hash.match(/job=(\d+)/); if (jm) openJob(jm[1]);
 }
@@ -719,8 +962,9 @@ function searchHTML() {
   const pill = (key, label, on) => `<div class="pill"><button type="button" data-pill="${key}" aria-pressed="${!!on}" aria-haspopup="true">${esc(label)}${I.chev(12)}</button></div>`;
   return `
   <form class="searchbar" id="searchForm" role="search">
-    <select id="scope" aria-label="Search in"><option value="title">Titles</option><option value="title_description">Titles and descriptions</option><option value="description">Descriptions</option></select>
-    <input id="q" type="search" placeholder="Search roles or skills, or paste a job link" autocomplete="off" value="${esc(state.search.include)}" aria-label="Search" />
+    <select id="scope" aria-label="Search in" style="width:auto;min-width:max-content"><option value="title">Titles</option><option value="title_description">Titles and descriptions</option><option value="description">Descriptions</option></select>
+    <input id="q" type="search" placeholder="Search roles or skills (separate several with |), or paste a job link" autocomplete="off" value="${esc(state.search.include)}" aria-label="Search" />
+    <button class="btn quiet" id="addTerm" type="button" title="Add another title or keyword (matches any)">+ Add</button>
     <button class="btn primary" type="submit">Search</button>
   </form>
   <div class="recent" id="recent" aria-label="Recent searches"></div>
@@ -737,7 +981,8 @@ function searchHTML() {
     <span style="flex:1"></span>
     <button class="btn sm quiet" id="saveSearch" type="button">${state.saved ? 'Saved search on' : 'Save this search'}</button>
   </div>
-  <div id="searchMeta"></div>`;
+  <div id="searchMeta"></div>
+`;
 }
 // The titles and roles you search for are kept, with the filters you had on, so one click brings both back.
 const FILTER_KEYS = ['remote_only', 'preferred_workplace_types', 'preferred_employment_types', 'allowed_countries', 'max_experience_required', 'min_salary', 'salary_is_hard_constraint', 'exclude_clearance_jobs'];
@@ -759,7 +1004,16 @@ async function applyRecent(r) {
     state.posted = r.f.posted; store.set('posted', state.posted);
     await savePrefs(r.f.prefs); await saveProfileField({ needs_sponsorship: r.f.visa });
   }
-  route();
+  // Handle post-OAuth redirect (?gmail=connected)
+(function() {
+  const p = new URLSearchParams(location.search);
+  if (p.get('gmail') === 'connected') {
+    history.replaceState(null, '', location.pathname + location.hash);
+    // the server sends you back to #/settings
+    toast('Gmail connected successfully!');
+  }
+})();
+route();
 }
 function renderRecent() {
   const host = $('#recent'); if (!host) return;
@@ -774,6 +1028,7 @@ function bindSearch(onChange) {
     if (/^https?:\/\//i.test(q)) return importLink(q, e.submitter);
     state.search = { include: $('#q').value, exclude: $('#ex').value, scope: $('#scope').value }; rememberSearch(); onChange();
   });
+  $('#addTerm').addEventListener('click', () => { const q = $('#q'); q.value = q.value.trim().replace(/\|$/, '').trim(); q.value += q.value ? ' | ' : ''; q.focus(); });
   renderRecent();
   $('#recent').addEventListener('click', e => {
     const x = e.target.closest('[data-rm]'); const go = e.target.closest('[data-i]');
@@ -794,7 +1049,7 @@ function bindSearch(onChange) {
   });
   $$('[data-pill]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openFilterMenu(b.dataset.pill, b.parentElement, onChange); }));
 }
-function closeMenus() { $$('.pill .menu').forEach(m => m.remove()); }
+function closeMenus() { $$('.pill .menu').forEach(m => { m.remove(); m.onClose?.(); }); }
 document.addEventListener('click', e => { if (!e.target.closest('.menu')) closeMenus(); });
 async function savePrefs(patch) { await api('PUT', `/users/${USER}/profile/preferences`, patch); Object.assign(state.profile, patch); }
 async function saveProfileField(patch) { const p = { ...state.profile, ...patch }; await api('PUT', `/users/${USER}/profile`, profileBody(p)); Object.assign(state.profile, patch); }
@@ -804,10 +1059,11 @@ function profileBody(p) {
   return Object.fromEntries(keys.map(k => [k, p?.[k] ?? (/preferred_|excluded_|allowed_/.test(k) ? [] : null)]));
 }
 function openFilterMenu(key, host, onChange) {
-  closeMenus();
+  // switching straight to another filter: drop the open menu quietly and refresh when this one closes instead
+  const carried = $$('.pill .menu').some(x => x.dirty?.()); $$('.pill .menu').forEach(x => x.remove());
   const p = state.profile; const m = document.createElement('div'); m.className = 'menu'; m.setAttribute('role', 'dialog');
   const opts = (list, sel, type = 'checkbox') => list.map(([v, l]) => `<label class="opt"><input type="${type}" name="o" value="${v}" ${sel.includes(v) ? 'checked' : ''}/> ${l}</label>`).join('');
-  const foot = `<div class="foot"><button class="btn sm quiet" data-act="clear" type="button">Clear</button><button class="btn sm primary" data-act="apply" type="button">Apply</button></div>`;
+  const foot = `<div class="foot"><span class="muted" style="font-size:12px;margin-right:auto">Saves as you pick</span><button class="btn sm quiet" data-act="clear" type="button">Clear</button><button class="btn sm primary" data-act="apply" type="button">Done</button></div>`;
   if (key === 'date') m.innerHTML = opts(DATE_OPTS.map(([v, l]) => [String(v), l]), [String(state.posted)], 'radio') + foot;
   if (key === 'workplace') m.innerHTML = opts(WORKPLACES, p.remote_only ? ['REMOTE'] : (p.preferred_workplace_types || [])) + `<p>Remote on its own hides everything else. Picking several ranks them instead.</p>` + foot;
   if (key === 'employment') m.innerHTML = opts(EMPLOYMENT, p.preferred_employment_types || []) + foot;
@@ -818,9 +1074,20 @@ function openFilterMenu(key, host, onChange) {
   if (key === 'clearance') m.innerHTML = `<label class="opt"><input type="checkbox" ${p.exclude_clearance_jobs ? 'checked' : ''}/> Hide jobs that require a security clearance</label>` + foot;
   host.appendChild(m);
   m.querySelector('input')?.focus();
-  m.addEventListener('click', async e => {
+  // Every pick saves at once; the jobs list refreshes when the menu closes (Done, Enter, Esc or a click outside).
+  let saved = carried, saving = Promise.resolve();
+  m.dirty = () => saved;
+  m.onClose = () => { if (saved) saving.then(onChange); };
+  const done = () => { saved = true; closeMenus(); };
+  m.addEventListener('change', () => { if (key === 'date') save(false).then(done); else save(false); });
+  m.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(false).then(done); } });
+  m.addEventListener('click', e => {
     const act = e.target.closest('[data-act]')?.dataset.act; if (!act) return;
-    const clear = act === 'clear'; const vals = $$('input[type=checkbox]:checked', m).map(i => i.value);
+    (act === 'clear' ? save(true) : saving).then(done);
+  });
+  function save(clear) { saved = true; return (saving = saving.then(() => write(clear))); }
+  async function write(clear) {
+    const vals = $$('input[type=checkbox]:checked', m).map(i => i.value);
     try {
       if (key === 'date') { state.posted = clear ? 30 : Number(m.querySelector('input:checked')?.value ?? 30); store.set('posted', state.posted); }
       if (key === 'workplace') { const v = clear ? [] : vals; await savePrefs({ remote_only: v.length === 1 && v[0] === 'REMOTE', preferred_workplace_types: v }); }
@@ -830,17 +1097,19 @@ function openFilterMenu(key, host, onChange) {
       if (key === 'salary') { const n = m.querySelector('input').value; await savePrefs({ min_salary: clear || n === '' ? null : Number(n), salary_is_hard_constraint: !clear && n !== '' }); }
       if (key === 'visa') await saveProfileField({ needs_sponsorship: !clear && m.querySelector('input').checked });
       if (key === 'clearance') await savePrefs({ exclude_clearance_jobs: !clear && m.querySelector('input').checked });
-      closeMenus(); onChange();
     } catch (err) { toast(err.message); }
-  });
+  }
+}
+/** Highlights the searched words in already-escaped text, like Tsenta's job details. */
+function markTerms(html) {
+  const terms = String(state.search.include || '').split('|').map(t => esc(t.trim())).filter(t => t.length > 1);
+  if (!terms.length) return html;
+  return html.replace(new RegExp(`(${terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi'), '<mark>$1</mark>');
 }
 function searchMetaHTML(feed) {
-  const warn = (feed?.searchWarnings || []).map(w => `<div class="notice warn">${esc(w)}</div>`).join('');
-  if (!feed?.keywordSearch) return warn;
-  const ks = feed.keywordSearch;
-  return `<div class="search-meta">${ks.include.map(t => `<span class="tag cobalt">${esc(t)}</span>`).join('')}${ks.exclude.map(t => `<span class="tag miss">without ${esc(t)}</span>`).join('')}
-    <span>${feed.total} result${feed.total === 1 ? '' : 's'}. Search matches rank higher, so their scores run above an unsearched list.</span>
-    <button class="btn sm quiet" id="clearSearch" type="button">Clear search</button></div>` + warn;
+  // one quiet line; the search box and "Hide jobs mentioning" already show the terms
+  if (!feed?.keywordSearch) return '';
+  return `<div class="search-meta"><button class="btn sm quiet" id="clearSearch" type="button">Clear search</button></div>`;
 }
 function zeroHTML(feed) {
   const r = feed.zeroResultReason;
@@ -852,6 +1121,24 @@ function zeroHTML(feed) {
 }
 
 // ═══ Job rows ═══════════════════════════════════════════════════════════════
+const JTINTS = ['#FBE9D0', '#F5DCDD', '#DCEBFA', '#D6F5E3', '#E8E4FD', '#FFF1C9'];
+function jobCardHTML(j, i) {
+  const v = Math.max(0, Math.min(100, Math.round(j.matchScore || 0))), c = 2 * Math.PI * 22;
+  const wp = j.workplace && !['UNKNOWN', 'ONSITE'].includes(j.workplace) ? pretty(j.workplace) : '';
+  const sk = jobSkills(j).slice(0, 5).map(x => `<span>${esc(x)}</span>`).join('');
+  return `<article class="jc" data-job="${j.jobId}" tabindex="0" style="--tint:${JTINTS[i % JTINTS.length]}">
+    <div class="jc-top"><div class="jc-meta">${whereText(j) && !wp ? `<span>${esc(whereText(j))}</span>` : ''}${wp ? `<span class="rm">${wp}</span>` : ''}<span>${ago(j.postedAt || j.discovered)}</span></div>
+      <svg class="ring" viewBox="0 0 54 54" role="img" aria-label="${v}% match"><circle cx="27" cy="27" r="22" fill="none" stroke="#0002" stroke-width="3"/><circle cx="27" cy="27" r="22" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-dasharray="${(c * v / 100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 27 27)"/><text x="27" y="26" text-anchor="middle">${v}%</text><text class="m" x="27" y="37" text-anchor="middle">match</text></svg>
+      <h3>${esc(j.title)}</h3>${sk ? `<div class="skills">${sk}</div>` : ''}</div>
+    <div class="jc-acts"><button class="btn quiet sm" type="button" data-save="${j.jobId}">Save</button><button class="btn quiet sm" type="button" data-jdetail="${j.jobId}">Details</button><button class="btn quiet sm" data-link="${j.jobId}" data-url="${esc(j.url || '')}" title="Open original posting" type="button">${I.ext(13)} Posting</button></div>
+    <div class="jc-foot" id="jcf-${j.jobId}"><span class="co" title="${esc(j.company)}"><i class="av">${esc((j.company || '?')[0].toUpperCase())}${logoImg(j.company)}</i><span class="nm">${esc(j.company)}</span></span>
+      <button class="btn sm" data-pass="${j.jobId}" type="button">Pass</button><button class="btn sm primary" data-apply="${j.jobId}" type="button">Apply</button></div>
+  </article>`;
+}
+function linkCardHTML() {
+  return `<article class="jc link" data-addlink tabindex="0" role="button"><div class="jc-top"><div class="jc-meta">Workday, Greenhouse, Lever…</div><h3>Add your own link</h3><div class="jc-meta" style="padding:0">Paste a URL and optional job description</div></div>
+    <div class="jc-foot"><span class="co">Quick add<br/><span class="muted" style="font-weight:400">Any job board</span></span><button class="btn sm primary" type="button">+ Add</button></div></article>`;
+}
 function rowHTML(j, { compact = false } = {}) {
   const have = new Set(state.profileSkills || []);
   const skills = jobSkills(j); const hits = skills.filter(s => have.has(s.toLowerCase()));
@@ -869,6 +1156,7 @@ function rowHTML(j, { compact = false } = {}) {
     <div class="acts">
       <button class="icon-btn" data-pass="${j.jobId}" title="Not for me" aria-label="Pass on ${esc(j.title)}">${I.x(16)}</button>
       ${compact ? '' : `<button class="icon-btn" data-save="${j.jobId}" title="Save to tracker" aria-label="Save ${esc(j.title)}">${I.save(16)}</button>`}
+      ${j.url ? `<a class="btn sm quiet" href="${esc(j.url)}" target="_blank" rel="noopener" title="Open original posting">Link</a>` : ''}
       <button class="btn sm primary" data-apply="${j.jobId}">Apply</button>
     </div>
   </article>`;
@@ -876,14 +1164,20 @@ function rowHTML(j, { compact = false } = {}) {
 function bindRows(root) {
   const find = id => state.feed?.jobs.find(j => j.jobId === id) || { jobId: id };
   root.addEventListener('click', async e => {
-    const btn = e.target.closest('[data-pass],[data-apply],[data-save]');
+    if (e.target.closest('[data-jdetail]')) { openJob(e.target.closest('[data-jdetail]').dataset.jdetail); return; }
+    const btn = e.target.closest('[data-pass],[data-apply],[data-save],[data-link]');
     if (btn) {
       e.stopPropagation();
       const id = btn.dataset.pass || btn.dataset.apply || btn.dataset.save;
       try {
+        if (btn.dataset.link) { window.open(btn.dataset.url || `https://google.com/search?q=${encodeURIComponent(btn.closest('[data-job]')?.querySelector('h3')?.textContent||'')}`, '_blank', 'noopener'); return; }
         if (btn.dataset.pass) { await api('POST', `/users/${USER}/jobs/${id}/interactions`, { interaction_type: 'SKIP' }); removeRow(id); toast('Passed. This job won\'t come back.'); }
         if (btn.dataset.save) { await api('POST', `/users/${USER}/applications`, { jobId: id, status: 'SAVED' }); toast('Saved to your tracker.'); loadApps(); }
-        if (btn.dataset.apply) applyTo(find(id));
+        if (btn.dataset.apply) {
+          const rowEl = btn.closest('[data-job]');
+          const cardFoot = btn.closest('.jc-foot') || btn.closest('.jc')?.querySelector('.jc-foot') || null;
+          applyTo(find(id), { cardFoot, rowEl });
+        }
       } catch (err) { toast(err.message); }
       return;
     }
@@ -900,26 +1194,130 @@ function removeRow(id) {
   if (state.feed) state.feed.jobs = state.feed.jobs.filter(j => j.jobId !== id);
   if (state.selected === id) { state.selected = null; const d = $('#detail'); if (d) d.innerHTML = detailEmpty(); }
 }
-async function applyTo(job) {
-  if (job.url) window.open(job.url, '_blank', 'noopener');
-  await api('POST', `/users/${USER}/applications`, { jobId: job.jobId, status: 'APPLIED' });
-  removeRow(job.jobId);
-  toast('Posting opened and marked as applied.');
+// ─── Live-status tracker for in-flight auto-apply jobs ─────────────────────
+const _applyPollers = new Map(); // jobId → intervalId
+function _applyStatus(jobId, appId, cardFoot, rowEl) {
+  const LABELS = {
+    QUEUED:      ['queued',  '<span class="spin"></span> Tailoring resume…'],
+    PREPARED:    ['working', '<span class="spin"></span> Opening the form…'],
+    SUBMITTING:  ['working', '<span class="spin"></span> Filling form…'],
+    NEEDS_REVIEW:['working', '👀 Ready: review &amp; submit'],
+    NEEDS_YOU:   ['failed',  '🛑 Needs your input'],
+    SUBMITTED:   ['done',    '✅ Applied!'],
+    FAILED:      ['failed',  '❌ Failed: see Applications'],
+    SKIPPED:     ['done',    'Skipped'],
+  };
+  const render = state => {
+    const [cls, text] = LABELS[state] || ['queued', state];
+    const badge = `<span class="apply-status ${cls}">${text}</span>`;
+    if (cardFoot) {
+      // replace Apply btn with badge, keep Pass btn
+      const applyBtn = cardFoot.querySelector('[data-apply]');
+      if (applyBtn) applyBtn.replaceWith(Object.assign(document.createElement('span'), { className: `apply-status ${cls}`, innerHTML: text }));
+      else { const s = cardFoot.querySelector('.apply-status'); if (s) { s.className = `apply-status ${cls}`; s.innerHTML = text; } }
+    }
+    if (rowEl) {
+      const acts = rowEl.querySelector('.acts');
+      if (acts) {
+        const old = acts.querySelector('.apply-status'); if (old) old.remove();
+        const s = document.createElement('span'); s.className = `apply-status ${cls}`; s.innerHTML = text;
+        acts.appendChild(s);
+        const applyBtn = acts.querySelector('[data-apply]'); if (applyBtn) applyBtn.remove();
+      }
+    }
+  };
+  render('QUEUED');
+  const startedAt = Date.now();
+  const poll = async () => {
+    try {
+      const { data } = await api('GET', `/users/${USER}/applications/${appId}`);
+      const s = data?.applyState;
+      render(s || 'QUEUED');
+      if (['SUBMITTED','FAILED','SKIPPED','NEEDS_YOU','NEEDS_REVIEW'].includes(s) || Date.now() - startedAt > 10 * 60_000) {
+        clearInterval(_applyPollers.get(jobId)); _applyPollers.delete(jobId);
+        if (s === 'SUBMITTED') removeRow(jobId);
+        if (s === 'NEEDS_REVIEW') toast('Form filled. Review and submit it under Applications → Needs you.');
+        if (s === 'FAILED') toast(data.applyDetail?.reason || 'That application failed.');
+        if (s === 'SUBMITTED') toast('Applied. It\'s under Applications → Submitted.');
+        if (s === 'SKIPPED') toast('Skipped. See Applications.');
+        loadApps();
+      }
+    } catch { /* network blip, keep polling */ }
+  };
+  const id = setInterval(poll, 2500);
+  _applyPollers.set(jobId, id);
+  setTimeout(poll, 400); // first check soon
+}
+
+async function applyTo(job, { cardFoot = null, rowEl = null } = {}) {
+  // Create application record
+  const { data: created } = await api('POST', `/users/${USER}/applications`, { jobId: job.jobId, status: 'SAVED' });
+  const appId = created?.id;
+  if (!appId) { toast('Could not start application.'); return; }
+
+  // Start live status badge
+  _applyStatus(job.jobId, appId, cardFoot, rowEl);
+  removeRow(job.jobId); toast('Applying. Follow it under Applications → In flight.');   // it leaves the feed now and moves to In flight, then Submitted / Failed / Skipped
+
+  // The server tailors, fills the form and stops for your review; the badge just follows its state.
+  api('POST', `/users/${USER}/applications/${appId}/apply`, {})
+    .catch(err => { toast(err.message); loadApps(); });
+
   loadApps();
 }
-async function importLink(url, button) {
+async function importLink(url, button, description = '') {
   const label = button?.textContent; if (button) { button.disabled = true; button.textContent = 'Checking link…'; }
   try {
-    const res = await fetch(`${API}/jobs/import`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+    const res = await fetch(`${API}/jobs/import`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, description }) });
     const data = await res.json();
     if (data.jobId) {
       toast(data.company?.added ? `Job added. ${data.company.name} will now be scanned automatically.` : 'Job added.');
       if ($('#q')?.value.trim() === url) $('#q').value = '';
-      if ($('#addLinkInput')?.value.trim() === url) $('#addLinkInput').value = '';
       openJob(data.jobId);
-    } else toast(data.message || 'That link couldn\'t be added.');
+      return true;
+    }
+    toast(data.message || 'That link couldn\'t be added.');
+    if (data.code === 'PAGE_UNREADABLE' && !$('#linkModal')) openLinkModal(url);
   } catch (err) { toast(err.message); }
   finally { if (button) { button.disabled = false; button.textContent = label; } }
+  return false;
+}
+// "Add your own link": paste a job URL from any board, optionally fetch or paste its description.
+function openLinkModal(url = '') {
+  $('#linkModal')?.remove();
+  const el = document.createElement('div'); el.id = 'linkModal'; el.className = 'modal-scrim';
+  el.innerHTML = `<form class="modal" role="dialog" aria-modal="true" aria-labelledby="lmT">
+    <button class="icon-btn" type="button" data-x aria-label="Close" style="position:absolute;top:14px;right:14px">${I.x(16)}</button>
+    <h2 id="lmT">Add your own link</h2>
+    <div class="lm-hint">Paste the URL of the job page, from any job board.</div>
+    <label for="lmUrl">Job URL</label>
+    <div class="lm-row"><input id="lmUrl" type="url" required placeholder="https://…" value="${esc(url)}"/><button class="btn" type="button" id="lmFetch">Fetch JD</button></div>
+    <label for="lmJd">Job description <span class="muted">(click “Fetch JD”, or paste it here)</span></label>
+    <textarea id="lmJd" rows="6" placeholder="Click 'Fetch JD' above, or paste the job description here as a fallback."></textarea>
+    <div class="lm-ats muted" id="lmAts" aria-live="polite"></div>
+    <button class="btn primary" type="submit" id="lmGo" style="width:100%;padding:12px">Add job</button></form>`;
+  document.body.appendChild(el);
+  const u = $('#lmUrl', el), jd = $('#lmJd', el), ats = $('#lmAts', el);
+  const detect = async () => {
+    if (!/^https?:\/\//i.test(u.value)) { ats.textContent = ''; return; }
+    try { const r = await (await fetch(`${API}/jobs/import/check?url=${encodeURIComponent(u.value)}`)).json(); ats.textContent = r.supported ? `${pretty(r.ats)} detected` : (r.ats ? `${pretty(r.ats)} detected` : 'Reading the job page directly'); } catch { ats.textContent = ''; }
+  };
+  const close = () => el.remove();
+  el.addEventListener('click', e => { if (e.target === el || e.target.closest('[data-x]')) close(); });
+  el.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  u.addEventListener('change', detect); detect(); u.focus();
+  $('#lmFetch', el).addEventListener('click', async e => {
+    const b = e.target; if (!u.reportValidity()) return; b.disabled = true; b.textContent = 'Fetching…';
+    try {
+      const res = await fetch(`${API}/jobs/import/preview`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: u.value }) });
+      const d = await res.json();
+      if (d.ok) { jd.value = d.description; ats.textContent = `${d.ats ? pretty(d.ats) + ' · ' : ''}${d.title}${d.company ? ' at ' + d.company : ''}`; } else toast(d.message || 'Couldn\'t read that page.');
+    } catch (err) { toast(err.message); }
+    b.disabled = false; b.textContent = 'Fetch JD';
+  });
+  el.firstElementChild.addEventListener('submit', async e => {
+    e.preventDefault(); if (await importLink(u.value.trim(), $('#lmGo', el), jd.value.trim())) close();
+  });
 }
 
 // ═══ Job detail (pane on wide screens, drawer otherwise) ═════════════════════
@@ -942,6 +1340,15 @@ async function openJob(jobId) {
   bindDetail(host, data, jobId);
   if (!pane) host.querySelector('[data-close]')?.focus();
 }
+// Years of experience: the structured field wins; otherwise the first "N+ years ... experience" in the description.
+function experienceText(j) {
+  const { min, max } = j.experience || {};
+  if (min != null) return { text: max != null && max > min ? `${min}–${max} years` : `${min}+ years` };
+  const m = /(\d{1,2})\s*(?:(?:-|–|to)\s*(\d{1,2}))?\s*\+?\s*(?:years?|yrs?)\b[^.\n]{0,60}?experience|experience[^.\n]{0,40}?(\d{1,2})\s*(?:(?:-|–|to)\s*(\d{1,2}))?\s*\+?\s*(?:years?|yrs?)\b/i.exec(j.description || '');
+  if (!m) return null;
+  const a = m[1] ?? m[3], b = m[2] ?? m[4];
+  return { text: b ? `${a}–${b} years` : `${a}+ years`, fromDescription: true };
+}
 function jobDetailHTML(data, jobId, inDrawer) {
   const j = data.job, m = data.match;
   const fromFeed = state.feed?.jobs.find(x => x.jobId === jobId);
@@ -963,14 +1370,14 @@ function jobDetailHTML(data, jobId, inDrawer) {
       <div class="jd-actions">
         <button class="btn primary" data-dapply>Apply</button>
         <button class="btn" data-dsave>${I.save(15)} ${status ? 'In your tracker' : 'Save'}</button>
-        <button class="btn" data-tailor aria-expanded="false">Tailor resume</button>
+        ${ME?.impersonator ? `<button class="btn" data-tailor aria-expanded="false" title="Admin view">Tailor resume</button>` : ''}
         <a class="btn quiet" href="${esc(j.url)}" target="_blank" rel="noopener">${I.ext(15)} View posting</a>
         <button class="btn quiet" data-hide>Not interested</button>
       </div>
     </div>
     <div class="jd-body">
       <section class="jd-sec hidden" id="tailorSec"></section>
-      ${m ? `<section class="jd-sec"><h4>Why it matches</h4>
+      ${m && !ME?.impersonator ? '' : m ? `<section class="jd-sec"><h4>Why it matches <span class="tag">Admin view</span></h4>
         <div class="why">${score(s, { big: true })}<div class="parts">${parts}</div></div>
         <ul class="reasons">${(fromFeed?.whyMatched || m.whyMatched).map(r => `<li>${esc(humanize(r))}</li>`).join('')}</ul>
         ${m.missingRequiredSkills?.length ? `<p style="font-size:14px;margin:10px 0 0">Missing required skills: ${m.missingRequiredSkills.map(x => `<span class="tag miss">${esc(x)}</span>`).join(' ')}</p>` : ''}
@@ -980,11 +1387,11 @@ function jobDetailHTML(data, jobId, inDrawer) {
       <section class="jd-sec"><h4>The role</h4><dl class="facts">
         ${fact('Pay', money(j.salary) || 'Not posted')}${fact('Workplace', j.workplace && j.workplace !== 'UNKNOWN' ? pretty(j.workplace) : 'Not stated')}
         ${fact('Level', j.seniority && j.seniority !== 'UNKNOWN' ? pretty(j.seniority) : (j.experience?.min != null ? `${j.experience.min}+ years` : 'Not stated'))}${fact('Job type', j.employmentType && j.employmentType !== 'UNKNOWN' ? pretty(j.employmentType) : 'Not stated')}
-        ${fact('Field', pretty(j.roleFamily) || 'Not classified')}<div><dt>Visa sponsorship</dt><dd><span class="tag ${visa[0]}">${visa[1]}</span></dd></div></dl></section>
+        ${fact('Experience required', (e => e ? e.text + (e.fromDescription ? ' (from description)' : '') : 'Not stated')(experienceText(j)))}${fact('Field', pretty(j.roleFamily) || 'Not classified')}<div><dt>Visa sponsorship</dt><dd><span class="tag ${visa[0]}">${visa[1]}</span></dd></div></dl></section>
       ${openings ? `<section class="jd-sec"><h4>${openings.length} openings for this role</h4><div class="openings">${openings.map(o => `<div><span>${esc(o.locationText || 'Location not stated')}${o.current ? ' <span class="tag cobalt">Viewing</span>' : ''}</span>${o.current ? '' : `<button class="btn sm quiet" data-sib="${o.jobId}">Open</button>`}</div>`).join('')}</div></section>` : ''}
       ${req.length ? `<section class="jd-sec"><h4>Required skills</h4><div class="chips">${req.map(chip).join('')}</div></section>` : ''}
       ${other.length ? `<section class="jd-sec"><h4>${req.length ? 'Also mentioned' : 'Skills mentioned'}</h4><div class="chips">${other.map(chip).join('')}</div></section>` : ''}
-      <section class="jd-sec"><h4>Description</h4><div class="desc">${esc(j.description || 'No description was captured for this posting.')}</div></section>
+      <section class="jd-sec"><h4>Description</h4><div class="desc">${markTerms(esc(j.description || 'No description was captured for this posting.'))}</div></section>
     </div>`;
 }
 function bindDetail(host, data, jobId) {
@@ -993,7 +1400,7 @@ function bindDetail(host, data, jobId) {
   host.querySelector('[data-hide]').addEventListener('click', async () => { await api('POST', `/users/${USER}/jobs/${jobId}/interactions`, { interaction_type: 'HIDE' }); removeRow(jobId); closeDrawer(); toast('Hidden. You won\'t see this job again.'); });
   host.querySelector('[data-dsave]').addEventListener('click', async () => { await api('POST', `/users/${USER}/applications`, { jobId, status: data.application?.status || 'SAVED' }); toast('Saved to your tracker.'); loadApps(); });
   host.querySelector('[data-dapply]').addEventListener('click', () => { applyTo({ jobId, url: data.job.url }); closeDrawer(); });
-  host.querySelector('[data-tailor]').addEventListener('click', e => openTailor(host, data, jobId, e.currentTarget));
+  host.querySelector('[data-tailor]')?.addEventListener('click', e => openTailor(host, data, jobId, e.currentTarget));
 }
 function closeDrawer(silent) {
   $('#drawer').classList.remove('open'); $('#scrim').classList.remove('open'); $('#drawer').setAttribute('aria-hidden', 'true');
@@ -1005,32 +1412,161 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawe
 // ═══ Dashboard ══════════════════════════════════════════════════════════════
 const STATUSES = [['SAVED', 'Saved'], ['APPLIED', 'Applied'], ['GHOSTED', 'No reply'], ['INTERVIEWING', 'Interviewing'], ['OFFER', 'Offer'], ['REJECTED', 'Rejected']];
 const STATUS_LABEL = Object.fromEntries(STATUSES);
+const TINTS = ['#FFF1C9', '#D6F5E3', '#E8E4FD', '#FFE1DC'];
+function topCardHTML(j, i) {
+  const v = Math.max(0, Math.min(100, Math.round(j.matchScore || 0))), c = 2 * Math.PI * 19;
+  const where = j.workplace === 'REMOTE' ? 'Remote' : j.locationText ? esc(j.locationText.split(',')[0]) : '';
+  const sk = jobSkills(j).slice(0, 3).map(x => `<span class="tag" style="font-size:11px">${esc(x)}</span>`).join('');
+  return `<article class="tcard" data-job="${j.jobId}" tabindex="0">
+    <div class="tc-top" style="--tint:${TINTS[i % TINTS.length]}">
+      <div class="tc-meta">${where ? `<span style="opacity:.7">${where}</span><span style="opacity:.4">·</span>` : ''}<span style="opacity:.55">${ago(j.postedAt || j.discovered)}</span></div>
+      <h3 title="${esc(j.title)}">${esc(j.title)}</h3>
+      ${sk ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">${sk}</div>` : ''}
+      <svg class="ring" viewBox="0 0 46 46" role="img" aria-label="${v}% match"><circle cx="23" cy="23" r="19" fill="none" stroke="#0002" stroke-width="3.5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#111" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${(c * v / 100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 23 23)"/><text x="23" y="27" text-anchor="middle" style="font:700 12px var(--text);fill:#111">${v}%</text></svg>
+    </div>
+    <div class="tc-foot">
+      <span class="co"><i class="av">${esc((j.company || '?')[0].toUpperCase())}${logoImg(j.company)}</i>${esc(j.company)}</span>
+      <button class="btn-pass" data-pass="${j.jobId}" type="button">Pass</button>
+      <button class="btn sm primary" data-apply="${j.jobId}" type="button">Apply</button>
+    </div>
+  </article>`;
+}
+// Dashboard app-table state
+const _dashTab = { active: 'all', q: '' };
+const _DASH_TABS = [
+  ['all', 'All'], ['APPLIED', 'Submitted'], ['in_flight', 'In flight'],
+  ['needs_you', 'Needs you'], ['FAILED', 'Failed'], ['SKIPPED', 'Skipped']
+];
+
 async function renderDashboard() {
-  const first = (state.profile?.full_name || '').split(' ')[0];
-  const hour = new Date().getHours();
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'}${first ? `, ${esc(first)}` : ''}</h1><p id="dashLine">Finding your best matches…</p></div></div>
-    <form class="searchbar" id="dashSearch" role="search" style="margin-bottom:22px"><input id="dq" type="search" placeholder="Search roles or skills, or paste a job link" aria-label="Search jobs"/><button class="btn primary" type="submit">Search</button></form>
-    <div class="dash">
-      <section class="panel"><div class="panel-head"><h2>Best matches right now</h2><span class="spacer"></span><a class="btn sm quiet" href="#/jobs">See all jobs</a></div>
-        <div class="list" id="top">${'<div style="padding:16px 18px"><div class="skeleton" style="height:52px"></div></div>'.repeat(4)}</div></section>
-      <div style="display:grid;gap:22px">
-        <section class="panel"><div class="panel-head"><h2>Applications</h2><span class="spacer"></span><a class="btn sm quiet" href="#/tracker">Open tracker</a></div><div class="panel-body" id="pipe"></div></section>
-        <section class="panel" id="profilePanel"></section>
+    <h1 class="sr-only">Dashboard</h1>
+    <div id="dashSearch" style="margin-bottom:18px"></div>
+    <div class="tm-head" style="margin-bottom:8px">
+      <h2>Top job matches</h2>
+      <span class="spacer"></span>
+      <button class="btn sm quiet" id="addOwnLink" type="button">+ Add your own</button>
+      <a class="btn sm quiet" href="#/jobs">Browse jobs</a>
+    </div>
+    <div class="top-strip" id="top">${'<div class="skeleton" style="height:200px;width:220px;border-radius:16px;flex:none"></div>'.repeat(5)}</div>
+    <div class="all-apps">
+      <div class="all-apps-head">
+        <h2>All applications</h2>
+        <span class="spacer"></span>
+        <a class="btn sm quiet" href="#/tracker">Open tracker</a>
+        <button class="btn sm" id="approveAllBtn" type="button" style="opacity:.5" disabled>✓ Approve all</button>
       </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <div class="app-tabs" id="appTabs" style="flex:1;min-width:0">${_DASH_TABS.map(([k, l]) => `<button class="app-tab" data-tab="${k}" aria-selected="${_dashTab.active === k}">${l}<span class="n" id="tn-${k}"></span></button>`).join('')}</div>
+        <input class="app-search-co" id="appCoSearch" type="search" placeholder="🔍 Search company" value="${esc(_dashTab.q)}" style="flex-shrink:0;width:160px">
+      </div>
+      <table class="app-table"><thead><tr><th>Company</th><th>Resume</th><th>Status</th><th>Applied</th></tr></thead>
+      <tbody id="appTbody"><tr><td colspan="4"><div class="skeleton" style="height:48px;border-radius:0"></div></td></tr></tbody></table>
+      <div id="appMore"></div>
     </div>`;
-  $('#dashSearch').addEventListener('submit', e => {
-    e.preventDefault(); const q = $('#dq').value.trim(); if (!q) { location.hash = '#/jobs'; return; }
-    if (/^https?:\/\//i.test(q)) return importLink(q, e.submitter);
-    state.search = { include: q, exclude: '', scope: 'title' }; location.hash = '#/jobs';
-  });
+
+  // Same search and filters as Jobs; any change redraws them and the top matches here.
+  const drawTop = feed => {
+    $('#searchMeta').innerHTML = searchMetaHTML(feed);
+    $('#clearSearch')?.addEventListener('click', () => { state.search = { include: '', exclude: '', scope: state.search.scope }; refresh(); });
+    $('#top').innerHTML = feed.jobs.length ? feed.jobs.slice(0, 5).map(topCardHTML).join('') : zeroHTML(feed);
+  };
+  const drawSearch = () => { $('#dashSearch').innerHTML = searchHTML(); bindSearch(refresh); };
+  const refresh = async () => {
+    if (!$('#dashSearch')) return;
+    drawSearch(); $('#top').innerHTML = '<div class="skeleton" style="height:200px;width:220px;border-radius:16px;flex:none"></div>'.repeat(5);
+    drawTop(await loadFeed({ limit: 6 }));
+  };
+  drawSearch();
+  $('#addOwnLink')?.addEventListener('click', () => openLinkModal());
+
+  // Tab switching
+  $$('.app-tab').forEach(b => b.addEventListener('click', () => {
+    _dashTab.active = b.dataset.tab; _dashTab.q = ''; $('#appCoSearch').value = '';
+    $$('.app-tab').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+    drawDashApps();
+  }));
+  $('#appCoSearch').addEventListener('input', e => { _dashTab.q = e.target.value; drawDashApps(); });
+
   bindRows($('#top'));
   await Promise.all([ensureSkills(), loadApps(), loadRailProfile()]);
-  renderPipeline(); renderProfilePanel();
-  const feed = await loadFeed({ limit: 6 });
-  const strong = feed.jobs.filter(j => j.matchScore >= 80).length;
-  $('#dashLine').textContent = feed.total ? `${feed.total} jobs fit your profile${strong ? `, and ${strong} of the top ${feed.jobs.length} are strong matches` : ''}.` : 'No matching jobs yet. Widen your filters or add more skills.';
-  $('#top').innerHTML = feed.jobs.length ? feed.jobs.map(j => rowHTML(j, { compact: true })).join('') : zeroHTML(feed);
+  drawDashApps();
+
+  drawTop(await loadFeed({ limit: 6 }));
+}
+
+const _AP_STATUS_DOT = {
+  APPLIED: ['ok', 'Submitted'], SUBMITTED: ['ok', 'Submitted'],
+  in_flight: ['warn', 'In flight'], QUEUED: ['warn', 'Queued'], SUBMITTING: ['warn', 'Filling form…'], PREPARED: ['warn', 'Tailoring resume…'],
+  NEEDS_YOU: ['bad', 'Needs you'], NEEDS_REVIEW: ['bad', 'Review needed'],
+  FAILED: ['bad', 'Application failed'],
+  SKIPPED: ['muted', 'Skipped'], SAVED: ['muted', 'Saved'],
+};
+function _apStatusDot(a) {
+  const st = a.applyState || a.status;
+  const [cls, label] = _AP_STATUS_DOT[st] || ['muted', pretty(st || 'Unknown')];
+  return `<span class="status-dot ${cls}">${esc(label)}</span>`;
+}
+function _apResBadge(a) {
+  if (!a.resumeProfile) return `<span class="res-badge none">—</span>`;
+  if (a.status === 'SKIPPED' || a.applyState === 'SKIPPED') return `<span class="res-badge skip">Skipped</span>`;
+  return `<span class="res-badge">Ready</span>`;
+}
+
+function drawDashApps() {
+  const tbody = $('#appTbody'); if (!tbody) return;
+  const { applications, counts } = state.apps || {};
+  const allApps = applications || [];
+
+  // Update tab counts
+  const submitted = allApps.filter(a => a.status === 'APPLIED').length;
+  const inFlight  = allApps.filter(a => ['QUEUED','PREPARED','SUBMITTING'].includes(a.applyState)).length;
+  const needsYou  = allApps.filter(a => ['NEEDS_YOU','NEEDS_REVIEW'].includes(a.applyState)).length;
+  const failed    = allApps.filter(a => a.applyState === 'FAILED' || (a.status !== 'APPLIED' && a.applyState === 'FAILED')).length;
+  const skipped   = allApps.filter(a => a.status === 'SKIPPED' || a.applyState === 'SKIPPED').length;
+  const tabCounts = { all: allApps.length, APPLIED: submitted, in_flight: inFlight, needs_you: needsYou, FAILED: failed, SKIPPED: skipped };
+  _DASH_TABS.forEach(([k]) => { const el = $(`#tn-${k}`); if (el) el.textContent = tabCounts[k] ? ` ${tabCounts[k]}` : ''; });
+
+  // Approve all: submit everything that's filled and waiting for your OK
+  const approveBtn = $('#approveAllBtn');
+  const toReview = allApps.filter(a => a.applyState === 'NEEDS_REVIEW');
+  if (approveBtn) {
+    approveBtn.disabled = !toReview.length; approveBtn.style.opacity = toReview.length ? '1' : '.4';
+    approveBtn.textContent = toReview.length ? `✓ Submit all ${toReview.length}` : '✓ Submit all';
+    approveBtn.onclick = async () => {
+      approveBtn.disabled = true;
+      for (const a of toReview) await api('POST', `/users/${USER}/applications/${a.id}/approve`, {}).catch(err => toast(err.message));
+      toast(`Submitting ${toReview.length}…`); loadApps();
+    };
+  }
+  // Something is filling a form right now: look again shortly so it moves to the next list by itself.
+  clearTimeout(state.appsTimer);
+  if (inFlight) state.appsTimer = setTimeout(() => { if ($('#appTbody')) loadApps(); }, 4000);
+
+  // Filter
+  let rows = allApps;
+  if (_dashTab.active === 'APPLIED')    rows = allApps.filter(a => a.status === 'APPLIED');
+  if (_dashTab.active === 'in_flight')  rows = allApps.filter(a => ['QUEUED','PREPARED','SUBMITTING'].includes(a.applyState));
+  if (_dashTab.active === 'needs_you')  rows = allApps.filter(a => ['NEEDS_YOU','NEEDS_REVIEW'].includes(a.applyState));
+  if (_dashTab.active === 'FAILED')     rows = allApps.filter(a => a.applyState === 'FAILED');
+  if (_dashTab.active === 'SKIPPED')    rows = allApps.filter(a => a.status === 'SKIPPED' || a.applyState === 'SKIPPED');
+  if (_dashTab.q) rows = rows.filter(a => (a.job?.company || a.company || '').toLowerCase().includes(_dashTab.q.toLowerCase()));
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="4" class="muted" style="padding:24px;text-align:center">No applications here yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.slice(0, 50).map(a => {
+    const co = a.job?.company || a.company || 'Unknown';
+    const title = a.job?.title || a.title || '';
+    return `<tr data-app="${a.id}" style="cursor:pointer">
+      <td><div class="co-cell"><div class="co-av">${esc(co[0] || '?')}</div><div class="co-info"><b>${esc(co)}</b><span>${esc(title)}</span></div></div></td>
+      <td>${_apResBadge(a)}</td>
+      <td>${_apStatusDot(a)}</td>
+      <td class="time-col">${ago(a.appliedAt || a.updatedAt || a.createdAt)}</td>
+    </tr>`;
+  }).join('');
+  $$('#appTbody tr[data-app]').forEach(r => r.addEventListener('click', () => openApplication(r.dataset.app)));
 }
 function renderPipeline() {
   const host = $('#pipe'); if (!host) return;
@@ -1055,27 +1591,40 @@ function renderProfilePanel() {
 // ═══ Jobs (two-pane) ════════════════════════════════════════════════════════
 async function renderJobs() {
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Jobs</h1><p id="jobsLine">Ranked by how well they fit your profile.</p></div></div>
+    <div class="page-head"><div><h1 class="sr-only">Jobs</h1><p id="jobsLine">Ranked by how well they fit your profile.</p></div></div>
     <div class="jobs">
       <div>
         ${searchHTML()}
-        <form class="addlink" id="addLinkForm"><label for="addLinkInput">Found a job elsewhere?</label><input id="addLinkInput" type="url" placeholder="Paste its link to add it" required/><button class="btn sm" type="submit">Add job</button></form>
-        <div class="list" id="list" style="margin-top:14px">${'<div style="padding:18px"><div class="skeleton" style="height:60px"></div></div>'.repeat(6)}</div>
+        <div class="jgrid" id="list">${'<div class="skeleton" style="height:200px;border-radius:var(--r-md)"></div>'.repeat(6)}</div>
       </div>
       <aside class="detail" id="detail" aria-label="Job details">${detailEmpty()}</aside>
     </div>`;
   bindSearch(() => renderJobs());
-  $('#addLinkForm').addEventListener('submit', e => { e.preventDefault(); importLink($('#addLinkInput').value.trim(), e.submitter); });
+  $('#list').addEventListener('click', e => { if (e.target.closest('[data-addlink]')) openLinkModal(); });
   bindRows($('#list'));
   await ensureSkills();
   const draw = feed => {
     $('#searchMeta').innerHTML = searchMetaHTML(feed);
     $('#clearSearch')?.addEventListener('click', () => { state.search = { include: '', exclude: '', scope: state.search.scope }; renderJobs(); });
     $('#jobsLine').textContent = feed.total ? `${feed.total} jobs, best fit first.` : 'Ranked by how well they fit your profile.';
-    $('#list').innerHTML = feed.jobs.length ? feed.jobs.map(j => rowHTML(j)).join('') + (feed.nextCursor ? `<div class="more"><button class="btn" id="loadMore" type="button">Show more jobs</button></div>` : '') : zeroHTML(feed);
-    $('#loadMore')?.addEventListener('click', async e => { e.target.disabled = true; draw(await loadFeed({ append: true })); });
+    $('#list').innerHTML = linkCardHTML() + (feed.jobs.length ? feed.jobs.map(jobCardHTML).join('') + (feed.nextCursor ? `<div class="more" id="sentinel"><span class="muted">Loading more jobs…</span></div>` : '') : zeroHTML(feed));
+    watch.disconnect(); if ($('#sentinel')) watch.observe($('#sentinel'));
   };
-  draw(await loadFeed());
+  // Cards are added as you scroll: 30 first, then 30 more each time the end comes into view.
+  let busy = false;
+  const watch = new IntersectionObserver(async ([e]) => {
+    if (!e.isIntersecting || busy) return; busy = true;
+    try {
+      const before = state.feed.jobs.length, f = await loadFeed({ append: true, limit: 30 });
+      $('#sentinel')?.insertAdjacentHTML('beforebegin', f.jobs.slice(before).map((j, i) => jobCardHTML(j, before + i)).join(''));
+      if (!f.nextCursor) { $('#sentinel')?.remove(); watch.disconnect(); }
+    } catch (err) { toast(err.message); }
+    busy = false;
+  }, { rootMargin: '600px' });
+  // If we have a cached feed (from a previous visit this session), render it now
+  // so the page is instantly populated while the network request completes.
+  if (state.feed?.jobs?.length) draw(state.feed);
+  draw(await loadFeed({ limit: 30 }));
   const pane = $('#detail');
   if (state.feed.jobs[0] && pane && getComputedStyle(pane).display !== 'none' && !/job=/.test(location.hash)) openJob(state.feed.jobs[0].jobId);
 }
@@ -1086,26 +1635,29 @@ async function renderTracker() {
   const q = (store.get('trackerQ', '') || '').toLowerCase();
   const apps = state.apps.applications.filter(a => !q || `${a.job?.company} ${a.job?.title}`.toLowerCase().includes(q));
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Tracker</h1><p>Drag a card to move it, or use the menu on each card.</p></div><span class="spacer"></span>
+    <div class="page-head"><div><h1 class="sr-only">Tracker</h1><p>Drag a card to another column to move it.</p></div><span class="spacer"></span>
       <input id="tq" type="search" placeholder="Search companies or roles" value="${esc(q)}" style="width:240px" aria-label="Search tracker"/><button class="btn" id="exportCsv" type="button">Export CSV</button></div>
     <div class="board">${STATUSES.map(([k, l]) => {
       const items = apps.filter(a => a.status === k);
       return `<section class="col st-${k}" data-col="${k}" aria-label="${l}"><h3>${l}<span>${items.length}</span></h3>
         ${items.map(a => `<div class="tcard" draggable="true" data-app="${a.id}"><b>${esc(a.job?.title || 'Removed job')}</b><div class="c">${esc(a.job?.company || '')}</div>${a.applyState ? `<div class="aa-badge">${applyBadge(a.applyState)}</div>` : ''}
-          <div class="d"><span>${ago(a.updatedAt)}</span><select data-move="${a.id}" aria-label="Move to">${STATUSES.map(([v, lab]) => `<option value="${v}" ${v === k ? 'selected' : ''}>${lab}</option>`).join('')}<option value="ARCHIVED">Archive</option></select></div></div>`).join('') || '<p class="muted" style="font-size:13px;margin:4px 2px">Nothing here yet.</p>'}
+          <div class="d"><span>${ago(a.updatedAt)}</span></div></div>`).join('') || '<p class="muted" style="font-size:13px;margin:4px 2px">Nothing here yet.</p>'}
       </section>`;
     }).join('')}</div>`;
   $('#tq').addEventListener('input', e => { store.set('trackerQ', e.target.value); clearTimeout(renderTracker.t); renderTracker.t = setTimeout(() => renderTracker().then(() => { const i = $('#tq'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }), 250); });
   const move = async (id, status) => { await api('PATCH', `/users/${USER}/applications/${id}`, { status }); renderTracker(); };
-  $$('[data-move]').forEach(s => s.addEventListener('change', () => move(s.dataset.move, s.value)));
   $$('.tcard').forEach(c => {
     c.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', c.dataset.app));
-    c.addEventListener('click', e => { if (e.target.closest('select')) return; openApplication(c.dataset.app); });
+    c.addEventListener('click', () => openApplication(c.dataset.app));
   });
   $$('.col').forEach(col => {
     col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drop'); });
     col.addEventListener('dragleave', () => col.classList.remove('drop'));
-    col.addEventListener('drop', e => { e.preventDefault(); col.classList.remove('drop'); move(e.dataTransfer.getData('text/plain'), col.dataset.col); });
+    col.addEventListener('drop', e => {
+      e.preventDefault(); col.classList.remove('drop');
+      const id = e.dataTransfer.getData('text/plain');
+      if (state.apps.applications.find(x => x.id === id)?.status !== col.dataset.col) move(id, col.dataset.col);   // dropped back on its own column: nothing to do
+    });
   });
   $('#exportCsv').addEventListener('click', () => {
     const rows = [['Company', 'Role', 'Status', 'Applied', 'Updated', 'Link'], ...state.apps.applications.map(a => [a.job?.company, a.job?.title, a.status, a.appliedAt || '', a.updatedAt, a.job?.url])];
@@ -1158,7 +1710,8 @@ const APPLY_STATE = {
   QUEUED: ['wait', 'Queued'], PREPARED: ['wait', 'Ready to send'], SUBMITTING: ['wait', 'Sending'], NEEDS_REVIEW: ['review', 'Waiting for your OK'],
   NEEDS_YOU: ['you', 'Needs you'], SUBMITTED: ['sent', 'Sent'], FAILED: ['you', "Couldn't send"], SKIPPED: ['off', 'Skipped'],
 };
-const applyBadge = st => { const [c, l] = APPLY_STATE[st] || ['off', pretty(st)]; return `<span class="badge ${c}">${esc(l)}</span>`; };
+const _SPIN = '<span style="display:inline-block;width:9px;height:9px;border:1.5px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:3px"></span>';
+const applyBadge = st => { const [c, l] = APPLY_STATE[st] || ['off', pretty(st)]; const spin = c === 'wait' ? _SPIN : ''; return `<span class="badge ${c}">${spin}${esc(l)}</span>`; };
 function eventText(e) {
   if (e.kind === 'note') return 'Notes edited';
   if (e.kind === 'resume') return `Resume tailored${e.detail?.profile ? ` from "${e.detail.profile}"` : ''}`;
@@ -1172,6 +1725,11 @@ function eventText(e) {
   return `Moved to ${STATUS_LABEL[e.to] || pretty(e.to)}`;
 }
 async function openApplication(appId) {
+  // Needs-you items open the full review page, not the drawer.
+  const cached = state.apps?.applications?.find(x => x.id === appId);
+  if (['NEEDS_YOU', 'NEEDS_REVIEW'].includes(cached?.applyState) && !location.hash.startsWith('#/review/')) { closeDrawer(true); location.hash = `#/review/${appId}`; return; }
+  // Sent applications open the full page (form answers, resume, job), like Tsenta.
+  if (cached && cached.status !== 'SAVED' && !location.hash.startsWith('#/sent/')) { closeDrawer(true); location.hash = `#/sent/${appId}`; return; }
   const host = $('#drawer');
   host.classList.add('open'); $('#scrim').classList.add('open'); host.setAttribute('aria-hidden', 'false');
   host.innerHTML = `<div class="jd-head"><div class="skeleton" style="height:28px;width:70%"></div></div><div class="jd-body"><div class="skeleton" style="height:200px"></div></div>`;
@@ -1180,32 +1738,38 @@ async function openApplication(appId) {
   catch (e) { host.innerHTML = `<div class="jd-body"><div class="notice bad">${esc(e.message)}</div></div>`; return; }
   const j = a.job || {}; const snap = a.snapshot || {};
   const rep = a.tailoredResume?.report;
+  const sentAt = a.submittedAt || a.appliedAt;
+  const sentLine = (a.applyState === 'SUBMITTED' || a.status === 'APPLIED') && sentAt
+    ? `<div class="sent-card"><b>Sent ${new Date(sentAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</b><span>${[snap.ats || j.ats ? pretty(snap.ats || j.ats) : '', a.source === 'auto' ? 'by auto-apply' : a.source === 'tsenta' ? 'through Tsenta' : ''].filter(Boolean).join(' · ')}</span></div>` : '';
   host.innerHTML = `
     <div class="jd-head">
       <div style="display:flex;gap:12px;align-items:flex-start"><h2 style="flex:1">${esc(j.title || 'Removed job')}</h2><button class="icon-btn" data-close aria-label="Close">${I.x(16)}</button></div>
-      <div class="sub"><b>${esc(j.company || '')}</b><span>${esc(j.locationText || '')}</span><span class="status st-${a.status}">${esc(STATUS_LABEL[a.status] || pretty(a.status))}</span>${a.applyState ? applyBadge(a.applyState) : ''}</div>
+      <div class="sub"><b>${esc(j.company || '')}</b>${j.locationText ? `<span>${esc(j.locationText)}</span>` : ''}${a.applyState && a.applyState !== 'SUBMITTED' ? applyBadge(a.applyState) : `<span class="status st-${a.status}">${esc(STATUS_LABEL[a.status] || pretty(a.status))}</span>`}</div>
       <div class="jd-actions">
         ${j.jobId && !j.removed ? `<button class="btn" data-job="${j.jobId}">Job details and match</button>` : ''}
         ${j.url ? `<a class="btn quiet" href="${esc(j.url)}" target="_blank" rel="noopener">${I.ext(15)} View posting</a>` : ''}
-        ${a.hasTailoredResume ? `<a class="btn quiet" href="${resumeUrl(a.id, true, true)}" download>Download resume</a>` : `<button class="btn quiet" data-tailor-app>Tailor resume</button>`}
-        ${a.applyState === 'NEEDS_YOU' || a.applyState === 'NEEDS_REVIEW' ? `<a class="btn primary" href="#/auto-apply">Answer in Auto-apply</a>` : ''}
+        ${a.hasTailoredResume ? `<a class="btn quiet" href="${resumeUrl(a.id, true, true)}" download>Download resume</a>` : (ME?.impersonator ? `<button class="btn quiet" data-tailor-app title="Admin view">Tailor resume</button>` : '')}
         <label class="move">Status <select id="appStatus">${STATUSES.map(([v, l]) => `<option value="${v}" ${v === a.status ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       </div>
       ${j.removed && a.source !== 'tsenta' ? `<div class="notice warn" style="margin-bottom:0">The posting has been taken down. What you applied to is kept below.</div>` : ''}
     </div>
     <div class="jd-body">
-      <section class="jd-sec"><h4>History</h4><ul class="events">${a.events.map(e => `<li>${esc(eventText(e))}<small>${new Date(e.at).toLocaleString()}</small></li>`).join('') || '<li>Tracked</li>'}</ul></section>
-      ${rep ? `<section class="jd-sec"><h4>Resume ${a.applyState === 'SUBMITTED' || a.status === 'APPLIED' ? 'sent' : 'for this job'}${a.resumeProfileName ? ` · ${esc(a.resumeProfileName)} profile` : ''}</h4>${tailorReportHTML(rep, a.id)}</section>` : ''}
+      ${['NEEDS_YOU', 'NEEDS_REVIEW', 'FAILED'].includes(a.applyState) ? `<div id="drawerQueue" style="margin-bottom:14px">${queueItemHTML(a)}</div>` : ''}
+      ${['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState) ? `<div class="notice info" id="drawerBusy">${a.applyState === 'SUBMITTING' ? 'Filling in the form…' : 'Getting this ready…'} This page updates by itself.</div>` : ''}
+      ${sentLine}
+      ${rep ? `<section class="jd-sec"><h4>Resume ${a.applyState === 'SUBMITTED' || a.status === 'APPLIED' ? 'sent' : 'for this job'}${a.resumeProfileName ? ` <span class="muted" style="font-weight:400;font-size:13px">from your ${esc(a.resumeProfileName)} profile</span>` : ''}</h4>${resumeSummaryHTML(rep, a.id)}</section>` : ''}
       ${!rep && a.tailoredResume?.sections ? `<section class="jd-sec"><h4>Resume sent${a.source === 'tsenta' ? ', written by Tsenta' : ''}</h4>
         ${a.claimsCheck?.unsupported?.length ? `<p style="font-size:14px;margin:0 0 10px">Added for this job, beyond your ${esc(a.claimsCheck.profileName)} profile: ${a.claimsCheck.unsupported.slice(0, 24).map(x => `<span class="tag cobalt">${esc(x)}</span>`).join(' ')}${a.claimsCheck.unsupported.length > 24 ? ' …' : ''}</p>` : ''}
         <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn sm primary" href="${resumeUrl(a.id, true, true)}" download>Download PDF</a><a class="btn sm" href="${resumeUrl(a.id)}" target="_blank" rel="noopener">Open PDF</a><a class="btn sm" href="${changesUrl(a.id)}" target="_blank" rel="noopener">See what changed</a></div></section>` : ''}
-      ${a.applyDetail?.filled?.length ? `<section class="jd-sec"><h4>Answers on the form</h4><table class="filled">${a.applyDetail.filled.map(f => `<tr class="src-${esc(f.source || '')}"><td>${esc(f.label)}</td><td>${esc(f.value)}</td></tr>`).join('')}</table></section>` : ''}
       ${a.coverLetter ? `<section class="jd-sec"><h4>Cover letter</h4><div class="letter">${esc(a.coverLetter)}</div></section>` : ''}
       <section class="jd-sec"><h4>Notes</h4><textarea id="appNotes" rows="3" placeholder="Recruiter name, interview dates, anything to remember">${esc(a.notes || '')}</textarea>
         <div style="margin-top:8px"><button class="btn sm" id="saveNotes" type="button">Save notes</button></div></section>
-      <section class="jd-sec"><h4>The posting${snap.importedFrom === 'tsenta' ? ' <span class="muted" style="font-weight:400;font-size:13px">from your Tsenta history</span>' : snap.capturedAt ? ` <span class="muted" style="font-weight:400;font-size:13px">as saved ${ago(snap.capturedAt)}</span>` : ''}</h4><div class="desc">${esc(snap.description || 'No description was saved for this job.')}</div></section>
+      <section class="jd-sec"><h4>The posting${snap.importedFrom === 'tsenta' ? ' <span class="muted" style="font-weight:400;font-size:13px">from your Tsenta history</span>' : snap.capturedAt ? ` <span class="muted" style="font-weight:400;font-size:13px">as saved ${ago(snap.capturedAt)}</span>` : ''}</h4>${snap.description ? `<div class="desc">${esc(snap.description)}</div>` : `<p class="muted" style="margin:0">Only the link was saved. ${j.url ? `<a href="${esc(j.url)}" target="_blank" rel="noopener">Open the posting</a>` : ''}</p>`}</section>
     </div>`;
   host.scrollTop = 0;
+  state.openApp = a.id;
+  const q = host.querySelector('#drawerQueue .qitem'); if (q) bindQueueItem(q);
+  host.querySelector('#drawerBusy') && setTimeout(() => { if (state.openApp === a.id && $('#drawer').classList.contains('open')) openApplication(a.id); }, 4000);
   host.querySelector('[data-close]').addEventListener('click', () => closeDrawer());
   host.querySelector('[data-close]').focus();
   host.querySelector('[data-job]')?.addEventListener('click', () => openJob(j.jobId));
@@ -1220,6 +1784,66 @@ async function openApplication(appId) {
   });
 }
 
+// ═══ Sent application page (Form / Resume / Job tabs, Prev/Next), like Tsenta ═══════════════
+async function renderSent() {
+  const [, id, tab = 'form'] = location.hash.replace(/^#\/?/, '').split('/');
+  if (!state.apps?.applications?.length) await loadApps();
+  const list = state.apps.applications.filter(x => x.status !== 'SAVED')
+    .sort((x, y) => new Date(y.appliedAt || y.updatedAt) - new Date(x.appliedAt || x.updatedAt));
+  const { data: a } = await api('GET', `/users/${USER}/applications/${id}`);
+  const j = a.job || {}, snap = a.snapshot || {}, d = a.applyDetail || {}, rep = a.tailoredResume?.report;
+  const i = list.findIndex(x => x.id === id), n = list.length;
+  const go = k => `#/sent/${list[(i + k + n) % n]?.id}/${tab}`;
+  const sentAt = a.submittedAt || a.appliedAt;
+  const answers = (d.filled || []).filter(f => f.label && f.value !== '' && f.value != null && !/^contact info$/i.test(f.label));
+  const groups = answers.reduce((m, f) => { (m[f.step || 'Answers on the form'] ||= []).push(f); return m; }, {});
+  const TABS = [['form', 'Form'], ['resume', 'Resume'], ['job', 'Job']];
+  const body = {
+    form: () => `${d.appliedWith ? `<div class="sp-card"><span>Applied using</span><b>${esc(d.appliedWith)}</b></div>` : ''}
+      ${answers.length ? Object.entries(groups).map(([g, fs]) => `<section class="sp-group"><h3>${esc(g)}<small>${fs.length} field${fs.length === 1 ? '' : 's'}</small></h3>
+        ${fs.map(f => `<div class="sp-field"><label>${esc(f.label)}</label><div class="sp-val">${esc(f.value)}${f.source === 'llm' ? ' <span class="tag" title="Chosen by the AI from your profile">AI</span>' : ''}</div></div>`).join('')}</section>`).join('')
+      : `<div class="rv-empty"><b>No form answers saved</b>${a.source === 'tsenta' ? 'Tsenta filled this form; its answers weren\'t part of the import.' : a.source === 'auto' ? 'This one was sent before answers were recorded.' : 'You applied on the company\'s site.'}</div>`}`,
+    resume: () => a.hasTailoredResume
+      ? `<div class="sp-bar"><b>${rep?.ats ? `Tailored resume · ${rep.ats.score}/10 ATS match` : 'Resume sent'}</b><span style="flex:1"></span>${rep ? `<button class="btn sm quiet" id="spChanges" type="button" aria-pressed="false">What changed</button>` : ''}<a class="btn sm" href="${resumeUrl(a.id, true, true)}" download>Download</a></div>
+         <iframe class="sp-pdf" src="${resumeUrl(a.id, false)}" title="Resume sent"></iframe>`
+      : `<div class="rv-empty"><b>No resume saved</b>The resume for this application wasn't kept.</div>`,
+    job: () => `<div class="sp-job"><h3>${esc(j.title || snap.title || '')}</h3><p class="muted">${esc([j.company || snap.company, j.locationText || snap.location].filter(Boolean).join(' · '))}</p>
+      ${snap.description ? `<div class="desc">${esc(snap.description)}</div>` : `<p class="muted">The posting text wasn't saved with this application. ${j.url ? `<a href="${esc(j.url)}" target="_blank" rel="noopener">Open the posting</a>` : ''}</p>`}</div>`,
+  };
+  $('#view').innerHTML = `
+    <div class="rv-head">
+      <a class="btn sm quiet" href="#/applied" aria-label="Back to Applied">←</a>
+      <span class="logo">${esc((j.company || '?')[0].toUpperCase())}${logoImg(j.company)}</span>
+      <div><h1>${esc(j.title || 'Removed job')}</h1><span class="muted">${esc(j.company || '')}</span></div><span style="flex:1"></span>
+      ${n > 1 && i >= 0 ? `<span class="rv-nav"><a href="${go(-1)}">‹ Prev</a><span class="muted">${i + 1} of ${n}</span><a href="${go(1)}">Next ›</a></span>` : ''}
+      ${j.url ? `<a class="btn sm" href="${esc(j.url)}" target="_blank" rel="noopener">${I.ext(14)} View job posting</a>` : ''}
+      <span class="status st-${a.status}">${a.status === 'APPLIED' ? 'Submitted' : esc(STATUS_LABEL[a.status] || pretty(a.status))}</span></div>
+    <div class="rv-grid">
+      <aside class="rv-side">
+        <nav class="sp-tabs">${TABS.map(([k, l]) => `<a href="#/sent/${id}/${k}" aria-current="${k === tab ? 'page' : 'false'}">${l}</a>`).join('')}</nav>
+        ${sentAt ? `<div class="sent-card"><b>Sent ${new Date(sentAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</b><span>${[snap.ats ? pretty(snap.ats) : '', a.source === 'auto' ? 'by auto-apply' : a.source === 'tsenta' ? 'through Tsenta' : ''].filter(Boolean).join(' · ')}</span></div>` : ''}
+        <label class="field" style="margin-top:14px">Notes<textarea id="appNotes" rows="4" placeholder="Recruiter name, interview dates, anything to remember">${esc(a.notes || '')}</textarea></label>
+        <button class="btn sm" id="saveNotes" type="button" style="margin-top:8px">Save notes</button>
+      </aside>
+      <div class="rv-main"><div class="sp-body">${(body[tab] || body.form)()}</div></div></div>`;
+  // "What changed" swaps the resume for the side-by-side changes in the same frame.
+  $('#spChanges')?.addEventListener('click', e => {
+    const on = e.target.getAttribute('aria-pressed') !== 'true';
+    e.target.setAttribute('aria-pressed', on); e.target.textContent = on ? 'Show resume' : 'What changed';
+    $('.sp-pdf').src = on ? changesUrl(a.id) : resumeUrl(a.id, false);   // same page view as What changed, no PDF viewer
+  });
+  $('#saveNotes').addEventListener('click', async () => { await api('PATCH', `/users/${USER}/applications/${a.id}`, { notes: $('#appNotes').value }); toast('Notes saved.'); });
+}
+
+/** Resume card: the score, what changed, downloads; the scoring breakdown folds away. */
+function resumeSummaryHTML(rep, appId) {
+  const n = (k, w) => `${k} ${w}${k === 1 ? '' : 's'}`;
+  const ats = rep.ats;
+  return `${ats ? `<div class="score-line"><b>${ats.score}/10</b><span>ATS match${ats.before != null && ats.before !== ats.score ? `, up from ${ats.before}` : ''}</span></div>` : ''}
+    <p style="margin:6px 0;font-size:14px;color:var(--ink-2)">${rep.model ? `${n(rep.editedBullets || 0, 'bullet')} reworded for this job${rep.summaryRewritten ? ' and the summary rewritten' : ''}. Employers, titles and dates are unchanged.` : esc(rep.aiSkipped || 'Sent as written.')}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="btn sm primary" href="${resumeUrl(appId, true, true)}" download>Download PDF</a><a class="btn sm" href="${resumeUrl(appId)}" target="_blank" rel="noopener">Open</a><a class="btn sm quiet" href="${changesUrl(appId)}" target="_blank" rel="noopener">What changed</a></div>
+    ${ats || rep.addedSkills?.length || rep.addedBullets?.length ? `<details class="earlier" style="margin-top:10px"><summary>Score details</summary>${matchReportHTML({ ...rep, model: null, aiSkipped: '' }, null).replace(/<p style="margin:6px 0;font-size:14px">\.<\/p>/, '')}</details>` : ''}`;
+}
 function atsScanHTML(a) {
   if (!a) return '';
   const chips = (list, cls) => list.map(x => `<span class="tag ${cls}">${esc(x)}</span>`).join(' ');
@@ -1248,38 +1872,23 @@ const apState = { q: '', fields: [], source: 'all', view: 'list', page: 1 };
 const fmtDay = d => (d ? new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: new Date(d).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' }) : '');
 const nfmt = n => Number(n || 0).toLocaleString();
 async function renderApplied() {
-  let imp = null; let model = null;
-  try { [{ data: imp }, { data: model }] = await Promise.all([api('GET', `/users/${USER}/imports/tsenta`), api('GET', `/users/${USER}/resume-model`)]); } catch {}
-  const canImport = imp?.available && imp.imported < imp.available.applications;
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Applied</h1><p>Every application you've sent, with the posting and the resume that went out.</p></div></div>
-    ${canImport ? `<div class="import-box"><div><b>Your Tsenta history is ready to import</b><p>${nfmt(imp.available.applications)} applications. For the most recent ${imp.available.details}, the posting is included, and for some the resume Tsenta sent.${imp.imported ? ` ${nfmt(imp.imported)} are already here.` : ''}</p></div><button class="btn primary" id="apImport" type="button">Import</button></div>` : ''}
+    <div class="page-head"><div><h1 class="sr-only">Applied</h1><p>Every application you've sent, with the posting and the resume that went out.</p></div></div>
     <form class="searchbar" id="apSearch" role="search"><input id="apQ" type="search" placeholder="Search a company, job title, link or words in the posting" value="${esc(apState.q)}" aria-label="Search applications"><button class="btn primary" type="submit">Search</button></form>
     <div class="ap-controls">
       <div class="ap-fields" role="group" aria-label="Search in">${AP_FIELDS.map(([k, l]) => `<button type="button" class="fchip" data-f="${k}" aria-pressed="${apState.fields.includes(k)}">${l}<span class="n" data-n="${k}"></span></button>`).join('')}</div>
       <span class="spacer"></span>
-      <select id="apSource" aria-label="Source"><option value="all">All applications</option><option value="app">Sent from here</option><option value="tsenta">From Tsenta</option></select>
       <div class="seg" role="tablist" aria-label="View"><button role="tab" data-v="list" aria-selected="${apState.view === 'list'}">Applications</button><button role="tab" data-v="company" aria-selected="${apState.view === 'company'}">By company</button></div>
     </div>
     <p class="ap-line" id="apLine" aria-live="polite"></p>
     <div id="apList" class="ap-list"></div>
-    <div id="apMore"></div>
-    ${model ? `<section class="panel model-panel"><div class="panel-head"><h2>Resume model</h2><span class="spacer"></span><span class="badge ${model.ok ? 'sent' : 'off'}">${model.ok ? 'Running' : 'Not running'}</span></div>
-      <div class="panel-body"><p style="margin:0 0 8px">${model.ok ? `Rewrites use <b>${esc(model.model)}</b> on this computer.` : esc(model.reason || 'The local model is not reachable.')}</p>
-      <p class="muted" style="margin:0;font-size:14px">${model.trainingData ? `Training data so far: ${nfmt(model.trainingData.total)} resumes with their postings (${nfmt(model.trainingData.model_rewrites)} rewritten here, ${nfmt(model.trainingData.from_tsenta)} from Tsenta), ${nfmt(model.trainingData.sent)} sent, ${nfmt(model.trainingData.led_to_interview)} led to an interview. ` : ''}Export it and fine-tune your own model with the steps in docs/resume-model.md.</p></div></section>` : ''}`;
-  $('#apSource').value = apState.source;
+    <div id="apMore"></div>`;
   $('#apSearch').addEventListener('submit', e => { e.preventDefault(); apState.q = $('#apQ').value.trim(); apState.page = 1; loadApplied(); });
   $$('.fchip').forEach(b => b.addEventListener('click', () => {
     const f = b.dataset.f; apState.fields = apState.fields.includes(f) ? apState.fields.filter(x => x !== f) : [...apState.fields, f];
     b.setAttribute('aria-pressed', String(apState.fields.includes(f))); apState.page = 1; loadApplied();
   }));
-  $('#apSource').addEventListener('change', e => { apState.source = e.target.value; apState.page = 1; loadApplied(); });
   $$('.seg [data-v]').forEach(b => b.addEventListener('click', () => { apState.view = b.dataset.v; $$('.seg [data-v]').forEach(x => x.setAttribute('aria-selected', String(x === b))); apState.page = 1; loadApplied(); }));
-  $('#apImport')?.addEventListener('click', async e => {
-    e.target.disabled = true; e.target.textContent = 'Importing…';
-    try { const { data: r } = await api('POST', `/users/${USER}/imports/tsenta`); toast(`Imported ${nfmt(r.applications)} applications from Tsenta.`); renderApplied(); }
-    catch (err) { toast(err.message); e.target.disabled = false; e.target.textContent = 'Import'; }
-  });
   loadApplied();
 }
 function markSnippet(s) { return s ? `<p class="snip">${esc(s.before)}<mark>${esc(s.match)}</mark>${esc(s.after)}</p>` : ''; }
@@ -1312,7 +1921,7 @@ async function loadApplied(append = false) {
           ${a.matchedOn.length ? `<span class="ap-hits">${a.matchedOn.map(m => `<span class="tag cobalt">${esc((AP_FIELDS.find(f => f[0] === m) || [m, m])[1])}</span>`).join(' ')}</span>` : ''}
           ${markSnippet(a.postingSnippet)}</span>
         <span class="ap-side">${a.status !== 'APPLIED' ? `<span class="status st-${a.status}">${esc(STATUS_LABEL[a.status] || pretty(a.status))}</span>` : ''}${a.source === 'tsenta' ? '<span class="tag">Tsenta</span>' : ''}
-          <span class="have ${a.hasDescription ? 'yes' : ''}" title="${a.hasDescription ? 'Posting saved' : 'No posting saved'}">Posting</span>${a.hasResume ? `<span class="have yes" role="link" tabindex="0" data-dl="${a.id}" title="Download the resume you sent">Resume ↓</span>` : `<span class="have" title="No resume saved">Resume</span>`}</span></button>`).join('');
+          ${a.hasResume ? `<span class="have yes" role="link" tabindex="0" data-dl="${a.id}" title="Download the resume you sent">Resume ↓</span>` : ''}</span></button>`).join('');
   }
   if (!append) list.innerHTML = html || `<div class="empty"><b>${apState.q ? 'Nothing matches that search.' : 'Nothing sent yet.'}</b><p class="muted">${apState.q ? 'Try fewer words, or search all fields.' : 'Applications you send from Jobs or Auto-apply show up here with the posting and resume.'}</p></div>`;
   else list.insertAdjacentHTML('beforeend', html);
@@ -1323,7 +1932,7 @@ async function loadApplied(append = false) {
   $$('[data-dl]:not([data-b])', list).forEach(c => { c.dataset.b = 1;
     const go = e => { e.stopPropagation(); e.preventDefault(); window.location.href = resumeUrl(c.dataset.dl, true, true); };
     c.addEventListener('click', go); c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') go(e); }); });
-  $$('.ap-row:not([data-b])', list).forEach(r => { r.dataset.b = 1; r.addEventListener('click', () => openApplication(r.dataset.app)); });
+  $$('.ap-row:not([data-b])', list).forEach(r => { r.dataset.b = 1; r.addEventListener('click', e => { if (!e.target.closest('[data-dl]')) location.hash = `#/sent/${r.dataset.app}`; }); });
   $$('.ap-co:not([data-b])', list).forEach(r => { r.dataset.b = 1; r.addEventListener('click', () => {
     apState.q = r.dataset.co; apState.fields = ['company']; apState.view = 'list'; apState.page = 1; renderApplied();
   }); });
@@ -1332,45 +1941,30 @@ async function loadApplied(append = false) {
 // ═══ Auto-apply ═════════════════════════════════════════════════════════════
 const POSTED_OPTS = [[3, 'Past 3 days'], [7, 'Past week'], [14, 'Past 2 weeks'], [30, 'Past month']];
 async function renderAutoApply() {
-  const [{ data: aa }, { data: list }] = await Promise.all([api('GET', `/users/${USER}/auto-apply`), api('GET', `/users/${USER}/applications?source=auto`)]);
+  const { data: aa } = await api('GET', `/users/${USER}/auto-apply`);
   const profiles = await ensureResumeProfiles();
-  const apps = list.applications;
-  const by = st => apps.filter(a => a.applyState === st);
-  const needs = [...by('NEEDS_YOU'), ...by('FAILED')]; const review = by('NEEDS_REVIEW');
-  const waiting = apps.filter(a => ['QUEUED', 'PREPARED', 'SUBMITTING'].includes(a.applyState));
-  const sent = by('SUBMITTED');
-  const sentToday = sent.filter(a => a.submittedAt && new Date(a.submittedAt).toDateString() === new Date().toDateString()).length;
   const lastRun = aa.runs?.find(r => !r.dryRun);
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Auto-apply</h1><p>Finds jobs for each lane, tailors your resume, fills the form, and sends it or waits for your OK.</p></div><span class="spacer"></span>
+    <div class="page-head"><div><h1 class="sr-only">Auto-apply</h1><p>Choose what to apply for. Each lane finds jobs, tailors your resume and fills the form. Results show on your dashboard.</p></div><span class="spacer"></span>
       <label class="switch"><input type="checkbox" id="aaOn" ${aa.enabled ? 'checked' : ''}><span class="track"></span><span id="aaOnLabel">${aa.enabled ? 'On' : 'Off'}</span></label></div>
     ${!profiles.length ? `<div class="notice info">Set up a resume profile first: auto-apply sends it. <a href="#/profile">Go to Profile</a></div>` : ''}
-    <div class="stats">
-      <div class="stat ${needs.length ? 'attn' : ''}"><b>${needs.length}</b><span>need you</span></div>
-      <div class="stat"><b>${review.length}</b><span>waiting for your OK</span></div>
-      <div class="stat"><b>${waiting.length}</b><span>queued to send</span></div>
-      <div class="stat"><b>${sentToday}</b><span>sent today of ${aa.dailyCap}</span></div>
-    </div>
     <div class="aa">
       <div style="display:grid;gap:22px">
-        ${needs.length ? `<section class="panel"><div class="panel-head"><h2>Needs you</h2></div><div id="qNeeds">${needs.map(queueItemHTML).join('')}</div></section>` : ''}
-        ${review.length ? `<section class="panel"><div class="panel-head"><h2>Waiting for your OK</h2><span class="spacer"></span><button class="btn sm" id="approveAll" type="button">Approve all ${review.length}</button></div><div id="qReview">${review.map(queueItemHTML).join('')}</div></section>` : ''}
-        <section class="panel"><div class="panel-head"><h2>Next run</h2><span class="spacer"></span><button class="btn sm" id="aaPreview" type="button">Preview</button><button class="btn sm primary" id="aaRun" type="button" ${aa.running ? 'disabled' : ''}>${aa.running ? 'Running…' : 'Run now'}</button></div>
-          <div class="panel-body" id="aaPlan"><p class="muted" style="margin:0">${lastRun ? `Last run ${ago(lastRun.startedAt)}: ${runLine(lastRun.summary)}.` : 'Not run yet.'} Preview shows which jobs the next run would pick, without sending anything.</p>
-          ${waiting.length ? `<p style="margin:10px 0 0;font-size:14px">${waiting.length} application${waiting.length === 1 ? ' is' : 's are'} queued and will be filled on the next run.</p>` : ''}</div></section>
-        <section class="panel"><div class="panel-head"><h2>Sent</h2><span class="spacer"></span><a class="btn sm quiet" href="#/tracker">Open tracker</a></div>
-          <div class="panel-body">${sent.length ? sent.slice(0, 12).map(a => `<div class="app-row" data-open="${a.id}"><div class="t"><b>${esc(a.job?.title || 'Removed job')}</b><span>${esc(a.job?.company || '')}</span></div><span class="muted" style="font-size:13px">${ago(a.submittedAt || a.updatedAt)}</span></div>`).join('') : '<p class="muted" style="margin:0">Nothing sent yet.</p>'}</div></section>
+        <section class="panel"><div class="panel-head"><h2>Lanes</h2><span class="spacer"></span><button class="btn sm" id="addLane" type="button" ${aa.lanes.length >= (aa.maxLanes || 3) ? 'disabled' : ''}>Add lane</button></div>
+          <div class="panel-body" style="padding-top:4px"><p class="muted" style="margin:10px 0 0;font-size:13px">A lane is one kind of role, applied to with one resume profile. You can have up to ${aa.maxLanes || 3}.</p>
+          <div id="lanes">${aa.lanes.map(l => laneHTML(l, profiles)).join('') || '<p style="margin:12px 0 0">No lanes yet. Add one to start.</p>'}</div></div></section>
       </div>
       <div style="display:grid;gap:22px">
+        <section class="panel"><div class="panel-head"><h2>Next run</h2><span class="spacer"></span><button class="btn sm" id="aaPreview" type="button">Preview</button><button class="btn sm primary" id="aaRun" type="button" ${aa.running ? 'disabled' : ''}>${aa.running ? 'Running…' : 'Run now'}</button></div>
+          <div class="panel-body" id="aaPlan"><p class="muted" style="margin:0">${lastRun ? `Last run ${ago(lastRun.startedAt)}.` : 'Not run yet.'} Preview shows which jobs the next run would pick, without sending anything.</p></div></section>
         <section class="panel"><div class="panel-head"><h2>Limits</h2></div><form class="panel-body" id="aaLimits" style="display:grid;gap:12px">
-          <div class="form-grid"><label class="field">Applications per day<input type="number" name="dailyCap" min="1" max="100" value="${aa.dailyCap}"></label>
+          <div class="form-grid"><label class="field">Applications per day<input type="number" name="dailyCap" min="1" max="${aa.maxDailyCap || 50}" value="${aa.dailyCap}"></label>
             <label class="field">Per company in 30 days<input type="number" name="perCompanyCap30d" min="1" max="20" value="${aa.perCompanyCap30d}"></label></div>
+          ${aa.monthly ? `<p class="muted" style="margin:0;font-size:13px">${aa.monthly.used} of ${aa.monthly.cap} applications used this month. Resets ${new Date(aa.monthly.resetsAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}.</p>` : ''}
           <label class="check"><input type="checkbox" name="acceptConsent" ${aa.acceptConsent ? 'checked' : ''}> Tick required "I agree" boxes, such as privacy notices</label>
-          <p class="muted" style="margin:0;font-size:13px">Forms that show a CAPTCHA, or ask something your profile doesn't answer, are never guessed. They come back to you under "Needs you". It fills ${aa.fillableAts.map(pretty).join(', ')} forms; other jobs are skipped.</p>
+          <label class="check"><input type="checkbox" name="reviewBeforeSubmit" ${aa.reviewBeforeSubmit !== false ? 'checked' : ''}> Review before sending when I press Apply on a job (off: Apply fills and sends it)</label>
+          <p class="muted" style="margin:0;font-size:13px">Forms that show a CAPTCHA, or ask something your profile doesn't answer, are never guessed. They come back to you under "Needs you" on the dashboard. It fills ${aa.fillableAts.map(pretty).join(', ')} forms; other jobs are skipped.</p>
           <div><button class="btn sm" type="submit">Save limits</button></div></form></section>
-        <section class="panel"><div class="panel-head"><h2>Lanes</h2><span class="spacer"></span><button class="btn sm" id="addLane" type="button" ${aa.lanes.length >= 5 ? 'disabled' : ''}>Add lane</button></div>
-          <div class="panel-body" style="padding-top:4px"><p class="muted" style="margin:10px 0 0;font-size:13px">A lane is one kind of role sent with one resume profile.</p>
-          <div id="lanes">${aa.lanes.map(l => laneHTML(l, profiles)).join('') || '<p style="margin:12px 0 0">No lanes yet. Add one to start.</p>'}</div></div></section>
       </div>
     </div>`;
 
@@ -1382,7 +1976,7 @@ async function renderAutoApply() {
   });
   $('#aaLimits').addEventListener('submit', async e => {
     e.preventDefault(); const f = e.target;
-    await api('PUT', `/users/${USER}/auto-apply`, { dailyCap: f.dailyCap.value, perCompanyCap30d: f.perCompanyCap30d.value, acceptConsent: f.acceptConsent.checked });
+    await api('PUT', `/users/${USER}/auto-apply`, { dailyCap: f.dailyCap.value, perCompanyCap30d: f.perCompanyCap30d.value, acceptConsent: f.acceptConsent.checked, reviewBeforeSubmit: f.reviewBeforeSubmit.checked });
     toast('Limits saved.');
   });
   $('#addLane').addEventListener('click', async () => {
@@ -1403,13 +1997,6 @@ async function renderAutoApply() {
     pollRun();
   });
   if (aa.running) pollRun();
-  $('#approveAll')?.addEventListener('click', async e => {
-    e.target.disabled = true;
-    for (const a of review) await api('POST', `/users/${USER}/applications/${a.id}/approve`, {});
-    toast(`${review.length} approved. They're sent on the next run.`); renderAutoApply();
-  });
-  $$('.qitem').forEach(bindQueueItem);
-  $$('.app-row[data-open]').forEach(r => r.addEventListener('click', () => openApplication(r.dataset.open)));
 }
 async function pollRun() {
   for (let i = 0; i < 90; i++) {
@@ -1497,39 +2084,102 @@ function queueItemHTML(a) {
   const missing = d.missing || [];
   const field = (m, i) => {
     const name = `q${i}`;
-    if (m.options?.length) return `<label class="field">${esc(m.label)}<select name="${name}" data-q="${esc(m.label)}"><option value="">Choose…</option>${m.options.map(o => `<option>${esc(o)}</option>`).join('')}</select></label>`;
-    if (m.type === 'textarea') return `<label class="field">${esc(m.label)}<textarea name="${name}" rows="3" data-q="${esc(m.label)}"></textarea></label>`;
+    if (m.options?.length) return `<label class="field"><span>${esc(m.label)} <em class="req" style="font-style:normal;font-size:11px;background:#fbefc9;color:#8a5a00;border-radius:99px;padding:1px 8px;margin-left:6px">Required</em></span><select name="${name}" data-q="${esc(m.label)}"><option value="">Choose…</option>${m.options.map(o => `<option>${esc(o)}</option>`).join('')}</select></label>`;
+    if (m.type === 'textarea') return `<label class="field"><span>${esc(m.label)} <em class="req" style="font-style:normal;font-size:11px;background:#fbefc9;color:#8a5a00;border-radius:99px;padding:1px 8px;margin-left:6px">Required</em></span><textarea name="${name}" rows="3" data-q="${esc(m.label)}"></textarea></label>`;
     if (m.type === 'file') return `<p class="muted" style="margin:0;font-size:13px">"${esc(m.label)}" asks for a file. Apply on the company's site for this one.</p>`;
-    return `<label class="field">${esc(m.label)}<input name="${name}" data-q="${esc(m.label)}"></label>`;
+    return `<label class="field"><span>${esc(m.label)} <em class="req" style="font-style:normal;font-size:11px;background:#fbefc9;color:#8a5a00;border-radius:99px;padding:1px 8px;margin-left:6px">Required</em></span><input name="${name}" data-q="${esc(m.label)}"></label>`;
   };
   const askable = missing.filter(m => m.type !== 'file');
   return `<div class="qitem" data-app="${a.id}" data-state="${a.applyState}">
     <div class="top"><div class="t"><h3>${esc(a.job?.title || 'Removed job')}</h3><div class="meta"><b>${esc(a.job?.company || '')}</b>${d.matchScore != null ? `<span>${d.matchScore}% match</span>` : ''}<span>${ago(a.updatedAt)}</span></div></div>${applyBadge(a.applyState)}</div>
     ${d.reason ? `<p class="why-stop">${esc(d.reason)}</p>` : ''}
-    ${a.applyState === 'NEEDS_YOU' && missing.length ? `<form class="qform">${missing.map(field).join('')}
+    ${a.applyState === 'NEEDS_YOU' && missing.length ? `${askable.length ? `<div style="background:#fff8e6;border:1px solid #f1dfaa;border-radius:10px;padding:10px 14px;margin-top:10px"><b>${askable.length} detail${askable.length === 1 ? '' : 's'} needed</b><div class="muted" style="font-size:13px">Add only the missing information below. Everything else is already filled.</div></div>` : ''}<form class="qform">${missing.map(field).join('')}
       ${askable.length ? `<label class="check"><input type="checkbox" name="remember" checked> Save these answers to my profile for next time</label>` : ''}</form>` : ''}
-    ${a.applyState === 'NEEDS_REVIEW' && d.filled?.length ? `<details style="margin-top:10px"><summary style="cursor:pointer;font-size:14px">What it filled in (${d.filled.length})</summary><table class="filled">${d.filled.map(f => `<tr class="src-${esc(f.source || '')}"><td>${esc(f.label)}</td><td>${esc(f.value)}</td></tr>`).join('')}</table></details>` : ''}
+    ${a.applyState === 'NEEDS_REVIEW' && d.filled?.length ? `<form class="qform review"><p class="muted" style="margin:10px 0 0;font-size:13px">Check the answers below. Change anything that's wrong, then submit.</p>${d.filled.map(f => f.key === 'resumeFile' || f.key === 'coverLetterFile' || /\.pdf$/.test(f.value || '') ? `<label class="field">${esc(f.label)}<input value="${esc(f.value)}" disabled></label>` : `<label class="field">${esc(f.label)}<input value="${esc(f.value)}" data-orig="${esc(f.value)}" data-e="${esc(f.label)}"></label>`).join('')}</form>` : ''}
     <div class="acts">
-      ${a.applyState === 'NEEDS_REVIEW' ? `<button class="btn sm primary" data-approve type="button">Approve and send</button>` : ''}
-      ${a.applyState === 'NEEDS_YOU' && askable.length ? `<button class="btn sm primary" data-answer type="button">Save answers and send</button>` : ''}
-      ${a.applyState === 'FAILED' ? `<button class="btn sm primary" data-approve type="button">Try again</button>` : ''}
+      ${a.applyState === 'NEEDS_REVIEW' ? `<button class="btn sm primary" data-approve type="button">Submit application</button>` : ''}
+      ${a.applyState === 'NEEDS_YOU' && askable.length ? `<button class="btn sm primary" data-answer type="button" disabled>Answer ${askable.length} required field${askable.length === 1 ? '' : 's'}</button>` : ''}
+      ${a.applyState === 'FAILED' || (a.applyState === 'NEEDS_YOU' && !askable.length) ? `<button class="btn sm ${a.applyState === 'FAILED' ? 'primary' : ''}" data-retry type="button">Try again</button>` : ''}
+      ${a.applyState === 'NEEDS_YOU' && /CAPTCHA|reCAPTCHA|hCaptcha|Cloudflare check/.test(d.reason || '') ? `<button class="btn sm primary" data-finish type="button" title="Opens a window with the form filled. You complete the check and click Submit.">Finish it here</button>` : ''}
       ${a.hasTailoredResume ? `<a class="btn sm" href="${resumeUrl(a.id)}" target="_blank" rel="noopener">Resume</a>` : ''}
       ${d.formUrl || a.job?.url ? `<a class="btn sm quiet" href="${esc(d.formUrl || a.job.url)}" target="_blank" rel="noopener">${I.ext(14)} Apply on site</a>` : ''}
       <button class="btn sm quiet" data-details type="button">Details</button>
-      <button class="btn sm quiet" data-skip type="button">Skip</button>
+      <button class="btn sm quiet" data-skip type="button">${a.applyState === 'FAILED' ? 'Skip' : 'Cancel application'}</button>
     </div></div>`;
 }
+const refreshApplications = () => { loadApps(); if (location.hash.startsWith('#/review/')) return reviewNext(); if (location.hash.startsWith('#/auto-apply')) renderAutoApply(); else if ($('#drawer').classList.contains('open') && state.openApp) openApplication(state.openApp); };
 function bindQueueItem(el) {
   const id = el.dataset.app;
-  el.querySelector('[data-skip]').addEventListener('click', async () => { await api('POST', `/users/${USER}/applications/${id}/skip`); toast('Skipped.'); renderAutoApply(); loadApps(); });
-  el.querySelector('[data-details]').addEventListener('click', () => openApplication(id));
-  el.querySelector('[data-approve]')?.addEventListener('click', async () => { await api('POST', `/users/${USER}/applications/${id}/approve`, {}); toast('Approved. It\'s sent on the next run.'); renderAutoApply(); loadApps(); });
+  el.querySelector('[data-skip]').addEventListener('click', async () => { await api('POST', `/users/${USER}/applications/${id}/skip`); toast('Skipped.'); refreshApplications(); });
+  el.querySelector('[data-details]').addEventListener('click', () => { if (['NEEDS_YOU', 'NEEDS_REVIEW'].includes(el.dataset.state) && !el.closest('#view[data-review]')) location.hash = `#/review/${id}`; else openApplication(id); });
+  el.querySelector('[data-finish]')?.addEventListener('click', async e => { e.target.disabled = true; try { await api('POST', `/users/${USER}/applications/${id}/finish`, {}); toast('A window is opening. Complete the check there and click Submit.'); } catch (err) { toast(err.message); e.target.disabled = false; } });
+  el.querySelector('[data-retry]')?.addEventListener('click', async e => { e.target.disabled = true; try { await api('POST', `/users/${USER}/applications/${id}/apply`, {}); toast('Trying again…'); } catch (err) { toast(err.message); } refreshApplications(); });
+  el.querySelector('[data-approve]')?.addEventListener('click', async e => {
+    e.target.disabled = true;
+    const edits = {}; $$('[data-e]', el).forEach(f => { if (f.value.trim() && f.value !== f.dataset.orig) edits[f.dataset.e] = f.value.trim(); });
+    try {
+      // edited answers refill the form with the new values, then send; untouched forms send as they are
+      if (Object.keys(edits).length) await api('POST', `/users/${USER}/applications/${id}/answers`, { answers: edits, remember: false, approve: true });
+      else await api('POST', `/users/${USER}/applications/${id}/approve`, {});
+      toast('Submitting…');
+    } catch (err) { toast(err.message); }
+    refreshApplications();
+  });
+  const ansBtn = el.querySelector('[data-answer]');
+  const ready = () => { if (ansBtn) ansBtn.disabled = $$('[data-q]', el).some(f => !f.value.trim()); };
+  el.addEventListener('input', ready); el.addEventListener('change', ready);
   el.querySelector('[data-answer]')?.addEventListener('click', async () => {
     const answers = {}; let blank = 0;
     $$('[data-q]', el).forEach(f => { if (f.value.trim()) answers[f.dataset.q] = f.value.trim(); else blank++; });
     if (blank) { toast(`Answer all ${blank + Object.keys(answers).length} questions first.`); return; }
     await api('POST', `/users/${USER}/applications/${id}/answers`, { answers, remember: !!el.querySelector('[name=remember]')?.checked, approve: true });
-    toast('Saved. It\'s sent on the next run.'); renderAutoApply(); loadApps();
+    toast('Saved. Submitting…'); refreshApplications();
+  });
+}
+
+// ═══ Review page (one Needs-you application at a time, like Tsenta) ═════════
+let reviewIds = [];
+const reviewNext = (cur = location.hash.split('/')[2]) => {
+  const i = reviewIds.indexOf(cur), rest = reviewIds.filter(x => x !== cur);
+  reviewIds = rest; location.hash = rest.length ? `#/review/${rest[Math.min(i, rest.length - 1)]}` : '#/dashboard';
+};
+async function renderReview() {
+  const id = location.hash.split('/')[2];
+  const { data } = await api('GET', `/users/${USER}/applications`);
+  const todo = data.applications.filter(a => ['NEEDS_YOU', 'NEEDS_REVIEW'].includes(a.applyState));
+  if (!reviewIds.includes(id)) reviewIds = todo.map(a => a.id);
+  const a = data.applications.find(x => x.id === id);
+  if (!a || !['NEEDS_YOU', 'NEEDS_REVIEW'].includes(a.applyState)) { location.hash = '#/dashboard'; return; }
+  const i = Math.max(0, reviewIds.indexOf(id)), n = reviewIds.length, d = a.applyDetail || {};
+  const go = k => `#/review/${reviewIds[(i + k + n) % n]}`;
+  const ask = (d.missing || []).filter(m => m.type !== 'file').length;
+  const nr = a.applyState === 'NEEDS_REVIEW', co = esc(a.job?.company || '');
+  const blank = !nr && !(d.missing || []).length && !d.assisted;   // assisted: the person applies on the site, nothing to start here
+  $('#view').dataset.review = 1;
+  $('#view').innerHTML = `
+    <div class="rv-head">
+      <a class="btn sm quiet" href="#/dashboard" aria-label="Back to dashboard">←</a>
+      <span class="logo">${esc((a.job?.company || '?')[0].toUpperCase())}${logoImg(a.job?.company)}</span>
+      <div><h1>${esc(a.job?.title || 'Removed job')}</h1><span class="muted">${co}</span></div><span style="flex:1"></span>
+      ${n > 1 ? `<span class="rv-nav"><a href="${go(-1)}">‹ Prev</a><span class="muted">${i + 1} of ${n}</span><a href="${go(1)}">Next ›</a></span>` : ''}
+      ${a.job?.url ? `<a class="btn sm" href="${esc(a.job.url)}" target="_blank" rel="noopener">${I.ext(14)} View job posting</a>` : ''}
+      ${applyBadge(a.applyState)}</div>
+    <div class="rv-grid">
+      <aside class="rv-side">
+        <div class="who"><i>${nr ? '✎' : '!'}</i><div><b>${nr ? 'Review before submit' : 'Needs your input'}</b><small>${nr ? 'Waiting for your approval' : blank ? 'Not started yet' : 'Waiting for your answers'}</small></div></div>
+        ${d.assisted ? `<p>${esc(d.reason || '')}</p><div style="display:grid;gap:8px;margin:4px 0 12px">
+          <a class="btn primary" href="${esc(d.jobUrl || a.job?.url || '#')}" target="_blank" rel="noopener">${I.ext(14)} Open the application</a>
+          <button class="btn" id="markApplied" type="button">I've applied</button></div>` : ''}
+        <p${d.assisted ? ' hidden' : ''}>${nr ? `Check what we filled in for <b>${co}</b>, and edit anything before we submit.` : ask ? `We filled what we could for <b>${co}</b>. Add the missing details, then we send it.` : blank ? `We haven't filled the <b>${co}</b> form yet. Start applying and we'll fill it from your profile.` : esc(d.reason || '')}</p>
+        <p class="note">🔒 The resume file can't be changed here. Everything else is editable.</p></aside>
+      <div class="rv-main">${blank ? `<div class="rv-empty"><b>Nothing to review yet</b>Press <b style="display:inline">Start applying</b> and we'll fill the form, then show you every answer here.</div>` : ''}${queueItemHTML(a)}</div></div>`;
+  if (blank) { const r = $('#view [data-retry]'); if (r) r.textContent = 'Start applying'; }
+  bindQueueItem($('#view .qitem'));
+  $('#markApplied')?.addEventListener('click', async () => {
+    await api('PATCH', `/users/${USER}/applications/${a.id}`, { status: 'APPLIED' });
+    toast(`Marked as applied at ${a.job?.company || 'the company'}.`);
+    reviewIds = reviewIds.filter(x => x !== a.id);
+    location.hash = reviewIds.length ? `#/review/${reviewIds[i % reviewIds.length]}` : '#/dashboard';
   });
 }
 
@@ -1549,6 +2199,25 @@ const LIST_SECTIONS = {
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const fmtMonth = v => { const m = String(v || '').match(/^(\d{4})(?:-(\d{2}))?$/); return m ? (m[2] ? `${MONTHS[+m[2] - 1]} ${m[1]}` : m[1]) : (v || ''); };
 const span = e => { const a = fmtMonth(e.startDate), b = e.current ? 'Present' : fmtMonth(e.endDate); return a && b ? `${a} – ${b}` : (a || b); };
+/** "1 yr 6 mos" between the entry's start and end (or now) */
+const durationOf = e => {
+  const m = v => { const x = String(v || '').match(/^(\d{4})(?:-(\d{2}))?/); return x ? +x[1] * 12 + (x[2] ? +x[2] - 1 : 0) : null; };
+  const a = m(e.startDate), n = new Date(), b = e.current ? n.getFullYear() * 12 + n.getMonth() : m(e.endDate);
+  if (a == null || b == null || b < a) return '';
+  const t = b - a + 1, y = Math.floor(t / 12), mo = t % 12;
+  return [y && `${y} yr${y > 1 ? 's' : ''}`, mo && `${mo} mo${mo > 1 ? 's' : ''}`].filter(Boolean).join(' ');
+};
+/** The first three bullets, the rest behind "+N more bullets" */
+const bulletsHTML = (list, keep = 3) => !list.length ? '' : `<ul>${list.map((b, i) => `<li${i >= keep ? ' data-x hidden' : ''}>${esc(b)}</li>`).join('')}</ul>${list.length > keep ? `<button class="more" type="button" data-more="${list.length - keep}">+${list.length - keep} more bullets</button>` : ''}`;
+const SEC_IC = {
+  experience: svg('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>', 18),
+  education: svg('<path d="M3 9l9-5 9 5-9 5z"/><path d="M7 11v5c2 2 8 2 10 0v-5"/>', 18),
+  projects: svg('<path d="M5 19c0-6 4-11 14-14-1 10-6 14-12 14z"/>', 18),
+  certifications: svg('<circle cx="12" cy="9" r="5"/><path d="M9 13l-1 7 4-2 4 2-1-7"/>', 18),
+  skills: svg('<path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/>', 18),
+  defaults: svg('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/>', 18),
+  custom: svg('<path d="M5 5h14v14H5z"/>', 18),
+};
 const linkHref = u => (/^https?:/i.test(u) ? u : 'https://' + u);
 
 async function loadResumeProfiles() {
@@ -1575,7 +2244,7 @@ async function renderProfile() {
   const initials = (p.fullName || rp.name).split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
   const counts = { experience: s.experience.length, education: s.education.length, projects: s.projects.length, skills: s.skills.reduce((n, g) => n + g.items.length, 0), certifications: s.certifications.length };
   $('#view').innerHTML = `
-    <div class="page-head"><div><h1>Profile</h1><p>What recruiters and job forms see. Your default profile drives your job matches.</p></div><span class="spacer"></span>
+    <div class="page-head"><div><h1 class="sr-only">Profile</h1><p>What recruiters and job forms see. Your default profile drives your job matches.</p></div><span class="spacer"></span>
       <div class="switcher">
         <select id="rpSelect" aria-label="Choose a profile">${state.resumeProfiles.map(x => `<option value="${x.id}" ${x.id === rp.id ? 'selected' : ''}>${esc(x.name)}${x.isDefault ? ' (default)' : ''}</option>`).join('')}</select>
         <button class="btn" id="rpNew" type="button">New profile</button>
@@ -1587,12 +2256,7 @@ async function renderProfile() {
     <div id="tabBody"></div>`;
 
   $('#rpSelect').addEventListener('change', e => { store.set('rpId', e.target.value); renderProfile(); });
-  $('#rpNew').addEventListener('click', async () => {
-    const name = prompt('Name the new profile, for example "Java Full Stack". It starts as a copy of this one.');
-    if (!name) return;
-    const { data } = await api('POST', `/users/${USER}/resume-profiles`, { name, copyFrom: rp.id });
-    store.set('rpId', data.id); toast(`Created "${data.name}".`); renderProfile();
-  });
+  $('#rpNew').addEventListener('click', () => newProfileDialog(rp));
   $('#rpDefault')?.addEventListener('click', async () => { await api('POST', `/users/${USER}/resume-profiles/${rp.id}/set-default`); state.profile = null; state.profileSkills = null; state.feed = null; toast(`"${rp.name}" is now your default. Job matches use it.`); renderProfile(); });
   $('#rpRename').addEventListener('click', async () => { const name = prompt('Rename this profile', rp.name); if (name && name !== rp.name) { await patchRP({ name }, 'Renamed.'); renderProfile(); } });
   $('#rpDelete')?.addEventListener('click', async () => {
@@ -1606,37 +2270,39 @@ async function renderProfile() {
   if (state.profileTab === 'letter') return renderLetterTab();
 
   const todo = rp.completeness.items.filter(i => !i.done);
-  const contact = [p.city && [p.city, p.state].filter(Boolean).join(', '), p.email, p.phone].filter(Boolean);
+  const contact = [[p.address, p.city, [p.state, p.zip].filter(Boolean).join(' ')].filter(Boolean).join(', '), p.email, p.phone].filter(Boolean);
   const links = [p.linkedin && ['LinkedIn', p.linkedin], p.github && ['GitHub', p.github], p.portfolio && ['Website', p.portfolio]].filter(Boolean);
-  $('#tabBody').innerHTML = `<div class="profile">
-    <nav class="toc" aria-label="Profile sections">
-      ${[['about', 'About you'], ['looking', 'What you want'], ['summary', 'Summary'], ['experience', 'Experience', counts.experience], ['education', 'Education', counts.education], ['projects', 'Projects', counts.projects], ['skills', 'Skills', counts.skills], ['certifications', 'Certifications', counts.certifications], ['custom', 'Other sections'], ['defaults', 'Application answers']]
-        .map(([id, l, n]) => `<a href="#/profile" data-jump="${id}">${l}${n != null ? `<span>${n}</span>` : ''}</a>`).join('')}
-    </nav>
-    <div>
-      ${!rp.hasResume && !s.experience.length ? `<div class="notice info" style="margin-top:0">Fastest start: <a href="#/profile" id="goResume">upload your resume</a> and every section below fills in for you to review.</div>` : ''}
-      <section class="sec" id="sec-about">
-        <div class="hero-card"><div class="initials" aria-hidden="true">${esc(initials)}</div>
-          <div><h1>${esc(p.fullName || 'Add your name')}</h1>${p.headline ? `<div style="color:var(--ink-2);margin-top:2px">${esc(p.headline)}</div>` : ''}
-            <div class="contact">${contact.map(x => `<span>${esc(x)}</span>`).join('') || '<span class="muted">Add your contact details</span>'}${links.map(([l, u]) => `<a href="${esc(linkHref(u))}" target="_blank" rel="noopener">${l}</a>`).join('')}</div>
-            <div style="margin-top:10px"><span class="tag ${p.openToWork ? 'hit' : ''}">${p.openToWork ? 'Open to work' : 'Not looking right now'}</span></div></div>
-          <div class="pct"><b>${rp.completeness.percent}%</b><span>complete</span></div></div>
-        ${todo.length ? `<p style="margin:16px 0 0;font-size:14px;color:var(--ink-2)">Still to add:</p><ul class="checklist">${todo.map(i => `<li>${esc(i.label)}</li>`).join('')}</ul>` : ''}
-        <div style="margin-top:14px"><button class="btn sm" type="button" data-edit-personal>${I.edit(14)} Edit details</button></div>
-        <div id="personalEditor"></div>
-      </section>
-      <section class="sec" id="sec-looking"><div class="sec-head"><div><h2>What you want</h2><p>The roles you're aiming for. They count for about a third of every match score.</p></div></div><div id="rolesBox"><div class="skeleton" style="height:40px"></div></div></section>
-      <section class="sec" id="sec-summary"><div class="sec-head"><div><h2>Summary</h2><p>Two to four sentences about what you do best.</p></div><span class="spacer"></span><button class="btn sm" type="button" data-edit-summary>Edit</button></div>
-        <div id="summaryBody">${s.summary ? `<p style="margin:0;max-width:72ch;color:var(--ink-2)">${esc(s.summary)}</p>` : '<p class="muted" style="margin:0">No summary yet.</p>'}</div></section>
-      ${['experience', 'education', 'projects'].map(listSectionHTML).join('')}
-      <section class="sec" id="sec-skills"><div class="sec-head"><div><h2>Skills</h2><p>Grouped the way you'd list them on a resume. Every job's requirements are checked against these.</p></div><span class="spacer"></span><button class="btn sm" type="button" data-edit-skills>Edit</button></div>
-        <div id="skillsBody">${s.skills.length ? s.skills.map(g => `<div style="margin-bottom:12px"><div style="font-weight:600;font-size:14px;margin-bottom:6px">${esc(g.group)}</div><div class="chips">${g.items.map(x => `<span class="tag">${esc(x)}</span>`).join('')}</div></div>`).join('') : '<p class="muted" style="margin:0">No skills yet. Upload a resume or add them by hand.</p>'}</div></section>
-      ${['certifications', 'custom'].map(listSectionHTML).join('')}
-      <section class="sec" id="sec-defaults"><div class="sec-head"><div><h2>Application answers</h2><p>The questions job forms ask every time, answered once.</p></div></div><div id="defaultsBody"></div></section>
+  $('#tabBody').innerHTML = `<div class="pf">
+    <section class="sec pf-hero" id="sec-about">
+      <div class="hero-card"><div class="initials" aria-hidden="true">${esc(initials)}</div>
+        <div><div class="pf-name"><h1>${esc(p.fullName || 'Add your name')}</h1><span class="tag ${p.openToWork ? 'hit' : ''}">${p.openToWork ? '● Open to work' : 'Not looking right now'}</span></div>
+          ${p.headline ? `<div style="color:var(--ink-2);margin-top:2px">${esc(p.headline)}</div>` : ''}
+          <div class="contact">${contact.map(x => `<span>${esc(x)}</span>`).join('') || '<span class="muted">Add your contact details</span>'}${links.map(([l, u]) => `<a href="${esc(linkHref(u))}" target="_blank" rel="noopener">${l}</a>`).join('')}</div></div>
+        <div class="pf-hero-r"><span class="pct"><b>${rp.completeness.percent}%</b><span>complete</span></span><button class="btn sm quiet" type="button" data-edit-personal>Edit →</button></div></div>
+      ${todo.length ? `<p style="margin:14px 0 0;font-size:14px;color:var(--ink-2)">Still to add:</p><ul class="checklist">${todo.map(i => `<li>${esc(i.label)}</li>`).join('')}</ul>` : ''}
+      <div id="personalEditor"></div>
+    </section>
+    <div class="pf-label"><span>Profile details</span><i></i></div>
+    ${!rp.hasResume && !s.experience.length ? `<div class="notice info" style="margin:0 0 16px">Fastest start: <a href="#/profile" id="goResume">upload your resume</a> and every section below fills in for you to review.</div>` : ''}
+    <div class="pf-cols">
+      <div class="pf-main">
+        <section class="sec" id="sec-summary"><div class="sec-head"><div><h2>Professional summary</h2></div><span class="spacer"></span><button class="btn sm quiet" type="button" data-edit-summary>${I.edit(14)} Edit</button></div>
+          <div id="summaryBody">${s.summary ? `<p style="margin:0;max-width:72ch;color:var(--ink-2)">${esc(s.summary)}</p>` : '<p class="muted" style="margin:0">No summary yet.</p>'}</div></section>
+        ${['education', 'experience', 'projects', 'custom'].map(listSectionHTML).join('')}
+      </div>
+      <div class="pf-side">
+        <section class="sec" id="sec-looking"><div class="sec-head"><div><h2>What you want</h2><p>The roles you're aiming for. They count for about a third of every match score.</p></div></div><div id="rolesBox"><div class="skeleton" style="height:40px"></div></div></section>
+        <section class="sec" id="sec-workauth"><div class="sec-head"><span class="sec-ic">${SEC_IC.defaults}</span><div><h2>Application defaults</h2><p>What we auto-fill on every ATS form.</p></div></div>
+          <div class="pf-sub">Work authorization</div><p class="muted" style="margin:0 0 10px;font-size:13px">One row per country. A country you haven't added comes back to you instead of being guessed.</p><div id="workAuthBody"></div></section>
+        <section class="sec" id="sec-contacts"><div class="sec-head"><div><h2>People you know</h2><p>When you apply where one of them works, referral questions name them. Everywhere else they get "No" or "N/A".</p></div></div><div id="contactsBody"></div></section>
+        <section class="sec" id="sec-defaults"><div class="sec-head"><div><h2>Application answers</h2><p>The questions job forms ask every time, answered once.</p></div></div><div id="defaultsBody"></div></section>
+        <section class="sec" id="sec-skills"><div class="sec-head"><span class="sec-ic">${SEC_IC.skills}</span><div><h2>Skills</h2><p>${counts.skills} skills across ${s.skills.length} ${s.skills.length === 1 ? 'category' : 'categories'}</p></div><span class="spacer"></span><button class="btn sm quiet" type="button" data-edit-skills>${I.edit(14)} Edit</button></div>
+          <div id="skillsBody">${s.skills.length ? s.skills.map(g => `<div class="skillrow"><div class="sk-l">${esc(g.group)}</div><div class="chips">${g.items.map(x => `<span class="tag">${esc(x)}</span>`).join('')}</div></div>`).join('') : '<p class="muted" style="margin:0">No skills yet. Upload a resume or add them by hand.</p>'}</div></section>
+        ${listSectionHTML('certifications')}
+      </div>
     </div></div>`;
 
   $('#goResume')?.addEventListener('click', e => { e.preventDefault(); state.profileTab = 'resume'; renderProfile(); });
-  $$('[data-jump]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); $(`#sec-${a.dataset.jump}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   $('[data-edit-personal]').addEventListener('click', () => openPersonalEditor());
   $('[data-edit-summary]').addEventListener('click', () => {
     $('#summaryBody').innerHTML = `<div class="editor"><label class="field">Summary<textarea id="sumText" rows="5" maxlength="4000">${esc(s.summary)}</textarea></label><div class="acts"><button class="btn quiet" type="button" data-cancel>Cancel</button><button class="btn primary" type="button" data-save>Save summary</button></div></div>`;
@@ -1646,29 +2312,32 @@ async function renderProfile() {
   });
   $('[data-edit-skills]').addEventListener('click', openSkillsEditor);
   for (const key of Object.keys(LIST_SECTIONS)) bindListSection(key);
-  renderDefaults();
+  renderDefaults(); renderWorkAuth(); renderContacts();
   renderRoles();
 }
 
 function listSectionHTML(key) {
   const def = LIST_SECTIONS[key]; const items = state.rp.sections[key];
   const isTimeline = key === 'experience' || key === 'education';
-  return `<section class="sec" id="sec-${key}"><div class="sec-head"><div><h2>${def.title}</h2><p>${def.blurb}</p></div><span class="spacer"></span><button class="btn sm" type="button" data-add="${key}">Add ${def.item}</button></div>
+  return `<section class="sec" id="sec-${key}"><div class="sec-head"><span class="sec-ic">${SEC_IC[key] || ''}</span><div><h2>${def.title}</h2><p title="${esc(def.blurb)}">${items.length} ${items.length === 1 ? def.item : def.item + 's'}</p></div><span class="spacer"></span><button class="btn sm quiet" type="button" data-add="${key}">+ Add</button></div>
     <div id="editor-${key}"></div>
     ${items.length ? `<div class="${isTimeline ? 'timeline' : ''}">${items.map((e, i) => entryHTML(key, e, i)).join('')}</div>` : `<p class="muted" style="margin:0">Nothing here yet.</p>`}</section>`;
 }
+const lgTile = (name, kind) => `<span class="ent-logo" aria-hidden="true">${esc(String(name || '?')[0].toUpperCase())}${logoImg(name, kind)}</span>`;
 function entryHTML(key, e, i) {
   const tools = `<span class="tools"><button class="icon-btn" type="button" data-up="${key}:${i}" aria-label="Move up" ${i === 0 ? 'disabled' : ''}>${I.up()}</button><button class="icon-btn" type="button" data-edit="${key}:${i}" aria-label="Edit">${I.edit()}</button><button class="icon-btn" type="button" data-del="${key}:${i}" aria-label="Delete">${I.trash()}</button></span>`;
-  if (key === 'experience') return `<div class="entry${e.current ? ' now' : ''}"><div class="entry-head"><h3>${esc(e.title || 'Untitled role')}</h3>${tools}<span class="when">${esc(span(e))}</span></div><div class="org">${esc([e.company, e.location].filter(Boolean).join(', '))}</div>${e.bullets.length ? `<ul>${e.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}</div>`;
-  if (key === 'education') return `<div class="entry"><div class="entry-head"><h3>${esc(e.school || e.degree)}</h3>${tools}<span class="when">${esc(span(e))}</span></div><div class="org">${esc([e.degree, e.field].filter(Boolean).join(', '))}${e.gpa ? `, GPA ${esc(e.gpa)}` : ''}</div>${e.description ? `<p style="margin:6px 0 0;color:var(--ink-2);font-size:14px">${esc(e.description)}</p>` : ''}</div>`;
-  if (key === 'projects') return `<div class="entry" style="${i ? 'border-top:1px solid var(--line-2);padding-top:14px' : ''}"><div class="entry-head"><h3>${e.url ? `<a href="${esc(linkHref(e.url))}" target="_blank" rel="noopener">${esc(e.name)}</a>` : esc(e.name)}</h3>${tools}<span class="when">${esc(span(e))}</span></div>${e.role ? `<div class="org">${esc(e.role)}</div>` : ''}${e.technologies.length ? `<div class="chips" style="margin-top:6px">${e.technologies.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}${e.bullets.length ? `<ul>${e.bullets.map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}</div>`;
-  if (key === 'certifications') return `<div class="entry" style="padding-bottom:10px"><div class="entry-head"><h3 style="font-size:15.5px">${esc(e.name)}</h3>${tools}<span class="when">${esc(fmtMonth(e.date))}</span></div>${e.issuer ? `<div class="org">${esc(e.issuer)}</div>` : ''}</div>`;
+  if (key === 'experience') return `<div class="entry has-lg${e.current ? ' now' : ''}">${lgTile(e.company, 'company')}<div class="ent-body"><div class="entry-head"><h3>${esc(e.title || 'Untitled role')}</h3>${tools}</div><div class="org">${esc(e.company || '')}</div><div class="meta">${esc([span(e), durationOf(e), e.location].filter(Boolean).join(' · '))}</div>${bulletsHTML(e.bullets)}</div></div>`;
+  if (key === 'education') return `<div class="entry has-lg">${lgTile(e.school, 'school')}<div class="ent-body"><div class="entry-head"><h3>${esc(e.school || e.degree)}</h3>${tools}</div><div class="org">${esc([e.degree, e.field].filter(Boolean).join(' · '))}</div><div class="meta">${esc([span(e), e.gpa && `GPA ${e.gpa}`].filter(Boolean).join(' · '))}</div>${e.description ? `<p style="margin:6px 0 0;color:var(--ink-2);font-size:14px">${esc(e.description)}</p>` : ''}</div></div>`;
+  if (key === 'projects') return `<div class="entry" style="${i ? 'border-top:1px solid var(--line-2);padding-top:14px' : ''}"><div class="entry-head"><h3>${e.url ? `<a href="${esc(linkHref(e.url))}" target="_blank" rel="noopener">${esc(e.name)}</a>` : esc(e.name)}</h3>${tools}<span class="when">${esc(span(e))}</span></div>${e.role ? `<div class="org">${esc(e.role)}</div>` : ''}${e.technologies.length ? `<div class="chips" style="margin-top:6px">${e.technologies.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}${bulletsHTML(e.bullets)}</div>`;
+  if (key === 'certifications') return `<div class="entry has-lg" style="padding-bottom:10px">${lgTile(e.issuer, 'company')}<div class="ent-body"><div class="entry-head"><h3 style="font-size:15.5px">${esc(e.name)}</h3>${tools}<span class="when">${esc(fmtMonth(e.date))}</span></div>${e.issuer ? `<div class="org">${esc(e.issuer)}</div>` : ''}</div></div>`;
   return `<div class="entry"><div class="entry-head"><h3 style="font-size:15.5px">${esc(e.title)}</h3>${tools}</div><p style="white-space:pre-wrap;margin:6px 0 0;color:var(--ink-2);font-size:14px">${esc(e.body)}</p></div>`;
 }
 function bindListSection(key) {
   const sec = $(`#sec-${key}`); if (!sec) return;
   sec.querySelector('[data-add]').addEventListener('click', () => openEntryEditor(key, -1));
   sec.addEventListener('click', async e => {
+    const mo = e.target.closest('[data-more]');
+    if (mo) { const open = !!mo.previousElementSibling.querySelector('li[hidden]'); mo.previousElementSibling.querySelectorAll('li[data-x]').forEach(li => { li.hidden = !open; }); mo.textContent = open ? 'Show less' : `+${mo.dataset.more} more bullets`; return; }
     const b = e.target.closest('[data-edit],[data-del],[data-up]'); if (!b) return;
     const i = Number((b.dataset.edit || b.dataset.del || b.dataset.up).split(':')[1]);
     const list = [...state.rp.sections[key]];
@@ -1718,7 +2387,7 @@ function openEntryEditor(key, index) {
 }
 function openPersonalEditor() {
   const p = state.rp.sections.personal;
-  const fields = [['fullName', 'Full name'], ['headline', 'Headline, for example Software Engineer'], ['email', 'Email'], ['phone', 'Phone'], ['city', 'City'], ['state', 'State'], ['country', 'Country'], ['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['portfolio', 'Website or portfolio'], ['openToWork', 'Open to work', 'bool']];
+  const fields = [['fullName', 'Full name'], ['headline', 'Headline, for example Software Engineer'], ['email', 'Email'], ['phone', 'Phone'], ['address', 'Street address'], ['city', 'City'], ['state', 'State'], ['zip', 'Postal code'], ['country', 'Country'], ['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['portfolio', 'Website or portfolio'], ['openToWork', 'Open to work', 'bool']];
   const host = $('#personalEditor');
   host.innerHTML = `<form class="editor" style="margin-top:14px"><div class="form-grid">${fields.map(([n, l, t]) => fieldInput(n, l, t, p[n])).join('')}</div><div class="acts"><button class="btn quiet" type="button" data-cancel>Cancel</button><button class="btn primary" type="submit">Save details</button></div></form>`;
   const form = host.querySelector('form'); form.querySelector('input').focus();
@@ -1740,18 +2409,99 @@ function openSkillsEditor() {
     await patchRP({ sections: { skills } }, 'Skills saved.'); renderProfile();
   });
 }
+const WORKAUTH_KEYS = ['authorizedToWork', 'needsSponsorship', 'workCountry'];   // answered per country in renderWorkAuth
+const WA_COUNTRIES = ['United States', 'Canada', 'United Kingdom', 'India', 'Germany', 'Ireland', 'Netherlands', 'France', 'Australia', 'Singapore', 'Israel', 'Mexico', 'Spain', 'Poland', 'Switzerland', 'Sweden', 'Japan', 'Brazil', 'Italy', 'Portugal'];
+const WA_BASIS = ['Citizen', 'Permanent resident', 'Temporary work authorization', 'Not currently authorized', 'Other'];
+const ynSelect = (name, v) => `<select name="${name}"><option value="">Not answered</option><option value="true" ${v === true ? 'selected' : ''}>Yes</option><option value="false" ${v === false ? 'selected' : ''}>No</option></select>`;
+function renderWorkAuth() {
+  const host = $('#workAuthBody'); if (!host) return;
+  let rows = (state.rp.sections.workAuth || []).map(r => ({ ...r }));
+  const draw = () => {
+    const left = WA_COUNTRIES.filter(c => !rows.some(r => r.country === c));
+    host.innerHTML = `<form id="waForm">
+      ${rows.length ? rows.map((r, i) => `<div class="wa-row" data-i="${i}">
+        <div class="wa-head"><b>${esc(r.country)}</b><span class="spacer"></span><button class="btn sm quiet danger" type="button" data-rm="${i}" aria-label="Remove ${esc(r.country)}">Remove</button></div>
+        <div class="form-grid">
+          <label class="field">Are you legally authorized to work in ${esc(r.country)}?${ynSelect('authorized', r.authorized)}</label>
+          <label class="field">Will you now or in the future require employer sponsorship in ${esc(r.country)}?${ynSelect('needsSponsorship', r.needsSponsorship)}</label>
+          <label class="field">Authorization basis<select name="status"><option value="">Select a status</option>${[...new Set([...WA_BASIS, r.status].filter(Boolean))].map(o => `<option ${r.status === o ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></label>
+        </div></div>`).join('') : '<p class="muted" style="margin:0 0 12px">No countries yet. Add the countries you would work in.</p>'}
+      <div class="wa-add"><select id="waPick" aria-label="Country to add"><option value="">Add a country…</option>${left.map(c => `<option>${esc(c)}</option>`).join('')}<option value="__other">Other…</option></select>
+        <span class="spacer"></span><button class="btn primary" type="submit">Save work authorization</button></div></form>`;
+    const read = () => $$('.wa-row', host).forEach(el => {
+      const r = rows[+el.dataset.i]; const v = n => el.querySelector(`[name=${n}]`).value;
+      r.authorized = v('authorized') === '' ? null : v('authorized') === 'true';
+      r.needsSponsorship = v('needsSponsorship') === '' ? null : v('needsSponsorship') === 'true';
+      r.status = v('status').trim();
+    });
+    $('#waPick').addEventListener('change', e => {
+      let c = e.target.value; if (!c) return;
+      if (c === '__other') c = (prompt('Country name') || '').trim();
+      if (!c || rows.some(r => r.country.toLowerCase() === c.toLowerCase())) { draw(); return; }
+      read(); rows.push({ country: c, authorized: null, needsSponsorship: null, status: '' }); draw();
+      host.querySelector(`.wa-row[data-i="${rows.length - 1}"] select`)?.focus();
+    });
+    host.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { read(); rows.splice(+b.dataset.rm, 1); draw(); }));
+    $('#waForm').addEventListener('submit', async e => {
+      e.preventDefault(); read();
+      // The first row (usually the United States) also feeds job matching's sponsorship filter.
+      const main = rows.find(r => r.country === 'United States') || rows[0];
+      const ad = { ...(state.rp.sections.applicationDefaults || {}) };
+      if (main) { ad.workCountry = main.country; if (main.authorized !== null) ad.authorizedToWork = main.authorized; else delete ad.authorizedToWork; if (main.needsSponsorship !== null) ad.needsSponsorship = main.needsSponsorship; else delete ad.needsSponsorship; }
+      await patchRP({ sections: { workAuth: rows, applicationDefaults: ad } }, 'Work authorization saved.'); renderProfile();
+    });
+  };
+  draw();
+}
+const RELATIONS = ['Friend', 'Family member', 'Former colleague', 'Classmate', 'Recruiter', 'Other'];
+function renderContacts() {
+  const host = $('#contactsBody'); if (!host) return;
+  let rows = (state.rp.sections.contacts || []).map(r => ({ ...r }));
+  const draw = () => {
+    host.innerHTML = `<form id="ctForm">
+      ${rows.length ? `<div class="ct-list">${rows.map((c, i) => `<div class="ct-row" data-i="${i}">
+        <label class="field">Name<input name="name" value="${esc(c.name)}" required></label>
+        <label class="field">Company<input name="company" value="${esc(c.company)}" required></label>
+        <label class="field">Email<input name="email" type="email" placeholder="optional" value="${esc(c.email || '')}"></label>
+        <label class="field">Relation<select name="relation">${RELATIONS.map(r => `<option ${c.relation === r ? 'selected' : ''}>${r}</option>`).join('')}</select></label>
+        <button class="btn sm quiet danger" type="button" data-rm="${i}" aria-label="Remove ${esc(c.name || 'contact')}">Remove</button></div>`).join('')}</div>` : '<p class="muted" style="margin:0 0 12px">Nobody added. That is fine: those questions get "No".</p>'}
+      <div class="wa-add"><button class="btn" type="button" id="ctAdd">Add a person</button><span class="spacer"></span>${rows.length || (state.rp.sections.contacts || []).length ? '<button class="btn primary" type="submit">Save people</button>' : ''}</div></form>`;
+    const read = () => $$('.ct-row', host).forEach(el => { const c = rows[+el.dataset.i]; for (const n of ['name', 'company', 'email', 'relation']) c[n] = el.querySelector(`[name=${n}]`).value.trim(); });
+    $('#ctAdd').addEventListener('click', () => { read(); rows.push({ name: '', company: '', email: '', relation: 'Friend' }); draw(); host.querySelector(`.ct-row[data-i="${rows.length - 1}"] input`)?.focus(); });
+    host.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { read(); rows.splice(+b.dataset.rm, 1); draw(); }));
+    $('#ctForm').addEventListener('submit', async e => { e.preventDefault(); read(); await patchRP({ sections: { contacts: rows.filter(c => c.name && c.company) } }, 'People saved.'); renderProfile(); });
+  };
+  draw();
+}
 function renderDefaults() {
   const fields = state.fields || {}; const ad = state.rp.sections.applicationDefaults || {};
-  const GROUPS = [['authorization', 'Work authorization', 'Used to filter out jobs that won\'t sponsor you, and for every "are you authorized to work" question.'], ['logistics', 'Availability', ''], ['background', 'Background questions', ''], ['eeo', 'Voluntary self-identification', 'Optional. Employers use these only for equal-opportunity reporting, and "Prefer not to say" is always fine.']];
+  const GROUPS = [['authorization', 'Citizenship', 'Select every country where you hold citizenship. Visa and sponsorship answers come from Work authorization above.'], ['logistics', 'Availability', ''], ['background', 'Background questions', ''], ['eeo', 'Voluntary self-identification', 'Optional. Employers use these only for equal-opportunity reporting, and "Prefer not to say" is always fine.']];
   const input = (key, f) => {
     const v = ad[key];
     if (f.type === 'bool') return `<label class="field">${f.label}<select name="${key}"><option value="">Not answered</option><option value="true" ${v === true ? 'selected' : ''}>Yes</option><option value="false" ${v === false ? 'selected' : ''}>No</option></select></label>`;
     if (f.type === 'select') return `<label class="field">${f.label}<select name="${key}"><option value="">Not answered</option>${f.options.map(o => `<option ${v === o ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></label>`;
+    if (key === 'citizenship') return `<div class="field wide" id="citField">${f.label}<input type="hidden" name="citizenship" value="${esc(v || '')}"/><div class="chips" id="citChips" style="margin:6px 0"></div>
+      <select id="citPick" aria-label="Add a country of citizenship"><option value="">Add a country…</option>${WA_COUNTRIES.map(c => `<option>${esc(c)}</option>`).join('')}<option value="__other">Other…</option></select></div>`;
     if (f.type === 'date') return `<label class="field">${f.label}<input type="date" name="${key}" value="${esc(v || '')}"/></label>`;
     return `<label class="field">${f.label}${f.hint ? ` <small>${esc(f.hint)}</small>` : ''}<input type="text" name="${key}" value="${esc(v || '')}"/></label>`;
   };
-  $('#defaultsBody').innerHTML = `<form id="adForm">${GROUPS.map(([g, title, hint]) => `<div class="ad-group"><h3>${title}</h3>${hint ? `<p class="hint">${hint}</p>` : ''}<div class="form-grid" style="margin-top:${hint ? 0 : 10}px">${Object.entries(fields).filter(([, f]) => f.group === g).map(([k, f]) => input(k, f)).join('')}</div></div>`).join('')}
+  $('#defaultsBody').innerHTML = `<form id="adForm">${GROUPS.map(([g, title, hint]) => `<div class="ad-group"><h3>${title}</h3>${hint ? `<p class="hint">${hint}</p>` : ''}<div class="form-grid" style="margin-top:${hint ? 0 : 10}px">${Object.entries(fields).filter(([k, f]) => f.group === g && !WORKAUTH_KEYS.includes(k)).map(([k, f]) => input(k, f)).join('')}</div></div>`).join('')}
     <div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="btn primary" type="submit">Save answers</button></div></form>`;
+  const cit = $('#adForm [name=citizenship]');
+  if (cit) {
+    const draw = () => {
+      const list = cit.value.split(',').map(x => x.trim()).filter(Boolean);
+      $('#citChips').innerHTML = list.map((c, i) => `<span class="chip-r"><button type="button" tabindex="-1">${esc(c)}</button><button type="button" data-rm="${i}" aria-label="Remove ${esc(c)}">×</button></span>`).join('') || '<span class="muted" style="font-size:13px">None added</span>';
+      $$('#citChips [data-rm]').forEach(b => b.addEventListener('click', () => { list.splice(+b.dataset.rm, 1); cit.value = list.join(', '); draw(); }));
+    };
+    $('#citPick').addEventListener('change', e => {
+      let c = e.target.value; e.target.value = ''; if (c === '__other') c = (prompt('Country name') || '').trim();
+      const list = cit.value.split(',').map(x => x.trim()).filter(Boolean);
+      if (c && !list.some(x => x.toLowerCase() === c.toLowerCase())) { list.push(c); cit.value = list.join(', '); }
+      draw();
+    });
+    draw();
+  }
   $('#adForm').addEventListener('submit', async e => {
     e.preventDefault();
     const out = {};
@@ -1872,20 +2622,7 @@ function renderResumeTab() {
       ${editing ? '<div class="rz-editbar" role="status"><span>Click any text on the page to change it. Enter adds a bullet, ⋮⋮ drags it, × deletes it.</span><span class="spacer"></span><b>Not saved yet</b></div>' : ''}
     </div>
 
-    <div class="rz-canvas" id="rzCanvas"><div class="rz-paper" id="rzPaper"><iframe id="rzFrame" title="${editing ? 'Resume editor' : 'Resume preview'}"></iframe></div><p class="rz-pages" id="rzPages"></p></div>`}
-    <details class="sec rz-examples" style="margin-top:18px" ${state.rzExamplesOpen ? 'open' : ''} id="examplesSec">
-      <summary><h2>Teach "Match the job" how you tailor</h2><span class="muted" style="font-size:13px">Optional</span></summary>
-      <p class="muted" style="margin:0 0 12px;font-size:13px">Add a resume and the version you tailored for one job. "Match the job" learns your style from these and reuses bullets you wrote.</p>
-      <form id="exampleForm" class="example-form" style="display:grid;gap:10px;max-width:640px">
-        <label>Original resume <input type="file" name="original" accept=".pdf,.doc,.docx,.txt" required/></label>
-        <label>Tailored resume <input type="file" name="tailored" accept=".pdf,.doc,.docx,.txt" required/></label>
-        <div style="display:flex;gap:10px;flex-wrap:wrap"><label style="flex:1">Job title <input name="jobTitle" maxlength="200"/></label><label style="flex:1">Company <input name="company" maxlength="200"/></label></div>
-        <label>Job posting <span class="muted">(optional, needed for training)</span><textarea name="jobDescription" rows="5"></textarea></label>
-        <div><button class="btn primary" type="submit">Save example</button></div>
-      </form>
-      <div id="exampleResult"></div>
-      <ul id="exampleList" class="example-list" style="list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px"></ul>
-    </details>`;
+    <div class="rz-canvas" id="rzCanvas"><div class="rz-paper" id="rzPaper"><iframe id="rzFrame" title="${editing ? 'Resume editor' : 'Resume preview'}"></iframe></div><p class="rz-pages" id="rzPages"></p></div>`}`;
 
   // ── Wiring ──
   const rerender = () => renderResumeTab();
@@ -1980,7 +2717,6 @@ function renderResumeTab() {
     drop.addEventListener('dragleave', () => drop.classList.remove('over'));
     drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); e.dataTransfer.files[0] && handle(e.dataTransfer.files[0]); });
   }
-  setupTailoringExamples();
   if (z.view === 'original') return;
 
   // ── The page itself ──
@@ -2026,6 +2762,17 @@ function renderResumeTab() {
         paper.style.transform = `scale(${scale})`; paper.style.height = `${h * scale}px`; paper.style.width = `${816}px`;
         paper.style.marginLeft = `${Math.max(0, (canvas.clientWidth - 24 - 816 * scale) / 2)}px`;
         const content = doc.getElementById('content'); const pages = $('#rzPages');
+        // where each printed page ends: Letter with 0.5in margins holds 10in (960px) of resume per page
+        if (content) {
+          doc.querySelectorAll('.rj-pb').forEach(el => el.remove());
+          const top = content.getBoundingClientRect().top + doc.defaultView.scrollY;
+          for (let k = 1; k * 960 < content.scrollHeight - 2; k++) {
+            const pb = doc.createElement('div'); pb.className = 'rj-pb'; pb.setAttribute('aria-hidden', 'true'); pb.contentEditable = 'false';
+            pb.style.cssText = `position:absolute;left:0;right:0;top:${top + k * 960}px;border-top:1px dashed rgba(91,100,112,.45);pointer-events:none;z-index:5`;
+            pb.innerHTML = `<span style="position:absolute;right:10px;top:-11px;font:600 11px system-ui,sans-serif;color:#5B6470;background:#EEF1F4;border:1px solid #D5DAE0;border-radius:99px;padding:2px 9px">Page ${k + 1}</span>`;
+            doc.body.appendChild(pb);
+          }
+        }
         if (content && pages) {
           const over = content.scrollHeight > 960 + 2;
           pages.className = `rz-pages${over && z.mode !== 'edit' ? ' over' : ''}`;
@@ -2063,42 +2810,59 @@ function renderResumeTab() {
   }
   paint();
 }
+// New profile: a name, and what it starts from (a resume read into it, a copy of the current one, or blank).
+// It used to be a bare name prompt that silently copied the current profile, so it looked like nothing happened.
+function newProfileDialog(current) {
+  document.getElementById('npDlg')?.remove();
+  document.body.insertAdjacentHTML('beforeend', `<dialog id="npDlg" style="border:1px solid var(--line);border-radius:16px;padding:0;max-width:460px;width:92vw;background:var(--surface);color:var(--ink)">
+    <form method="dialog" id="npForm" style="padding:22px;display:grid;gap:14px">
+      <h2 style="margin:0;font-size:18px">New profile</h2>
+      <p class="muted" style="margin:-6px 0 0;font-size:13.5px">One profile per kind of role you apply for, each with its own resume.</p>
+      <label class="field">Profile name<input name="name" required maxlength="80" placeholder="e.g. Java Full Stack"></label>
+      <fieldset style="border:0;padding:0;margin:0;display:grid;gap:8px"><legend style="font-weight:600;font-size:14px;margin-bottom:6px">Start from</legend>
+        <label class="check"><input type="radio" name="from" value="upload" checked> Upload a resume <span class="muted">(read into the profile)</span></label>
+        <input type="file" name="file" accept=".pdf,.doc,.docx,.txt" style="margin-left:26px">
+        <label class="check"><input type="radio" name="from" value="copy"> Copy "${esc(current.name)}"</label>
+        <label class="check"><input type="radio" name="from" value="blank"> Start blank</label></fieldset>
+      <p class="muted" id="npMsg" style="margin:0;font-size:13px" role="status"></p>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn primary" id="npGo" value="go">Create profile</button></div>
+    </form></dialog>`);
+  const dlg = document.getElementById('npDlg'), f = document.getElementById('npForm');
+  f.file.addEventListener('change', () => { f.from.value = 'upload'; if (!f.name.value && f.file.files[0]) f.name.value = f.file.files[0].name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').slice(0, 80); });
+  f.addEventListener('submit', async e => {
+    if (e.submitter?.value !== 'go') return;
+    e.preventDefault();
+    const from = f.from.value, file = f.file.files[0], msg = document.getElementById('npMsg'), go = document.getElementById('npGo');
+    if (!f.name.value.trim()) { f.name.focus(); return; }
+    if (from === 'upload' && !file) { msg.textContent = 'Choose a resume file, or pick another way to start.'; return; }
+    go.disabled = true;
+    try {
+      let text = null;
+      if (from === 'upload') { msg.textContent = 'Reading your resume…'; text = await parseResumeFile(file); }
+      msg.textContent = 'Creating the profile…';
+      const { data } = await api('POST', `/users/${USER}/resume-profiles`, { name: f.name.value.trim(), ...(from === 'copy' ? { copyFrom: current.id } : {}) });
+      if (text) {
+        const { data: imp } = await api('POST', `/users/${USER}/resume-profiles/${data.id}/import-resume`, { text, filename: file.name, mode: 'replace' });
+        const x = imp.extracted || {};
+        toast(`Created "${data.name}" from your resume: ${x.experience ?? 0} roles, ${x.education ?? 0} schools, ${x.skills ?? 0} skills. Check the details.`);
+      } else toast(from === 'copy' ? `Created "${data.name}" as a copy of "${current.name}".` : `Created "${data.name}". Add your details or upload a resume.`);
+      dlg.close(); store.set('rpId', data.id); renderProfile();
+    } catch (err) { msg.textContent = err.message; go.disabled = false; }
+  });
+  dlg.addEventListener('close', () => dlg.remove());
+  dlg.showModal(); f.name.focus();
+}
+
 async function parseResumeFile(file) {
   const fd = new FormData(); fd.append('resume', file);
   const r = await fetch('/api/parse-resume', { method: 'POST', body: fd }); const parsed = await r.json();
   if (!r.ok) throw new Error(parsed.error || `${file.name} couldn't be read`);
   return parsed.text;
 }
-function setupTailoringExamples() {
-  const list = async () => {
-    const { data } = await api('GET', `/users/${USER}/resume-examples`);
-    const ex = data?.examples || [];
-    $('#exampleList').innerHTML = ex.length ? ex.map(x => `<li style="display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 12px">
-        <span><b>${esc(x.jobTitle || 'Untitled role')}</b>${x.company ? ` at ${esc(x.company)}` : ''}<br><span class="muted">${x.bullets.original} bullets became ${x.bullets.tailored}${x.hasPosting ? '' : '. No posting, so it isn\'t used for training'}</span></span>
-        <button class="btn" type="button" data-del="${x.id}">Remove</button></li>`).join('') : '<li class="muted">No examples yet.</li>';
-  };
-  $('#exampleList').addEventListener('click', async e => {
-    const id = e.target.closest('[data-del]')?.dataset.del; if (!id) return;
-    await api('DELETE', `/users/${USER}/resume-examples/${id}`); toast('Example removed'); list();
-  });
-  $('#exampleForm').addEventListener('submit', async e => {
-    e.preventDefault(); const f = e.target; const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
-    $('#exampleResult').innerHTML = '<div class="notice info">Reading both resumes…</div>';
-    try {
-      const [original, tailored] = await Promise.all([parseResumeFile(f.original.files[0]), parseResumeFile(f.tailored.files[0])]);
-      const { data, error } = await api('POST', `/users/${USER}/resume-examples`, { original, tailored, jobTitle: f.jobTitle.value, company: f.company.value, jobDescription: f.jobDescription.value });
-      if (error || !data?.id) throw new Error(error || data?.error || 'The example couldn\'t be saved');
-      $('#exampleResult').innerHTML = `<div class="notice info">Saved. ${data.bullets.original} bullets in the original, ${data.bullets.tailored} in the tailored version.</div>`;
-      f.reset(); list();
-    } catch (err) { $('#exampleResult').innerHTML = `<div class="notice bad">${esc(err.message)}</div>`; }
-    finally { btn.disabled = false; }
-  });
-  list();
-}
 function renderLetterTab() {
   const rp = state.rp;
-  $('#tabBody').innerHTML = `<section class="sec"><div class="sec-head"><div><h2>Cover letter template</h2><p>Write {company} and {title} where the job's details should go. Each profile keeps its own template.</p></div></div>
-    <textarea id="letter" rows="16" style="max-width:76ch" aria-label="Cover letter template">${esc(rp.coverLetter || '')}</textarea>
+  $('#tabBody').innerHTML = `<section class="sec"><div class="sec-head"><div><h2>Cover letter</h2><p>When a form takes a cover letter, Rejekt.ai writes a new one for that job from this profile, using only what your resume shows. Add a sample in your own voice to set the tone. It's also used as-is, with {company} and {title} filled in, if the letter can't be written.</p></div></div>
+    <textarea id="letter" rows="16" style="max-width:76ch" aria-label="Sample cover letter">${esc(rp.coverLetter || '')}</textarea>
     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn primary" id="saveLetter" type="button">Save template</button><button class="btn quiet" id="starter" type="button">Start from a draft</button></div></section>`;
   $('#saveLetter').addEventListener('click', async () => { await patchRP({ coverLetter: $('#letter').value }, 'Template saved.'); });
   $('#starter').addEventListener('click', () => {
@@ -2111,8 +2875,118 @@ function renderLetterTab() {
   });
 }
 
+
+// ═══ Settings tab ═══════════════════════════════════════════════════════════
+// Settings is its own page in the nav, so it's reachable from anywhere.
+async function renderSettings() {
+  $('#view').innerHTML = `<div class="page-head"><div><h1 class="sr-only">Settings</h1><p>Email and account settings. Auto-apply has its own tab.</p></div></div><div id="tabBody"></div>`;
+  await renderSettingsTab();
+}
+async function renderSettingsTab() {
+  $('#tabBody').innerHTML = `
+    <div style="max-width:680px">
+
+      <!-- Email Integration -->
+      <section class="sec" id="sec-email-int">
+        <div class="sec-head"><div><h2>Email Integration</h2><p>Connect an email account so auto-apply can use your address and read OTP verification emails.</p></div></div>
+
+        <div id="gmailCard" style="border:1px solid var(--line);border-radius:12px;padding:18px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#4285F4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.3-.2-2.7-.5-4z"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;">Gmail <span id="gmailBadge" style="display:none;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-bd)">Connected</span></div>
+              <div style="font-size:13px;color:var(--muted);margin-top:2px;" id="gmailStatusLine">Checking…</div>
+            </div>
+          </div>
+          <p style="font-size:13px;color:var(--ink-2);margin:0 0 14px;max-width:58ch;">Auto-apply uses your Gmail address for job applications and can read OTP verification emails sent back to you.</p>
+          <div id="gmailActions">
+            <button class="btn primary" id="gmailConnectBtn" type="button" style="background:#4285F4;border-color:#4285F4;display:inline-flex;align-items:center;gap:8px;">
+              <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.3-.2-2.7-.5-4z"/></svg>
+              Sign in with Google
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ATS Account -->
+      <section class="sec" id="sec-ats">
+        <div class="sec-head"><div><h2>Workday account</h2><p>Workday needs a login for each employer. Set the password Rejekt.ai uses when it creates those accounts for you.</p></div></div>
+        <div style="max-width:360px;">
+          <label style="font-size:13px;font-weight:500;display:block;margin-bottom:5px;">Workday password</label>
+          <input type="password" id="s_ats_password" placeholder="Stored securely" autocomplete="new-password"
+            style="width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--surface);color:var(--ink);">
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Used only when a Workday employer requires creating an account</div>
+        </div>
+      </section>
+
+      <div style="padding:0 0 24px;">
+        <button class="btn primary" id="saveSettingsBtn" type="button">Save password</button>
+        <span id="settingsSavedMsg" style="display:none;font-size:13px;color:var(--ok);margin-left:12px;">✓ Saved</span>
+      </div>
+
+    </div>`;
+
+  // Load current Gmail status
+  try {
+    const { data } = await api('GET', `/users/${USER}/gmail/status`);
+    const statusLine = $('#gmailStatusLine');
+    const badge = $('#gmailBadge');
+    const actions = $('#gmailActions');
+    if (data.connected) {
+      statusLine.textContent = 'Connected as ' + (data.email || 'your Google account');
+      badge.style.display = 'inline-block';
+      actions.innerHTML = `<button class="btn quiet" id="gmailDisconnectBtn" type="button" style="color:var(--bad);border-color:var(--bad);">Disconnect Gmail</button>`;
+      $('#gmailDisconnectBtn').addEventListener('click', async () => {
+        await api('DELETE', `/users/${USER}/gmail`);
+        toast('Gmail disconnected.');
+        renderSettingsTab();
+      });
+    } else {
+      statusLine.textContent = 'Not connected';
+      badge.style.display = 'none';
+      $('#gmailConnectBtn').addEventListener('click', async () => {
+        const { data: d } = await api('GET', `/users/${USER}/gmail/auth-url`);
+        if (d.url) window.location.href = d.url;
+      });
+    }
+  } catch(e) {
+    $('#gmailStatusLine').textContent = 'Could not load status';
+    console.error('Gmail status error:', e);
+  }
+
+  // Save settings
+  $('#saveSettingsBtn').addEventListener('click', async () => {
+    // Auto-apply settings live on the Auto-apply page; this only saves the ATS password.
+    const pw = $('#s_ats_password').value.trim();
+    if (!pw) return toast('Type a password first.');
+    const payload = { ats_password: pw };
+    try {
+      await api('PUT', `/users/${USER}/profile`, payload);
+      const msg = $('#settingsSavedMsg');
+      msg.style.display = 'inline';
+      if (pw) $('#s_ats_password').value = '';
+      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    } catch(e) { toast('Save failed: ' + e.message); }
+  });
+}
+
 // ═══ Theme + boot ═══════════════════════════════════════════════════════════
 const savedTheme = store.get('theme', null); if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+$('#logoutBtn').title = ME?.email || '';
+// An admin has opened this dashboard as the user (admin portal → Open as user)
+if (ME?.impersonator) {
+  document.body.insertAdjacentHTML('afterbegin', `<div class="imp-banner" role="status">Viewing as ${esc(ME.email)}, opened by ${esc(ME.impersonator)}. Anything you change is real. <button type="button" id="impBack">Back to admin</button></div>`);
+  $('#impBack').addEventListener('click', async () => {
+    const r = await fetch('/auth/return', { method: 'POST' }).then(r => r.json()).catch(() => ({}));
+    location.assign(r.redirect || '/login');
+  });
+}
+$('#logoutBtn').addEventListener('click', async () => {
+  const r = await fetch('/auth/logout', { method: 'POST' }).then(r => r.json()).catch(() => ({}));
+  location.assign(r.redirect || '/login');
+});
 $('#themeBtn').addEventListener('click', () => {
   const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
   document.documentElement.dataset.theme = dark ? 'light' : 'dark'; store.set('theme', document.documentElement.dataset.theme);

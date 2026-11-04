@@ -10,28 +10,168 @@
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { query } from './lib/db.mjs';
+import { query, slowQuery } from './lib/db.mjs';
 import { getScanStatus, reapStaleRuns } from './lib/scan-status.mjs';
+import { reapStuckApplications } from './autoapply/engine.mjs';
 import { startScan, stopScans } from './lib/scan-control.mjs';
 import { normalizeSkillName } from './lib/skills.mjs';
 import { extractResumeSections } from './lib/resume-extract.mjs';
 import { router as apiRouter } from './api/server.mjs';
+import { readFileSync } from 'fs';
+import * as auth from './lib/auth.mjs';
+import { getLogo } from './lib/logos.mjs';
+import { router as adminRouter } from './lib/admin.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 
 const app = express();
-// The dashboard lives at /app. The older single page stays at /index.html.
-app.get('/', (req, res) => res.redirect('/app/'));
-app.use(express.static(join(__dirname, 'public')));
+
+// ─── Login ───────────────────────────────────────────────────────────────────
+// rejekt.ai serves the login pages; after logging in you land on APP_URL (https://dashboard.rejekt.ai in
+// production, /app/ locally). The session cookie is set for COOKIE_DOMAIN (.rejekt.ai) so both hosts see it.
+const APP_URL  = process.env.APP_URL || '/app/';
+const appBase  = /^https?:/.test(APP_URL) ? new URL(APP_URL).origin : '';
+const appHost  = appBase && new URL(appBase).host;
+const LOGIN    = `${process.env.SITE_URL || ''}/login`;
+const siteUrl  = (req) => process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
+// where to go after logging in: admins → the admin portal; users → a same-site path they were headed to, else the dashboard
+const ADMIN_URL = `${appBase}/admin`;
+const afterLogin = (next, user) => {
+  const path = typeof next === 'string' && /^\/(?![/\\])/.test(next) && !/^\/(login|signup)/.test(next) ? next : null;
+  if (user?.is_admin) return path?.startsWith('/admin') ? appBase + path : ADMIN_URL;
+  return path && !path.startsWith('/admin') ? appBase + path : APP_URL;
+};
+
+// Who's asking (null when logged out)
+app.use(async (req, res, next) => {
+  try { req.user = await auth.userFromToken(auth.readCookie(req)); next(); } catch (e) { next(e); }
+});
+
+// A cross-site page can't make a logged-in browser change anything (SameSite=Lax already withholds the cookie)
+app.use((req, res, next) => {
+  const origin = req.get('origin');
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method) || !origin) return next();
+  const allowed = [req.get('host'), appHost, process.env.SITE_URL && new URL(process.env.SITE_URL).host].filter(Boolean);
+  try { if (allowed.includes(new URL(origin).host)) return next(); } catch {}
+  res.status(403).json({ error: 'Cross-site request blocked' });
+});
+
+const authJson = express.json({ limit: '10kb' });
+const ip = (req) => req.ip || req.socket.remoteAddress;
+const signedIn = (res, user, next) => auth.createSession(user.id).then(raw => {
+  res.setHeader('Set-Cookie', auth.sessionCookie(raw));
+  res.json({ redirect: afterLogin(next, user) });
+});
+
+app.post('/auth/login', authJson, async (req, res) => {
+  const { email, password, next } = req.body || {};
+  if (auth.tooManyAttempts(`login:${ip(req)}:${auth.normEmail(email)}`)) return res.status(429).json({ error: 'Too many tries. Wait 15 minutes.' });
+  const r = await auth.logIn(email, password);
+  return r.error ? res.status(401).json(r) : signedIn(res, r.user, next);
+});
+app.post('/auth/signup', authJson, async (req, res) => {
+  const { email, password, next } = req.body || {};
+  if (auth.tooManyAttempts(`signup:${ip(req)}`)) return res.status(429).json({ error: 'Too many tries. Wait 15 minutes.' });
+  const r = await auth.signUp(email, password);
+  return r.error ? res.status(400).json(r) : signedIn(res, r.user, next);
+});
+app.post('/auth/logout', async (req, res) => {
+  await auth.endSession(auth.readCookie(req));
+  await auth.endSession(auth.readCookie(req, auth.ADMIN_COOKIE));   // logging out while "Open as user" ends both
+  res.setHeader('Set-Cookie', [auth.sessionCookie('', { clear: true }), auth.sessionCookie('', { clear: true, name: auth.ADMIN_COOKIE })]);
+  res.json({ redirect: LOGIN });
+});
+// Leave "Open as user": end that session and switch back to the admin's own
+app.post('/auth/return', async (req, res) => {
+  const adminRaw = auth.readCookie(req, auth.ADMIN_COOKIE);
+  const admin = await auth.userFromToken(adminRaw);
+  if (req.user?.impersonator_id) await auth.endSession(auth.readCookie(req));
+  const back = admin?.is_admin;
+  res.setHeader('Set-Cookie', [auth.sessionCookie('', { clear: true, name: auth.ADMIN_COOKIE }), auth.sessionCookie(back ? adminRaw : '', { clear: !back })]);
+  res.json({ redirect: back ? `/admin#/users/${req.user?.id || ''}` : LOGIN });
+});
+app.post('/auth/forgot', authJson, async (req, res) => {
+  if (auth.tooManyAttempts(`forgot:${ip(req)}`, 5)) return res.status(429).json({ error: 'Too many tries. Wait 15 minutes.' });
+  await auth.startReset(req.body?.email, siteUrl(req));
+  res.json({ ok: true });   // same answer whether or not the account exists
+});
+app.post('/auth/reset', authJson, async (req, res) => {
+  const r = await auth.finishReset(req.body?.token, req.body?.password);
+  res.status(r.error ? 400 : 200).json(r);
+});
+// Landing page "Request an invite" → admin portal, Invites
+app.post('/auth/request-invite', authJson, async (req, res) => {
+  if (auth.tooManyAttempts(`invite-request:${ip(req)}`, 5, 60 * 60_000)) return res.status(429).json({ error: 'Too many requests. Try again later.' });
+  const email = auth.normEmail(req.body?.email);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) return res.status(400).json({ error: 'Enter a valid email address.' });
+  await query(`INSERT INTO invite_requests (email, note) VALUES ($1, $2) ON CONFLICT (email) DO UPDATE SET note = COALESCE(EXCLUDED.note, invite_requests.note)`,
+    [email, String(req.body?.note || '').trim().slice(0, 300) || null]);
+  res.json({ ok: true });
+});
+app.get('/auth/me', (req, res) => req.user ? res.json(req.user) : res.status(401).json({ error: 'Not logged in' }));
+
+// Login pages: one file, the path picks the form. Logged in already → straight to the dashboard.
+app.get(['/login', '/signup', '/forgot', '/reset'], (req, res) => {
+  if (req.user && ['/login', '/signup'].includes(req.path)) return res.redirect(afterLogin(req.query.next, req.user));
+  res.sendFile(join(__dirname, 'public', 'login.html'));
+});
+
+// Terms, Privacy Policy, AI disclosure: public, one page (public/legal.html) picks the document by path
+app.get(['/terms', '/privacy', '/ai'], (req, res) => res.sendFile(join(__dirname, 'public', 'legal.html')));
+
+// The landing page: logged out on the main site; logged in → your dashboard (admins → the portal)
+app.get('/', (req, res, next) => {
+  if (appHost && req.get('host') === appHost) return next();          // dashboard.rejekt.ai/ is the dashboard
+  if (req.user) return res.redirect(afterLogin(null, req.user));
+  res.sendFile(join(__dirname, 'public', 'landing.html'));
+});
+
+// Everything else needs a session; scan controls need an admin.
+const PUBLIC = /^\/(brand\/|favicon|login\.html$|landing\.html$|legal\.html$)/;
+const ADMIN  = /^\/(admin|api\/scan-)/;
+app.use((req, res, next) => {
+  if (PUBLIC.test(req.path) || req.path === '/v1/health') return next();
+  if (!req.user) {
+    if (/^\/(v1|api)\//.test(req.path)) return res.status(401).json({ error: 'Log in first' });
+    return res.redirect(`${LOGIN}?next=${encodeURIComponent(req.originalUrl)}`);
+  }
+  if (ADMIN.test(req.path) && !req.user.is_admin) return res.status(403).send('Admins only');
+  next();
+});
+
+// The dashboard page, with the logged-in user written into it (it used to invent a random id in localStorage)
+function sendApp(req, res) {
+  if (req.user.is_admin) return res.redirect(ADMIN_URL);   // admins work in the admin portal ("Open as user" to see a user's dashboard)
+  const me = JSON.stringify({ id: req.user.id, email: req.user.email, is_admin: req.user.is_admin,
+                             impersonator: req.user.impersonator_email || null }).replace(/</g, '\\u003c');
+  const html = readFileSync(join(__dirname, 'public', 'app', 'index.html'), 'utf8')
+    .replace('<script>', `<script>window.RJ_USER = ${me};</script>\n<script>`);
+  res.set('Cache-Control', 'no-store');   // always the current dashboard on reload or back/forward, never a stale copy
+  res.type('html').send(html);
+}
+// dashboard.rejekt.ai/ is the dashboard itself; on the login site / goes to it
+app.get('/', (req, res) => (appHost && req.get('host') === appHost ? sendApp(req, res) : res.redirect(APP_URL)));
+app.use(express.static(join(__dirname, 'public'), { index: false }));
+
+// Admin portal (admins only, see the gate above)
+app.get('/admin', (req, res) => res.sendFile(join(__dirname, 'public', 'admin.html')));
+app.use('/admin/api', adminRouter);
 
 // Dashboard (public/app) talks to the REST API (api/server.mjs) on the same
 // origin under /v1 — e.g. GET /v1/users/:id/recommendations. Express strips
 // the /v1 prefix before handing the request to the API's own router.
+// Company and school logos for the app (lib/logos.mjs). 404 means "none found": the app keeps the initial.
+app.get('/v1/logo', async (req, res) => {
+  const logo = await getLogo(String(req.query.kind || ''), String(req.query.name || '').slice(0, 160)).catch(() => null);
+  res.set('Cache-Control', `private, max-age=${logo ? 604800 : 86400}`);
+  if (!logo) return res.status(404).end();
+  res.type(logo.contentType).send(logo.image);
+});
 app.use('/v1', (req, res) => { apiRouter(req, res); });
 app.get(['/app', '/app/{*rest}'], (req, res, next) => {
   if (/\.[a-z0-9]+$/i.test(req.path)) return next(); // real files fall through to static
-  res.sendFile(join(__dirname, 'public', 'app', 'index.html'));
+  sendApp(req, res);
 });
 
 // ─── Seniority bucket mapping ───────────────────────────────────────────────
@@ -248,7 +388,8 @@ app.get('/api/jobs', async (req, res) => {
     // ── Posted within N days ──────────────────────────────────────────────────
     if (postedWithin) {
       params.push(postedWithin);
-      conditions.push(`(posted_at >= NOW() - ($${params.length} * interval '1 day') OR discovered >= NOW() - ($${params.length} * interval '1 day'))`);
+      // posting date when known, else when we found it (see matching/recommend.mjs)
+      conditions.push(`(posted_at >= NOW() - ($${params.length} * interval '1 day') OR (posted_at IS NULL AND discovered >= NOW() - ($${params.length} * interval '1 day')))`);
     }
 
     params.push(pageSize, offset);
@@ -329,6 +470,7 @@ app.get('/api/jobs', async (req, res) => {
 
 // ─── Scan stats API ─────────────────────────────────────────────────────────
 // Returns scan history + per-ATS job discovery data for the dashboard.
+const byHourCache = { rows: [], at: 0, busy: null };
 app.get('/api/scan-stats', async (req, res) => {
   try {
     await reapStaleRuns().catch(() => {});
@@ -343,32 +485,18 @@ app.get('/api/scan-stats', async (req, res) => {
        LIMIT 30
     `);
 
-    // Jobs discovered per ATS per hour, last 48h
-    const { rows: byHour } = await query(`
-      SELECT c.ats,
-             DATE_TRUNC('hour', j.discovered) AS hour,
-             COUNT(*)                          AS jobs_found
-        FROM jobs j
-        JOIN companies c ON c.id = j.company_id
-       WHERE j.discovered > NOW() - INTERVAL '48 hours'
-       GROUP BY c.ats, hour
-       ORDER BY hour ASC, jobs_found DESC
-    `);
-
-    // Active jobs total per ATS
-    const { rows: totals } = await query(`
-      SELECT c.ats,
-             COUNT(DISTINCT c.id)                       AS companies,
-             COUNT(j.id)                            AS active_jobs,
-             MAX(j.discovered)                      AS latest_job
-        FROM companies c
-        LEFT JOIN jobs j ON j.company_id = c.id AND j.active = TRUE
-       WHERE c.active = TRUE
-       GROUP BY c.ats
-       ORDER BY active_jobs DESC
-    `);
-
-    res.json({ runs, byHour, totals });
+    // Jobs found per platform per hour, last 48h: computed in the background (it passes the pool's 30 s limit
+    // while a scan loads the database) and cached for 10 min, so the runs table never waits on it
+    if (Date.now() - byHourCache.at > 600_000 && !byHourCache.busy) {
+      byHourCache.busy = slowQuery(`
+        SELECT ats, DATE_TRUNC('hour', discovered) AS hour, COUNT(*) AS jobs_found
+          FROM jobs WHERE discovered > NOW() - INTERVAL '48 hours'
+         GROUP BY ats, hour ORDER BY hour ASC`)
+        .then(rows => Object.assign(byHourCache, { rows, at: Date.now() }))
+        .catch(e => console.error('[scan-stats] jobs per hour:', e.message))
+        .finally(() => { byHourCache.busy = null; });
+    }
+    res.json({ runs, byHour: byHourCache.rows, byHourAt: byHourCache.at || null });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -401,10 +529,6 @@ app.post('/api/scan-control', express.json(), async (req, res) => {
   catch (err) { res.status(500).json({ ok: false, message: err.message }); }
 });
 
-// Serve the scan log dashboard
-app.get('/scan-log', (_req, res) => {
-  res.sendFile(join(__dirname, 'public', 'scan-log.html'));
-});
 
 
 // ─── POST /api/parse-resume ──────────────────────────────────────────────────
@@ -600,5 +724,12 @@ app.post('/api/parse-resume', (req, res) => {
 app.listen(PORT, () => {
   console.log(`\n🌐  Job board running at http://localhost:${PORT}`);
   console.log(`🧭  Dashboard at http://localhost:${PORT}/app`);
-  console.log(`📊  Scan log dashboard at http://localhost:${PORT}/scan-log\n`);
+  console.log(`🛡   Admin portal (scans, users, …) at http://localhost:${PORT}/admin\n`);
+  // Applications left mid-flight by a restart or a dead run become FAILED ("Try again") instead of spinning forever.
+  const reap = () => reapStuckApplications().then(n => n && console.log(`[apply] ${n} interrupted application(s) moved to Failed`)).catch(() => {});
+  reap(); setInterval(reap, 60_000);
+  // Fill the job-match cache for recently active people, so the first page after a restart isn't the slow one.
+  query(`SELECT DISTINCT user_id FROM resume_profiles WHERE updated_at > NOW() - INTERVAL '30 days' LIMIT 5`)
+    .then(({ rows }) => Promise.all(rows.map(r => fetch(`http://localhost:${PORT}/v1/users/${r.user_id}/recommendations?limit=6`).catch(() => {}))))
+    .catch(() => {});
 });

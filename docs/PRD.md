@@ -57,7 +57,7 @@ Most job boards depend on company submissions or scrape LinkedIn. This creates:
 - **Frontend SPA** — single-file dark-mode UI with live filters, infinite scroll, "open original" link per job.
 - **User profile drawer** — localStorage profile with resume parse, skill tags, job preferences, salary range, visa/work auth.
 - **Resume auto-parse** — upload PDF/DOCX → backend extracts fields → pre-fills profile.
-- **Scan log dashboard** — real-time scan progress view at `/scan-log`.
+- **Scan log dashboard** — real-time scan progress, inside the admin portal at `/admin#/scans`.
 
 ### Planned (v0.2+)
 - Auth + multi-user accounts.

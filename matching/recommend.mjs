@@ -14,6 +14,7 @@
  *      the fine-grained salary-hard-constraint edge cases)
  *   -> score eligible candidates, sort, paginate
  */
+import { cached } from '../lib/stale-cache.mjs';
 import { query } from '../lib/db.mjs';
 import { normalizeTitle } from '../lib/normalize.mjs';
 import { buildJobContracts } from './job-contract.mjs';
@@ -26,7 +27,9 @@ import {
   keywordSearchWarnings, summarizeKeywordSearch,
 } from './keyword-search.mjs';
 
-const CANDIDATE_POOL_SIZE = 2000;
+import { isGenericCanonicalRole } from '../lib/role-taxonomy.mjs';
+
+const CANDIDATE_POOL_SIZE = 1500; // was 600/2000: with the date index and the country rule in SQL, 1500 costs ~1s cold
 
 export async function loadUserContext(userId) {
   const { rows: profileRows } = await query(
@@ -126,6 +129,14 @@ function buildCandidateFilters(userId, ctx, options) {
     conditions.push(`NOT (j.role_family = ANY($${params.length}::text[]))`);
     note('excludedRoleFamilies', `Hidden role categories: ${ctx.preferences.excludedRoleFamilies.join(', ')}`);
   }
+  if (ctx.preferences.allowedCountries?.length) {
+    // same rule as evaluateEligibility's country check, in SQL: the pool is only the newest few hundred rows, so a
+    // check that ran afterwards threw most of them away (a Europe-only profile kept ~90 jobs out of 270k)
+    params.push(ctx.preferences.allowedCountries);
+    const rel = `l.job_id = j.id AND l.country_code IS NOT NULL AND l.is_remote_restriction = (j.workplace_type = 'REMOTE')`;
+    conditions.push(`(NOT EXISTS (SELECT 1 FROM job_locations l WHERE ${rel}) OR EXISTS (SELECT 1 FROM job_locations l WHERE ${rel} AND l.country_code = ANY($${params.length}::text[])))`);
+    note('allowedCountries', `Countries: ${ctx.preferences.allowedCountries.join(', ')}`);
+  }
   if (ctx.preferences.excludeClearanceJobs) {
     conditions.push(`j.clearance_type = 'NONE'`);
     note('excludeClearanceJobs', 'Hides jobs requiring a security clearance');
@@ -146,14 +157,18 @@ function buildCandidateFilters(userId, ctx, options) {
   }
   if (options.postedWithinDays) {
     params.push(Number(options.postedWithinDays));
-    conditions.push(`(j.posted_at >= NOW() - ($${params.length} * interval '1 day') OR j.discovered >= NOW() - ($${params.length} * interval '1 day'))`);
+    // the posting date when the board gives one, else when we found it (what the card shows). "posted OR found
+    // recently" let a job posted 12 days ago through a 24-hour filter just because a new company brought it in today
+    conditions.push(`COALESCE(j.posted_at, j.discovered) >= NOW() - ($${params.length} * interval '1 day')`); // same test as one expression so idx_jobs_ready_family_date serves it
     note('postedWithinDays', `Date posted: last ${Number(options.postedWithinDays)} days`);
   }
   // A title/title_description INCLUDE search looks across every job, not
   // just the role families near the profile — that's what lets a Java
   // profile search "react" and actually find React jobs. Exclude-only or
   // description-scope searches keep the normal profile narrowing.
-  const keywordWidensPool = ks?.include?.length > 0 && ks.scope !== 'description';
+  // Only a Titles search widens: description matches stay among the profile's role families (as Tsenta's "all"),
+  // or "software engineer" in a description pulls in Head of Customer Deployments.
+  const keywordWidensPool = ks?.include?.length > 0 && ks.scope === 'title';
   const families = keywordWidensPool ? [] : relevantRoleFamilies(ctx.targetRoles);
   if (families.length) {
     params.push(families);
@@ -169,7 +184,7 @@ function buildCandidateFilters(userId, ctx, options) {
   return { conditions, params, activeFilters, appliedFilters, semanticRoles: keyword.semanticRoles };
 }
 
-async function fetchCandidates(filters) {
+async function fetchCandidates(filters, targetRoles = []) {
   const { conditions, params } = filters;
 
   // DISTINCT ON (fingerprint) — found via live-data review: a company
@@ -180,15 +195,36 @@ async function fetchCandidates(filters) {
   // fingerprint (never meant to dedupe concurrent live duplicates), fixed
   // here rather than in the scanner since it only matters for what gets
   // shown, not what gets stored.
-  const sql = `
+  const query1 = (extra, extraParams, size) => {
+    const ps = [...params, ...extraParams];
+    const cond = [...conditions, ...extra.map(e => e(params.length))];
+    const sql = `
     SELECT id FROM (
-      SELECT DISTINCT ON (j.fingerprint) j.id, j.discovered
-        FROM jobs j WHERE ${conditions.join(' AND ')}
-       ORDER BY j.fingerprint, j.discovered DESC
-    ) deduped ORDER BY discovered DESC LIMIT ${CANDIDATE_POOL_SIZE}`;
-  const { rows } = await query(sql, params);
-  return rows.map(r => r.id);
+      SELECT DISTINCT ON (fingerprint) id, discovered FROM (
+        SELECT j.id, j.fingerprint, j.discovered
+          FROM jobs j WHERE ${cond.join(' AND ')}
+         ORDER BY j.discovered DESC LIMIT ${size * 3}
+      ) newest
+       ORDER BY fingerprint, discovered DESC
+    ) deduped ORDER BY discovered DESC LIMIT ${size}`;
+    // ponytail: dedupe runs over the newest 3x pool, not every match — sorting ~1M rows by fingerprint timed out at 30s; raise the multiplier if dupes ever starve the pool
+    return candidateIds(JSON.stringify([sql, ps]), sql, ps);
+  };
+  // Several specific target roles (data analyst + data engineer ...): one slice per role, plus one for the
+  // profile's general pool, so the newest postings of the busiest role can't fill the whole pool and hide the rest.
+  const roles = [...new Set(targetRoles.map(t => t.canonicalRole).filter(r => r && !isGenericCanonicalRole(r)))];
+  if (roles.length < 2) return query1([], [], CANDIDATE_POOL_SIZE);
+  const size = Math.max(100, Math.floor(CANDIDATE_POOL_SIZE / (roles.length + 1)));
+  const slices = await Promise.all([
+    query1([], [], size),
+    ...roles.map(r => query1([n => `j.canonical_role = $${n + 1}`], [r], size)),
+  ]);
+  return [...new Set(slices.flat())];
 }
+
+// The candidate query is the heaviest one in the app. Reuse it for 5 min, and when the DB is too busy
+// to answer (vacuum, scan writes) serve the last result for up to 24h instead of an error page.
+const candidateIds = cached(async (_k, sql, params) => (await query(sql, params)).rows.map(r => r.id), { ttl: 300_000, maxAge: 24 * 3600_000, max: 100, name: 'candidates' });
 
 /**
  * @param {string} userId
@@ -213,9 +249,12 @@ export async function generateRecommendations(userId, options = {}) {
     for (const [k, v] of Object.entries(o.profile || {})) if (v !== null && v !== undefined && v !== '') ctx.profile[k] = v;
     if (o.userSkillNames?.length) ctx.userSkillNames = o.userSkillNames;
   }
+  if (options.targetRoles) ctx.targetRoles = options.targetRoles; // lanes / what-if runs score against another set of roles
+  // What-if runs (matching/relevance.mjs) relax one preference without saving it.
+  if (options.preferencesOverride) Object.assign(ctx.preferences, options.preferencesOverride);
   const ks = options.keywordSearch?.active ? options.keywordSearch : null;
   const filters = buildCandidateFilters(userId, ctx, { ...options, keywordSearch: ks });
-  const candidateIds = await fetchCandidates(filters);
+  const candidateIds = await fetchCandidates(filters, options.keywordSearch?.include?.length ? [] : ctx.targetRoles);
   const contracts = await buildJobContracts(candidateIds);
 
   const scored = [];

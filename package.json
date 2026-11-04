@@ -23,6 +23,11 @@
     "test:job-sourcing": "node scripts/test-job-sourcing.mjs",
     "test:profiles": "node scripts/test-profiles.mjs",
     "test:auto-apply": "node scripts/test-auto-apply.mjs",
+    "test:auto-apply-limits": "node --env-file=.env.local scripts/test-auto-apply-limits.mjs",
+    "test:cover-letter": "node scripts/test-cover-letter.mjs",
+    "test:checkbox-group": "node scripts/test-checkbox-group.mjs",
+    "test:security-code": "node scripts/test-security-code.mjs",
+    "test:handoff": "node scripts/test-handoff.mjs",
     "autoapply": "node --env-file=.env.local autoapply/run.mjs",
     "smoke:providers": "node scripts/smoke-new-providers.mjs",
     "match": "node --env-file=.env.local matching/matcher.mjs --verbose",
@@ -49,7 +54,11 @@
     "ml:rewriter:generate": "node --env-file=.env.local ml/generate-best-of-n.mjs",
     "ml:rewriter:eval-ats": "node --env-file=.env.local ml/eval-ats.mjs",
     "ml:rewriter:idf": "node ml/build-posting-idf.mjs",
-    "test:resume-layout": "node scripts/test-resume-layout.mjs"
+    "test:resume-layout": "node scripts/test-resume-layout.mjs",
+    "test:auth": "node --env-file=.env.local scripts/test-auth.mjs",
+    "test:admin": "node --env-file=.env.local scripts/test-admin.mjs",
+    "migrate:auth": "node --env-file=.env.local db/migrate-auth.mjs",
+    "invite": "node --env-file=.env.local scripts/invite.mjs"
   },
   "dependencies": {
     "@neon/config": "^1.4.2",
@@ -58,7 +67,8 @@
     "mammoth": "^1.12.3",
     "pdf-parse": "^2.4.5",
     "pg": "^8.12.0",
-    "playwright-core": "^1.64.1"
+    "playwright-core": "^1.64.1",
+    "redis": "^6.3.1"
   },
   "engines": {
     "node": ">=20"

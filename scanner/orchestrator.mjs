@@ -15,8 +15,12 @@ import { query, startScanRun, finishScanRun, batchTouchCompanies } from '../lib/
 import { createPool }                          from '../lib/pool.mjs';
 import { ATS_CONCURRENCY }                     from '../lib/pool.mjs';
 import { processCompany }                      from './worker.mjs';
+import { loadWorkableFeed }                    from './workable-feed.mjs';
 import { markClosedJobs }                      from '../freshness/checker.mjs';
 import { matchNewJobs }                        from '../matching/matcher.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Run a full scan across all active companies.
@@ -47,7 +51,8 @@ export async function runScan(opts = {}) {
   }
 
   // Load companies
-  let sql    = `SELECT id, name, ats, slug, meta FROM companies WHERE active = TRUE`;
+  // Workable feed-only and jobs.workable.com companies get their jobs from the Workable feed below
+  let sql    = `SELECT id, name, ats, slug, meta FROM companies WHERE active = TRUE AND NOT (ats = 'workable' AND (meta ? 'feed' OR meta ? 'companyId'))`;
   const params = [];
   if (opts.ats) {
     params.push(opts.ats.toLowerCase());
@@ -84,7 +89,7 @@ export async function runScan(opts = {}) {
   }
 
   console.error(`\n🔍  Scanning ${companies.length} companies across ${[...new Set(companies.map(c => c.ats))].join(', ')}`);
-  console.error(`    Mode: ${opts.dryRun ? 'DRY RUN' : 'LIVE'}  |  ${new Date().toISOString()}\n`);
+  console.error(`    Mode: ${opts.dryRun ? 'DRY RUN' : 'LIVE'} · ${opts.quick ? 'quick (new jobs only)' : 'full'}  |  ${new Date().toISOString()}\n`);
 
   // Start audit run
   const runId = opts.dryRun ? null : await startScanRun();
@@ -103,6 +108,7 @@ export async function runScan(opts = {}) {
   // Collect company IDs for batched touchCompany at end (2 queries instead of N)
   const companySuccessIds = [];
   const companyErrorIds   = [];
+  const truncatedIds      = [];   // got only part of their board (page caps): freshness skips them
 
   try {
     // Build one pool per ATS
@@ -117,10 +123,18 @@ export async function runScan(opts = {}) {
     // buffer for DB round-trips (many jobs) and slow ATS responses → 90s.
     const COMPANY_TIMEOUT_MS = +process.env.COMPANY_TIMEOUT_MS || 90_000;
 
+    // Stop starting new companies once the run's time budget is spent, so the run ends on its own
+    // (saves progress, closes old jobs, matches) before run-scan.sh's 3h kill (135 min leaves time for closing old jobs and matching). Companies left over
+    // are scanned first next run (ORDER BY last_scan). Every run used to be killed, so it never finished.
+    const deadline = started + (+process.env.SCAN_BUDGET_MIN || 135) * 60_000;
+    let leftForNext = 0;
+
     // Dispatch all companies into their ATS pool concurrently
-    const tasks = companies.map((company) => {
-      const pool = pools[company.ats] || defaultPool;
+    const dispatch = (company, opts) => {
+      // jobs already in hand (Workable feed) need no HTTP, so they don't take a slot in the ATS's rate-limited pool
+      const pool = (!opts.prefetchedJobs && pools[company.ats]) || defaultPool;
       return pool(async () => {
+        if (Date.now() > deadline) { leftForNext++; return null; }
         // Wrap processCompany in a per-company timeout so a single hung worker
         // (e.g. dead RDS connection or stalled HTTP response) can't block the
         // entire scan indefinitely.
@@ -152,6 +166,7 @@ export async function runScan(opts = {}) {
           if (!opts.dryRun) companyErrorIds.push(result.companyId);
         } else {
           if (!opts.dryRun) companySuccessIds.push(result.companyId);
+          if (result.truncated) truncatedIds.push(result.companyId);
         }
 
         // Progress log every 50 companies; also save which companies are done so a killed run can resume
@@ -165,9 +180,19 @@ export async function runScan(opts = {}) {
 
         return result;
       });
-    });
+    };
+    const tasks = companies.map((company) => dispatch(company, opts));
+
+    // Workable's full feed: one download adds the Workable companies we don't scan one by one
+    const skipped = (process.env.SKIP_ATS || '').toLowerCase().split(',').includes('workable');
+    if (!opts.dryRun && !opts.company && !skipped && (!opts.ats || opts.ats.toLowerCase() === 'workable')) {
+      tasks.push(loadWorkableFeed({ verbose: opts.verbose })
+        .then(list => Promise.all(list.map(({ company, jobs }) => dispatch(company, { ...opts, prefetchedJobs: jobs }))))
+        .catch(err => console.error(`  ⚠️  Workable feed skipped this run: ${err.message}`)));
+    }
 
     await Promise.all(tasks);
+    if (leftForNext) console.error(`\n⏱   Time budget reached: ${leftForNext} companies left for the next run`);
 
     // Batch-update all company last_scan timestamps in 2 queries (instead of N)
     if (!opts.dryRun) {
@@ -184,10 +209,11 @@ export async function runScan(opts = {}) {
     // sink the ENTIRE run's status to 'failed' even though the actual scan
     // (fetching + upserting jobs, the time-sensitive part) had already
     // completed successfully — isolate it so it can't do that.
-    if (!opts.dryRun && !opts.skipFreshness) {
+    // Quick runs don't see every job, so only full runs may count jobs as missing.
+    if (!opts.dryRun && !opts.skipFreshness && !opts.quick) {
       console.error('\n🔄  Running freshness check...');
       try {
-        const { closed } = await markClosedJobs();
+        const { closed } = await markClosedJobs({ since: new Date(started), skipCompanies: truncatedIds });   // only companies this run reached
         totals.jobsClosed = closed;
       } catch (err) {
         console.error(`  ⚠️  Freshness check failed (non-fatal): ${err.message}`);
@@ -196,13 +222,18 @@ export async function runScan(opts = {}) {
 
     // Matching pass
     if (!opts.dryRun && totals.jobsNew > 0) {
-      console.error('\U0001f465  Running matcher pass...');
-      const { matched } = await matchNewJobs({ since: 120, verbose: opts.verbose }).catch(() => ({ matched: 0 }));
+      console.error('👥  Running matcher pass...');
+      // cover the whole run: runs last up to ~2.5h, a fixed 120 min missed the early new jobs
+      const since = Math.ceil((Date.now() - started) / 60_000) + 5;
+      const { matched } = await matchNewJobs({ since, verbose: opts.verbose }).catch(() => ({ matched: 0 }));
       if (matched > 0) console.error(`   -> ${matched.toLocaleString()} user alerts created`);
     }
 
     // Finish audit run
     if (runId) await finishScanRun(runId, totals, 'completed');
+    if (!opts.dryRun && !opts.quick && !opts.ats && !opts.company) {
+      fs.writeFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'logs', 'last-full-scan'), new Date().toISOString());
+    }
 
     // Summary
     const elapsed = ((Date.now() - started) / 1000).toFixed(1);

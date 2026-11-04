@@ -177,8 +177,8 @@ normalized-title `LIKE ANY` path.
 
 ## 5. Next steps
 
-- **Feed relevance counterfactuals (E13).** Run the recommendation pipeline
-  with one hard filter relaxed at a time, and return the strong-match (≥65)
-  count plus a ready-to-apply preferences patch.
+- ~~Feed relevance counterfactuals (E13)~~ Built: `matching/relevance.mjs`,
+  `GET /users/:id/feed-relevance`, and a "Check feed relevance" panel in the
+  Jobs page (top jobs as cards, one-click filter patches).
 - **UI.** `public/index.html` still talks to `server.mjs`'s `/api/jobs`. It
   needs an exclude box and a "saved search" chip wired to the endpoints above.

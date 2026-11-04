@@ -11,6 +11,7 @@
  *   pinpoint    {slug}.pinpointhq.com/postings.json     {data: []}
  *   rippling    api.rippling.com/…/board/{slug}/jobs    []
  *   teamtailor  {slug}.teamtailor.com/jobs.rss          RSS
+ *   smartrecruiters api.smartrecruiters.com/v1/companies/{slug}/postings  {content, totalFound}
  *   oraclecloud {host}/hcmRestApi/…recruitingCEJobRequisitions?siteNumber={site}
  *               slug "{host}/{site}", meta { host, site }
  *
@@ -62,6 +63,18 @@ const PROBES = {
     const x = await fetchText(`https://${s}.teamtailor.com/jobs.rss`, { headers: UA, timeoutMs: 15_000, retries: 1 });
     return /<rss[\s>]/i.test(x) ? (x.match(/<item[\s>]/gi) || []).length : null;
   },
+  ashby: async (s) => {
+    const d = await fetchJSON(`https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(s)}`, { headers: UA, timeoutMs: 15_000, retries: 1 });
+    return Array.isArray(d?.jobs) ? d.jobs.length : null;
+  },
+  greenhouse: async (s) => {
+    const d = await fetchJSON(`https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(s)}/jobs`, { headers: UA, timeoutMs: 15_000, retries: 1 });
+    return Array.isArray(d?.jobs) ? d.jobs.length : null;
+  },
+  smartrecruiters: async (s) => {
+    const d = await fetchJSON(`https://api.smartrecruiters.com/v1/companies/${encodeURIComponent(s)}/postings?limit=1`, { headers: UA, timeoutMs: 15_000, retries: 1 });
+    return Array.isArray(d?.content) ? (d.totalFound ?? d.content.length) : null;
+  },
   oraclecloud: async (_s, e) => {
     const url = `https://${e.host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions` +
       `?onlyData=true&finder=findReqs;siteNumber=${encodeURIComponent(e.site)},limit=1,offset=0`;
@@ -92,8 +105,10 @@ async function main() {
     limit:       { type: 'string' },
     concurrency: { type: 'string',  default: '16' },
     verbose:     { type: 'boolean', default: false },
+    'from-live': { type: 'string' },   // insert from a saved --dry-run result instead of probing again
   } });
 
+  if (f['from-live']) return insert(JSON.parse(fs.readFileSync(f['from-live'], 'utf8')).ats, f.ats);
   const data   = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
   const atsList = Object.keys(data.ats).filter(a => !f.ats || a === f.ats.toLowerCase());
   const minJobs = +f['min-jobs'], minHits = +f['min-hits'];
@@ -123,9 +138,13 @@ async function main() {
   fs.writeFileSync(LIVE_FILE, JSON.stringify({ checkedAt: new Date().toISOString(), ats: live }, null, 1));
   console.error(`\nWrote ${path.relative(process.cwd(), LIVE_FILE)}`);
   if (f['dry-run']) return;
+  await insert(live);
+}
 
+async function insert(live, only) {
   const { query, closePool } = await import('../lib/db.mjs');
   for (const [ats, rows] of Object.entries(live)) {
+    if (only && ats !== only.toLowerCase()) continue;
     let inserted = 0, existing = 0;
     for (const e of rows) {
       const meta = ats === 'oraclecloud' ? { host: e.host, site: e.site } : {};

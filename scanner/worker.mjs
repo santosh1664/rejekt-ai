@@ -62,6 +62,7 @@ import { fetchAll as pinpoint }        from '../providers/pinpoint.mjs';
 import { fetchAll as rippling }        from '../providers/rippling.mjs';
 import { fetchAll as teamtailor }      from '../providers/teamtailor.mjs';
 import { fetchAll as oraclecloud }     from '../providers/oraclecloud.mjs';
+import { fetchAll as dover }           from '../providers/dover.mjs';
 
 export const PROVIDERS = {
   greenhouse,
@@ -79,6 +80,9 @@ export const PROVIDERS = {
   rippling,
   teamtailor,
   oraclecloud,
+  dover,
+  // Jobs added by pasting a link on any other site (lib/job-import.mjs). Never scanned: the company row is inactive.
+  manual: async () => [],
 };
 
 /**
@@ -108,7 +112,17 @@ export async function processCompany(company, opts = {}) {
   try {
     // opts.prefetchedJobs: lib/job-import.mjs has already fetched the board
     // to locate the pasted job — reuse it instead of fetching twice.
-    jobs = opts.prefetchedJobs ?? await provider(company, { verbose: opts.verbose });
+    // Quick scans: newest-first boards stop paging once a whole page is jobs we already have.
+    // "New" must match what gets saved: jobs are keyed by fingerprint (company + title, so one row per
+    // title across cities), and out-of-region jobs are dropped below. Matching by URL kept every page "new".
+    let isNew;
+    if (opts.quick && company.ats === 'oraclecloud') {
+      const { rows } = await query(`SELECT fingerprint FROM jobs WHERE company_id = $1 AND active`, [company.id]);
+      const known = new Set(rows.map(r => r.fingerprint));
+      isNew = (job) => isJobInCoverage(job) && !known.has(computeFingerprint(job));
+    }
+    jobs = opts.prefetchedJobs ?? await provider(company, { verbose: opts.verbose, isNew });
+    result.truncated = !!jobs?.truncated;   // partial list: freshness must not count its missing jobs as gone
   } catch (err) {
     result.error = err.message;
     return result;
@@ -205,7 +219,9 @@ export async function processCompany(company, opts = {}) {
       );
     } catch (err) {
       if (opts.verbose) console.error(`  ⚠ ${company.name}: touch-unchanged failed: ${err.message}`);
-      // Don't abort — still try to upsert new/changed jobs below
+      // Still upsert new/changed jobs below, but the company must not count as cleanly scanned: its jobs
+      // kept their old last_seen, and freshness would read every one of them as gone (POET: 80 live jobs).
+      result.error = `touch-unchanged failed: ${err.message}`;
     }
   }
 

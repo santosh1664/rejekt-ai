@@ -1,0 +1,68 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rejekt-ai:latest
+    container_name: rejekt-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # Database
+      DATABASE_URL: ${DATABASE_URL}
+      # LLM for resume tailoring + form Q&A fallback
+      LLM_PROVIDER: ${LLM_PROVIDER:-openrouter}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-deepseek/deepseek-chat-v3-0324}
+      # Optional alternative providers
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
+      HF_TOKEN: ${HF_TOKEN:-}
+      HF_MODEL: ${HF_MODEL:-}
+      # Auth
+      SESSION_SECRET: ${SESSION_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      # App
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      # Playwright (use system Chromium installed in Docker image)
+      PLAYWRIGHT_BROWSERS_PATH: /usr/bin
+      CHROME_PATH: /usr/bin/chromium
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - rejekt-net
+    shm_size: '256mb'   # Needed for Chromium
+
+  db:
+    image: postgres:16-alpine
+    container_name: rejekt-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-rejekt}
+      POSTGRES_USER: ${POSTGRES_USER:-rejekt}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rejekt}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rejekt-net
+
+volumes:
+  pgdata:
+  uploads:
+
+networks:
+  rejekt-net:
+    driver: bridge

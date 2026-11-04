@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# Env files (never bake secrets into the image)
+.env
+.env.*
+!.env.example
+
+# Dev dependencies / local tools
+node_modules/
+npm-debug.log*
+
+# Test / CI
+coverage/
+.nyc_output/
+*.test.mjs
+*.spec.mjs
+__tests__/
+
+# Local Playwright browser downloads (use system Chromium in Docker)
+playwright-browsers/
+
+# Uploads / user data (mounted as a volume)
+uploads/
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Docs / assets not needed at runtime
+docs/
+*.md
+!README.md

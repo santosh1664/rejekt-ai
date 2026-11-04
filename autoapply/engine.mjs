@@ -28,24 +28,63 @@ import { normalizeSkillName } from '../lib/skills.mjs';
 import { getResumeProfile, getDefaultResumeProfile, deriveMatchingFields, updateResumeProfile, normalizeQuestion } from '../lib/resume-profiles.mjs';
 import { tailorForJob, TAILOR_MODES } from '../lib/resume-tailor.mjs';
 import { atsScore } from '../lib/ats-score.mjs';
-import { renderResumeHTML, renderResumePDF, renderCoverLetter, getBrowser } from '../lib/resume-render.mjs';
-import { trackApplication, updateApplication, setApplyState, recordEvent } from '../lib/applications.mjs';
+import { renderResumeHTML, renderResumePDF, getBrowser, launchHeaded, resumeFileName } from '../lib/resume-render.mjs';
+import { writeCoverLetter } from '../lib/cover-letter.mjs';
+import { getGmailStatus, waitForOTP, extractSecurityCode } from '../lib/gmail.mjs';
+import { trackApplication, updateApplication, setApplyState, recordEvent, saveShot } from '../lib/applications.mjs';
 import { recordRewrite, loadStyleExamples, loadBulletBank } from '../lib/rewrites.mjs';
 import { buildAnswerBook } from './answers.mjs';
 import { fillApplication } from './form-fill.mjs';
+import { fillWorkday, workdayAuth } from './workday-fill.mjs';
+import { ensureOnForm } from './account-create.mjs';
 
-export const FILLABLE_ATS = ['greenhouse', 'lever', 'ashby'];
+export const FILLABLE_ATS = ['greenhouse', 'lever', 'ashby', 'workday', 'rippling', 'recruitee', 'pinpoint', 'teamtailor', 'breezy', 'workable'];
+// Platforms whose "it was sent" page we've seen recognised on a real submission. On the others the form fills
+// (scripts/probe-autoapply.mjs) but every application waits for a person's Send, even in lanes that skip review,
+// so a confirmation page we don't recognise can't turn into an unattended "no confirmation" or a double send.
+// Add a platform here once its first approved applications come back Submitted.
+export const SUBMIT_VERIFIED_ATS = ['greenhouse', 'lever', 'ashby', 'workday'];
+// Assisted: these sites stop automated applications, so Rejekt.ai prepares the application (tailored resume,
+// answers) and the person sends it on the company's site from Needs you. We never solve CAPTCHAs or get around
+// bot checks. bamboohr: visible reCAPTCHA on every form; smartrecruiters: "Access is temporarily restricted"
+// bot check; oraclecloud: email-first multi-step flow, not automated yet.
+export const ASSISTED_ATS = {
+  bamboohr: "BambooHR asks you to confirm you're not a robot",
+  smartrecruiters: 'SmartRecruiters blocks automated applications',
+  oraclecloud: "This company's Oracle careers site needs you to apply yourself",
+};
 const MAX_ATTEMPTS = 3;
 
 // ─── Settings and lanes ──────────────────────────────────────────────────────
 
-const SETTINGS_DEFAULTS = { enabled: false, dailyCap: 25, perCompanyCap30d: 3, acceptConsent: false };
+// Plan limits for now: one place to change them.
+export const MONTHLY_CAP = 1500, MAX_DAILY_CAP = 50, MAX_LANES = 3;
+
+/** The person's current 30-ish-day cycle: from the day-of-month they joined (e.g. Nov 19) to the same day next month (Dec 19). */
+export function cycleWindow(joinedAt, now = new Date()) {
+  const day = new Date(joinedAt).getUTCDate();
+  const at = (y, m) => new Date(Date.UTC(y, m, Math.min(day, new Date(Date.UTC(y, m + 1, 0)).getUTCDate())));
+  let y = now.getUTCFullYear(), m = now.getUTCMonth();
+  if (at(y, m) > now) m--;
+  return { startsAt: at(y, m), resetsAt: at(y, m + 1) };
+}
+
+// Only what was actually sent (or is being sent) uses the monthly 1500: a CAPTCHA stop, a failure or a skip is given back, as Tsenta refunds those.
+async function monthlyUsage(userId) {
+  const { rows: [u] } = await query(`SELECT created_at FROM users WHERE id = $1`, [userId]);
+  const w = cycleWindow(u?.created_at || new Date());
+  const { rows: [c] } = await query(
+    `SELECT COUNT(*)::int AS n FROM applications WHERE user_id = $1 AND apply_state IS NOT NULL AND apply_state NOT IN ('SKIPPED','FAILED','NEEDS_YOU') AND created_at >= $2`, [userId, w.startsAt]);
+  return { cap: MONTHLY_CAP, used: c.n, ...w };
+}
+
+const SETTINGS_DEFAULTS = { enabled: false, dailyCap: 25, perCompanyCap30d: 3, acceptConsent: false, reviewBeforeSubmit: true };
 
 export async function getSettings(userId) {
   const { rows } = await query(`SELECT * FROM auto_apply_settings WHERE user_id = $1`, [userId]);
   const r = rows[0];
-  const settings = r ? { enabled: r.enabled, dailyCap: r.daily_cap, perCompanyCap30d: r.per_company_cap_30d, acceptConsent: r.accept_consent, updatedAt: r.updated_at } : { ...SETTINGS_DEFAULTS, updatedAt: null };
-  return { exists: !!r, ...settings, lanes: await listLanes(userId) };
+  const settings = r ? { enabled: r.enabled, dailyCap: r.daily_cap, perCompanyCap30d: r.per_company_cap_30d, acceptConsent: r.accept_consent, reviewBeforeSubmit: r.review_before_submit, updatedAt: r.updated_at } : { ...SETTINGS_DEFAULTS, updatedAt: null };
+  return { exists: !!r, ...settings, dailyCap: Math.min(settings.dailyCap, MAX_DAILY_CAP), maxDailyCap: MAX_DAILY_CAP, maxLanes: MAX_LANES, monthly: await monthlyUsage(userId), lanes: await listLanes(userId) };
 }
 
 export async function saveSettings(userId, patch = {}) {
@@ -53,14 +92,15 @@ export async function saveSettings(userId, patch = {}) {
   const clampInt = (v, lo, hi, d) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; };
   const next = {
     enabled: patch.enabled === undefined ? cur.enabled : !!patch.enabled,
-    dailyCap: patch.dailyCap === undefined ? cur.dailyCap : clampInt(patch.dailyCap, 1, 100, cur.dailyCap),
+    dailyCap: patch.dailyCap === undefined ? cur.dailyCap : clampInt(patch.dailyCap, 1, MAX_DAILY_CAP, cur.dailyCap),
     perCompanyCap30d: patch.perCompanyCap30d === undefined ? cur.perCompanyCap30d : clampInt(patch.perCompanyCap30d, 1, 20, cur.perCompanyCap30d),
     acceptConsent: patch.acceptConsent === undefined ? cur.acceptConsent : !!patch.acceptConsent,
+    reviewBeforeSubmit: patch.reviewBeforeSubmit === undefined ? cur.reviewBeforeSubmit !== false : !!patch.reviewBeforeSubmit,
   };
   await query(
-    `INSERT INTO auto_apply_settings (user_id, enabled, daily_cap, per_company_cap_30d, accept_consent) VALUES ($1, $2, $3, $4, $5)
-     ON CONFLICT (user_id) DO UPDATE SET enabled = $2, daily_cap = $3, per_company_cap_30d = $4, accept_consent = $5, updated_at = NOW()`,
-    [userId, next.enabled, next.dailyCap, next.perCompanyCap30d, next.acceptConsent]);
+    `INSERT INTO auto_apply_settings (user_id, enabled, daily_cap, per_company_cap_30d, accept_consent, review_before_submit) VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (user_id) DO UPDATE SET enabled = $2, daily_cap = $3, per_company_cap_30d = $4, accept_consent = $5, review_before_submit = $6, updated_at = NOW()`,
+    [userId, next.enabled, next.dailyCap, next.perCompanyCap30d, next.acceptConsent, next.reviewBeforeSubmit]);
   return getSettings(userId);
 }
 
@@ -109,7 +149,7 @@ export async function saveLane(userId, laneId, input = {}) {
     if (!cur) return null;
   } else {
     const { rows } = await query(`SELECT COUNT(*)::int AS n FROM auto_apply_lanes WHERE user_id = $1`, [userId]);
-    if (rows[0].n >= 5) return { error: 'You can have up to 5 lanes' };
+    if (rows[0].n >= MAX_LANES) return { error: `You can have up to ${MAX_LANES} lanes` };
   }
   const v = laneValues(input, cur);
   if (v.resumeProfileId && !(await getResumeProfile(userId, v.resumeProfileId))) return { error: 'Resume profile not found' };
@@ -147,6 +187,22 @@ export function applyUrlFor({ url, ats, slug, rawId }) {
   }
   if (which === 'lever' && det?.ats === 'lever' && det.jobId) return `https://${det.host}/${det.slug}/${det.jobId}/apply`;
   if (which === 'ashby' && det?.ats === 'ashby' && det.jobId) return `https://jobs.ashbyhq.com/${det.slug}/${det.jobId}/application`;
+  if (which === 'workday') {
+    const d = det?.ats === 'workday' ? det : (url ? detectAts(url) : null);
+    if (d?.meta?.tenant && d?.meta?.shard && d?.meta?.site) {
+      const reqId = d.jobId || rawId;
+      if (reqId && !url) return `https://${d.meta.tenant}.${d.meta.shard}.myworkdayjobs.com/${d.meta.site}`;
+    }
+    return url || null;   // the job page: its Apply button leads into the account step
+  }
+  // These forms are reached from the posting itself: on the page behind its Apply button, or at a fixed sub-path
+  const base = url && url.replace(/[?#].*$/, '').replace(/\/+$/, '');
+  if (base && which === 'teamtailor') return base;   // (BambooHR's form is on the posting too, but behind a reCAPTCHA: assisted)
+  if (base && which === 'breezy') return `${base}/apply`;
+  if (base && which === 'pinpoint') return `${base}/applications/new`;
+  if (base && which === 'rippling') return `${base}/apply`;
+  if (base && which === 'recruitee') return `${base}/c/new`;
+  if (base && which === 'workable') return `${base}/apply/`;   // the posting's APPLICATION tab
   // Test boards and plain HTML forms served from the developer's own machine.
   if (url && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//.test(url) && process.env.AUTO_APPLY_ALLOW_LOCAL === '1') return url;
   return null;
@@ -187,7 +243,10 @@ export async function planRun(userId, { dryRun = false, laneIds = null } = {}) {
   const settings = await getSettings(userId);
   const lanes = settings.lanes.filter(l => l.enabled && (!laneIds || laneIds.includes(l.id)));
   const used = await capsUsed(userId);
-  let capLeft = Math.max(0, settings.dailyCap - used.today);
+  const monthly = settings.monthly;
+  const dailyLeft = Math.max(0, settings.dailyCap - used.today), monthlyLeft = Math.max(0, monthly.cap - monthly.used);
+  let capLeft = Math.min(dailyLeft, monthlyLeft);
+  const capReason = monthlyLeft < dailyLeft ? 'monthly cap reached' : 'daily cap reached';
   const { rows: tracked } = await query(`SELECT job_id FROM applications WHERE user_id = $1 AND job_id IS NOT NULL`, [userId]);
   const taken = new Set(tracked.map(r => String(r.job_id)));
   const companyCount = new Map(used.perCompany);
@@ -218,10 +277,10 @@ export async function planRun(userId, { dryRun = false, laneIds = null } = {}) {
       const { rows: jr } = await query(
         `SELECT j.url, j.ats, c.slug, j.raw->>'id' AS raw_id FROM jobs j LEFT JOIN companies c ON c.id = j.company_id WHERE j.id = $1`, [job.jobId]);
       const formUrl = jr[0] ? applyUrlFor({ url: jr[0].url, ats: jr[0].ats, slug: jr[0].slug, rawId: jr[0].raw_id }) : null;
-      if (!formUrl) { skip(`can't fill ${jr[0]?.ats || 'this'} forms yet`, job); continue; }
+      if (!formUrl && !ASSISTED_ATS[jr[0]?.ats]) { skip(`can't fill ${jr[0]?.ats || 'this'} forms yet`, job); continue; }
       const co = String(job.company || '').toLowerCase();
       if ((companyCount.get(co) || 0) >= settings.perCompanyCap30d) { skip('company cap (30 days)', job); continue; }
-      if (capLeft <= 0) { skip('daily cap reached', job); continue; }
+      if (capLeft <= 0) { skip(capReason, job); continue; }
 
       capLeft--; taken.add(String(job.jobId)); companyCount.set(co, (companyCount.get(co) || 0) + 1);
       report.picked.push({ jobId: job.jobId, title: job.title, company: job.company, matchScore: job.matchScore, formUrl });
@@ -263,7 +322,7 @@ async function jobForTailoring(app) {
  * Tailor the resume and build the answers for one application.
  * mode: the lane's tailoring mode, or an explicit one for manual use.
  */
-export async function prepareApplication(userId, appId, { mode = null } = {}) { // `mode` is kept for old callers; there is one way to tailor now
+export async function prepareApplication(userId, appId, { mode = null, track = false } = {}) { // `mode` is kept for old callers; there is one way to tailor now
   const app = await loadApp(appId);
   if (!app || app.user_id !== userId) return { error: 'Not found', code: 404 };
   const rp = app.resume_profile_id ? await getResumeProfile(userId, app.resume_profile_id) : await getDefaultResumeProfile(userId);
@@ -279,7 +338,10 @@ export async function prepareApplication(userId, appId, { mode = null } = {}) { 
   // ATS scan of the finished resume against this posting, next to the untailored resume's score.
   const scan = atsScore(tailored.sections, job, { original: rp.sections });
   tailored.report.ats = { score: scan.score, before: atsScore(rp.sections, job, { original: rp.sections }).score, parts: scan.parts, missing: scan.missing, gaps: scan.gaps, issues: scan.issues };
-  const coverLetter = renderCoverLetter(rp.coverLetter, job);
+  // A letter written for this job from the profile (the profile's own template only sets the tone, and is the fallback).
+  const cover = await writeCoverLetter(tailored.sections, job, { template: rp.coverLetter });
+  const coverLetter = cover.letter;
+  tailored.report.coverLetter = { source: cover.source, model: cover.model || null, rejected: cover.rejected || null };
   await query(
     `UPDATE applications SET tailored_resume = $2, cover_letter = $3, resume_profile_id = $4, updated_at = NOW() WHERE id = $1`,
     [appId, { sections: tailored.sections, sectionOrder: tailored.sectionOrder, report: tailored.report, profileName: rp.name }, coverLetter || null, rp.id]);
@@ -287,7 +349,7 @@ export async function prepareApplication(userId, appId, { mode = null } = {}) { 
     applicationId: appId, mode: tailored.report.mode, model: tailored.report.model || null, job,
     before: rp.sections, after: tailored.sections, report: tailored.report, sent: app.status === 'APPLIED',
   });
-  if (app.source === 'auto') await setApplyState(appId, userId, 'PREPARED', { ...(app.apply_detail || {}), tailoring: tailored.report.mode });
+  if (app.source === 'auto' || track) await setApplyState(appId, userId, 'PREPARED', { ...(app.apply_detail || {}), tailoring: tailored.report.mode });
   else await recordEvent(appId, userId, { kind: 'resume', detail: { tailored: tailored.report.mode, profile: rp.name } });
   return { ok: true, report: tailored.report, resumeProfileName: rp.name };
 }
@@ -298,49 +360,110 @@ export async function prepareApplication(userId, appId, { mode = null } = {}) { 
  * Fill (and, unless the lane reviews first, send) one prepared application.
  * approve: the person approved it after review, so it's sent.
  */
-export async function submitApplication(userId, appId, { approve = false, browser = null } = {}) {
+export async function submitApplication(userId, appId, { approve = false, browser = null, handoff = false } = {}) {
   const app = await loadApp(appId);
   if (!app || app.user_id !== userId) return { error: 'Not found', code: 404 };
-  if (!app.tailored_resume) { const p = await prepareApplication(userId, appId); if (p.error) return p; return submitApplication(userId, appId, { approve, browser }); }
+  if (!app.tailored_resume) { const p = await prepareApplication(userId, appId); if (p.error) return p; return submitApplication(userId, appId, { approve, browser, handoff }); }
   const detail = app.apply_detail || {};
-  const formUrl = detail.formUrl || (app.job_snapshot?.url && applyUrlFor({ url: app.job_snapshot.url, ats: app.job_snapshot.ats }));
-  if (!formUrl) { await setApplyState(appId, userId, 'NEEDS_YOU', { ...detail, reason: "This form can't be filled automatically. Apply on the company's site." }); return { outcome: 'NEEDS_YOU' }; }
+  const formUrl = (app.job_snapshot?.ats === 'workday' ? null : detail.formUrl) || (app.job_snapshot?.url && applyUrlFor({ url: app.job_snapshot.url, ats: app.job_snapshot.ats }));
+  if (!formUrl) {
+    const why = ASSISTED_ATS[app.job_snapshot?.ats];
+    await setApplyState(appId, userId, 'NEEDS_YOU', { ...detail, assisted: !!why, jobUrl: app.job_snapshot?.url || null,
+      reason: why ? `${why}, so this one is yours to send: your tailored resume is ready. Open the job, apply on the company's site, then mark it applied.`
+                  : "This form can't be filled automatically. Apply on the company's site." });
+    return { outcome: 'NEEDS_YOU' };
+  }
 
-  browser ||= await getBrowser();
+  const ownBrowser = handoff && !browser ? await launchHeaded() : null;   // a visible window the person works in; closed when done
+  browser ||= ownBrowser || await getBrowser();
   if (!browser) {
     await setApplyState(appId, userId, app.apply_state || 'PREPARED', { ...detail, reason: 'No browser available: install Chrome, or set CHROME_PATH' });
     return { error: 'No browser available', code: 503 };
   }
   const rp = await getResumeProfile(userId, app.resume_profile_id);
+  // Credentials for ATS account creation (Phase 4)
+  // Email: prefer profile email, fall back to the Gmail account they connected via OAuth
+  const [{ rows: upRows }, { rows: gmailRows }] = await Promise.all([
+    query(`SELECT email, ats_password FROM user_profiles WHERE user_id = $1`, [userId]).catch(() => ({ rows: [] })),
+    query(`SELECT gmail_email FROM user_gmail_tokens WHERE user_id = $1`, [userId]).catch(() => ({ rows: [] })),
+  ]);
+  const atsEmail = upRows[0]?.email || gmailRows[0]?.gmail_email || rp?.sections?.personal?.email || null;
+  const userCreds = atsEmail
+    ? { email: atsEmail, password: upRows[0]?.ats_password || null, fullName: rp?.sections?.personal?.fullName }
+    : null;
   const settings = await getSettings(userId);
   const tailored = app.tailored_resume;
-  const send = approve || app.review_before_submit === false;
+  const ats = app.job_snapshot?.ats || detectAts(app.job_snapshot?.url || '')?.ats;
+  // review first: a lane's own setting, or for the Apply button (no lane) the account's "Review before sending"
+  const reviewFirst = app.lane_id ? app.review_before_submit !== false : settings.reviewBeforeSubmit !== false;
+  const send = approve || (!reviewFirst && SUBMIT_VERIFIED_ATS.includes(ats));
   const book = buildAnswerBook(rp?.sections || tailored.sections, app.job_snapshot || {}, { coverLetter: app.cover_letter || '', overrides: app.answers?.overrides || {} });
 
   const dir = await mkdtemp(join(tmpdir(), 'autoapply-'));
-  const name = (rp?.sections?.personal?.fullName || 'Resume').replace(/[^A-Za-z0-9]+/g, '_');
-  const files = { resume: join(dir, `${name}_Resume.pdf`), coverLetter: null };
-  const page = await browser.newPage();
+  // the file the employer receives: Name_Role.pdf (e.g. Durgasantosh_G_Senior_Data_Engineer.pdf)
+  const fullName = rp?.sections?.personal?.fullName || tailored.sections?.personal?.fullName;
+  const files = { resume: join(dir, resumeFileName(fullName, app.job_snapshot?.title)), coverLetter: null };
+  const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });   // Workday hides footer buttons behind its sticky bar on short windows
   await setApplyState(appId, userId, 'SUBMITTING', detail, { attempts: (app.attempts || 0) + 1 });
   let result;
   try {
     const pdf = await renderResumePDF(renderResumeHTML(tailored.sections, { sectionOrder: tailored.sectionOrder, layout: rp?.layout }));
     await writeFile(files.resume, pdf);
     if (app.cover_letter) {
-      files.coverLetter = join(dir, `${name}_Cover_Letter.pdf`);
+      files.coverLetter = join(dir, resumeFileName(fullName, app.job_snapshot?.title, 'Cover_Letter'));
       const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
       const letterHtml = `<!doctype html><meta charset=utf-8><body style="font:11pt/1.5 Arial;max-width:6.5in;margin:0 auto;white-space:pre-wrap">${esc(app.cover_letter)}</body>`;
       await writeFile(files.coverLetter, await renderResumePDF(letterHtml));
     }
-    result = await fillApplication(page, formUrl, book, files, { submit: send, acceptConsent: settings.acceptConsent });
+    // Phase 4: handle ATS login wall (creates account + reads OTP via Gmail)
+    const isWd = detectAts(formUrl || '')?.ats === 'workday';
+    const seen = {};
+    const wallResult = isWd
+      ? (userCreds?.password ? await workdayAuth(page, formUrl, userCreds, userId, seen) : { ok: false, reason: 'Workday needs an account. Add a Workday password in Settings.' })
+      : await ensureOnForm(page, formUrl, userCreds, userId);
+    if (seen.description) await query(`UPDATE applications SET job_snapshot = jsonb_set(COALESCE(job_snapshot, '{}'::jsonb), '{description}', to_jsonb($1::text))
+      WHERE id = $2 AND COALESCE(job_snapshot->>'description', '') = ''`, [seen.description.trim(), appId]).catch(() => {});
+    if (!wallResult.ok) {
+      result = wallResult.applied   // the account shows this job as applied already
+        ? { outcome: 'SUBMITTED', filled: [], missing: [], reason: wallResult.reason, confirmation: 'Already applied on Workday' }
+        : { outcome: 'NEEDS_YOU', filled: [], missing: [], reason: wallResult.reason };
+    } else {
+      const isWorkday = detectAts(formUrl || '')?.ats === 'workday';
+      if (isWorkday) {
+        result = await fillWorkday(page, formUrl, book, files, {
+          alreadyOnPage: true, submit: send, acceptConsent: settings.acceptConsent,
+          llmContext: { job: app.job_snapshot || {}, resumeSections: (tailored.sections || rp?.sections || {}) },
+        });
+      } else {
+        result = await fillApplication(page, formUrl, book, files, {
+          submit: send, handoff, acceptConsent: settings.acceptConsent, alreadyOnPage: true,
+          onStep: (text, data) => recordEvent(appId, userId, { kind: 'step', detail: { text, ...data } }).catch(() => {}),
+          // Greenhouse emails a security code before it takes Submit: read it from the person's linked Gmail
+          readCode: async ({ since }) => {
+            const g = await getGmailStatus(userId).catch(() => ({ connected: false }));
+            if (!g.connected) return { reason: `The form emailed a security code to ${atsEmail || 'the applicant'}. Link Gmail in Settings so it can be read automatically, or open the application and enter it yourself.` };
+            if (atsEmail && g.email && g.email.toLowerCase() !== atsEmail.toLowerCase()) return { reason: `The security code went to ${atsEmail}, but the linked Gmail is ${g.email}. Open the application and enter the code yourself.` };
+            const code = await waitForOTP(userId, { from: 'greenhouse-mail.io', extract: extractSecurityCode, after: new Date(since), maxAgeMinutes: 15, maxWaitMs: 90_000, pollIntervalMs: 4_000 });
+            return code ? { code } : { reason: `The security code email from the company's form didn't arrive within 90 seconds. Open the application and send it yourself.` };
+          },
+          onShot: async (pg, label) => { const jpeg = await pg.screenshot({ type: 'jpeg', quality: 55, fullPage: true }).catch(() => null); if (jpeg) await saveShot(appId, label, jpeg).catch(() => {}); },
+          llmContext: { job: app.job_snapshot || {}, resumeSections: (tailored.sections || rp?.sections || {}) },
+        });
+      }
+    }
   } catch (err) {
-    result = { outcome: 'FAILED', filled: [], missing: [], reason: err.message.split('\n')[0] };
+    // a step that waited on the page and gave up (e.g. "locator.click: Timeout 30000ms exceeded"): say what it means
+    const msg = err.message.split('\n')[0];
+    result = { outcome: 'FAILED', filled: [], missing: [], reason: /Timeout \d+ms exceeded/.test(msg)
+      ? "The application page didn't respond as expected (a button never became clickable). Nothing was sent. Try again, or open the application and send it yourself."
+      : msg };
   } finally {
     await page.close().catch(() => {});
+    await ownBrowser?.close().catch(() => {});
     await rm(dir, { recursive: true, force: true }).catch(() => {});
   }
 
-  const base = { formUrl, matchScore: detail.matchScore, filled: result.filled, missing: result.missing, reason: result.reason || null, at: new Date().toISOString() };
+  const base = { formUrl, appliedWith: atsEmail, matchScore: detail.matchScore, filled: result.filled, missing: result.missing, reason: result.reason || null, page: result.page || null, at: new Date().toISOString() };
   if (result.outcome === 'SUBMITTED') {
     await setApplyState(appId, userId, 'SUBMITTED', { ...base, confirmation: result.confirmation }, { submitted_at: new Date() });
     await updateApplication(userId, appId, { status: 'APPLIED' });
@@ -349,7 +472,9 @@ export async function submitApplication(userId, appId, { approve = false, browse
   } else if (result.outcome === 'NEEDS_YOU') {
     await setApplyState(appId, userId, 'NEEDS_YOU', base);
   } else {
-    const attempts = (app.attempts || 0) + 1;
+    // Once the Submit button was clicked a retry could send a duplicate, so that failure is final.
+    const clicked = /^Submitted, but/.test(result.reason || '');
+    const attempts = clicked ? MAX_ATTEMPTS : (app.attempts || 0) + 1;
     await setApplyState(appId, userId, attempts >= MAX_ATTEMPTS ? 'FAILED' : 'PREPARED', { ...base, attempts, willRetry: attempts < MAX_ATTEMPTS });
   }
   return { outcome: result.outcome, reason: result.reason, filled: result.filled.length, missing: result.missing };
@@ -386,6 +511,70 @@ export async function skipApplication(userId, appId) {
   return { ok: true };
 }
 
+// ─── Apply pipeline (the Apply button, Submit, Try again) ────────────────────
+
+const APPLY_TIMEOUT_MS = 6 * 60_000;   // tailor + up to 3 fills; a stuck browser must not hold an application forever
+const running = new Set();             // application ids being worked on by this process
+export const isRunning = id => running.has(String(id));
+
+/**
+ * Run one application end to end in the background, owned by the server so a closed tab or a
+ * failed request can't strand it: tailor → fill the form → stop at NEEDS_REVIEW (approve=false),
+ * or send it (approve=true, after the person checked it) → SUBMITTED. Fill errors are retried up
+ * to MAX_ATTEMPTS and then land in FAILED, so every path ends in a visible state.
+ * Returns false when it's already running.
+ */
+export function startApply(userId, appId, { approve = false } = {}) {
+  appId = String(appId);
+  if (running.has(appId)) return false;
+  running.add(appId);
+  const stop = async reason => { await setApplyState(appId, userId, 'FAILED', { ...((await loadApp(appId))?.apply_detail || {}), reason, at: new Date().toISOString() }).catch(() => {}); };
+  let timer;
+  const work = (async () => {
+    let app = await loadApp(appId);
+    if (!app || app.user_id !== userId) return;
+    await query(`UPDATE applications SET attempts = 0 WHERE id = $1`, [appId]);
+    const m = await monthlyUsage(userId);
+    if (m.used > m.cap) return stop(`You've used all ${m.cap} applications for this cycle. It resets on ${m.resetsAt.toISOString().slice(0, 10)}.`);
+    if (!approve || !app.tailored_resume) {
+      if (app.apply_state !== 'QUEUED') await setApplyState(appId, userId, 'QUEUED', app.apply_detail || {});   // the Apply button already queued it
+      const p = await prepareApplication(userId, appId, { track: true });
+      if (p.error) return stop(p.error);
+    }
+    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+      const r = await submitApplication(userId, appId, { approve });
+      if (r.error) return stop(r.error);
+      if (r.outcome !== 'FAILED') return;          // NEEDS_REVIEW, NEEDS_YOU or SUBMITTED: a stopping point the person can see
+      if ((await loadApp(appId))?.apply_state === 'FAILED') return;   // out of attempts
+      await new Promise(r => setTimeout(r, 3000));
+    }
+  })();
+  Promise.race([work, new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('Timed out. The form took too long to fill. Try again.')), APPLY_TIMEOUT_MS); })])
+    .catch(err => stop(String(err.message).split('\n')[0]))
+    .finally(() => { clearTimeout(timer); running.delete(appId); });
+  return true;
+}
+
+/**
+ * Nothing may sit in QUEUED / PREPARED / SUBMITTING forever. A server restart, or a run that
+ * died, leaves applications nobody is working on; move them to FAILED so "Try again" shows up.
+ * Applications started by the Apply button belong to this process; auto-apply runs may live in
+ * the CLI, so those are only reaped when stuck filling for a long time.
+ */
+export async function reapStuckApplications() {
+  const { rows } = await query(
+    `SELECT id, user_id, apply_detail FROM applications
+      WHERE (source <> 'auto' AND apply_state IN ('QUEUED','PREPARED','SUBMITTING') AND updated_at < NOW() - INTERVAL '1 minute')
+         OR (source = 'auto' AND apply_state = 'SUBMITTING' AND updated_at < NOW() - INTERVAL '15 minutes')`);
+  let n = 0;
+  for (const r of rows) {
+    if (running.has(String(r.id))) continue;
+    await setApplyState(r.id, r.user_id, 'FAILED', { ...(r.apply_detail || {}), reason: 'Interrupted (the server restarted or the run stopped). Try again.', at: new Date().toISOString() });
+    n++;
+  }
+  return n;
+}
+
 // ─── Run ─────────────────────────────────────────────────────────────────────
 
 /**
@@ -413,6 +602,7 @@ export async function runForUser(userId, { dryRun = false, limit = 50, log = () 
       `SELECT id, (answers->>'approved')::boolean AS approved FROM applications
         WHERE user_id = $1 AND apply_state = 'PREPARED' AND source = 'auto' ORDER BY id LIMIT $2`, [userId, limit]);
     for (const { id, approved } of ready) {
+      if (running.has(String(id))) continue;
       const r = await submitApplication(userId, String(id), { approve: !!approved });
       if (r.error) { summary.errors.push({ id: String(id), error: r.error }); if (r.code === 503) break; continue; }
       summary.outcomes[r.outcome] = (summary.outcomes[r.outcome] || 0) + 1;
